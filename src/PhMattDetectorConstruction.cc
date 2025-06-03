@@ -47,7 +47,7 @@ G4VPhysicalVolume *PhMattDetectorConstruction::Construct()
         for (G4int iy = 0; iy < nPixelsY; iy++) {
             G4double xpos = (ix - nPixelsX/2 + 0.5) * pixelPitch;
             G4double ypos = (iy - nPixelsY/2 + 0.5) * pixelPitch;
-            G4ThreeVector position(xpos + 5 *cm, ypos + 5 *cm, 5 *cm); // WARNING: SHIFTED the pixels far away so that PCB can be analyzed
+            G4ThreeVector position(xpos + 5 *cm, ypos + 5 *cm, 5 *cm); 
             
             new G4PVPlacement(nullptr, position, logicPixel, "Pixel", logicalWorld, false, ix*nPixelsY + iy, false);
         }
