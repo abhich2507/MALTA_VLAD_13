@@ -46,5 +46,15 @@ G4bool PhMattSensitiveDetector::ProcessHits(G4Step *aStep, G4TouchableHistory *)
     analysisManager->FillNtupleDColumn(0, 5, energy);
     analysisManager->AddNtupleRow(0); 
 
+    // Get out the secondary particle step length
+    if (aStep->GetTrack()->GetParentID() != 0)
+    {
+        
+        fTrackLengths[aStep->GetTrack()->GetTrackID()] += aStep->GetStepLength();
+        analysisManager->FillNtupleIColumn(2, 0, eventID);
+        analysisManager->FillNtupleDColumn(2, 1,  fTrackLengths[aStep->GetTrack()->GetTrackID()] * 1000);
+        analysisManager->AddNtupleRow(2); 
+    }
+
     return true;
 }

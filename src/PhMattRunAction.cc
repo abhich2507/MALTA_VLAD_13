@@ -34,6 +34,14 @@ PhMattRunAction::PhMattRunAction()
     analysisManager->CreateH1("ScatteringAngle", "Scattering Angle", 100, 0., 180.0);
     analysisManager->CreateH1("MomentumDistribution", "Momentum Distribution", 100, 0., 190.0 *GeV);
 
+    // Create Ntuple for debugging info
+    analysisManager->CreateNtuple("DebuggingInfo", "Debugging Info");
+    analysisManager->CreateNtupleIColumn("iEvent");
+    // Create Double position columns
+    analysisManager->CreateNtupleDColumn("TravelLength");
+    analysisManager->FinishNtuple(2);    
+    
+
 }
 PhMattRunAction::~PhMattRunAction()
 {

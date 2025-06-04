@@ -31,6 +31,7 @@ private:
     //std::vector<std::vector<int>> channelHitMap;
     std::map<std::pair<int, int>, int> channelHitMap;
     std::ofstream hitDataFile;
+    std::map<G4int, G4double> fTrackLengths;
 
 
     // G4HCofThisEvent - generate hit collections for analysis and reconstruction within gent4 or add electronic noise?

@@ -9,7 +9,7 @@ PhMattPrimaryGenerator::PhMattPrimaryGenerator()
     G4double y = 5. *cm - 10 *um;
     G4double z = -10. *cm; // shifted away slightly
     G4ThreeVector pos(x,y,z);
-    fParticleGun->SetParticlePosition(pos);
+    //fParticleGun->SetParticlePosition(pos);
     
 
     // Particle Direction (momemntum)
@@ -24,7 +24,7 @@ PhMattPrimaryGenerator::PhMattPrimaryGenerator()
     G4ParticleDefinition *particle = particleTable->FindParticle("proton");
 
     fParticleGun->SetParticleMomentumDirection(mom);
-    fParticleGun->SetParticleEnergy(180 * GeV); 
+    fParticleGun->SetParticleEnergy(120 * GeV); 
     fParticleGun->SetParticleDefinition(particle);
     
     
@@ -69,11 +69,11 @@ G4ThreeVector PhMattPrimaryGenerator::GetRandomPointOnRectangle(G4double height,
 void PhMattPrimaryGenerator::GeneratePrimaries(G4Event *oneEvent)
 {
     // Particle circular beam simulation
-    /*
-    double beamWidth = 18.6368 *mm;
-    G4ThreeVector pos = GetRandomPointOnCircle(0.5 *beamWidth, G4ThreeVector(5 *cm, 5 *cm, -10 *cm));
+    
+    double beamWidth = 18.6368 *mm; //Half-chip beam
+    G4ThreeVector pos = GetRandomPointOnCircle(beamWidth/2, G4ThreeVector(5 *cm, 5 *cm, -10 *cm));
     fParticleGun->SetParticlePosition(pos);
-    */
+    
 
     // Particle rectangel beam simulation. Useful for edge simulation
     /*
