@@ -18,7 +18,7 @@ G4VPhysicalVolume *PhMattDetectorConstruction::Construct()
     // Instantiate NIST material manager
     G4NistManager *nist = G4NistManager::Instance();
     // Define world material
-    G4Material *worldMat = nist->FindOrBuildMaterial("G4_AIR");
+    G4Material *worldMat = nist->FindOrBuildMaterial("G4_Galactic");
     G4Material *detMat = nist->FindOrBuildMaterial("G4_Si");
 
     // Define the world
@@ -31,7 +31,8 @@ G4VPhysicalVolume *PhMattDetectorConstruction::Construct()
     G4LogicalVolume *logicalWorld = new G4LogicalVolume(solidWorld, worldMat, "logicalWorld");
     // Physical Volume
     G4VPhysicalVolume *physWorld = new G4PVPlacement(0, G4ThreeVector(0.,0.,0.), logicalWorld, "physWorld", 0, false, 0, checkOverlaps);
-    // MALTA implementation
+    // MALTA implementation pixel like structure
+    /*
     G4int nPixelsX = 512;
     G4int nPixelsY = 512;
 
@@ -52,9 +53,19 @@ G4VPhysicalVolume *PhMattDetectorConstruction::Construct()
             new G4PVPlacement(nullptr, position, logicPixel, "Pixel", logicalWorld, false, ix*nPixelsY + iy, false);
         }
     }
+    */
+
+    // MALTA implementation monolithic sensor
+    G4double maltaWidth = 18.6368 *mm; 
+    G4double maltaDepth = 30 * um;
+    G4Box *solidMALTA = new G4Box ("MALTASensor", maltaWidth/2, maltaWidth/2, maltaDepth/2);
+    logicSensor = new G4LogicalVolume (solidMALTA, detMat, "logicSensor");
+    G4VPhysicalVolume *physSensor  = new G4PVPlacement(0, G4ThreeVector(5 *cm, 5 *cm, 5 *cm), logicSensor, "physSensor", logicalWorld, false, 0, true);
+
+    
     G4VisAttributes *pixelVisAtt = new G4VisAttributes(G4Color(0., 0., 1., 0.5));
     pixelVisAtt->SetForceSolid(true);
-    logicPixel->SetVisAttributes(pixelVisAtt);
+    logicSensor->SetVisAttributes(pixelVisAtt);
 
 
     // FR4 flame retardant dielectric for PCB implementation. 
@@ -169,6 +180,6 @@ void PhMattDetectorConstruction::ConstructSDandField()
     PhMattSensitiveDetector *sensDet = new PhMattSensitiveDetector("SensitiveDetector");
     // Ensure that methods initialize at end of event
     G4SDManager::GetSDMpointer()->AddNewDetector(sensDet);
-    logicPixel->SetSensitiveDetector(sensDet);
+    logicSensor->SetSensitiveDetector(sensDet);
     
 }

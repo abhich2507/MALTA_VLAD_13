@@ -12,7 +12,7 @@ void in_pixel_plots() {
     TChain *chain = new TChain("EnDeposited");
 
     for (int t = 0; t <= 5; ++t) {
-        chain->Add(Form("/home/vlad/Documents/Simu/Geant4/DECAL/Data/condor_submission/output0_t%d.root", t));
+        chain->Add(Form("/home/vlad/Documents/Simu/Geant4/DECAL_REPO/build/output0_t%d.root", t));
     }
 
     // Variables to hold values
@@ -30,7 +30,7 @@ void in_pixel_plots() {
     int nX = 100, nY = 100, nZ = 100;
     double pixelSizeX = 0.0364 , pixelSizeY = 0.0364;
     TH3D *h3 = new TH3D("h3", "3D Energy Map;X;Y;Z", nX, 0, pixelSizeX *1000, nY, 0, pixelSizeY *1000, nZ, -15, 15);
-    TH2D *h2_fullChip = new TH2D("h2_fullChip", "h2_fullChip", 512, 50 - 1.86, 50 + 1.86, 512, 50 - 1.86, 50 + 1.86);
+    TH2D *h2_fullChip = new TH2D("h2_fullChip", "h2_fullChip", 512, 50 - 18.6/2, 50 + 18.6/2, 512, 50 - 18.6/2, 50 + 18.6/2);
 
     Long64_t nEntries = chain->GetEntries();
     for (Long64_t i = 0; i < nEntries; ++i) 

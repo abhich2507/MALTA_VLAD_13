@@ -44,7 +44,7 @@ public:
     virtual G4VPhysicalVolume *Construct();
 
 private:
-    G4LogicalVolume *logicPixel;
+    G4LogicalVolume *logicSensor;
     // Method constructs any sensitive detector or additional field
     virtual void ConstructSDandField();
 };
