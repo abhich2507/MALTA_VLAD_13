@@ -1,6 +1,6 @@
 #include "PhMattSensitiveDetector.hh"
 #include <cmath>
-#include "CorrectionData.hh" // Access EffMap
+#include "CorrectionData2D.hh" // Access EffMap2D
 
 // Implement the desired number of channels
 const G4int channelNum = 64;
@@ -80,15 +80,15 @@ G4double yy = InPixPosition.y() / um;
 const int dx = floor(xx);
 const int dy = floor(yy);
 
-if (dx < 0 || dy < 0 || dx > 26 || dy > 26) {
+if (dx < 0 || dy < 0 || dx > 31 || dy > 31) { // hardcodes region to be 
     G4cout << " Extend range of input." << G4endl;
     return 0;
     }
 
-c00 = EffMap[0][dx][dy];
-c10 = EffMap[0][dx+1][dy];
-c01 = EffMap[0][dx][dy+1];
-c11 = EffMap[0][dx+1][dy+1];
+c00 = EffMap2D[dx][dy];
+c10 = EffMap2D[dx+1][dy];
+c01 = EffMap2D[dx][dy+1];
+c11 = EffMap2D[dx+1][dy+1];
 
 if ((c00<0.) or (c10<0.) or (c01<0.) or (c11<0.)) {
         eff = 0.; // if any close point is negative --> energy not detected
@@ -102,7 +102,7 @@ else {
     eff=( (y2-yy)*(x2-xx)*c00 + 
             (y2-yy)*(xx-x1)*c10 + 
             (yy-y1)*(x2-xx)*c01 + 
-            (yy-y1)*(xx-x1)*c11)/4.;
+            (yy-y1)*(xx-x1)*c11)/1.; // divison by 1 because of bin spacing of 1
 }
 
 return eff;
