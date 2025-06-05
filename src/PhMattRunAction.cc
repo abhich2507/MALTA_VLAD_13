@@ -18,6 +18,8 @@ PhMattRunAction::PhMattRunAction()
     analysisManager->CreateNtupleIColumn("fGlobalTime");
     // Create Double Energy column
     analysisManager->CreateNtupleDColumn("Energy");
+    // Create Double corrected Energy column
+    analysisManager->CreateNtupleDColumn("CorrEnergy");
     analysisManager->FinishNtuple(0);
 
     // Scattering Angle Ntuple

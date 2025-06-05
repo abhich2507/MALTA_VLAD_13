@@ -21,7 +21,7 @@ public:
     ~PhMattSensitiveDetector();
     //Getter
     const std::map<std::pair<int, int>, int>& GetChannelHitMap() const { return channelHitMap; }
-    
+    G4double GetEfficiencyCorrectionXY(const G4ThreeVector& InPixPosition);
 
 private:
     G4double fTotalEnergyDeposited;
