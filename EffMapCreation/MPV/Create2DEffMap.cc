@@ -23,6 +23,12 @@ int ExportTH2DToArray(const std::string& inputFileName, const std::string& outpu
     int nBinsY = hist->GetNbinsY();
     double maxContent = hist->GetMaximum();
 
+    // Get bin widths (assuming uniform binning)
+    double xSpacing = hist->GetXaxis()->GetBinWidth(1); // spacing in X
+    double ySpacing = hist->GetYaxis()->GetBinWidth(1); // spacing in Y
+    std::cout << "Xspacing: " << xSpacing << std::endl;
+    std::cout << "Yspacing: " << xSpacing << std::endl;
+
     if (maxContent <= 0.0) {
     std::cerr << "Error: Maximum bin content is zero or negative. Cannot normalize histogram." << std::endl;
     file->Close();
@@ -34,6 +40,8 @@ int ExportTH2DToArray(const std::string& inputFileName, const std::string& outpu
     outFile << "#include \"CorrectionData2D.hh\"\n\n";
     outFile << "const int nBinsX = " << nBinsX << ";\n";
     outFile << "const int nBinsY = " << nBinsY << ";\n";
+    outFile << "const double spacingX = " << xSpacing << ";\n";
+    outFile << "const double spacingY = " << ySpacing << ";\n";
     outFile << "double EffMap2D[nBinsX][nBinsY] = {\n";
 
     for (int i = 1; i <= nBinsX; ++i) {
