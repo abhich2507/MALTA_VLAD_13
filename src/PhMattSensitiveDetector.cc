@@ -43,6 +43,7 @@ G4bool PhMattSensitiveDetector::ProcessHits(G4Step *aStep, G4TouchableHistory *)
     G4cout << posPixel[0] << "," << posPixel[1] << G4endl;
     // get modulus for InPixel location.
     G4ThreeVector InPixPos = G4ThreeVector(std::fmod(posPixel[0],36.4*um), std::fmod(posPixel[1],36.4*um), posPixel[2]); // result in mm
+    //G4double MPV_binsize = 36.4/16; // unit um
     double efficiency = GetEfficiencyCorrectionXY(InPixPos);
     G4cout << "InPixPos: " << InPixPos[0]/um << ", " << InPixPos[1]/um << " --> Eff: " << efficiency << G4endl;
     G4double edep_corr = efficiency * energy;
@@ -69,6 +70,7 @@ G4bool PhMattSensitiveDetector::ProcessHits(G4Step *aStep, G4TouchableHistory *)
 }
 
 // obtain a scalar efficiency based on the XY positions within a pixel.
+// binsize in unit um
 G4double PhMattSensitiveDetector::GetEfficiencyCorrectionXY(const G4ThreeVector& InPixPosition) {
 
 G4double eff;
@@ -77,10 +79,13 @@ G4double c00, c10, c01, c11;
 G4double xx = InPixPosition.x() / um; // in unit um with origin at bottom left corner (from 0 to 36.4)
 G4double yy = InPixPosition.y() / um;
 
-const int dx = floor(xx);
-const int dy = floor(yy);
+const int dx = floor(xx/spacingX);
+const int dy = floor(yy/spacingY);
 
-if (dx < 0 || dy < 0 || dx > 31 || dy > 31) { // hardcodes region to be 
+size_t dimX = sizeof(EffMap2D) / sizeof(EffMap2D[0]);       // nBinsX
+size_t dimY = sizeof(EffMap2D[0]) / sizeof(EffMap2D[0][0]); // nBinsY
+
+if (dx < 0 || dy < 0 || dx > dimX || dy > dimY) { 
     G4cout << " Extend range of input." << G4endl;
     return 0;
     }
@@ -94,15 +99,15 @@ if ((c00<0.) or (c10<0.) or (c01<0.) or (c11<0.)) {
         eff = 0.; // if any close point is negative --> energy not detected
     }
 else {
-    G4double x1 = dx;
-    G4double x2 = (dx+1);
-    G4double y1 = dy;
-    G4double y2 = (dy+1);
+    G4double x1 = dx*spacingX;
+    G4double x2 = (dx+1)*spacingX;
+    G4double y1 = dy*spacingY;
+    G4double y2 = (dy+1)*spacingY;
 
     eff=( (y2-yy)*(x2-xx)*c00 + 
             (y2-yy)*(xx-x1)*c10 + 
             (yy-y1)*(x2-xx)*c01 + 
-            (yy-y1)*(xx-x1)*c11)/1.; // divison by 1 because of bin spacing of 1
+            (yy-y1)*(xx-x1)*c11)/(spacingX*spacingY); // for same binsize: division by *binsize^2
 }
 
 return eff;
