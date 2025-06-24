@@ -7,10 +7,6 @@
 /vis/modeling/trajectories/create/drawByParticleID
 /vis/modeling/trajectories/drawByParticleID-0/set gamma red
 /vis/modeling/trajectories/drawByParticleID-0/set e+ magenta
-/vis/modeling/trajectories/drawByParticleID-0/set opticalphoton blue
-/vis/modeling/trajectories/drawByParticleID-0/set anti_nu_e invisible
-/vis/modeling/trajectories/drawByParticleID-0/set K40 yellow
-/vis/modeling/trajectories/drawByParticleID-0/set Ca40 white
 /vis/drawVolume
 
 
