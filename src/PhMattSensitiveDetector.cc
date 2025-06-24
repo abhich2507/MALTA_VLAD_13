@@ -40,12 +40,12 @@ G4bool PhMattSensitiveDetector::ProcessHits(G4Step *aStep, G4TouchableHistory *)
     G4double fglobalTime = preStepPoint->GetGlobalTime();
     G4ThreeVector posPixel = preStepPoint->GetPosition();
 
-    G4cout << posPixel[0] << "," << posPixel[1] << G4endl;
+    //G4cout << posPixel[0] << "," << posPixel[1] << G4endl;
     // get modulus for InPixel location.
     G4ThreeVector InPixPos = G4ThreeVector(std::fmod(posPixel[0],36.4*um), std::fmod(posPixel[1],36.4*um), posPixel[2]); // result in mm
     //G4double MPV_binsize = 36.4/16; // unit um
     double efficiency = GetEfficiencyCorrectionXY(InPixPos);
-    G4cout << "InPixPos: " << InPixPos[0]/um << ", " << InPixPos[1]/um << " --> Eff: " << efficiency << G4endl;
+    // G4cout << "InPixPos: " << InPixPos[0]/um << ", " << InPixPos[1]/um << " --> Eff: " << efficiency << G4endl;
     G4double edep_corr = efficiency * energy;
 
     analysisManager->FillNtupleIColumn(0, 0, eventID);
