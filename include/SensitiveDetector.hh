@@ -1,5 +1,5 @@
-#ifndef PHMATTSENSITIVEDETECTOR_HH
-#define PHMATTSENSITIVEDETECTOR_HH
+#ifndef SENSITIVEDETECTOR_HH
+#define SENSITIVEDETECTOR_HH
 
 #include "G4VSensitiveDetector.hh"
 #include "G4RunManager.hh"
@@ -7,18 +7,18 @@
 #include "G4SystemOfUnits.hh"
 #include "G4UnitsTable.hh"
 #include "G4OpticalPhoton.hh"
-#include "PhMattDetectorConstruction.hh"
-#include "PhMattEventAction.hh"
+#include "DetectorConstruction.hh"
+#include "EventAction.hh"
 #include "G4Poisson.hh"
 // Thread Safety
 #include <mutex>
 #include "CLHEP/Random/RandFlat.h"
-class PhMattSensitiveDetector: public G4VSensitiveDetector
+class SensitiveDetector: public G4VSensitiveDetector
 {
 public:
     // G4String = Detector Name
-    PhMattSensitiveDetector(G4String);
-    ~PhMattSensitiveDetector();
+    SensitiveDetector(G4String);
+    ~SensitiveDetector();
     //Getter
     const std::map<std::pair<int, int>, int>& GetChannelHitMap() const { return channelHitMap; }
     G4double GetEfficiencyCorrectionXY(const G4ThreeVector& InPixPosition);

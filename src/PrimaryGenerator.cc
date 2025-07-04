@@ -1,6 +1,6 @@
-#include "PhMattPrimaryGenerator.hh"
+#include "PrimaryGenerator.hh"
 //Constructor
-PhMattPrimaryGenerator::PhMattPrimaryGenerator()
+PrimaryGenerator::PrimaryGenerator()
 {
     fParticleGun = new G4ParticleGun(1); // 1 particle per event
     // Particle position for a point like source
@@ -30,12 +30,12 @@ PhMattPrimaryGenerator::PhMattPrimaryGenerator()
     
     
 }
-PhMattPrimaryGenerator::~PhMattPrimaryGenerator()
+PrimaryGenerator::~PrimaryGenerator()
 {
     delete fParticleGun;
 }
 // circular beam modeling
-G4ThreeVector PhMattPrimaryGenerator::GetRandomPointOnCircle(G4double radius, G4ThreeVector center)
+G4ThreeVector PrimaryGenerator::GetRandomPointOnCircle(G4double radius, G4ThreeVector center)
 {
     while (true)
     {
@@ -52,7 +52,7 @@ G4ThreeVector PhMattPrimaryGenerator::GetRandomPointOnCircle(G4double radius, G4
     }
 }
 
-G4ThreeVector PhMattPrimaryGenerator::GetRandomPointOnRectangle(G4double height, G4double thickness, G4ThreeVector center)
+G4ThreeVector PrimaryGenerator::GetRandomPointOnRectangle(G4double height, G4double thickness, G4ThreeVector center)
 {
     G4double halfHeight = height / 2.0;
     G4double halfThickness = thickness / 2.0;
@@ -66,7 +66,7 @@ G4ThreeVector PhMattPrimaryGenerator::GetRandomPointOnRectangle(G4double height,
 
 
 
-void PhMattPrimaryGenerator::GeneratePrimaries(G4Event *oneEvent)
+void PrimaryGenerator::GeneratePrimaries(G4Event *oneEvent)
 {
     // Particle circular beam simulation
     

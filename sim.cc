@@ -6,10 +6,10 @@
 #include "G4VisExecutive.hh"
 #include "G4UIExecutive.hh"
 
-#include "PhMattPhysicsList.hh"
-#include "PhMattDetectorConstruction.hh"
-#include "PhMattActionInitialization.hh"
-#include "PhMattTrackingAction.hh"
+#include "PhysicsList.hh"
+#include "DetectorConstruction.hh"
+#include "ActionInitialization.hh"
+#include "TrackingAction.hh"
 
 int main (int argc, char** argv)
 // argc = argument count; argv = argument value - Command line arguments
@@ -31,13 +31,13 @@ int main (int argc, char** argv)
 
 
     // Physics List Initialization
-    runManager->SetUserInitialization(new PhMattPhysicsList());
+    runManager->SetUserInitialization(new PhysicsList());
 
     // Detector Construction Initialization
-    runManager->SetUserInitialization(new PhMattDetectorConstruction());
+    runManager->SetUserInitialization(new DetectorConstruction());
 
     // Action Initialization
-    runManager->SetUserInitialization(new PhMattActionInitialization());
+    runManager->SetUserInitialization(new ActionInitialization());
 
     // GUI mode initializes only when more than 1 command line argument is passed
     /*

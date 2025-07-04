@@ -1,17 +1,17 @@
-#include "PhMattDetectorConstruction.hh"
+#include "DetectorConstruction.hh"
 // Constructor
-PhMattDetectorConstruction::PhMattDetectorConstruction()
+DetectorConstruction::DetectorConstruction()
 {
 
 }
 
 // Destructor
-PhMattDetectorConstruction::~PhMattDetectorConstruction()
+DetectorConstruction::~DetectorConstruction()
 {
     
 }
 
-G4VPhysicalVolume *PhMattDetectorConstruction::Construct()
+G4VPhysicalVolume *DetectorConstruction::Construct()
 {
     // Volume overlap check needed to ensure correct physics simulation
     G4bool checkOverlaps = true;
@@ -174,10 +174,10 @@ G4VPhysicalVolume *PhMattDetectorConstruction::Construct()
     return physWorld;
 }
 
-void PhMattDetectorConstruction::ConstructSDandField()
+void DetectorConstruction::ConstructSDandField()
 {
     
-    PhMattSensitiveDetector *sensDet = new PhMattSensitiveDetector("SensitiveDetector");
+    SensitiveDetector *sensDet = new SensitiveDetector("SensitiveDetector");
     // Ensure that methods initialize at end of event
     G4SDManager::GetSDMpointer()->AddNewDetector(sensDet);
     logicSensor->SetSensitiveDetector(sensDet);

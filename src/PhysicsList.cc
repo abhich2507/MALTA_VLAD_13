@@ -1,7 +1,7 @@
-#include "PhMattPhysicsList.hh"
+#include "PhysicsList.hh"
 
 // Consrtuctor call
-PhMattPhysicsList::PhMattPhysicsList()
+PhysicsList::PhysicsList()
 // Body of the contructor - contains all the physics for the simulation
 {
     // Instantiation of GEANT4 methods to be put in the memory heap. Empty constructors -> ()
@@ -19,12 +19,12 @@ PhMattPhysicsList::PhMattPhysicsList()
     
 }
 // Destructor
-PhMattPhysicsList::~PhMattPhysicsList()
+PhysicsList::~PhysicsList()
 {
     
 }
 
-void PhMattPhysicsList::SetCuts()
+void PhysicsList::SetCuts()
 {
     // Optional: define the range of energies to which production cuts apply
     G4ProductionCutsTable::GetProductionCutsTable()->SetEnergyRange(250 * eV, 120 * GeV);
