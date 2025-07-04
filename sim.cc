@@ -19,8 +19,8 @@ int main (int argc, char** argv)
     // new allocates object in the memory heap (stack) and return pointer to its location
     // Create UI session. G4UIExecutive = Geant4 class that manages UI stuff
     // In large statistics runs better to not use gui. Commenitng the line below and initializing later is more flexible.
-    // G4UIExecutive *ui = new G4UIExecutive(argc, argv);
-    G4UIExecutive *ui;
+    G4UIExecutive *ui = new G4UIExecutive(argc, argv);
+    //G4UIExecutive *ui;
     // Preprocessor directive evaluated before compilation. Depending if G4MULTITHREAD
     // is defined select between single and multi threading operation of the run manager
     #ifdef G4MULTITHREADED
@@ -40,10 +40,12 @@ int main (int argc, char** argv)
     runManager->SetUserInitialization(new PhMattActionInitialization());
 
     // GUI mode initializes only when more than 1 command line argument is passed
+    /*
     if(argc ==1)
-    {
+    {   G4cout << "One argument" << G4endl;
         ui = new G4UIExecutive(argc, argv);
     }
+    */
 
     // Sets up visualization manager.
     G4VisManager *visManager = new G4VisExecutive();
@@ -54,19 +56,29 @@ int main (int argc, char** argv)
     // This allows for using commands such as run/beamOn or vis/open/OGL
     G4UImanager *UImanager = G4UImanager::GetUIpointer();
     // Import visualization macro vis.mac. Added logic to account for run.mac large stat runs
-    if(ui)
-    {
-        UImanager->ApplyCommand("/control/execute vis.mac");
-        // Executes the interactive terminal i.e. starts the UI. 
-        ui->SessionStart();
-    }
-    else
+    if(argc > 1)
     {
         G4String command = "/control/execute ";
         // File name passed as the second command line argument
         G4String fileName =  argv[1];
         UImanager->ApplyCommand(command + fileName);
+        if (fileName.substr(0, 3) == "vis") {
+            G4cout << "Macro identified for visualization." << G4endl;
+            ui->SessionStart(); // blocks program for visualization until GUI closes
+        }
     }
+    else
+    {
+        UImanager->ApplyCommand("/control/execute vis.mac");
+        // Executes the interactive terminal i.e. starts the UI. 
+        ui->SessionStart();
+
+    }
+
+    // Delete in reverse order of creation
+    delete ui;
+    delete visManager;
+    delete runManager; 
 
 
     return 0;
