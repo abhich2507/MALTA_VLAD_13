@@ -1,7 +1,6 @@
 # Set the minimum version required for cmake. The version 4.0 was 
 # chosen as the required version for Allpix squared compatibility
-#cmake_minimum_required(VERSION 4.0 FATAL_ERROR)
-cmake_minimum_required(VERSION 3.2 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.26 FATAL_ERROR)
 # Define the project with the name Tutorial.
 project(Tutorial)
 # Locate and configure Geant4. Required == Fatal Error if not 
