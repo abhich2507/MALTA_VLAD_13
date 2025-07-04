@@ -1,5 +1,5 @@
-#ifndef PHMATTPRIMARYGENERATOR_HH
-#define PHMATTPRIMARYGENERATOR_HH
+#ifndef PRIMARYGENERATOR_HH
+#define PRIMARYGENERATOR_HH
 
 #include "G4VUserPrimaryGeneratorAction.hh"
 // Define particle types
@@ -14,11 +14,11 @@
 
 #include "G4AnalysisManager.hh"
 
-class PhMattPrimaryGenerator : public G4VUserPrimaryGeneratorAction
+class PrimaryGenerator : public G4VUserPrimaryGeneratorAction
 {
 public:
-    PhMattPrimaryGenerator();
-    ~PhMattPrimaryGenerator();
+    PrimaryGenerator();
+    ~PrimaryGenerator();
 
     virtual void GeneratePrimaries(G4Event *);
     

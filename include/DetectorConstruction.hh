@@ -1,5 +1,5 @@
-#ifndef PHMATTDETECTORCONSTRUCTION_HH
-#define PHMATTDETECTORCONSTRUCTION_HH
+#ifndef DETECTORCONSTRUCTION_HH
+#define DETECTORCONSTRUCTION_HH
 // Main class
 #include "G4VUserDetectorConstruction.hh"
 //Solid Volume e.g. Box
@@ -29,18 +29,18 @@
 // Sensitive Detector Manager
 #include "G4SDManager.hh"
 
-#include "PhMattSensitiveDetector.hh"
+#include "SensitiveDetector.hh"
 // Optical surface coupling imports
 #include "G4OpticalSurface.hh"
 #include "G4LogicalBorderSurface.hh"
 #include "G4LogicalSkinSurface.hh"
 
-class PhMattDetectorConstruction : public G4VUserDetectorConstruction
+class DetectorConstruction : public G4VUserDetectorConstruction
 {
 public:
-    PhMattDetectorConstruction();
+    DetectorConstruction();
     // virtual because overwrite allready defined in G4VUserDetectorConstruction
-    virtual ~PhMattDetectorConstruction();
+    virtual ~DetectorConstruction();
     virtual G4VPhysicalVolume *Construct();
 
 private:

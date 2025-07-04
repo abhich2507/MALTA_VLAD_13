@@ -1,34 +1,34 @@
-#include "PhMattSensitiveDetector.hh"
+#include "SensitiveDetector.hh"
 #include <cmath>
 #include "CorrectionData2D.hh" // Access EffMap2D
 
 // Implement the desired number of channels
 const G4int channelNum = 64;
-PhMattSensitiveDetector::PhMattSensitiveDetector(G4String name): G4VSensitiveDetector(name)
+SensitiveDetector::SensitiveDetector(G4String name): G4VSensitiveDetector(name)
 {
     fTotalEnergyDeposited = 0.;
 }
 
-PhMattSensitiveDetector::~PhMattSensitiveDetector()
+SensitiveDetector::~SensitiveDetector()
 {
     if (hitDataFile.is_open()) {
         hitDataFile.close();
     }
 }
 
-void PhMattSensitiveDetector::Initialize(G4HCofThisEvent *)
+void SensitiveDetector::Initialize(G4HCofThisEvent *)
 {
     fTotalEnergyDeposited = 0.;
 }
 
-void PhMattSensitiveDetector::EndOfEvent(G4HCofThisEvent *)
+void SensitiveDetector::EndOfEvent(G4HCofThisEvent *)
 {
 
 }
 
 
 
-G4bool PhMattSensitiveDetector::ProcessHits(G4Step *aStep, G4TouchableHistory *)
+G4bool SensitiveDetector::ProcessHits(G4Step *aStep, G4TouchableHistory *)
 {
     G4int eventID = G4RunManager::GetRunManager()->GetCurrentEvent()->GetEventID();
 
@@ -71,7 +71,7 @@ G4bool PhMattSensitiveDetector::ProcessHits(G4Step *aStep, G4TouchableHistory *)
 
 // obtain a scalar efficiency based on the XY positions within a pixel.
 // binsize in unit um
-G4double PhMattSensitiveDetector::GetEfficiencyCorrectionXY(const G4ThreeVector& InPixPosition) {
+G4double SensitiveDetector::GetEfficiencyCorrectionXY(const G4ThreeVector& InPixPosition) {
 
 G4double eff;
 G4double c00, c10, c01, c11;
