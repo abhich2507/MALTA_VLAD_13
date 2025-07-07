@@ -4,9 +4,17 @@
 
 // Implement the desired number of channels
 const G4int channelNum = 64;
-SensitiveDetector::SensitiveDetector(G4String name): G4VSensitiveDetector(name)
+SensitiveDetector::SensitiveDetector(G4String name, SimFlags* flags): G4VSensitiveDetector(name), fFlag(flags)
 {
     fTotalEnergyDeposited = 0.;
+    if(fFlag->runMode == "local") 
+    {
+        fOutputPath = fFlag->outputPathLocal;
+    }
+    else
+    {
+        fOutputPath = fFlag->outputPathNAF;
+    }
 }
 
 SensitiveDetector::~SensitiveDetector()

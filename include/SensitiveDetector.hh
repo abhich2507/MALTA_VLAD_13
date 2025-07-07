@@ -10,6 +10,7 @@
 #include "DetectorConstruction.hh"
 #include "EventAction.hh"
 #include "G4Poisson.hh"
+#include "Config.hh"
 // Thread Safety
 #include <mutex>
 #include "CLHEP/Random/RandFlat.h"
@@ -17,13 +18,14 @@ class SensitiveDetector: public G4VSensitiveDetector
 {
 public:
     // G4String = Detector Name
-    SensitiveDetector(G4String);
+    SensitiveDetector(G4String, SimFlags* flags);
     ~SensitiveDetector();
     //Getter
     const std::map<std::pair<int, int>, int>& GetChannelHitMap() const { return channelHitMap; }
     G4double GetEfficiencyCorrectionXY(const G4ThreeVector& InPixPosition);
 
 private:
+    SimFlags* fFlag;
     G4double fTotalEnergyDeposited;
     std::map<std::pair<int, int>, G4double> pixelLastHitTime;
     std::map<std::pair<int, int>, int> pixelHitCount;
@@ -32,6 +34,7 @@ private:
     std::map<std::pair<int, int>, int> channelHitMap;
     std::ofstream hitDataFile;
     std::map<G4int, G4double> fTrackLengths;
+    std::string fOutputPath;
 
 
     // G4HCofThisEvent - generate hit collections for analysis and reconstruction within gent4 or add electronic noise?

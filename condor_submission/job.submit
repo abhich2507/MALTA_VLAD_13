@@ -1,0 +1,13 @@
+executable = /afs/desy.de/user/b/berleavl/private/decal_sw/build/run_script_naf.sh
+
+should_transfer_files = YES
+when_to_transfer_output = ON_EXIT
+
+log = /afs/desy.de/user/b/berleavl/private/decal_sw/condor_log/job.log
+output = /afs/desy.de/user/b/berleavl/private/decal_sw/condor_log/job.out
+error = /afs/desy.de/user/b/berleavl/private/decal_sw/condor_log/job.err
+
+request_cpus = 12
+
+queue 1
+

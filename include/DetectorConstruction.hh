@@ -28,6 +28,7 @@
 #include "G4Color.hh"
 // Sensitive Detector Manager
 #include "G4SDManager.hh"
+#include "Config.hh"
 
 #include "SensitiveDetector.hh"
 // Optical surface coupling imports
@@ -38,12 +39,13 @@
 class DetectorConstruction : public G4VUserDetectorConstruction
 {
 public:
-    DetectorConstruction();
+    DetectorConstruction(SimFlags* flags);
     // virtual because overwrite allready defined in G4VUserDetectorConstruction
     virtual ~DetectorConstruction();
     virtual G4VPhysicalVolume *Construct();
 
 private:
+    SimFlags* fFlag;
     G4LogicalVolume *logicSensor;
     // Method constructs any sensitive detector or additional field
     virtual void ConstructSDandField();

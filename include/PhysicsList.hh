@@ -6,6 +6,7 @@
 #include "G4VModularPhysicsList.hh"
 #include "G4EmStandardPhysics.hh"
 #include "G4EmStandardPhysics_option4.hh"
+#include "Config.hh"
 #include "G4DecayPhysics.hh"
 #include "G4HadronElasticPhysics.hh"
 #include "G4HadronPhysicsFTFP_BERT.hh"
@@ -20,10 +21,13 @@ class PhysicsList : public G4VModularPhysicsList
 {
 public:
     // Constructor - called when object is created: PhysicsList::PhysicsList()
-    PhysicsList();
+    PhysicsList(SimFlags* flags);
     // Destructor - called when object goes out of scope
     ~PhysicsList();
     virtual void SetCuts();
+    
+private:
+    SimFlags* fFlag;
 };
 // File processed only once per compilation
 #endif
