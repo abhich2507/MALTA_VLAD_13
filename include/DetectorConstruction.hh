@@ -16,11 +16,8 @@
 #include "G4PVPlacement.hh"
 // Material definition
 #include "G4Material.hh"
-
 #include "G4NistManager.hh"
-
 #include "G4SystemOfUnits.hh"
-
 #include "G4UnitsTable.hh"
 // Visualization attribute
 #include "G4VisAttributes.hh"
@@ -29,7 +26,6 @@
 // Sensitive Detector Manager
 #include "G4SDManager.hh"
 #include "Config.hh"
-
 #include "SensitiveDetector.hh"
 // Optical surface coupling imports
 #include "G4OpticalSurface.hh"
