@@ -86,7 +86,7 @@ elif [[ "$RUN_MODE" == "naf" ]]; then
         start_time_human=$(date -d "@$start_time" "+%Y-%m-%d %H:%M:%S")
         job_started=0
         echo "📤 Job submitted at: $start_time_human"
-        while [ ! -f "/afs/desy.de/user/b/berleavl/private/decal_sw/condor_log/job.out" ]; do
+        while [ ! -f "/afs/desy.de/user/b/berleavl/private/decal_sw_cern/condor_log/job.out" ]; do
             now=$(date +%s)
             now_human=$(date -d "@$now" "+%Y-%m-%d %H:%M:%S")
             elapsed=$((now - start_time))
@@ -96,8 +96,8 @@ elif [[ "$RUN_MODE" == "naf" ]]; then
         echo
         echo "✅ Job completed at: $now_human"
         echo "⏱️ Job ran for: ${elapsed}s"
-        latest_dir=$(ls -d /afs/desy.de/user/b/berleavl/private/decal_sw/Results/naf_* | sort -V | tail -n 1)
-        mv /afs/desy.de/user/b/berleavl/private/decal_sw/condor_log/job.* "$latest_dir/"
+        latest_dir=$(ls -d /afs/desy.de/user/b/berleavl/private/decal_sw_cern/Results/naf_* | sort -V | tail -n 1)
+        mv /afs/desy.de/user/b/berleavl/private/decal_sw_cern/condor_log/job.* "$latest_dir/"
     ' > monitor.log 2>&1 &
 
     echo "ℹ️  Monitoring started in the background. Check progress with: tail -f monitor.log"
