@@ -1,11 +1,8 @@
 #!/bin/bash
 
-
-CFG_FILE="../flags.cfg"
-#TODO: Probably move these to permanent env variables
-NAF_USER="berleavl"
+source ../config.sh
 NAF_HOST="naf-atlas.desy.de"
-NAF_DIR="/afs/desy.de/user/"${NAF_USER:0:1}"/$NAF_USER/private/decal_sw_cern"
+NAF_DIR="/afs/desy.de/user/"${NAF_USER:0:1}"/$NAF_USER/$NAF_PATH"
 SOCKET="$HOME/.ssh/naf-socket"
 RUN_MODE=$1
 
@@ -81,24 +78,25 @@ elif [[ "$RUN_MODE" == "naf" ]]; then
 
     echo "[NAF] Submitting job to NAF... with JOB_ID: $JOB_ID"
     #persistent daemon run that transfers the job files to the current run directory
-    nohup ssh -S "$SOCKET" ${NAF_USER}@${NAF_HOST} '
-        start_time=$(date +%s)
-        start_time_human=$(date -d "@$start_time" "+%Y-%m-%d %H:%M:%S")
+    nohup ssh -S "$SOCKET" ${NAF_USER}@${NAF_HOST} "
+        NAF_DIR=\"$NAF_DIR\"
+        start_time=\$(date +%s)
+        start_time_human=\$(date -d \"@\${start_time}\" \"+%Y-%m-%d %H:%M:%S\")
         job_started=0
-        echo "📤 Job submitted at: $start_time_human"
-        while [ ! -f "/afs/desy.de/user/b/berleavl/private/decal_sw_cern/condor_log/job.out" ]; do
-            now=$(date +%s)
-            now_human=$(date -d "@$now" "+%Y-%m-%d %H:%M:%S")
-            elapsed=$((now - start_time))
-            echo -ne "⏳ Elapsed: ${elapsed}s\r"
+        echo \"📤 Job submitted at: \$start_time_human\"
+        while [ ! -f \"\$NAF_DIR/condor_log/job.out\" ]; do
+            now=\$(date +%s)
+            now_human=\$(date -d \"@\${now}\" \"+%Y-%m-%d %H:%M:%S\")
+            elapsed=\$((now - start_time))
+            echo -ne \"⏳ Elapsed: \${elapsed}s\r\"
             sleep 5
         done
         echo
-        echo "✅ Job completed at: $now_human"
-        echo "⏱️ Job ran for: ${elapsed}s"
-        latest_dir=$(ls -d /afs/desy.de/user/b/berleavl/private/decal_sw_cern/Results/naf_* | sort -V | tail -n 1)
-        mv /afs/desy.de/user/b/berleavl/private/decal_sw_cern/condor_log/job.* "$latest_dir/"
-    ' > monitor.log 2>&1 &
+        echo \"✅ Job completed at: \$now_human\"
+        echo \"⏱️ Job ran for: \${elapsed}s\"
+        latest_dir=\$(ls -d \$NAF_DIR/Results/naf_* | sort -V | tail -n 1)
+        mv \$NAF_DIR/condor_log/job.* \"\$latest_dir/\"
+    " > monitor.log 2>&1 &
 
     echo "ℹ️  Monitoring started in the background. Check progress with: tail -f monitor.log"
 
