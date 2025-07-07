@@ -5,9 +5,8 @@ CFG_FILE="../flags.cfg"
 #TODO: Probably move these to permanent env variables
 NAF_USER="berleavl"
 NAF_HOST="naf-atlas.desy.de"
-NAF_DIR="/afs/desy.de/user/"${NAF_USER:0:1}"/$NAF_USER/private/decal_sw"
+NAF_DIR="/afs/desy.de/user/"${NAF_USER:0:1}"/$NAF_USER/private/decal_sw_cern"
 SOCKET="$HOME/.ssh/naf-socket"
-BRANCH="NAF_develop_vlad"
 RUN_MODE=$1
 
 
