@@ -1,4 +1,4 @@
-source ../config.sh
+source /afs/desy.de/user/b/berleavl/private/decal_sw_cern/config.sh
 
 source "$NAF_GEANT"
 #export NUM_CORES=2

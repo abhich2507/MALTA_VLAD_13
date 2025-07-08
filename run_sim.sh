@@ -50,6 +50,7 @@ elif [[ "$RUN_MODE" == "naf" ]]; then
         cd build
         cmake .. > /dev/null 2>&1
         make > /dev/null 2>&1
+        source ../config.sh
         if [[ \$? -ne 0 ]]; then
             echo "🛑 Source compilation failed."
             exit 1
