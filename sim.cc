@@ -44,10 +44,26 @@ int main (int argc, char** argv)
         
         LoadSimFlagsFromFile("../flags.cfg", *flags);
     }
+    //From local paths to absolute paths using env var:
+    std::string localPath = std::getenv("LOCAL_PATH");
+    std::string localName = flags->outputPathLocal;
+    flags->outputPathLocal = localPath + localName;
+    std::string localMacro = flags->macroFileLocal;
+    flags->macroFileLocal = localPath + "build/" + localMacro;
+
+    std::string nafUser = std::getenv("NAF_USER");
+    std::string nafPath = std::getenv("NAF_PATH");
+    std::string nafFullPath = "/afs/desy.de/user/" + nafUser.substr(0,1) + "/" + nafUser + "/" + nafPath;
+    std::string nafName = flags->outputPathNAF;
+    flags->outputPathNAF = nafFullPath + "/" + nafName;
+    std::string nafMacro = flags->macroFileNAF;
+    flags->macroFileNAF = nafFullPath + + "build/" + nafMacro;
+
+    // Dry run test
     submissionTest(*flags);
     std::string homePath = std::getenv("HOME") ? std::getenv("HOME") : "";
+
     // Check if running in local or naf mode
-    // TODO: This is not running properyly FIX IT!
     if(homePath.find("home") != std::string::npos)
     {
         std::cout<< "You are running locally!"<< "\n";
