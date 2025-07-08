@@ -24,6 +24,7 @@ elif [[ "$RUN_MODE" == "naf" ]]; then
 
     echo "[NAF] Mode selected"
 
+
     #First things first we do a dry run to make sure the config is not bad
     source run_script_local_test.sh  
     EXIT_CODE=$?
@@ -38,11 +39,26 @@ elif [[ "$RUN_MODE" == "naf" ]]; then
         return 1
 
     fi
-        echo "✅ Preflight check passed. Submitting job..."
+    echo "✅ Preflight check passed."
+
+    # Check if there is another job already running
+    CUR_JOB=$(ssh -S "$SOCKET" ${NAF_USER}@${NAF_HOST} "condor_q $NAF_USER")
+    echo "$CUR_JOB" | grep -q "$NAF_USER" > /dev/null 2>&1
+
+    if [[ $? -eq 0 ]]; then
+        echo "🛑 There is already a Condor job running. Exiting... "
+        return 1
+    fi
+    echo "✅ No condor jobs currently running."  
 
     
-    
-
+    # SYNC the flag.cfg between local and naf.
+    rsync -avz --inplace -e "ssh -S $SOCKET" $LOCAL_PATH/flags.cfg $NAF_USER@$NAF_HOST:$NAF_DIR/flags.cfg > /dev/null 2>&1
+    if [[ $? -ne 0 ]]; then
+        echo "🛑 Could not SYNC the configuration between local and naf."
+        return 1
+    fi
+    echo "✅ Configuration SYNCED between local and naf."
     # SSH and submit Condor job
     
     ssh -S "$SOCKET" ${NAF_USER}@${NAF_HOST} "
@@ -61,18 +77,10 @@ elif [[ "$RUN_MODE" == "naf" ]]; then
     if [[ $? -ne 0 ]]; then
         return 1
     fi
-    # Check if there is another job already running
-    CUR_JOB=$(ssh -S "$SOCKET" ${NAF_USER}@${NAF_HOST} "condor_q $NAF_USER")
-    echo "$CUR_JOB" | grep -q "$NAF_USER" > /dev/null 2>&1
 
-    if [[ $? -eq 0 ]]; then
-        echo "🛑 There is already a Condor job running. Exiting... "
-        return 1
-    fi
-
-    ###THe auto cmake got lost somewhere. Readd it.
     JOB_ID=$(ssh -S "$SOCKET" ${NAF_USER}@${NAF_HOST} "
             cd $NAF_DIR
+            sed \"s|__BASE_PATH__|$NAF_DIR|g\" template.submit > job.submit
             condor_submit build/job.submit | awk '/submitted to cluster/ {print \$6}' | tr -d '.'
         ")
 
