@@ -7,6 +7,9 @@ log = /afs/desy.de/user/b/berleavl/private/decal_sw_cern/condor_log/job.log
 output = /afs/desy.de/user/b/berleavl/private/decal_sw_cern/condor_log/job.out
 error = /afs/desy.de/user/b/berleavl/private/decal_sw_cern/condor_log/job.err
 
+
+transfer_input_files = /afs/desy.de/user/b/berleavl/private/decal_sw_cern/config.sh
+
 request_cpus = 12
 
 queue 1
