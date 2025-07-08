@@ -60,7 +60,7 @@ elif [[ "$RUN_MODE" == "naf" ]]; then
 
     
     # SYNC the flag.cfg between local and naf.
-    rsync -avz --inplace -e "ssh -S $SOCKET" $LOCAL_PATH/configs $NAF_USER@$NAF_HOST:$NAF_DIR/configs > /dev/null 2>&1
+    rsync -avz --inplace -e "ssh -S $SOCKET" $LOCAL_PATH/configs/* $NAF_USER@$NAF_HOST:$NAF_DIR/configs > /dev/null 2>&1
     if [[ $? -ne 0 ]]; then
         echo "🛑 Could not SYNC the configuration between local and naf."
         return 1
