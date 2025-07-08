@@ -57,7 +57,7 @@ int main (int argc, char** argv)
     std::string nafName = flags->outputPathNAF;
     flags->outputPathNAF = nafFullPath + "/" + nafName;
     std::string nafMacro = flags->macroFileNAF;
-    flags->macroFileNAF = nafFullPath + + "build/" + nafMacro;
+    flags->macroFileNAF = nafFullPath + + "/build/" + nafMacro;
 
     // Dry run test
     submissionTest(*flags);
@@ -132,7 +132,7 @@ int main (int argc, char** argv)
         // Executes the interactive terminal i.e. starts the UI. 
         ui->SessionStart();
     }
-    else
+    else if (testRun == false)
     {
         if(!testRun){flags->isBatch = true;}
         if(flags->runMode == "local") 
