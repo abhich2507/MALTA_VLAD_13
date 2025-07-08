@@ -164,10 +164,12 @@ git pull origin master
 
 # Create build and results directories
 mkdir build Results condor_log
-
+```
 
 
 
 ## Usage
+```bash
 cd /build
 source ../run_sim.sh local/naf flag_name.cfg
+```
