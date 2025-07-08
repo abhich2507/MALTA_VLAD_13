@@ -1,7 +1,7 @@
 #include "RunAction.hh"
 #include "CustomRun.hh"
 
-RunAction::RunAction()
+RunAction::RunAction(SimFlags* flags) : fFlag(flags)
 {
     // Simplified instantiation thanks to GEANT4 implementation
     G4AnalysisManager *analysisManager = G4AnalysisManager::Instance();
@@ -55,10 +55,20 @@ void RunAction::BeginOfRunAction(const G4Run *run)
     G4AnalysisManager *analysisManager = G4AnalysisManager::Instance();
     // Create run ID
     G4int runID = run->GetRunID();
-
     std::stringstream strRunID;
     strRunID << runID;
-    analysisManager->OpenFile("output" + strRunID.str() + ".root");
+    //analysisManager->SetNtupleMerging(true);
+    if (isMaster && fFlag->isBatch)
+    {
+        fOutputPath = CreateNextRunDirectory(true, fFlag);
+        DumpConfigToFile(fOutputPath + "/flags.cfg");
+    }
+    else
+    {
+        fOutputPath = CreateNextRunDirectory(false, fFlag);
+    }
+
+    analysisManager->OpenFile(fOutputPath + "/output" + strRunID.str() + ".root");
 
 
 }

@@ -1,6 +1,6 @@
 #include "DetectorConstruction.hh"
 // Constructor
-DetectorConstruction::DetectorConstruction()
+DetectorConstruction::DetectorConstruction(SimFlags* flags) : fFlag(flags)
 {
 
 }
@@ -18,8 +18,12 @@ G4VPhysicalVolume *DetectorConstruction::Construct()
     // Instantiate NIST material manager
     G4NistManager *nist = G4NistManager::Instance();
     // Define world material
-    G4Material *worldMat = nist->FindOrBuildMaterial("G4_Galactic");
+    G4String outsideMat =  fFlag->outsideMaterial;
+    G4Material *worldMat = nist->FindOrBuildMaterial(outsideMat);
     G4Material *detMat = nist->FindOrBuildMaterial("G4_Si");
+    G4double detectorXOffset = fFlag->detectorXOffset *cm;
+    G4double detectorYOffset = fFlag->detectorYOffset *cm;
+    G4double detectorZOffset = fFlag->detectorZOffset *cm;
 
     // Define the world
     G4double xWorld = 1. *m;
@@ -56,16 +60,19 @@ G4VPhysicalVolume *DetectorConstruction::Construct()
     */
 
     // MALTA implementation monolithic sensor
-    G4double maltaWidth = 18.6368 *mm; 
-    G4double maltaDepth = 30 * um;
-    G4Box *solidMALTA = new G4Box ("MALTASensor", maltaWidth/2, maltaWidth/2, maltaDepth/2);
-    logicSensor = new G4LogicalVolume (solidMALTA, detMat, "logicSensor");
-    G4VPhysicalVolume *physSensor  = new G4PVPlacement(0, G4ThreeVector(5 *cm, 5 *cm, 5 *cm), logicSensor, "physSensor", logicalWorld, false, 0, true);
+    if(fFlag->preDefinedGeometryFlag == "MALTA")
+    {
+        G4double maltaWidth = 18.6368 *mm; 
+        G4double maltaDepth = 30 * um;
+        G4Box *solidMALTA = new G4Box ("MALTASensor", maltaWidth/2, maltaWidth/2, maltaDepth/2);
+        logicSensor = new G4LogicalVolume (solidMALTA, detMat, "logicSensor");
+        G4VPhysicalVolume *physSensor  = new G4PVPlacement(0, G4ThreeVector(detectorXOffset, detectorYOffset, detectorZOffset), logicSensor, "physSensor", logicalWorld, false, 0, true);
 
-    
-    G4VisAttributes *pixelVisAtt = new G4VisAttributes(G4Color(0., 0., 1., 0.5));
-    pixelVisAtt->SetForceSolid(true);
-    logicSensor->SetVisAttributes(pixelVisAtt);
+        
+        G4VisAttributes *pixelVisAtt = new G4VisAttributes(G4Color(0., 0., 1., 0.5));
+        pixelVisAtt->SetForceSolid(true);
+        logicSensor->SetVisAttributes(pixelVisAtt);
+    }
 
 
     // FR4 flame retardant dielectric for PCB implementation. 
@@ -86,85 +93,87 @@ G4VPhysicalVolume *DetectorConstruction::Construct()
     G4double FR4MiddlePlaneThickness = 0.1 *mm;
     G4double FR4InnerPlaneThickness = 0.2 *mm;
 
-    // Define logical Cu Plane
-    G4Box* solidCuPlane = new G4Box("solidCuPlane", 0.5 * PCBLateralSize, 0.5 * PCBLateralSize, 0.5 * CuPlaneThickness);
-    G4LogicalVolume* logicCuPlane = new G4LogicalVolume(solidCuPlane, metalPlane, "logicCuPlane");
-    G4VisAttributes *CuPlaneVisAtt = new G4VisAttributes(G4Color(0.6, 0.1, 0.1, 0.5));
-    CuPlaneVisAtt->SetForceSolid(true);
-    logicCuPlane->SetVisAttributes(CuPlaneVisAtt);
+    if(fFlag->preDefinedGeometryFlag == "PCB")
+    {
+        // Define logical Cu Plane
+        G4Box* solidCuPlane = new G4Box("solidCuPlane", 0.5 * PCBLateralSize, 0.5 * PCBLateralSize, 0.5 * CuPlaneThickness);
+        G4LogicalVolume* logicCuPlane = new G4LogicalVolume(solidCuPlane, metalPlane, "logicCuPlane");
+        G4VisAttributes *CuPlaneVisAtt = new G4VisAttributes(G4Color(0.6, 0.1, 0.1, 0.5));
+        CuPlaneVisAtt->SetForceSolid(true);
+        logicCuPlane->SetVisAttributes(CuPlaneVisAtt);
 
-    // Define logical outer plane dielectric
-    G4Box* solidFR4OuterPlane = new G4Box("solidFR4OuterPlane", 0.5 * PCBLateralSize, 0.5 * PCBLateralSize, 0.5 * FR4OuterPlaneThickness);
-    G4LogicalVolume* logicFR4OuterPlane = new G4LogicalVolume(solidFR4OuterPlane, FR4, "logicFR4OuterPlane");
-    G4VisAttributes *FR4OuterVisAtt = new G4VisAttributes(G4Color(0.5, 0.9, 0.5, 0.5));
-    FR4OuterVisAtt->SetForceSolid(true);
-    logicFR4OuterPlane->SetVisAttributes(FR4OuterVisAtt);
+        // Define logical outer plane dielectric
+        G4Box* solidFR4OuterPlane = new G4Box("solidFR4OuterPlane", 0.5 * PCBLateralSize, 0.5 * PCBLateralSize, 0.5 * FR4OuterPlaneThickness);
+        G4LogicalVolume* logicFR4OuterPlane = new G4LogicalVolume(solidFR4OuterPlane, FR4, "logicFR4OuterPlane");
+        G4VisAttributes *FR4OuterVisAtt = new G4VisAttributes(G4Color(0.5, 0.9, 0.5, 0.5));
+        FR4OuterVisAtt->SetForceSolid(true);
+        logicFR4OuterPlane->SetVisAttributes(FR4OuterVisAtt);
 
-    // Define logical middle plane dielectric
-    G4Box* solidFR4MiddlePlane = new G4Box("solidFR4MiddlePlane", 0.5 * PCBLateralSize, 0.5 * PCBLateralSize, 0.5 * FR4MiddlePlaneThickness);
-    G4LogicalVolume* logicFR4MiddlePlane = new G4LogicalVolume(solidFR4MiddlePlane, FR4, "logicFR4MiddlePlane");
-    G4VisAttributes *FR4MiddleVisAtt = new G4VisAttributes(G4Color(0., 0.5, 0., 0.5));
-    FR4MiddleVisAtt->SetForceSolid(true);
-    logicFR4MiddlePlane->SetVisAttributes(FR4MiddleVisAtt);
+        // Define logical middle plane dielectric
+        G4Box* solidFR4MiddlePlane = new G4Box("solidFR4MiddlePlane", 0.5 * PCBLateralSize, 0.5 * PCBLateralSize, 0.5 * FR4MiddlePlaneThickness);
+        G4LogicalVolume* logicFR4MiddlePlane = new G4LogicalVolume(solidFR4MiddlePlane, FR4, "logicFR4MiddlePlane");
+        G4VisAttributes *FR4MiddleVisAtt = new G4VisAttributes(G4Color(0., 0.5, 0., 0.5));
+        FR4MiddleVisAtt->SetForceSolid(true);
+        logicFR4MiddlePlane->SetVisAttributes(FR4MiddleVisAtt);
 
-    // Define logical inner plane dielectric
-    G4Box* solidFR4InnerPlane = new G4Box("solidFR4InnerPlane", 0.5 * PCBLateralSize, 0.5 * PCBLateralSize, 0.5 * FR4InnerPlaneThickness);
-    G4LogicalVolume* logicFR4InnerPlane = new G4LogicalVolume(solidFR4InnerPlane, FR4, "logicFR4InnerPlane");
-    G4VisAttributes *FR4InnerVisAtt = new G4VisAttributes(G4Color(0., 0.39, 0., 0.5));
-    FR4InnerVisAtt->SetForceSolid(true);
-    logicFR4MiddlePlane->SetVisAttributes(FR4InnerVisAtt);
+        // Define logical inner plane dielectric
+        G4Box* solidFR4InnerPlane = new G4Box("solidFR4InnerPlane", 0.5 * PCBLateralSize, 0.5 * PCBLateralSize, 0.5 * FR4InnerPlaneThickness);
+        G4LogicalVolume* logicFR4InnerPlane = new G4LogicalVolume(solidFR4InnerPlane, FR4, "logicFR4InnerPlane");
+        G4VisAttributes *FR4InnerVisAtt = new G4VisAttributes(G4Color(0., 0.39, 0., 0.5));
+        FR4InnerVisAtt->SetForceSolid(true);
+        logicFR4MiddlePlane->SetVisAttributes(FR4InnerVisAtt);
 
-    // Rotation for inclined measurements
-    auto rotation = new G4RotationMatrix();
-    rotation->rotateX(90 * deg);
-    rotation->rotateY(90 * deg);
+        // Rotation for inclined measurements
+        auto rotation = new G4RotationMatrix();
+        rotation->rotateX(90 * deg);
+        rotation->rotateY(90 * deg);
 
-    // Construct the physical PCB stack
-    G4double currentZ = 6.0 * cm;
-    G4double halfThickness = 0.5 * FR4OuterPlaneThickness;
-    /*
-    new G4PVPlacement(rotation, G4ThreeVector(5 *cm, 5 *cm, currentZ), logicFR4OuterPlane, "Outer1", logicalWorld, false, 0, true);
-    currentZ += FR4OuterPlaneThickness;
-    new G4PVPlacement(rotation, G4ThreeVector(5 *cm, 5 *cm, currentZ + 0.5 * CuPlaneThickness), logicCuPlane, "Cu1", logicalWorld, false, 0, true);
-    currentZ += CuPlaneThickness;
-    new G4PVPlacement(rotation, G4ThreeVector(5 *cm, 5 *cm, currentZ + 0.5 * FR4MiddlePlaneThickness), logicFR4MiddlePlane, "Middle1", logicalWorld, false, 0, true);
-    currentZ += FR4MiddlePlaneThickness;
-    new G4PVPlacement(rotation, G4ThreeVector(5 *cm, 5 *cm, currentZ + 0.5 * CuPlaneThickness), logicCuPlane, "Cu2", logicalWorld, false, 1, true);
-    currentZ += CuPlaneThickness;
-    new G4PVPlacement(rotation, G4ThreeVector(5 *cm, 5 *cm, currentZ + 0.5 * FR4InnerPlaneThickness), logicFR4InnerPlane, "Inner1", logicalWorld, false, 0, true);
-    currentZ += FR4InnerPlaneThickness;
-    new G4PVPlacement(rotation, G4ThreeVector(5 *cm, 5 *cm, currentZ + 0.5 * CuPlaneThickness), logicCuPlane, "Cu3", logicalWorld, false, 2, true);
-    currentZ += CuPlaneThickness;  
-    new G4PVPlacement(rotation, G4ThreeVector(5 *cm, 5 *cm, currentZ + 0.5 * FR4InnerPlaneThickness), logicFR4InnerPlane, "Inner2", logicalWorld, false, 1, true);
-    currentZ += FR4InnerPlaneThickness;
-    new G4PVPlacement(rotation, G4ThreeVector(5 *cm, 5 *cm, currentZ + 0.5 * CuPlaneThickness), logicCuPlane, "Cu4", logicalWorld, false, 3, true);
-    currentZ += CuPlaneThickness;
-    new G4PVPlacement(rotation, G4ThreeVector(5 *cm, 5 *cm, currentZ + 0.5 * FR4InnerPlaneThickness), logicFR4InnerPlane, "Inner3", logicalWorld, false, 2, true);
-    currentZ += FR4InnerPlaneThickness;
-    new G4PVPlacement(rotation, G4ThreeVector(5 *cm, 5 *cm, currentZ + 0.5 * CuPlaneThickness), logicCuPlane, "Cu5", logicalWorld, false, 4, true);
-    currentZ += CuPlaneThickness;
-    new G4PVPlacement(rotation, G4ThreeVector(5 *cm, 5 *cm, currentZ + 0.5 * FR4InnerPlaneThickness), logicFR4InnerPlane, "Inner4", logicalWorld, false, 3, true);
-    currentZ += FR4InnerPlaneThickness;
-    new G4PVPlacement(rotation, G4ThreeVector(5 *cm, 5 *cm, currentZ + 0.5 * CuPlaneThickness), logicCuPlane, "Cu6", logicalWorld, false, 5, true);
-    currentZ += CuPlaneThickness;
-    new G4PVPlacement(rotation, G4ThreeVector(5 *cm, 5 *cm, currentZ + 0.5 * FR4InnerPlaneThickness), logicFR4InnerPlane, "Inner5", logicalWorld, false, 4, true);
-    currentZ += FR4InnerPlaneThickness;
-    new G4PVPlacement(rotation, G4ThreeVector(5 *cm, 5 *cm, currentZ + 0.5 * CuPlaneThickness), logicCuPlane, "Cu7", logicalWorld, false, 6, true);
-    currentZ += CuPlaneThickness;
-    new G4PVPlacement(rotation, G4ThreeVector(5 *cm, 5 *cm, currentZ + 0.5 * FR4InnerPlaneThickness), logicFR4InnerPlane, "Inner6", logicalWorld, false, 5, true);
-    currentZ += FR4InnerPlaneThickness;
-    new G4PVPlacement(rotation, G4ThreeVector(5 *cm, 5 *cm, currentZ + 0.5 * CuPlaneThickness), logicCuPlane, "Cu8", logicalWorld, false, 7, true);
-    currentZ += CuPlaneThickness;
-    new G4PVPlacement(rotation, G4ThreeVector(5 *cm, 5 *cm, currentZ + 0.5 * FR4InnerPlaneThickness), logicFR4InnerPlane, "Inner7", logicalWorld, false, 6, true);
-    currentZ += FR4InnerPlaneThickness;
-    new G4PVPlacement(rotation, G4ThreeVector(5 *cm, 5 *cm, currentZ + 0.5 * CuPlaneThickness), logicCuPlane, "Cu9", logicalWorld, false, 8, true);
-    currentZ += CuPlaneThickness;
-    new G4PVPlacement(rotation, G4ThreeVector(5 *cm, 5 *cm, currentZ + 0.5 * FR4MiddlePlaneThickness), logicFR4MiddlePlane, "Middle2", logicalWorld, false, 1, true);
-    currentZ += FR4MiddlePlaneThickness;
-    new G4PVPlacement(rotation, G4ThreeVector(5 *cm, 5 *cm, currentZ + 0.5 * CuPlaneThickness), logicCuPlane, "Cu10", logicalWorld, false, 9, true);
-    currentZ += CuPlaneThickness;
-    new G4PVPlacement(rotation, G4ThreeVector(5 *cm, 5 *cm, currentZ + 0.5 * FR4OuterPlaneThickness), logicFR4OuterPlane, "Outer2", logicalWorld, false, 1, true);
-    */
+        // Construct the physical PCB stack
+        G4double currentZ = 6.0 * cm;
+        G4double halfThickness = 0.5 * FR4OuterPlaneThickness;
+        
+        new G4PVPlacement(rotation, G4ThreeVector(5 *cm, 5 *cm, currentZ), logicFR4OuterPlane, "Outer1", logicalWorld, false, 0, true);
+        currentZ += FR4OuterPlaneThickness;
+        new G4PVPlacement(rotation, G4ThreeVector(5 *cm, 5 *cm, currentZ + 0.5 * CuPlaneThickness), logicCuPlane, "Cu1", logicalWorld, false, 0, true);
+        currentZ += CuPlaneThickness;
+        new G4PVPlacement(rotation, G4ThreeVector(5 *cm, 5 *cm, currentZ + 0.5 * FR4MiddlePlaneThickness), logicFR4MiddlePlane, "Middle1", logicalWorld, false, 0, true);
+        currentZ += FR4MiddlePlaneThickness;
+        new G4PVPlacement(rotation, G4ThreeVector(5 *cm, 5 *cm, currentZ + 0.5 * CuPlaneThickness), logicCuPlane, "Cu2", logicalWorld, false, 1, true);
+        currentZ += CuPlaneThickness;
+        new G4PVPlacement(rotation, G4ThreeVector(5 *cm, 5 *cm, currentZ + 0.5 * FR4InnerPlaneThickness), logicFR4InnerPlane, "Inner1", logicalWorld, false, 0, true);
+        currentZ += FR4InnerPlaneThickness;
+        new G4PVPlacement(rotation, G4ThreeVector(5 *cm, 5 *cm, currentZ + 0.5 * CuPlaneThickness), logicCuPlane, "Cu3", logicalWorld, false, 2, true);
+        currentZ += CuPlaneThickness;  
+        new G4PVPlacement(rotation, G4ThreeVector(5 *cm, 5 *cm, currentZ + 0.5 * FR4InnerPlaneThickness), logicFR4InnerPlane, "Inner2", logicalWorld, false, 1, true);
+        currentZ += FR4InnerPlaneThickness;
+        new G4PVPlacement(rotation, G4ThreeVector(5 *cm, 5 *cm, currentZ + 0.5 * CuPlaneThickness), logicCuPlane, "Cu4", logicalWorld, false, 3, true);
+        currentZ += CuPlaneThickness;
+        new G4PVPlacement(rotation, G4ThreeVector(5 *cm, 5 *cm, currentZ + 0.5 * FR4InnerPlaneThickness), logicFR4InnerPlane, "Inner3", logicalWorld, false, 2, true);
+        currentZ += FR4InnerPlaneThickness;
+        new G4PVPlacement(rotation, G4ThreeVector(5 *cm, 5 *cm, currentZ + 0.5 * CuPlaneThickness), logicCuPlane, "Cu5", logicalWorld, false, 4, true);
+        currentZ += CuPlaneThickness;
+        new G4PVPlacement(rotation, G4ThreeVector(5 *cm, 5 *cm, currentZ + 0.5 * FR4InnerPlaneThickness), logicFR4InnerPlane, "Inner4", logicalWorld, false, 3, true);
+        currentZ += FR4InnerPlaneThickness;
+        new G4PVPlacement(rotation, G4ThreeVector(5 *cm, 5 *cm, currentZ + 0.5 * CuPlaneThickness), logicCuPlane, "Cu6", logicalWorld, false, 5, true);
+        currentZ += CuPlaneThickness;
+        new G4PVPlacement(rotation, G4ThreeVector(5 *cm, 5 *cm, currentZ + 0.5 * FR4InnerPlaneThickness), logicFR4InnerPlane, "Inner5", logicalWorld, false, 4, true);
+        currentZ += FR4InnerPlaneThickness;
+        new G4PVPlacement(rotation, G4ThreeVector(5 *cm, 5 *cm, currentZ + 0.5 * CuPlaneThickness), logicCuPlane, "Cu7", logicalWorld, false, 6, true);
+        currentZ += CuPlaneThickness;
+        new G4PVPlacement(rotation, G4ThreeVector(5 *cm, 5 *cm, currentZ + 0.5 * FR4InnerPlaneThickness), logicFR4InnerPlane, "Inner6", logicalWorld, false, 5, true);
+        currentZ += FR4InnerPlaneThickness;
+        new G4PVPlacement(rotation, G4ThreeVector(5 *cm, 5 *cm, currentZ + 0.5 * CuPlaneThickness), logicCuPlane, "Cu8", logicalWorld, false, 7, true);
+        currentZ += CuPlaneThickness;
+        new G4PVPlacement(rotation, G4ThreeVector(5 *cm, 5 *cm, currentZ + 0.5 * FR4InnerPlaneThickness), logicFR4InnerPlane, "Inner7", logicalWorld, false, 6, true);
+        currentZ += FR4InnerPlaneThickness;
+        new G4PVPlacement(rotation, G4ThreeVector(5 *cm, 5 *cm, currentZ + 0.5 * CuPlaneThickness), logicCuPlane, "Cu9", logicalWorld, false, 8, true);
+        currentZ += CuPlaneThickness;
+        new G4PVPlacement(rotation, G4ThreeVector(5 *cm, 5 *cm, currentZ + 0.5 * FR4MiddlePlaneThickness), logicFR4MiddlePlane, "Middle2", logicalWorld, false, 1, true);
+        currentZ += FR4MiddlePlaneThickness;
+        new G4PVPlacement(rotation, G4ThreeVector(5 *cm, 5 *cm, currentZ + 0.5 * CuPlaneThickness), logicCuPlane, "Cu10", logicalWorld, false, 9, true);
+        currentZ += CuPlaneThickness;
+        new G4PVPlacement(rotation, G4ThreeVector(5 *cm, 5 *cm, currentZ + 0.5 * FR4OuterPlaneThickness), logicFR4OuterPlane, "Outer2", logicalWorld, false, 1, true);
+    }        
 
 
 
@@ -176,10 +185,11 @@ G4VPhysicalVolume *DetectorConstruction::Construct()
 
 void DetectorConstruction::ConstructSDandField()
 {
-    
-    SensitiveDetector *sensDet = new SensitiveDetector("SensitiveDetector");
-    // Ensure that methods initialize at end of event
-    G4SDManager::GetSDMpointer()->AddNewDetector(sensDet);
-    logicSensor->SetSensitiveDetector(sensDet);
-    
+    if(fFlag->preDefinedGeometryFlag == "MALTA")
+    {
+        SensitiveDetector *sensDet = new SensitiveDetector("SensitiveDetector", fFlag);
+        // Ensure that methods initialize at end of event
+        G4SDManager::GetSDMpointer()->AddNewDetector(sensDet);
+        logicSensor->SetSensitiveDetector(sensDet);
+    }
 }

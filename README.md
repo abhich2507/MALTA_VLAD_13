@@ -127,7 +127,20 @@ TODO
 TODO
 
 ## Installation
-TODO
+
+ssh username@naf-atlas.desy.de
+mkdir private/decal
+cd private/decal
+git init
+git remote set-url origin git@gitlab.cern.ch:7999/dberlea/malta_simulation.git
+git pull develop
+mkdir build
+mkdir Results
+mkdir condor_log
+exit
+cd path_to_folder
+cat config.sh
+Edit the correct paths
 
 ## Usage
 TODO

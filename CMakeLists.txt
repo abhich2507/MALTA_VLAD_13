@@ -18,6 +18,8 @@ file(GLOB sources ${PROJECT_SOURCE_DIR}/src/*.cc)
 # Copy all te macro files in the macros directory
 file(GLOB MACRO_FILES "macros/*.mac")
 file(COPY ${MACRO_FILES} DESTINATION ${CMAKE_BINARY_DIR}/)
+file(GLOB CONDOR_FILES "condor_submission/*")
+file(COPY ${CONDOR_FILES} DESTINATION ${CMAKE_BINARY_DIR}/)
 # Create executable called sim that compilse sim.cc and all source files from sources
 # sim.cc is the main file with main() function
 add_executable(sim sim.cc ${sources})
