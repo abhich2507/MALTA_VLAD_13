@@ -64,6 +64,7 @@ elif [[ "$RUN_MODE" == "naf" ]]; then
     # Check if there is another job already running
     CUR_JOB=$(ssh -S "$SOCKET" ${NAF_USER}@${NAF_HOST} "condor_q $NAF_USER")
     echo "$CUR_JOB" | grep -q "$NAF_USER" > /dev/null 2>&1
+
     if [[ $? -eq 0 ]]; then
         echo "🛑 There is already a Condor job running. Exiting... "
         return 1
