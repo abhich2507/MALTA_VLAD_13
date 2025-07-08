@@ -1,3 +1,4 @@
+#!/bin/bash
 source ../config.sh
 
 source "$LOCAL_GEANT"

@@ -1,4 +1,6 @@
+#!/bin/bash
 source ../config.sh
+set -e
 
 source "$LOCAL_GEANT"
 source "$LOCAL_ROOT"
