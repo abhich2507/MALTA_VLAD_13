@@ -80,7 +80,7 @@ elif [[ "$RUN_MODE" == "naf" ]]; then
 
     JOB_ID=$(ssh -S "$SOCKET" ${NAF_USER}@${NAF_HOST} "
             cd $NAF_DIR
-            sed \"s|__BASE_PATH__|$NAF_DIR|g\" template.submit > job.submit
+            sed -i \"s|__BASE_PATH__|$NAF_DIR|g\" build/job.submit 
             condor_submit build/job.submit | awk '/submitted to cluster/ {print \$6}' | tr -d '.'
         ")
 

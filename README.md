@@ -127,53 +127,20 @@ TODO
 TODO
 
 ## Installation
-### NAF manual configuration:
-Local machine:
-ssh-keygen -t ed25519 -f ~/.ssh/id_ed25519_gitlab_cern -C "email@desy.de"
-Press ENTER and y for default path
-cat ~/.ssh/id_ed25519_gitlab_cern.pub
-Should output the generated key
 
-TODO:
-Maybe this works: 
-scp /home/vlad/.ssh/id_ed25519_gitlab_cern dberlea@lxplus.cern.ch:~/.ssh/
-
-
-Next we make sure that if one works with several git lab servers and the same ssh key, git has no ambiguities:
-cat > ~/.ssh/config << 'EOF'
- # GitLab DESY
-Host gitlab-desy
-    HostName gitlab.desy.de
-    User git
-    IdentityFile ~/.ssh/id_ed25519
- 
-# GitLab CERN
-Host gitlab-cern
-    HostName gitlab.cern.ch
-    User git
-    IdentityFile ~/.ssh/id_ed25519_gitlab_cern
-    ProxyJump cernname@lxplus.cern.ch
-    IdentitiesOnly yes
-
-EOF
-scp ~/.ssh/id_ed25519_gitlab_cern ~/.ssh/id_ed25519_gitlab_cern.pub email@naf-atlas.desy.de:~/.ssh/
-scp ~/.ssh/config email@naf-atlas.desy.de:~/.ssh/
 ssh username@naf-atlas.desy.de
-chmod 700 ~/.ssh
-chmod 600 ~/.ssh/id_ed25519_gitlab_cern
-chmod 644 ~/.ssh/id_ed25519_gitlab_cern.pub
-chmod 600 ~/.ssh/config
-Next go to the GitLab web interface -> Profile -> Preferences -> SSH Keys 
-Click on add new key -> paste the output of cat ~/.ssh/id_ed25519_gitlab_cern.pub in the key window 
-Usage Type: Authenthification and Signing ; Remove expiration date -> Add Key.
-Refresh page and should now see the key.
-ssh -T git@gitlab.desy.de
-Should output the following message without prompting for a password:
-Welcome to GitLab, @username! 
 mkdir private/decal
 cd private/decal
 git init
 git remote set-url origin git@gitlab.cern.ch:7999/dberlea/malta_simulation.git
+git pull develop
+mkdir build
+mkdir Results
+mkdir condor_log
+exit
+cd path_to_folder
+cat config.sh
+Edit the correct paths
 
 ## Usage
 TODO
