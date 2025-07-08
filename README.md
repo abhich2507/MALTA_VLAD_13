@@ -128,20 +128,46 @@ TODO
 
 ## Installation
 
-ssh username@naf-atlas.desy.de
-mkdir private/decal
-cd private/decal
+```bash
+# Create a working directory
+mkdir directory_name
+cd directory_name
+
+# Initialize Git repository
 git init
 git remote set-url origin git@gitlab.cern.ch:7999/dberlea/malta_simulation.git
-git pull develop
-mkdir build
-mkdir Results
-mkdir condor_log
-exit
-cd path_to_folder
+git pull origin master
+
+# Create build and results directories
+mkdir build Results
+
+# Review and edit configuration
 cat config.sh
-Edit the correct paths
+# Edit config.sh with the correct paths
+
+# Build the project
+cd build
+cmake ..
+make
+
+# Log in to NAF
+ssh username@naf-atlas.desy.de
+
+# Create a working directory in your private area
+mkdir -p private/directory_name
+cd private/directory_name
+
+# Initialize Git repository
+git init
+git remote set-url origin git@gitlab.cern.ch:7999/dberlea/malta_simulation.git
+git pull origin master
+
+# Create build and results directories
+mkdir build Results condor_log
+
+
+
 
 ## Usage
 cd /build
-source ../run_sim.sh local/naf
+source ../run_sim.sh local/naf flag_name.cfg
