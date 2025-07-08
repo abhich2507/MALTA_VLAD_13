@@ -143,4 +143,5 @@ cat config.sh
 Edit the correct paths
 
 ## Usage
-TODO
+cd /build
+source ../run_sim.sh local/naf
