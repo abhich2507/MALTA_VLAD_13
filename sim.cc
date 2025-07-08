@@ -42,7 +42,7 @@ int main (int argc, char** argv)
         std::cout<< std::endl<<"NO CONFIGURATION of the SIMU_CONFIG path. Reverting to DEFAULT" 
                  << std::endl<< "Configute it via: export SIMU_CONFIG=/path/to/my/file " << std::endl;
         
-        LoadSimFlagsFromFile("../flags.cfg", *flags);
+        LoadSimFlagsFromFile("../configs/flags.cfg", *flags);
     }
     //From local paths to absolute paths using env var:
     std::string localPath = std::getenv("LOCAL_PATH");
