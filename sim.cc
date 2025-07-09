@@ -42,7 +42,7 @@ int main (int argc, char** argv)
         std::cout<< std::endl<<"NO CONFIGURATION of the SIMU_CONFIG path. Reverting to DEFAULT" 
                  << std::endl<< "Configute it via: export SIMU_CONFIG=/path/to/my/file " << std::endl;
         
-        LoadSimFlagsFromFile("../flags.cfg", *flags);
+        LoadSimFlagsFromFile("../configs/flags.cfg", *flags);
     }
     //From local paths to absolute paths using env var:
     std::string localPath = std::getenv("LOCAL_PATH");
@@ -64,15 +64,16 @@ int main (int argc, char** argv)
     std::string homePath = std::getenv("HOME") ? std::getenv("HOME") : "";
 
     // Check if running in local or naf mode
-    if(homePath.find("home") != std::string::npos)
-    {
-        std::cout<< "You are running locally!"<< "\n";
-        flags->runMode = "local";
-    }
-    else
+    if(homePath.empty() || homePath.find("desy.de")!= std::string::npos)
     {
         std::cout<< "You are running from NAF!"<< "\n";
         flags->runMode = "naf";
+
+    }
+    else
+    {
+        std::cout<< "You are running locally!"<< "\n";
+        flags->runMode = "local";
     }
 
     #ifdef G4MULTITHREADED

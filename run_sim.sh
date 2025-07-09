@@ -5,15 +5,18 @@ NAF_HOST="naf-atlas.desy.de"
 NAF_DIR="/afs/desy.de/user/"${NAF_USER:0:1}"/$NAF_USER/$NAF_PATH"
 SOCKET="$HOME/.ssh/naf-socket"
 RUN_MODE=$1
-
+FLAG=$2
 
 
 
 if [[ "$RUN_MODE" == "local" ]]; then
     echo "[LOCAL] Running locally..."
-    #TODO: consider also handling directory janitorial services.
     #LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu ./sim 
-    source run_script_local.sh
+    if [ -n "$FLAG" ]; then
+        source run_script_local.sh $FLAG
+    else
+        source run_script_local.sh flags.cfg
+    fi
 
 elif [[ "$RUN_MODE" == "naf" ]]; then
 
@@ -26,7 +29,11 @@ elif [[ "$RUN_MODE" == "naf" ]]; then
 
 
     #First things first we do a dry run to make sure the config is not bad
-    source run_script_local_test.sh  
+    if [ -n "$FLAG" ]; then
+        source run_script_local_test.sh $FLAG
+    else
+        source run_script_local_test.sh flags.cfg
+    fi
     EXIT_CODE=$?
     #TODO: ensure jobfile is correct
     # Check the exit code of the above script.
@@ -53,7 +60,7 @@ elif [[ "$RUN_MODE" == "naf" ]]; then
 
     
     # SYNC the flag.cfg between local and naf.
-    rsync -avz --inplace -e "ssh -S $SOCKET" $LOCAL_PATH/flags.cfg $NAF_USER@$NAF_HOST:$NAF_DIR/flags.cfg > /dev/null 2>&1
+    rsync -avz --inplace -e "ssh -S $SOCKET" $LOCAL_PATH/configs/* $NAF_USER@$NAF_HOST:$NAF_DIR/configs > /dev/null 2>&1
     if [[ $? -ne 0 ]]; then
         echo "🛑 Could not SYNC the configuration between local and naf."
         return 1
@@ -81,6 +88,7 @@ elif [[ "$RUN_MODE" == "naf" ]]; then
     JOB_ID=$(ssh -S "$SOCKET" ${NAF_USER}@${NAF_HOST} "
             cd $NAF_DIR
             sed -i \"s|__BASE_PATH__|$NAF_DIR|g\" build/job.submit 
+            sed -i \"s|__FLAG__|$FLAG|g\" build/run_script_naf.sh
             condor_submit build/job.submit | awk '/submitted to cluster/ {print \$6}' | tr -d '.'
         ")
 
