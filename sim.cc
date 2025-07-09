@@ -64,7 +64,7 @@ int main (int argc, char** argv)
     std::string homePath = std::getenv("HOME") ? std::getenv("HOME") : "";
 
     // Check if running in local or naf mode
-    if(homePath.find("desy.de") != std::string::npos)
+    if(homePath.empty() || homePath.find("desy.de")!= std::string::npos)
     {
         std::cout<< "You are running from NAF!"<< "\n";
         flags->runMode = "naf";
