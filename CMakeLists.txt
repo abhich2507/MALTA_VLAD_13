@@ -1,7 +1,6 @@
 # Set the minimum version required for cmake. The version 4.0 was 
 # chosen as the required version for Allpix squared compatibility
-#cmake_minimum_required(VERSION 4.0 FATAL_ERROR)
-cmake_minimum_required(VERSION 3.2 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.26 FATAL_ERROR)
 # Define the project with the name Tutorial.
 project(Tutorial)
 # Locate and configure Geant4. Required == Fatal Error if not 
@@ -19,12 +18,15 @@ file(GLOB sources ${PROJECT_SOURCE_DIR}/src/*.cc)
 # Copy all te macro files in the macros directory
 file(GLOB MACRO_FILES "macros/*.mac")
 file(COPY ${MACRO_FILES} DESTINATION ${CMAKE_BINARY_DIR}/)
+file(GLOB CONDOR_FILES "condor_submission/*")
+file(COPY ${CONDOR_FILES} DESTINATION ${CMAKE_BINARY_DIR}/)
 # Create executable called sim that compilse sim.cc and all source files from sources
 # sim.cc is the main file with main() function
 add_executable(sim sim.cc ${sources})
 # Links the sim executable to the libraries listed in the varible Geant4_LIBRARIES
-target_link_libraries(sim ${Geant4_LIBRARIES})
+# added customizable functionality to the cmake. For vlad's machine it needs to be ran as 
+#cmake -DEXTRA_LIBS=uuid ..
+target_link_libraries(sim ${Geant4_LIBRARIES} ${EXTRA_LIBS})
 # Needs explicit link to libuuid library
-#target_link_libraries(sim uuid)
 # Define target called Tutorial that depends on sim. Running make Tutorial builds sim
 add_custom_target(Tutorial DEPENDS sim)

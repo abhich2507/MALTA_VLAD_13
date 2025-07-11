@@ -1,5 +1,5 @@
-#ifndef PHMATTEVENTACTION_HH
-#define PHMATTEVENTACTION_HH
+#ifndef EVENTACTION_HH
+#define EVENTACTION_HH
 
 
 #include "G4UserEventAction.hh"
@@ -12,11 +12,11 @@
 #include "G4RunManager.hh"
 #include <chrono>
 
-class PhMattEventAction : public G4UserEventAction
+class EventAction : public G4UserEventAction
 {
 public:
-    PhMattEventAction();
-    ~PhMattEventAction();
+    EventAction();
+    ~EventAction();
 
     virtual void BeginOfEventAction(const G4Event*);
     virtual void EndOfEventAction(const G4Event*);

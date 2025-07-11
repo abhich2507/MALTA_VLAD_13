@@ -1,0 +1,15 @@
+executable = __BASE_PATH__/build/run_script_naf.sh
+
+should_transfer_files = YES
+when_to_transfer_output = ON_EXIT
+
+log = __BASE_PATH__/condor_log/job.log
+output = __BASE_PATH__/condor_log/job.out
+error = __BASE_PATH__/condor_log/job.err
+
+
+transfer_input_files = __BASE_PATH__/config.sh
+
+request_cpus = 12
+
+queue 1

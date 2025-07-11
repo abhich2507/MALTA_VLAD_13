@@ -1,7 +1,7 @@
-#include "PhMattRunAction.hh"
-#include "PhMattCustomRun.hh"
+#include "RunAction.hh"
+#include "CustomRun.hh"
 
-PhMattRunAction::PhMattRunAction()
+RunAction::RunAction(SimFlags* flags) : fFlag(flags)
 {
     // Simplified instantiation thanks to GEANT4 implementation
     G4AnalysisManager *analysisManager = G4AnalysisManager::Instance();
@@ -45,25 +45,35 @@ PhMattRunAction::PhMattRunAction()
     
 
 }
-PhMattRunAction::~PhMattRunAction()
+RunAction::~RunAction()
 {
 
 }
 
-void PhMattRunAction::BeginOfRunAction(const G4Run *run)
+void RunAction::BeginOfRunAction(const G4Run *run)
 {
     G4AnalysisManager *analysisManager = G4AnalysisManager::Instance();
     // Create run ID
     G4int runID = run->GetRunID();
-
     std::stringstream strRunID;
     strRunID << runID;
-    analysisManager->OpenFile("output" + strRunID.str() + ".root");
+    //analysisManager->SetNtupleMerging(true);
+    if (isMaster && fFlag->isBatch)
+    {
+        fOutputPath = CreateNextRunDirectory(true, fFlag);
+        DumpConfigToFile(fOutputPath + "/flags.cfg");
+    }
+    else
+    {
+        fOutputPath = CreateNextRunDirectory(false, fFlag);
+    }
+
+    analysisManager->OpenFile(fOutputPath + "/output" + strRunID.str() + ".root");
 
 
 }
 
-void PhMattRunAction::EndOfRunAction(const G4Run *run)
+void RunAction::EndOfRunAction(const G4Run *run)
 {
     G4AnalysisManager *analysisManager = G4AnalysisManager::Instance();
     analysisManager->Write();
@@ -77,7 +87,7 @@ void PhMattRunAction::EndOfRunAction(const G4Run *run)
 }
 
 // Overload the runID method to increment the run ID
-G4Run* PhMattRunAction::GenerateRun() {
+G4Run* RunAction::GenerateRun() {
     static G4int runCounter = 0;
-    return new PhMattCustomRun(runCounter++);
+    return new CustomRun(runCounter++);
 }

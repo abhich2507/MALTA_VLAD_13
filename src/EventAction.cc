@@ -1,4 +1,4 @@
-#include "PhMattEventAction.hh"
+#include "EventAction.hh"
 
 // Thread safe event progress 
 namespace
@@ -10,22 +10,22 @@ namespace
 }
 
 
-PhMattEventAction::PhMattEventAction()
+EventAction::EventAction()
 {
     
 }
 
-PhMattEventAction::~PhMattEventAction()
+EventAction::~EventAction()
 {
    
 }
 
-void PhMattEventAction::BeginOfEventAction(const G4Event* event)
+void EventAction::BeginOfEventAction(const G4Event* event)
 {
 
 }
 
-void PhMattEventAction::EndOfEventAction(const G4Event* event) 
+void EventAction::EndOfEventAction(const G4Event* event) 
 {
     // Implementation of a rudimentary progress bar. Added thread safety
     G4AutoLock lock(&g4CounterMutex);

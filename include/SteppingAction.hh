@@ -1,5 +1,5 @@
-#ifndef PHMATTSTEPPINGACTION_HH
-#define PHMATTSTEPPINGACTION_HH
+#ifndef STEPPINGACTION_HH
+#define STEPPINGACTION_HH
 
 #include "G4UserSteppingAction.hh"
 #include "globals.hh"
@@ -11,11 +11,11 @@
 #include <set>
 
 
-class PhMattSteppingAction : public G4UserSteppingAction
+class SteppingAction : public G4UserSteppingAction
 {
 public:
-    PhMattSteppingAction();
-    ~PhMattSteppingAction() override;
+    SteppingAction();
+    ~SteppingAction() override;
 
     void UserSteppingAction(const G4Step*) override;
 private:

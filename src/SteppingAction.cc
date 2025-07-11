@@ -1,11 +1,11 @@
-#include "PhMattSteppingAction.hh"
+#include "SteppingAction.hh"
 
 
 
-PhMattSteppingAction::PhMattSteppingAction() {}
-PhMattSteppingAction::~PhMattSteppingAction() {}
+SteppingAction::SteppingAction() {}
+SteppingAction::~SteppingAction() {}
 
-void PhMattSteppingAction::UserSteppingAction(const G4Step* aStep)
+void SteppingAction::UserSteppingAction(const G4Step* aStep)
 {
     // Look only at protons
     G4Track* aTrack = aStep->GetTrack();

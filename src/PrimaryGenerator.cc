@@ -1,0 +1,101 @@
+#include "PrimaryGenerator.hh"
+//Constructor
+PrimaryGenerator::PrimaryGenerator(SimFlags* flags) : fFlag(flags)
+{
+    fParticleGun = new G4ParticleGun(fFlag->particleCount); // 1 particle per event
+    // Particle Direction (momentum)
+    G4double px = fFlag->particleMomentumX;
+    G4double py = fFlag->particleMomentumY;
+    G4double pz = fFlag->particleMomentumZ;
+    G4ThreeVector mom(px,py,pz);
+    fParticleGun->SetParticleMomentumDirection(mom);
+
+    // Set primary particle energy if a constant value is passed. If not, an energy method is used below
+    if(!fFlag->particleEnergy.empty() && fFlag->particleEnergy.find_first_not_of("0123456789") == std::string::npos)
+    {
+        G4double particleEnergy = std::stoi(fFlag->particleEnergy) * GeV;
+        fParticleGun->SetParticleEnergy(particleEnergy);  //1.4608 * MeV K-40   0.661 * MeV Cs-137
+    }
+    else
+    {
+        G4Exception("PhMattPrimaryGenerator::PrimaryGenerator", "SamplingFailure", FatalException,
+            "Aaaahm. How about inserting an actual energy value? Unless I implemented a conitnuous energy method and forgot to supress this print-out.");
+    }
+    
+    std::string particleType = fFlag->particleType;
+    
+    G4ParticleTable *particleTable = G4ParticleTable::GetParticleTable();
+    G4ParticleDefinition *particle = particleTable->FindParticle(particleType);
+    fParticleGun->SetParticleDefinition(particle);
+    
+    
+    
+}
+PrimaryGenerator::~PrimaryGenerator()
+{
+    delete fParticleGun;
+}
+// circular beam modeling
+G4ThreeVector PrimaryGenerator::GetRandomPointOnCircle(G4double radius, G4ThreeVector center)
+{
+    while (true)
+    {
+        G4double r = std::sqrt(G4UniformRand()) * radius;
+
+        // Uniform angle
+        G4double phi = 2 * CLHEP::pi * G4UniformRand();
+        // Coordinates in XY plane
+        G4double x = r * std::cos(phi);
+        G4double y = r * std::sin(phi);
+        G4double z = 0.0;
+
+        return center + G4ThreeVector(x, y, z);
+    }
+}
+
+G4ThreeVector PrimaryGenerator::GetRandomPointOnRectangle(G4double height, G4double thickness, G4ThreeVector center)
+{
+    G4double halfHeight = height / 2.0;
+    G4double halfThickness = thickness / 2.0;
+
+    G4double x = center.x() + (2.0 * G4UniformRand() - 1.0) * halfThickness;
+    G4double y = center.y() + (2.0 * G4UniformRand() - 1.0) * halfHeight;
+    G4double z = center.z();
+
+    return G4ThreeVector(x, y, z);
+}
+
+
+
+void PrimaryGenerator::GeneratePrimaries(G4Event *oneEvent)
+{
+    double beamWidth = fFlag->sourceRadius *mm;
+    G4double x = fFlag->beamXOffset *cm;
+    G4double y = fFlag->beamYOffset *cm;
+    G4double z = fFlag->beamZOffset *cm;
+    G4ThreeVector pos;
+    // Particle circular beam simulation
+    if(fFlag->beamGeometry == "pencil")
+    {
+        pos = G4ThreeVector(x, y, z);
+    }
+    else if(fFlag->beamGeometry == "circle")
+    {
+        pos = GetRandomPointOnCircle(0.5 *beamWidth, G4ThreeVector(x, y, z));
+    }
+    else if(fFlag->beamGeometry == "rectangle")
+    {
+        pos = GetRandomPointOnRectangle(beamWidth, beamWidth, G4ThreeVector(x, y, z));
+    }
+    else
+    {
+        G4Exception("PhMattPrimaryGenerator::GeneratePrimaries", "SamplingFailure", FatalException,
+            "Requested geometry not found.");
+    }
+
+    fParticleGun->SetParticlePosition(pos);
+
+    // Create Vertex
+    fParticleGun->GeneratePrimaryVertex(oneEvent);
+
+}
