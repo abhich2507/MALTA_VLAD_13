@@ -69,8 +69,8 @@ int ExportTH2DToArray(const std::string& inputFileName, const std::string& outpu
 
 // Main function where you can set parameters
 int main() {
-    std::string inputFile = "250127_MPV_CZ_data/W11R0IBIAS03SUB06/TOT_PASSRes2/W11R0IBIAS03SUB06_2D_MPV_Res2_TOT_PASS_LandauCDF2Eff.root";
-    std::string outputFile = "CorrectionData2D.cc";
+    std::string inputFile = "250710_MPV_EPI_data/W5R23IBIAS03SUB06/TOT_PASSRes2/W5R23IBIAS03SUB06_2D_MPV_Res2_TOT_PASS_LandauCDF2Eff.root";
+    std::string outputFile = "CorrectionData2D_EPI.cc";
     std::string histName = "MPV_2D";
 
     ExportTH2DToArray(inputFile, outputFile, histName);
@@ -79,3 +79,5 @@ int main() {
 }
 
 main();
+
+// Run this in root via ".L Create2DEffMap.cc"

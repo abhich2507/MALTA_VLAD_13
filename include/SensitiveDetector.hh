@@ -23,6 +23,7 @@ public:
     //Getter
     const std::map<std::pair<int, int>, int>& GetChannelHitMap() const { return channelHitMap; }
     G4double GetEfficiencyCorrectionXY(const G4ThreeVector& InPixPosition);
+    std::array<double, 4> GetEfficiencyAnalytical(const G4ThreeVector& InPixPosition);
 
 private:
     SimFlags* fFlag;
