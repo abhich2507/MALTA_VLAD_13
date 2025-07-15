@@ -54,11 +54,14 @@ G4bool SensitiveDetector::ProcessHits(G4Step *aStep, G4TouchableHistory *)
     //G4double MPV_binsize = 36.4/16; // unit um
     double efficiency = GetEfficiencyCorrectionXY(InPixPos);
     std::array<double, 4> effAn = GetEfficiencyAnalytical(InPixPos);
-    G4cout << "InPixPos: " << InPixPos[0]/um << ", " << InPixPos[1]/um << " --> Eff: " << efficiency << " of 4 pixels: " << effAn[0] << " " << effAn[1] << " " << effAn[2] << " " << effAn[3] << " " << G4endl;
+    //G4cout << "InPixPos: " << InPixPos[0]/um << ", " << InPixPos[1]/um << " --> Eff: " << efficiency << " of 4 pixels: " << effAn[0] << " " << effAn[1] << " " << effAn[2] << " " << effAn[3] << " " << G4endl;
 
-    // fill the 4 efficiencies into a tree. Apply a minimal threshold here already?
+    // fill the 4 efficiencies and timing into a tree. 
+    // Apply a minimal threshold here already of 50 e-? edep in MeV --> if (edep*10^6/3.6 > 50) // threshold in e- // edep in MeV
     // take care if hit is at boundary of sensor (minimal or maximal pix number.)
-    // associate timing based on amplitude (from time walk)
+    // associate timing based on amplitude (from time walk):
+    // pix_timing = GetTimingOffset(effAn[0]*energy*1000000/3.6) // argument is pixel charge in electrons
+
 
     G4double edep_corr = efficiency * energy;
 
@@ -188,4 +191,12 @@ std::array<double, 4>  SensitiveDetector::GetEfficiencyAnalytical(const G4ThreeV
     eff11 = eff_X1 * eff_Y1; // top right
 
     return {eff00, eff01, eff10, eff11}; // ordering not certain yet.
+}
+
+// Get time-walk from parameterization.
+// amplitude in unit electrons
+// returns timing in ns
+G4double GetTimingOffset(G4double amplitude) {
+    // assumes 1200e- correspond to 350 mV. Check calibration through injection scans.
+    return 40. * std::exp(amplitude /(-191.));
 }
