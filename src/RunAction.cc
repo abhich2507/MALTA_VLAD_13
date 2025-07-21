@@ -6,8 +6,8 @@ RunAction::RunAction(SimFlags* flags) : fFlag(flags)
     // Simplified instantiation thanks to GEANT4 implementation
     G4AnalysisManager *analysisManager = G4AnalysisManager::Instance();
 
-    // Deposited Energy Ntuple
-    analysisManager->CreateNtuple("EnDeposited", "Energy Deposited");
+    // Deposited Energy Ntuple. MONTE CARLO TRUTH
+    analysisManager->CreateNtuple("TruthEnDeposited", "Monte Carlo Truth Energy Deposited");
     // Create Integer Event # column
     analysisManager->CreateNtupleIColumn("iEvent");
     // Create Double position columns
@@ -20,6 +20,9 @@ RunAction::RunAction(SimFlags* flags) : fFlag(flags)
     analysisManager->CreateNtupleDColumn("Energy");
     // Create Double corrected Energy column
     analysisManager->CreateNtupleDColumn("CorrEnergy");
+    analysisManager->CreateNtupleIColumn("ClSize");
+    analysisManager->CreateNtupleDColumn("LeadingEnergy");
+    analysisManager->CreateNtupleDColumn("LeadingTime");
     analysisManager->FinishNtuple(0);
 
     // Scattering Angle Ntuple
@@ -42,6 +45,16 @@ RunAction::RunAction(SimFlags* flags) : fFlag(flags)
     // Create Double position columns
     analysisManager->CreateNtupleDColumn("TravelLength");
     analysisManager->FinishNtuple(2);    
+
+    analysisManager->CreateNtuple("RawPixelHits", "Raw Pixel Hits");
+    analysisManager->CreateNtupleIColumn("iEvent");
+    analysisManager->CreateNtupleIColumn("iHit");
+    analysisManager->CreateNtupleIColumn("PixX");
+    analysisManager->CreateNtupleIColumn("PixY");
+    analysisManager->CreateNtupleDColumn("timeWalkHit");
+    analysisManager->CreateNtupleDColumn("Energy");
+    analysisManager->FinishNtuple(3);
+
     
 
 }
