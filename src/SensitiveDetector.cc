@@ -257,5 +257,12 @@ std::pair<std::array<double, 4>, uint8_t>  SensitiveDetector::GetEfficiencyAnaly
 // returns timing in ns
 G4double SensitiveDetector::GetTimingOffset(G4double amplitude) {
     // assumes 1200e- correspond to 350 mV. Check calibration through injection scans.
-    return 40. * std::exp(amplitude /(-191.));
+    //return 40. * std::exp(amplitude /(-191.));
+    if (amplitude < 100.) 
+    { // delay only down to amplitudes of 100e-. 
+        return 3230. /pow(100-67.0, 1.08);
+    }
+
+    return 3230. /pow(amplitude-67.0, 1.08);
+
 }

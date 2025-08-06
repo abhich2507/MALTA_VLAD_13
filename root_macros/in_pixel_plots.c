@@ -8,8 +8,8 @@ void in_pixel_plots() {
     // root
     // .L ~/Documents/Simu/Geant4/DECAL_REPO/root_macros/in_pixel_plots.c
 
-    double threshold = 1400; // Threshold in electrons
-    std::string inputPath = "/home/vlad/Documents/Simu/Geant4/DECAL_REPO/Results/local_0040/";
+    double threshold = 5000; // Threshold in electrons
+    std::string inputPath = "/home/vlad/Documents/Simu/Geant4/DECAL_REPO/Results/local_0043/";
 
     //TFile *file = TFile::Open("/home/vlad/Documents/Simu/Geant4/DECAL/build/output0_t0.root");
     //TTree *tree = (TTree*)file->Get("EnDeposited");
@@ -71,7 +71,7 @@ void in_pixel_plots() {
         chainPixel->GetEntry(j);
         //std::cout << "Raw Event ID: " << rawEventID << "; Hit: " << iHit << "; PixX: " << pixX << "; PixY: " << pixY << "; Energy: " << corrEnergy << std::endl;
 
-        enMap[{rawEventID, iHit}] += corrEnergy; // Accumulate energy for each hit in the event
+        enMap[{rawEventID, iHit}] += corrEnergy; // Accumulate energy for each hit in the event.
         timeMap[rawEventID].push_back(timeWalkHit); // Store all times
     }
     std::map<int, int> clusterMap; // Map to hold cluster size per event
@@ -136,7 +136,45 @@ void in_pixel_plots() {
 
 
     hInPixelClSize->Divide(hInPixelPass);
+
+    double weightedSum = 0.0;
+    double totalWeight = 0.0;
+    int nx = hInPixelClSize->GetNbinsX();
+    int ny = hInPixelClSize->GetNbinsY();
+    for (int ix = 1; ix <= nx; ++ix) {
+        for (int iy = 1; iy <= ny; ++iy) {
+            double content = hInPixelClSize->GetBinContent(ix, iy);
+            if (content <= 0) continue; // skip empty or negative bins
+            weightedSum += content * content; // weight by content
+            totalWeight += content;
+        }
+    }
+
+    double weightedMeanZ = (totalWeight > 0) ? weightedSum / totalWeight : 0.0;
+    std::cout << "Average Cluster Size: " << weightedMeanZ << std::endl;
+
+
+
     hInPixelMatch->Divide(hInPixelPass);
+
+    weightedSum = 0.0;
+    totalWeight = 0.0;
+    nx = hInPixelMatch->GetNbinsX();
+    ny = hInPixelMatch->GetNbinsY();
+    for (int ix = 1; ix <= nx; ++ix) {
+        for (int iy = 1; iy <= ny; ++iy) {
+            double content = hInPixelMatch->GetBinContent(ix, iy);
+            if (content <= 0) continue; // skip empty or negative bins
+            weightedSum += content * content; // weight by content
+            totalWeight += content;
+        }
+    }
+
+    weightedMeanZ = (totalWeight > 0) ? weightedSum / totalWeight : 0.0;
+    std::cout << "Average eff.: " << weightedMeanZ << std::endl;
+
+
+
     hInPixelTime->Divide(hInPixelPass);
     auto h2 = h3->Project3D("xy");
     TCanvas *c1 = new TCanvas("c1", "XY Projection", 800, 600);
@@ -147,12 +185,38 @@ void in_pixel_plots() {
     TCanvas *c3 = new TCanvas("c3", " ", 800, 600);
     h2_fullChip->Draw("COLZ");
     TCanvas *c4 = new TCanvas("c4", " ", 800, 600);
+    gStyle->SetOptStat(0);
+    hInPixelClSize->SetMinimum(1);
+    hInPixelClSize->SetMaximum(4);
     hInPixelClSize->Draw("COLZ");
     TCanvas *c5 = new TCanvas("c5", " ", 800, 600);
+    gStyle->SetOptStat(0);
     hInPixelMatch->Draw("COLZ");
     TCanvas *c6 = new TCanvas("c6", " ", 800, 600);
+    gStyle->SetOptStat(0);
     hInPixelTime->Draw("COLZ");
+    // Here i plot manually average cluster size. TODO: automate this?
+    TCanvas *c7 = new TCanvas("c7", " ", 800, 600);
+    double thr[] = {100,150,200,250,300,350,400,450,500,550,600,650,700,750,800,1000,1300,1600,1900,2000,2100,2200,2300,2400};
+    double avgClSize[] = {2.38,2.25,2.15,2.07,2.,1.94,1.88,1.83,1.78,1.74,1.7,1.66,1.62,1.59,1.55,1.4,1.26,1.13,1,0.96,0.92,0.88,0.84,0.8};
+    TGraph *g = new TGraph(24, thr, avgClSize);
+    g->SetTitle("Thr vs <cl.size>; Threshold [e-]; <cl.size>"); // title and axis labels
+    g->SetMarkerStyle(20); // filled circle
+    g->SetMarkerSize(1.2);
+    g->SetMarkerColor(kBlack);
+    g->Draw("AP");
 
+
+
+    TCanvas *c8 = new TCanvas("c8", " ", 800, 600);
+    double thr2[] = {200,400,800,900,1000,1200,1300,1400,1500,1600,1800,1900,2000,2100,2200,2300,2400,2800,3000,3400,3800,4000,4400,5000};
+    double eff[] = {100,99.99,99.15,98.45,97.42,94.59,92.71,90.52,88.02,85.27,79.,75.14,71.51,67.79,64.08,60.46,56.96,45,40.45,33.51,28.64,26.74,23.81,20.59};
+    TGraph *thrEff = new TGraph(24, thr2, eff);
+    thrEff->SetTitle("Thr vs eff; Threshold [e-]; eff [%]"); // title and axis labels
+    thrEff->SetMarkerStyle(20); // filled circle
+    thrEff->SetMarkerSize(1.2);
+    thrEff->SetMarkerColor(kBlack);
+    thrEff->Draw("AP");
 
     // Save output
     TFile outFile("energyMap3D.root", "RECREATE");
