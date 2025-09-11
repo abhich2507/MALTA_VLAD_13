@@ -14,6 +14,10 @@ RunAction::RunAction(SimFlags* flags) : fFlag(flags)
     analysisManager->CreateNtupleDColumn("fX");
     analysisManager->CreateNtupleDColumn("fY");
     analysisManager->CreateNtupleDColumn("fZ");
+    analysisManager->CreateNtupleDColumn("vertexX");
+    analysisManager->CreateNtupleDColumn("vertexY");
+    analysisManager->CreateNtupleDColumn("vertexZ");
+
     // Create Integer Global time column = time that starts when each event begins. Local time = time when the particle is created
     analysisManager->CreateNtupleIColumn("fGlobalTime");
     // Create Double Energy column

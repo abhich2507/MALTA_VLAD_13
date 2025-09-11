@@ -44,6 +44,8 @@ G4bool SensitiveDetector::ProcessHits(G4Step *aStep, G4TouchableHistory *)
     G4StepPoint *preStepPoint = aStep->GetPreStepPoint();
     G4double energy = aStep->GetTotalEnergyDeposit();
     G4double fglobalTime = preStepPoint->GetGlobalTime();
+    G4ThreeVector posVertex = aStep->GetTrack()->GetVertexPosition();
+    // Position is currently defined as the preStepPoint position. 
     G4ThreeVector posPixel = preStepPoint->GetPosition();
     double pixelSize = fFlag->pixelSize *mm;
     double detX = fFlag->detectorSizeX *cm;
@@ -113,15 +115,22 @@ G4bool SensitiveDetector::ProcessHits(G4Step *aStep, G4TouchableHistory *)
 
 
     analysisManager->FillNtupleIColumn(0, 0, eventID);
+    // X, Y, Z position of the hit
     analysisManager->FillNtupleDColumn(0, 1, posPixel[0]);
     analysisManager->FillNtupleDColumn(0, 2, posPixel[1]);
     analysisManager->FillNtupleDColumn(0, 3, posPixel[2]);
-    analysisManager->FillNtupleIColumn(0, 4, fglobalTime);
-    analysisManager->FillNtupleDColumn(0, 5, energy);
-    analysisManager->FillNtupleDColumn(0, 6, edep_corr);
-    analysisManager->FillNtupleIColumn(0, 7, iHit);
-    analysisManager->FillNtupleDColumn(0, 8, leadingEnergy);
-    analysisManager->FillNtupleDColumn(0, 9, leadingTime);
+
+    analysisManager->FillNtupleDColumn(0, 4, posVertex[0]);
+    analysisManager->FillNtupleDColumn(0, 5, posVertex[1]);
+    analysisManager->FillNtupleDColumn(0, 6, posVertex[2]);
+
+    analysisManager->FillNtupleIColumn(0, 7, fglobalTime);
+    analysisManager->FillNtupleDColumn(0, 8, energy);
+    analysisManager->FillNtupleDColumn(0, 9, edep_corr);
+    // TODO: I dont get the point of iHit??
+    analysisManager->FillNtupleIColumn(0, 10, iHit);
+    analysisManager->FillNtupleDColumn(0, 11, leadingEnergy);
+    analysisManager->FillNtupleDColumn(0, 12, leadingTime);
     analysisManager->AddNtupleRow(0); 
     
 
@@ -257,5 +266,12 @@ std::pair<std::array<double, 4>, uint8_t>  SensitiveDetector::GetEfficiencyAnaly
 // returns timing in ns
 G4double SensitiveDetector::GetTimingOffset(G4double amplitude) {
     // assumes 1200e- correspond to 350 mV. Check calibration through injection scans.
-    return 40. * std::exp(amplitude /(-191.));
+    //return 40. * std::exp(amplitude /(-191.));
+    if (amplitude < 100.) 
+    { // delay only down to amplitudes of 100e-. 
+        return 3230. /pow(100-67.0, 1.08);
+    }
+
+    return 3230. /pow(amplitude-67.0, 1.08);
+
 }

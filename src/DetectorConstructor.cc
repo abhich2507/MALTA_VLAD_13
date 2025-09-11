@@ -62,6 +62,7 @@ G4VPhysicalVolume *DetectorConstruction::Construct()
     // MALTA implementation monolithic sensor
     if(fFlag->preDefinedGeometryFlag == "MALTA")
     {
+        //TODO: This is hardcoded. It has its own flag already. Fix it
         G4double maltaWidth = 18.6368 *mm; 
         G4double maltaDepth = 30 * um;
         G4Box *solidMALTA = new G4Box ("MALTASensor", maltaWidth/2, maltaWidth/2, maltaDepth/2);
