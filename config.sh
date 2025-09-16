@@ -4,4 +4,4 @@ export LOCAL_ROOT=/home/vlad/Documents/root/root-install/bin/thisroot.sh
 export EXTRA_LOCAL=LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu
 export NAF_GEANT=/afs/desy.de/user/b/berleavl/private/geant4-install/bin/geant4.sh
 export NAF_PATH=private/decal_sw_cern
-export NAF_USER=berleavl
+export NAF_USER=berleavl 

@@ -23,6 +23,8 @@ struct SimFlags
     double detectorYOffset = 0.;
     double detectorZOffset = 0.;
     double pixelSize = 0.;
+    double detectorSizeX =0.;
+    double detectorSizeY =0.;
     std::string outsideMaterial = "G4_Galactic";
     std::string beamGeometry = "";
     double beamXOffset = 0.;
