@@ -4,6 +4,10 @@
 #include <iostream>
 #include <math.h>
 
+// -------------- todo:
+// 1) clearly name "Energy", "corrEnergy", "Charge" and "corrCharge" (rename equivalently in RunAction.cc)
+// 2) Get eff. curve for uncorrected energy and compare models with data. (to show that CC-model makes more sense)
+
 double GetTimingOffset(double amplitude) 
 {
     // assumes 1200e- correspond to 350 mV. Check calibration through injection scans.
@@ -87,7 +91,7 @@ void in_pixel_plots(double result[3], double threshold = 1000) {
 
     int nX = 2*16, nY = 2*16, nZ = 100;
     double pixelSizeX = 0.0364 , pixelSizeY = 0.0364; // in mm
-    TH3D *h3 = new TH3D(Form("h3_%.0fThr", threshold), "3D Energy Map;Track X [#mum];Track Y [#mum];Track Z [#mum]", 100, 0, pixelSizeX *1000, 100, 0, pixelSizeY *1000, 100, -15, 15);
+    TH3D *h3 = new TH3D(Form("h3_%.0fThr", threshold), "3D Energy Map;Track X pos [#mum];Track Y pos [#mum];Track Z pos [#mum]", 100, 0, pixelSizeX *1000, 100, 0, pixelSizeY *1000, 100, -15, 15);
     TH2D *h2_fullChip = new TH2D(Form("h2_fullChip_%.0fThr", threshold), "h2_fullChip", 512, 50 - 18.6/2, 50 + 18.6/2, 512, 50 - 18.6/2, 50 + 18.6/2);
     TH2D *hInPixelClSize = new TH2D(Form("InPixelClSize_%.0fThr", threshold), "InPixelClSize", nX, 0, 2*pixelSizeX *1000, nY, 0, 2*pixelSizeY *1000);
     hInPixelClSize->SetTitle(";X [#mum]; Y [#mum]; cluster size");
@@ -107,13 +111,13 @@ void in_pixel_plots(double result[3], double threshold = 1000) {
 
     // histograms with tracking uncertainty:
     TH2D *hInPixelPass_trackunc = new TH2D(Form("InPixelHit_trackunc_%.0fThr", threshold), "InPixelHit_trackunc", nX, 0, 2*pixelSizeX*1000, nY, 0, 2*pixelSizeY *1000);
-    hInPixelPass_trackunc->SetTitle(";Track X [#mum];Track Y [#mum]; Passed tracks");
+    hInPixelPass_trackunc->SetTitle(";Track X pos [#mum];Track Y pos [#mum]; Passed tracks");
 
     TH2D *hInPixelMatch_trackunc = new TH2D(Form("InPixelMatch_trackunc_%.0fThr", threshold), "InPixel Efficiency_trackunc  [\%]", nX, 0, 2*pixelSizeX *1000, nY, 0, 2*pixelSizeY *1000);
-    hInPixelMatch_trackunc->SetTitle(";Track X [#mum]; Track Y [#mum]; Efficiency [\%]");
+    hInPixelMatch_trackunc->SetTitle(";Track X pos [#mum]; Track Y pos [#mum]; Efficiency [\%]");
 
     TH2D *hInPixelClSize_trackunc = new TH2D(Form("InPixelClSize_trackunc_%.0fThr", threshold), "InPixelClSize_trackunc", nX, 0, 2*pixelSizeX *1000, nY, 0, 2*pixelSizeY *1000);
-    hInPixelClSize_trackunc->SetTitle(";Track X [#mum];Track Y [#mum]; cluster size");
+    hInPixelClSize_trackunc->SetTitle(";Track X pos [#mum];Track Y pos [#mum]; cluster size");
 
     TChain *chainPixel = new TChain("RawPixelHits");
 
@@ -127,7 +131,7 @@ void in_pixel_plots(double result[3], double threshold = 1000) {
     chainPixel->SetBranchAddress("iHit", &iHit);
     chainPixel->SetBranchAddress("PixX", &pixX);
     chainPixel->SetBranchAddress("PixY", &pixY);
-    chainPixel->SetBranchAddress("Energy", &corrEnergy);
+    chainPixel->SetBranchAddress("Energy", &corrEnergy); // should probably be renamed from "Energy" to "corrCharge" (same in RunAction.cc)
     chainPixel->SetBranchAddress("timeWalkHit", &timeWalkHit);
     Long64_t nRawEntries = chainPixel->GetEntries();
     //std::map<std::pair<int, int>, double> enMap; // Avoid O(n^2) nested loops via extra map 
@@ -173,14 +177,14 @@ void in_pixel_plots(double result[3], double threshold = 1000) {
     {
         int eventID = entry.first.first;
         //int hitID   = entry.first.second;
-        double energy = entry.second;
-        inClusterTimes[eventID].push_back(GetTimingOffset(energy));
-        //std::cout << GetTimingOffset(energy) << std::endl;
+        double cenergy = entry.second; // corrected energy
+        inClusterTimes[eventID].push_back(GetTimingOffset(cenergy));
+        //std::cout << GetTimingOffset(cenergy) << std::endl;
         // Fill the cluster size map
-        if (energy > threshold) 
+        if (cenergy > threshold) 
         {
             clusterMap[eventID]++; // Increment cluster size for this event
-            //clusterEnergyMap[eventID] = std::max(clusterEnergyMap[eventID], energy); // Store the maximum energy for this event
+            //clusterEnergyMap[eventID] = std::max(clusterEnergyMap[eventID], cenergy); // Store the maximum correnergy for this event
             //I take the fasest hit in an event (cluster) as MALTA does.
             clusterTimeMap[eventID] = *std::min_element(inClusterTimes[eventID].begin(), inClusterTimes[eventID].end());
             //std::cout << "eventID: " << eventID << "timing: " <<  clusterTimeMap[eventID] << std::endl;
@@ -198,7 +202,7 @@ void in_pixel_plots(double result[3], double threshold = 1000) {
         //if (simpleCounter > 4) // This line looks for eventIDs that correspond to clusters larger than 4
         if (eventID == 27437)
         {
-            std::cout << "Event ID: " << eventID << "; pixX: " << entry.first.second.first << ";pixY: " << entry.first.second.second << "; Energy: " << energy << std::endl;
+            std::cout << "Event ID: " << eventID << "; pixX: " << entry.first.second.first << ";pixY: " << entry.first.second.second << "; corrEnergy: " << cenergy << std::endl;
         }
 
     }
@@ -286,7 +290,7 @@ void in_pixel_plots(double result[3], double threshold = 1000) {
 
     std::cout << "Matched tracks: " << hInPixelMatch->Integral() << std::endl;
     std::cout << "All tracks: " << hInPixelPass->Integral() << std::endl;
-    std::cout << "Av. Eff. (function): " << result[1] << "+- " 
+    std::cout << "Av. Eff.: " << result[1] << "+- " 
                 << result[2] << std::endl;
 
 
@@ -330,48 +334,68 @@ void in_pixel_plots(double result[3], double threshold = 1000) {
     c3->Close();
 
     set_style();
-    TCanvas *c4 = new TCanvas("c4", " ", 800, 800);
+    TCanvas *c2D = new TCanvas("c2D", "2DInPix ", 800, 800); // use same for all Inpixplots
     gStyle->SetOptStat(0);
+    c2D->SetRightMargin(0.16); // define margins for all IP plots
+    c2D->SetBottomMargin(0.1);
+    c2D->SetLeftMargin(0.1);
+    c2D->SetTopMargin(0.16);
+    // crossing lines to mark 2x2 pixels
+    TLine *LinI1 = new TLine(0., 36.4, 72.8, 36.4);
+    LinI1->SetLineColor(1);
+    LinI1->SetLineWidth(2);
+    TLine *LinI2 = new TLine(36.4, 0., 36.4, 72.8);
+    LinI2->SetLineColor(1);
+    LinI2->SetLineWidth(2);
+
+    // IP CLSIZE plot
     hInPixelClSize->SetMinimum(1);
     //hInPixelClSize->SetMaximum(4);
     hInPixelClSize->Draw("COLZ");
-    c4->SetRightMargin(0.15);
-    c4->SaveAs(Form("2DIPClSize_%.0fThr.pdf", threshold));
-    c4->Close();
+    hInPixelClSize->GetZaxis()->SetTitleOffset(1.5);
+    LinI1->Draw("SAMEL");
+    LinI2->Draw("SAMEL");
+    c2D->SaveAs(Form("2DIPClSize_%.0fThr.pdf", threshold));
 
-    TCanvas *c5 = new TCanvas("c5", " ", 800, 800);
-    gStyle->SetOptStat(0);
+    // IP Eff plot
     hInPixelMatch->Draw("COLZ");
     hInPixelMatch->SetMinimum(0.);
     hInPixelMatch->SetMaximum(100.);
-    c5->SetRightMargin(0.15);
-    c5->SaveAs(Form("2DIPMatch_%.0fThr.pdf", threshold));
-    c5->Close();
+    // Create TLatex object
+    TLatex *t = new TLatex();
+    // Draw the formatted text
+    t->DrawLatex(pixelSizeX/2.*1000., pixelSizeY*2*1000. +2, Form("<eff> = %.2f #pm %.2f %%", result[1], result[2]));
+    hInPixelMatch->GetZaxis()->SetTitleOffset(1.5);
+    LinI1->Draw("SAMEL");
+    LinI2->Draw("SAMEL");
+    c2D->SaveAs(Form("2DIPMatch_%.0fThr.pdf", threshold));
 
-    TCanvas *c6 = new TCanvas("c6", " ", 800, 800);
-    gStyle->SetOptStat(0);
+    // IP TIMING plot
     hInPixelTime->Draw("COLZ");
-    c6->SetRightMargin(0.15);
-    //c6->SaveAs(Form("2DIPTime_%.0fThr.pdf", threshold));
-    c6->Close();
+    hInPixelTime->GetZaxis()->SetTitleOffset(1.5);
+    LinI1->Draw("SAMEL");
+    LinI2->Draw("SAMEL");
+    c2D->SaveAs(Form("2DIPTime_%.0fThr.pdf", threshold));
 
-    TCanvas *c9 = new TCanvas("c9", " ", 800, 800);
-    gStyle->SetOptStat(0);
+    // IP CLSIZE plot with track unc
     hInPixelClSize_trackunc->SetMinimum(1);
     //hInPixelClSize_trackunc->SetMaximum(4);
     hInPixelClSize_trackunc->Draw("COLZ");
-    c9->SetRightMargin(0.15);
-    c9->SaveAs(Form("2DIPClSize_trackunc_%.0fThr.pdf", threshold));
-    c9->Close();
+    hInPixelClSize_trackunc->GetZaxis()->SetTitleOffset(1.5);
+    LinI1->Draw("SAMEL");
+    LinI2->Draw("SAMEL");
+    c2D->SaveAs(Form("2DIPClSize_trackunc_%.0fThr.pdf", threshold));
 
-    TCanvas *c10 = new TCanvas("c10", " ", 800, 800);
-    gStyle->SetOptStat(0);
+    // IP EFF plot with track unc
     hInPixelMatch_trackunc->Draw("COLZ");
     hInPixelMatch_trackunc->SetMinimum(0.);
     hInPixelMatch_trackunc->SetMaximum(100.);
-    c10->SetRightMargin(0.15);
-    c10->SaveAs(Form("2DIPEff_trackunc_%.0fThr.pdf", threshold));
-    c10->Close();
+    hInPixelMatch_trackunc->GetZaxis()->SetTitleOffset(1.5);
+    LinI1->Draw("SAMEL");
+    LinI2->Draw("SAMEL");
+    t->DrawLatex(pixelSizeX/2.*1000., pixelSizeY*2*1000. +2, Form("<eff> = %.2f #pm %.2f %%", result[1], result[2]));
+    c2D->SaveAs(Form("2DIPEff_trackunc_%.0fThr.pdf", threshold));
+    c2D->Close();
 
     // Save output
     TFile outFile("SimOutput.root", "UPDATE");
@@ -385,9 +409,8 @@ void in_pixel_plots(double result[3], double threshold = 1000) {
 
 int threshold_loop(){
     // List of threshold values:
-    //double thresholds[] = {200., 300., 400., 500., 600., 700., 800., 900., 1000., 1200., 1400., 1600., 1800., 2000., 2200., 2400., 2600., 2800., 3000.};
-    double thresholds[] = {400, 1000, 2000.};
-
+    double thresholds[] = {200., 300., 400., 500., 600., 700., 800., 900., 1000., 1200., 1400., 1600., 1800., 2000., 2200., 2400., 2600., 2800., 3000.};
+    //double thresholds[] = {400, 1000, 2000.};
 
     int num_values = sizeof(thresholds) / sizeof(thresholds[0]);
     double results[num_values][3];

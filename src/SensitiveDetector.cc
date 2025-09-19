@@ -86,12 +86,13 @@ G4bool SensitiveDetector::ProcessHits(G4Step *aStep, G4TouchableHistory *)
                                           << pixelCluster[3][0] << "," << pixelCluster[3][1] << "  " << G4endl ;
     */
 
+    double epsilon = 3.66; // electron-hole pair creaton energy = (3.66 +- 0.03) eV
     // fill the 4 efficiencies and timing into a tree. 
-    // Apply a minimal threshold here already of 50 e-? edep in MeV --> if (edep*10^6/3.6 > 50) // threshold in e- // edep in MeV
+    // Apply a minimal threshold here already of 50 e-? edep in MeV --> if (edep*10^6/epsilon > 50) // threshold in e- // edep in MeV
     // take care if hit is at boundary of sensor (minimal or maximal pix number.)
     // associate timing based on amplitude (from time walk):
-    std::array<G4double,4> pix_timing = {GetTimingOffset(effAn[0]*energy*1000000/3.6),GetTimingOffset(effAn[1]*energy*1000000/3.6),
-                                        GetTimingOffset(effAn[2]*energy*1000000/3.6),GetTimingOffset(effAn[3]*energy*1000000/3.6)}; // argument is pixel charge in electrons
+    std::array<G4double,4> pix_timing = {GetTimingOffset(effAn[0]*energy*1000000/epsilon),GetTimingOffset(effAn[1]*energy*1000000/epsilon),
+                                        GetTimingOffset(effAn[2]*energy*1000000/epsilon),GetTimingOffset(effAn[3]*energy*1000000/epsilon)}; // argument is pixel charge in electrons
     int iHit = 0;
     // Store only the largest deposited energy in a cluster and its corresponding timing
     auto it = std::max_element(effAn.begin(), effAn.end());
@@ -100,14 +101,14 @@ G4bool SensitiveDetector::ProcessHits(G4Step *aStep, G4TouchableHistory *)
     double leadingTime = pix_timing[maxIndex];
     for(int i = 0; i<4; i++)
     {
-        //if (effAn[i] * energy *1000000/3.6 > 50) // Set a data supression threshold at 50 deposited el
+        //if (effAn[i] * energy *1000000/epsilon > 50) // Set a data supression threshold at 50 deposited el
 
         analysisManager->FillNtupleIColumn(3, 0, eventID);
         analysisManager->FillNtupleIColumn(3, 1, iHit);
         analysisManager->FillNtupleIColumn(3, 2, pixelCluster[i][0]);
         analysisManager->FillNtupleIColumn(3, 3, pixelCluster[i][1]);
         analysisManager->FillNtupleDColumn(3, 4, pix_timing[i]);
-        analysisManager->FillNtupleDColumn(3, 5, effAn[i] * energy *1000000/3.6);
+        analysisManager->FillNtupleDColumn(3, 5, effAn[i] * energy *1000000/epsilon);
         analysisManager->AddNtupleRow(3); 
         iHit++;
 
