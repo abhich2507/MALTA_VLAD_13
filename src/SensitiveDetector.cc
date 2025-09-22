@@ -214,13 +214,11 @@ G4double smoothStep(G4double x, G4double pitch, G4double sigma) {
 // per definition the some of all 4 efficiencies = 1.0
 std::pair<std::array<double, 4>, uint8_t>  SensitiveDetector::GetEfficiencyAnalytical(const G4ThreeVector& InPixPosition) {
 
-    G4double pitch = 36.4; // in um
-    //G4double sigmaX = 4.3; // in um;
-    //G4double sigmaY = 4.3; // in um;
+    //G4double pitch = 36.4; // in um
+    double pitch = fFlag->pixelSize *1000; // convert from mm to um (default 36.4 um)
 
     double sigmaX = fFlag->CCModelSigmaX; // in um (default 4.3 um)
     double sigmaY = fFlag->CCModelSigmaY; // in um (default 4.3 um)
-    cout << sigmaX << " " << sigmaY << endl;
 
     // contribution to 4 neighboring pixels
     // 00 is bottom left    (low X,     low Y)
