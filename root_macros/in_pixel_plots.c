@@ -39,6 +39,8 @@ void in_pixel_plots() {
 
     // Connect branches
     chain->SetBranchAddress("iEvent", &truthEventID);
+    
+    
     chain->SetBranchAddress("fX", &fX);
     chain->SetBranchAddress("fY", &fY);
     chain->SetBranchAddress("fZ", &fZ);
