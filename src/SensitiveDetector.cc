@@ -283,6 +283,10 @@ G4double SensitiveDetector::GetEfficiencyCorrectionXY(const G4ThreeVector& InPix
 // sigma is gaussian standard deviation
 G4double smoothStep(G4double x, G4double pitch, G4double sigma) {
     return 0.5 * (std::erf((x) / sigma) - std::erf((x - pitch) / sigma));
+<<<<<<< HEAD
+=======
+    //return 0.5 * (std::erf((x) / (sigma * std::sqrt(2.0))) - std::erf((x - pitch) / (sigma * std::sqrt(2.0))));
+>>>>>>> 18e3f08 (removed sqrt2 from smoothstep)
 }
 
 // Analytical model of smeared rectangular box (error-functions in X and Y )

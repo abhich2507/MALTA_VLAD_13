@@ -52,8 +52,11 @@ G4VPhysicalVolume *DetectorConstruction::Construct()
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 >>>>>>> 8a2e4b8 (Cleaned up the simulation files. Removed the Truth En tree as it was not used further in the analysis chain. Additionally, general clean up in terms of branch renaming. It most probably will impact the in_pixel_plots script. However the default analysis chain has already been modified to account for these changes.)
+=======
+>>>>>>> b3c9266 (rebasing, for merging. caused by: removed sqrt2 from smoothstep)
         G4double maltaWidthX = fFlag->detectorSizeX *cm; 
         G4double maltaWidthY = fFlag->detectorSizeY *cm; 
         G4double maltaDepth = fFlag->detectorDepth* um;
@@ -70,6 +73,7 @@ G4VPhysicalVolume *DetectorConstruction::Construct()
 =======
         //TODO: This is hardcoded. It has its own flag already. Fix it
         G4double maltaWidth = 18.6368 *mm; 
+<<<<<<< HEAD
         G4double maltaDepth = 29.1 * um;
         G4Box *solidMALTA = new G4Box ("MALTASensor", maltaWidth/2, maltaWidth/2, maltaDepth/2);
 >>>>>>> 8149767 (Added digitization + tracking + clustering + analysis in an automatic fashion for each run)
@@ -79,6 +83,11 @@ G4VPhysicalVolume *DetectorConstruction::Construct()
 
         G4Box *solidMALTA = new G4Box ("MALTASensor", maltaWidthX/2, maltaWidthY/2, maltaDepth/2);
 >>>>>>> 66f7594 (DEBUG)
+=======
+        G4double maltaDepth = 30 * um; // 29.1 * um; for measurement result
+        G4Box *solidMALTA = new G4Box ("MALTASensor", maltaWidth/2, maltaWidth/2, maltaDepth/2);
+>>>>>>> 18e3f08 (removed sqrt2 from smoothstep)
+>>>>>>> b3c9266 (rebasing, for merging. caused by: removed sqrt2 from smoothstep)
         logicSensor = new G4LogicalVolume (solidMALTA, detMat, "logicSensor");
         G4VPhysicalVolume *physSensor  = new G4PVPlacement(0, G4ThreeVector(detectorXOffset, detectorYOffset, detectorZOffset), logicSensor, "physSensor", logicalWorld, false, 0, true);
 

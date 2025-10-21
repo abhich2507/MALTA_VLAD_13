@@ -425,10 +425,20 @@ void simpleAnalysis(std::string inputPath, std::string outROOTname, double resul
 // or use intLoop
 int threshold_loop(std::string inputFile, std::string outROOT){
     // List of threshold values:
+<<<<<<< HEAD:root_macros/simpleAnalysis.c
     double thresholds[] = {200., 300., 400., 500., 600., 700., 800., 900., 1000., 1200., 1400., 1600., 1800., 2000., 2200., 2400., 2600., 2800., 3000.};
     //double thresholds[] = {2000., 200.};
     //double thresholds[] = {1400., 200., 1200.};
     //double thresholds[] = {200, 230, 343, 448, 544, 632, 712}; // equivalent to thresholds of data points
+=======
+    //double thresholds[] = {200., 300., 400., 500., 600., 700., 800., 900., 1000., 1200., 1400., 1600., 1800., 2000., 2200., 2400., 2600., 2800., 3000.};
+    //double thresholds[] = {400, 1000, 2000.};
+<<<<<<< HEAD
+    double thresholds[] = {1200, 1400};
+=======
+    //double thresholds[] = {1400};
+>>>>>>> 18e3f08 (removed sqrt2 from smoothstep)
+>>>>>>> b3c9266 (rebasing, for merging. caused by: removed sqrt2 from smoothstep):root_macros/in_pixel_plots.c
 
     int num_values = sizeof(thresholds) / sizeof(thresholds[0]);
     double results[num_values][3];
@@ -481,9 +491,28 @@ int threshold_loop(std::string inputFile, std::string outROOT){
 }
 
 void RunInt_loop(){
+<<<<<<< HEAD:root_macros/simpleAnalysis.c
     for (int runNumber = 55; runNumber <= 55; ++runNumber) { // 46 to 50
+=======
+<<<<<<< HEAD
+    for (int runNumber = 43; runNumber <= 45; ++runNumber) {
+=======
+    for (int runNumber = 30; runNumber <= 39; ++runNumber) {
+>>>>>>> 18e3f08 (removed sqrt2 from smoothstep)
+>>>>>>> b3c9266 (rebasing, for merging. caused by: removed sqrt2 from smoothstep):root_macros/in_pixel_plots.c
         std::string inputFileName = "/Users/lucianfasselt/DECAL/Simulation/Geant4/MALTASIM/malta_simulation/Results/local_00"+ std::to_string(runNumber)+"/";  
         std::string outROOTName = "SimOutput_MaxCl8_MCTrue_distcut80_" + std::to_string(runNumber) + ".root";
         threshold_loop(inputFileName, outROOTName.c_str());
     }
+<<<<<<< HEAD:root_macros/simpleAnalysis.c
 }
+=======
+<<<<<<< HEAD
+}
+
+
+
+=======
+}
+>>>>>>> 18e3f08 (removed sqrt2 from smoothstep)
+>>>>>>> b3c9266 (rebasing, for merging. caused by: removed sqrt2 from smoothstep):root_macros/in_pixel_plots.c
