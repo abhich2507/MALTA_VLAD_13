@@ -27,7 +27,11 @@ double GetTimingOffset(double amplitude, double threshold)
     {
         return 200.; // set to 200 ns delay if less than threshold (function diverges at threshold)
     }
+<<<<<<< HEAD
     return 390.0 / pow((amplitude * 150./threshold) - 149.8, 0.65);
+=======
+    return 390.0 / pow((x * 150./threshold) - 149.8, 0.65);
+>>>>>>> 2d19158 (Time-walk model extended to all thresholds based on simple assumptions.)
 }
 
 inline std::pair<double,double> PixelPositionReconstruction(int pixelX, int pixelY)

@@ -343,6 +343,9 @@ std::pair<std::array<double, 4>, uint8_t>  SensitiveDetector::GetEfficiencyAnaly
     return {{eff00, eff01, eff10, eff11}, quadrantFlag} ; // ordering not certain yet.
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 580f2b4 (Tgain and agian. time-walk model extended to all thresholds based on simple assumptions.)
 }
 =======
 }
@@ -350,6 +353,7 @@ std::pair<std::array<double, 4>, uint8_t>  SensitiveDetector::GetEfficiencyAnaly
 // Get time-walk from parameterization.
 // amplitude in unit electrons
 // returns timing in ns
+<<<<<<< HEAD
 G4double SensitiveDetector::GetTimingOffset(G4double amplitude) {
     // function diverges at 150e-
     if (amplitude < 150.) 
@@ -363,3 +367,28 @@ G4double SensitiveDetector::GetTimingOffset(G4double amplitude) {
 =======
 }
 >>>>>>> 8a2e4b8 (Cleaned up the simulation files. Removed the Truth En tree as it was not used further in the analysis chain. Additionally, general clean up in terms of branch renaming. It most probably will impact the in_pixel_plots script. However the default analysis chain has already been modified to account for these changes.)
+=======
+// at 150e- threshold
+G4double SensitiveDetector::GetTimingOffset(G4double amplitude) {
+    // function diverges at 150e-
+    if (amplitude < 160.) 
+    { // delay only down to amplitudes of 160e-. 
+        return 390. /pow(160-149.8, 0.65);
+    }
+
+    return 390. /pow(amplitude-149.8, 0.65);
+
+}
+
+G4double SensitiveDetector::GetTimingOffsetatThreshold(G4double amplitude, G4double threshold) {
+    // function diverges at 150e-
+    if (amplitude < 160.) 
+    { // delay only down to amplitudes of 160e-. 
+        return 390. /pow(160-149.8, 0.65);
+    }
+
+    return 390. /pow(amplitude/threshold*150.-149.8, 0.65);
+
+}
+>>>>>>> 2d19158 (Time-walk model extended to all thresholds based on simple assumptions.)
+>>>>>>> 580f2b4 (Tgain and agian. time-walk model extended to all thresholds based on simple assumptions.)
