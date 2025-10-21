@@ -64,7 +64,7 @@ G4VPhysicalVolume *DetectorConstruction::Construct()
     {
         //TODO: This is hardcoded. It has its own flag already. Fix it
         G4double maltaWidth = 18.6368 *mm; 
-        G4double maltaDepth = 30 * um;
+        G4double maltaDepth = 30 * um; // 29.1 * um; for measurement result
         G4Box *solidMALTA = new G4Box ("MALTASensor", maltaWidth/2, maltaWidth/2, maltaDepth/2);
         logicSensor = new G4LogicalVolume (solidMALTA, detMat, "logicSensor");
         G4VPhysicalVolume *physSensor  = new G4PVPlacement(0, G4ThreeVector(detectorXOffset, detectorYOffset, detectorZOffset), logicSensor, "physSensor", logicalWorld, false, 0, true);

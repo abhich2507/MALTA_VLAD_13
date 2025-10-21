@@ -204,7 +204,8 @@ G4double SensitiveDetector::GetEfficiencyCorrectionXY(const G4ThreeVector& InPix
 // error-fct that parameterize edge of pixel are at x = 0 and x = pitch
 // sigma is gaussian standard deviation
 G4double smoothStep(G4double x, G4double pitch, G4double sigma) {
-    return 0.5 * (std::erf((x) / (sigma * std::sqrt(2.0))) - std::erf((x - pitch) / (sigma * std::sqrt(2.0))));
+    return 0.5 * (std::erf((x) / sigma) - std::erf((x - pitch) / sigma));
+    //return 0.5 * (std::erf((x) / (sigma * std::sqrt(2.0))) - std::erf((x - pitch) / (sigma * std::sqrt(2.0))));
 }
 
 
