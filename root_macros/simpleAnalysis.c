@@ -28,10 +28,14 @@ double GetTimingOffset(double amplitude, double threshold)
         return 200.; // set to 200 ns delay if less than threshold (function diverges at threshold)
     }
 <<<<<<< HEAD
+<<<<<<< HEAD
     return 390.0 / pow((amplitude * 150./threshold) - 149.8, 0.65);
 =======
     return 390.0 / pow((x * 150./threshold) - 149.8, 0.65);
 >>>>>>> 2d19158 (Time-walk model extended to all thresholds based on simple assumptions.)
+=======
+    return 390.0 / pow((amplitude * 150./threshold) - 149.8, 0.65);
+>>>>>>> 49ab774 (Changed variable name x to amplitude)
 }
 
 inline std::pair<double,double> PixelPositionReconstruction(int pixelX, int pixelY)
@@ -499,11 +503,18 @@ void RunInt_loop(){
     for (int runNumber = 55; runNumber <= 55; ++runNumber) { // 46 to 50
 =======
 <<<<<<< HEAD
+<<<<<<< HEAD
     for (int runNumber = 43; runNumber <= 45; ++runNumber) {
 =======
     for (int runNumber = 30; runNumber <= 39; ++runNumber) {
 >>>>>>> 18e3f08 (removed sqrt2 from smoothstep)
+<<<<<<< HEAD:root_macros/simpleAnalysis.c
 >>>>>>> b3c9266 (rebasing, for merging. caused by: removed sqrt2 from smoothstep):root_macros/in_pixel_plots.c
+=======
+=======
+    for (int runNumber = 40; runNumber <= 45; ++runNumber) {
+>>>>>>> 49ab774 (Changed variable name x to amplitude)
+>>>>>>> 2379f84 (Changed variable name x to amplitude):root_macros/in_pixel_plots.c
         std::string inputFileName = "/Users/lucianfasselt/DECAL/Simulation/Geant4/MALTASIM/malta_simulation/Results/local_00"+ std::to_string(runNumber)+"/";  
         std::string outROOTName = "SimOutput_MaxCl8_MCTrue_distcut80_" + std::to_string(runNumber) + ".root";
         threshold_loop(inputFileName, outROOTName.c_str());
