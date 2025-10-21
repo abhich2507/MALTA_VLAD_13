@@ -271,22 +271,10 @@ std::pair<std::array<double, 4>, uint8_t>  SensitiveDetector::GetEfficiencyAnaly
 // at 150e- threshold
 G4double SensitiveDetector::GetTimingOffset(G4double amplitude) {
     // function diverges at 150e-
-    if (amplitude < 160.) 
-    { // delay only down to amplitudes of 160e-. 
-        return 390. /pow(160-149.8, 0.65);
+    if (amplitude < 150.) 
+    { // delay only down to amplitudes of 150e-. 
+        return 200;
     }
-
     return 390. /pow(amplitude-149.8, 0.65);
-
-}
-
-G4double SensitiveDetector::GetTimingOffsetatThreshold(G4double amplitude, G4double threshold) {
-    // function diverges at 150e-
-    if (amplitude < 160.) 
-    { // delay only down to amplitudes of 160e-. 
-        return 390. /pow(160-149.8, 0.65);
-    }
-
-    return 390. /pow(amplitude/threshold*150.-149.8, 0.65);
 
 }
