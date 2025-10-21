@@ -371,14 +371,14 @@ G4double SensitiveDetector::GetTimingOffset(G4double amplitude) {
 // at 150e- threshold
 G4double SensitiveDetector::GetTimingOffset(G4double amplitude) {
     // function diverges at 150e-
-    if (amplitude < 160.) 
-    { // delay only down to amplitudes of 160e-. 
-        return 390. /pow(160-149.8, 0.65);
+    if (amplitude < 150.) 
+    { // delay only down to amplitudes of 150e-. 
+        return 200;
     }
-
     return 390. /pow(amplitude-149.8, 0.65);
 
 }
+<<<<<<< HEAD
 
 G4double SensitiveDetector::GetTimingOffsetatThreshold(G4double amplitude, G4double threshold) {
     // function diverges at 150e-
@@ -391,4 +391,9 @@ G4double SensitiveDetector::GetTimingOffsetatThreshold(G4double amplitude, G4dou
 
 }
 >>>>>>> 2d19158 (Time-walk model extended to all thresholds based on simple assumptions.)
+<<<<<<< HEAD
 >>>>>>> 580f2b4 (Tgain and agian. time-walk model extended to all thresholds based on simple assumptions.)
+=======
+=======
+>>>>>>> 5de186b (Removed unnecessary function)
+>>>>>>> 6cc58b9 (Removed unnecessary function)
