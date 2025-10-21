@@ -15,17 +15,19 @@
 // 1) clearly name "Energy", "corrEnergy", "Charge" and "corrCharge" (rename equivalently in RunAction.cc)
 // 2) Get eff. curve for uncorrected energy and compare models with data. (to show that CC-model makes more sense)
 
-double GetTimingOffset(double amplitude) 
+// this function is derived from data at threshold = 150e-.
+// It assumes that the front-end is readjusted for each threshold change.
+// Assumptions: 
+// 1) Time-walk for DeltaT vs. amplitude in volts is the same for each threshold
+// 2) calibration from volts to charge is linear with threshold. (larger threshold --> larger charge for same voltage amplitude.)
+// an upper limit of 200. is defined for amplitudes that fall below threshold. (Could also be set to inf or 0 ?)
+double GetTimingOffset(double amplitude, double threshold) 
 {
-    // assumes 1200e- correspond to 350 mV. Check calibration through injection scans.
-    //return 40. * std::exp(amplitude /(-191.));
-    if (amplitude < 100.) 
-    { // delay only down to amplitudes of 100e-. 
-        return 3230. /pow(100-67.0, 1.08);
+    if (amplitude < threshold) // if less than than threshold 
+    {
+        return 200.; // set to 200 ns delay if less than threshold (function diverges at threshold)
     }
-
-    return 3230. /pow(amplitude-67.0, 1.08);
-
+    return 390.0 / pow((x * 150./threshold) - 149.8, 0.65);
 }
 
 // Efficiency in percent
@@ -186,7 +188,7 @@ void in_pixel_plots(std::string inputPath, std::string outROOTname, double resul
         int eventID = entry.first.first;
         //int hitID   = entry.first.second;
         double cenergy = entry.second; // corrected energy
-        inClusterTimes[eventID].push_back(GetTimingOffset(cenergy));
+        inClusterTimes[eventID].push_back(GetTimingOffset(cenergy, threshold));
         //std::cout << GetTimingOffset(cenergy) << std::endl;
         // Fill the cluster size map
         if (cenergy > threshold) 

@@ -268,14 +268,25 @@ std::pair<std::array<double, 4>, uint8_t>  SensitiveDetector::GetEfficiencyAnaly
 // Get time-walk from parameterization.
 // amplitude in unit electrons
 // returns timing in ns
+// at 150e- threshold
 G4double SensitiveDetector::GetTimingOffset(G4double amplitude) {
-    // assumes 1200e- correspond to 350 mV. Check calibration through injection scans.
-    //return 40. * std::exp(amplitude /(-191.));
-    if (amplitude < 100.) 
-    { // delay only down to amplitudes of 100e-. 
-        return 3230. /pow(100-67.0, 1.08);
+    // function diverges at 150e-
+    if (amplitude < 160.) 
+    { // delay only down to amplitudes of 160e-. 
+        return 390. /pow(160-149.8, 0.65);
     }
 
-    return 3230. /pow(amplitude-67.0, 1.08);
+    return 390. /pow(amplitude-149.8, 0.65);
+
+}
+
+G4double SensitiveDetector::GetTimingOffsetatThreshold(G4double amplitude, G4double threshold) {
+    // function diverges at 150e-
+    if (amplitude < 160.) 
+    { // delay only down to amplitudes of 160e-. 
+        return 390. /pow(160-149.8, 0.65);
+    }
+
+    return 390. /pow(amplitude/threshold*150.-149.8, 0.65);
 
 }
