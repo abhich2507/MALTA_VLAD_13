@@ -27,7 +27,7 @@ double GetTimingOffset(double amplitude, double threshold)
     {
         return 200.; // set to 200 ns delay if less than threshold (function diverges at threshold)
     }
-    return 390.0 / pow((x * 150./threshold) - 149.8, 0.65);
+    return 390.0 / pow((amplitude * 150./threshold) - 149.8, 0.65);
 }
 
 // Efficiency in percent
@@ -479,7 +479,7 @@ int threshold_loop(std::string inputFile, std::string outROOT){
 }
 
 void RunInt_loop(){
-    for (int runNumber = 30; runNumber <= 39; ++runNumber) {
+    for (int runNumber = 40; runNumber <= 45; ++runNumber) {
         std::string inputFileName = "/Users/lucianfasselt/DECAL/Simulation/Geant4/MALTASIM/malta_simulation/Results/local_00"+ std::to_string(runNumber)+"/";  
         std::string outROOTName = "SimOutput_" + std::to_string(runNumber) + ".root";
         threshold_loop(inputFileName, outROOTName.c_str());
