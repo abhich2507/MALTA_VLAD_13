@@ -346,6 +346,7 @@ void in_pixel_plots(std::string inputPath, std::string outROOTname, double resul
     set_style();
     TCanvas *c2D = new TCanvas("c2D", "2DInPix ", 800, 800); // use same for all Inpixplots
     gStyle->SetOptStat(0);
+    c2D->SetTicks(1, 1);  // 1 = draw ticks on top/right as well
     c2D->SetRightMargin(0.16); // define margins for all IP plots
     c2D->SetBottomMargin(0.1);
     c2D->SetLeftMargin(0.1);
@@ -374,7 +375,8 @@ void in_pixel_plots(std::string inputPath, std::string outROOTname, double resul
     // Create TLatex object
     TLatex *t = new TLatex();
     // Draw the formatted text
-    t->DrawLatex(pixelSizeX/2.*1000., pixelSizeY*2*1000. +2, Form("<eff> = %.2f #pm %.2f %%", result[1], result[2]));
+    //t->DrawLatex(pixelSizeX/2.*1000., pixelSizeY*2*1000. +2, Form("<eff> = %.2f #pm %.2f %%", result[1], result[2]));
+    t->DrawLatex(-2., pixelSizeY*2*1000. +2, Form("MALTA2 Sim.#bf{, 30#mum EPI, <eff> =%.1f%%}", result[1]));
     hInPixelMatch->GetZaxis()->SetTitleOffset(1.5);
     LinI1->Draw("SAMEL");
     LinI2->Draw("SAMEL");
@@ -404,7 +406,8 @@ void in_pixel_plots(std::string inputPath, std::string outROOTname, double resul
     hInPixelMatch_trackunc->GetZaxis()->SetTitleOffset(1.5);
     LinI1->Draw("SAMEL");
     LinI2->Draw("SAMEL");
-    t->DrawLatex(pixelSizeX/2.*1000., pixelSizeY*2*1000. +2, Form("<eff> = %.2f #pm %.2f %%", result[1], result[2]));
+    //t->DrawLatex(pixelSizeX/2.*1000., pixelSizeY*2*1000. +2, Form("<eff> = %.2f #pm %.2f %%", result[1], result[2]));
+    t->DrawLatex(-2., pixelSizeY*2*1000. +2, Form("MALTA2 Sim.#bf{, 30#mum EPI, <eff> =%.1f%%}", result[1]));
     c2D->SaveAs(Form("2DIPEff_trackunc_%.0fThr.pdf", threshold));
     c2D->SaveAs(Form("2DIPEff_trackunc_%.0fThr.C", threshold));
     c2D->Close();
@@ -424,9 +427,9 @@ void in_pixel_plots(std::string inputPath, std::string outROOTname, double resul
 // or use intLoop
 int threshold_loop(std::string inputFile, std::string outROOT){
     // List of threshold values:
-    double thresholds[] = {200., 300., 400., 500., 600., 700., 800., 900., 1000., 1200., 1400., 1600., 1800., 2000., 2200., 2400., 2600., 2800., 3000.};
+    //double thresholds[] = {200., 300., 400., 500., 600., 700., 800., 900., 1000., 1200., 1400., 1600., 1800., 2000., 2200., 2400., 2600., 2800., 3000.};
     //double thresholds[] = {400, 1000, 2000.};
-    //double thresholds[] = {1400};
+    double thresholds[] = {1200, 1400};
 
     int num_values = sizeof(thresholds) / sizeof(thresholds[0]);
     double results[num_values][3];
@@ -479,7 +482,7 @@ int threshold_loop(std::string inputFile, std::string outROOT){
 }
 
 void RunInt_loop(){
-    for (int runNumber = 40; runNumber <= 45; ++runNumber) {
+    for (int runNumber = 43; runNumber <= 45; ++runNumber) {
         std::string inputFileName = "/Users/lucianfasselt/DECAL/Simulation/Geant4/MALTASIM/malta_simulation/Results/local_00"+ std::to_string(runNumber)+"/";  
         std::string outROOTName = "SimOutput_" + std::to_string(runNumber) + ".root";
         threshold_loop(inputFileName, outROOTName.c_str());
