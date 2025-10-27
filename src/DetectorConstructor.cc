@@ -75,6 +75,7 @@ G4VPhysicalVolume *DetectorConstruction::Construct()
         G4double maltaWidth = 18.6368 *mm; 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
         G4double maltaDepth = 29.1 * um;
         G4Box *solidMALTA = new G4Box ("MALTASensor", maltaWidth/2, maltaWidth/2, maltaDepth/2);
 >>>>>>> 8149767 (Added digitization + tracking + clustering + analysis in an automatic fashion for each run)
@@ -89,6 +90,9 @@ G4VPhysicalVolume *DetectorConstruction::Construct()
 =======
         G4double maltaDepth = 29.1 * um; // 29.1 * um or 30.0 * um; for measurement result
 >>>>>>> 580f2b4 (Tgain and agian. time-walk model extended to all thresholds based on simple assumptions.)
+=======
+        G4double maltaDepth = 29.1 * um;// 29.1 * um; // 29.1 * um or 30.0 * um; for measurement result
+>>>>>>> b0886b9 (Low Threshold data set from W5R23 added in threshold range 200-700e-)
         G4Box *solidMALTA = new G4Box ("MALTASensor", maltaWidth/2, maltaWidth/2, maltaDepth/2);
 >>>>>>> 18e3f08 (removed sqrt2 from smoothstep)
 >>>>>>> b3c9266 (rebasing, for merging. caused by: removed sqrt2 from smoothstep)

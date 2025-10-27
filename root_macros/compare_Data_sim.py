@@ -13,6 +13,7 @@ latEl= "e#lower[-2.2]{#scale[0.6]{- }}" #e- latex style
 data_filename_HighThr = "root_input/xybinsIDB100IBIAS05_Clsize_Xbin16_XNsteps1_Xstepsize0_Yfix-1.root"
 data_filename_LowThr = "root_input/xybinsIDB120IBIAS43_Clsize_Xbin16_XNsteps1_Xstepsize0_Yfix-1.root"
 
+<<<<<<< HEAD
 ## In Sim with sigma*sqrt(2) --> sigma 
 ## and sigma_erf = 4.3
 # z variation:
@@ -56,6 +57,63 @@ grList = data_AvEff_LT.GetListOfGraphs()
 RHF.addGrtoGr(grList[0], grList_AvEff_HT[0])
 RHF.addRelativeErrors(grList[0], 0.03,"X", 20.) # 3% uncertainty on Threshold-values
 
+=======
+## wrong sigma_erf definition and z = 30um:
+sim_inputs = [
+    {"filename": "SimOutput_26.root", "label": "w/o charge sharing", "color": ROOT.kRed, "linestyle": 3, "linewidth": 1, "alpha": 0.5, "markerstyle": 25, "markersize": 1.0},
+    #{"filename": "SimOutput_23.root", "label": "1.0", "color": ROOT.kBlack, "linestyle": 2, "linewidth": 1, "alpha": 0.5, "markerstyle": 25, "markersize": 1.0},
+    {"filename": "SimOutput_22.root", "label": "#sigma_{erf}=2.0#mum", "color": ROOT.kBlack, "linestyle": 3, "linewidth": 1, "alpha": 0.5, "markerstyle": 25, "markersize": 1.0},
+    {"filename": "SimOutput_21.root", "label": "#sigma_{erf}=3.0#mum", "color": ROOT.kBlack, "linestyle": 1, "linewidth": 1, "alpha": 1.0, "markerstyle": 21, "markersize": 1.2},
+    #{"filename": "SimOutput_24.root", "label": "4.0", "color": ROOT.kBlack, "linestyle": 2, "linewidth": 1, "alpha": 0.5, "markerstyle": 25, "markersize": 1.0},
+    {"filename": "SimOutput_20.root", "label": "#sigma_{erf}=4.3#mum", "color": ROOT.kRed, "linestyle": 1, "linewidth": 1, "alpha": 1.0, "markerstyle": 21, "markersize": 1.2},
+    #{"filename": "SimOutput_25.root", "label": "5.0", "color": ROOT.kBlack, "linestyle": 2, "linewidth": 1, "alpha": 0.5, "markerstyle": 21, "markersize": 1.0},
+    {"filename": "SimOutput_27.root", "label": "#sigma_{erf}=6.0#mum", "color": ROOT.kBlack, "linestyle": 2, "linewidth": 1, "alpha": 0.5, "markerstyle": 21, "markersize": 1.0},
+    {"filename": "SimOutput_28.root", "label": "#sigma_{erf}=10.0#mum", "color": ROOT.kRed, "linestyle": 2, "linewidth": 1, "alpha": 0.5, "markerstyle": 21, "markersize": 1.0},
+]
+
+## Corrected sigma definition: Sim with sigma*sqrt(2) --> sigma 
+# and z = 30 um
+sim_inputs = [
+    {"filename": "SimOutput_30.root", "label": "w/o charge sharing", "color": ROOT.kRed, "linestyle": 3, "linewidth": 1, "alpha": 0.5, "markerstyle": 25, "markersize": 1.0},
+    {"filename": "SimOutput_31.root", "label": "#sigma_{erf}=2.0#mum", "color": ROOT.kBlack, "linestyle": 3, "linewidth": 1, "alpha": 0.5, "markerstyle": 25, "markersize": 1.0},
+    {"filename": "SimOutput_32.root", "label": "#sigma_{erf}=4.3#mum", "color": ROOT.kRed, "linestyle": 1, "linewidth": 1, "alpha": 1.0, "markerstyle": 21, "markersize": 1.2},
+    {"filename": "SimOutput_33.root", "label": "#sigma_{erf}=6.0#mum", "color": ROOT.kBlack, "linestyle": 2, "linewidth": 1, "alpha": 0.5, "markerstyle": 21, "markersize": 1.0},
+    {"filename": "SimOutput_34.root", "label": "#sigma_{erf}=10.0#mum", "color": ROOT.kRed, "linestyle": 2, "linewidth": 1, "alpha": 0.5, "markerstyle": 21, "markersize": 1.0},
+]
+
+
+## Corrected sigma definition: Sim with sigma*sqrt(2) --> sigma 
+# and z = 29.1 um
+sim_inputs = [
+    {"filename": "SimOutput_35.root", "label": "w/o charge sharing", "color": ROOT.kRed, "linestyle": 3, "linewidth": 1, "alpha": 0.5, "markerstyle": 25, "markersize": 1.0},
+    {"filename": "SimOutput_36.root", "label": "#sigma_{erf}=  2.0#mum", "color": ROOT.kBlack, "linestyle": 3, "linewidth": 1, "alpha": 0.5, "markerstyle": 25, "markersize": 1.0},
+    {"filename": "SimOutput_37.root", "label": "#sigma_{erf}=  4.3#mum", "color": ROOT.kRed, "linestyle": 1, "linewidth": 1, "alpha": 1.0, "markerstyle": 21, "markersize": 1.2},
+    {"filename": "SimOutput_38.root", "label": "#sigma_{erf}=  6.0#mum", "color": ROOT.kBlack, "linestyle": 2, "linewidth": 1, "alpha": 0.5, "markerstyle": 21, "markersize": 1.0},
+    {"filename": "SimOutput_39.root", "label": "#sigma_{erf}=10.0#mum", "color": ROOT.kRed, "linestyle": 2, "linewidth": 1, "alpha": 0.5, "markerstyle": 21, "markersize": 1.0},
+]
+
+## In Sim with sigma*sqrt(2) --> sigma 
+# and sigma_erf = 4.3
+# z variation:
+sim_inputs_Zvar = [
+    {"filename": "SimOutput_42.root", "label": "z=27.0#mum", "color": ROOT.kRed, "linestyle": 3, "linewidth": 1, "alpha": 1.0, "markerstyle": 25, "markersize": 1.0},
+    {"filename": "SimOutput_41.root", "label": "z=28.0#mum", "color": ROOT.kBlack, "linestyle": 3, "linewidth": 1, "alpha": 1.0, "markerstyle": 25, "markersize": 1.0},
+    {"filename": "SimOutput_40.root", "label": "z=29.1#mum", "color": ROOT.kRed, "linestyle": 1, "linewidth": 1, "alpha": 1.0, "markerstyle": 21, "markersize": 1.2},
+    {"filename": "SimOutput_43.root", "label": "z=30.0#mum", "color": ROOT.kBlack, "linestyle": 2, "linewidth": 1, "alpha": 1.0, "markerstyle": 21, "markersize": 1.0},
+    {"filename": "SimOutput_44.root", "label": "z=31.0#mum", "color": ROOT.kRed, "linestyle": 2, "linewidth": 1, "alpha": 1.0, "markerstyle": 21, "markersize": 1.0},
+    {"filename": "SimOutput_45.root", "label": "z=32.0#mum", "color": ROOT.kGreen, "linestyle": 2, "linewidth": 1, "alpha": 1.0, "markerstyle": 21, "markersize": 1.0},
+]
+
+
+data_infile_HT = ROOT.TFile(data_filename_HighThr) # READ only
+data_AvEff = data_infile_HT.Get("MultiEff").Clone()
+
+grList = data_AvEff.GetListOfGraphs()
+RHF.Remove_everyNpoints(grList[0], 2, 1) # remove every 2nd point
+RHF.Remove_everyNpoints(grList[0], 2, 1) # remove again every 2nd point
+grList[0].GetListOfFunctions().Clear() # clear fit function
+RHF.addRelativeErrors(grList[0], 0.03,"X") # 3% uncertainty on Threshold-values
+>>>>>>> b0886b9 (Low Threshold data set from W5R23 added in threshold range 200-700e-)
 #for p in range(grList[0].GetN()):
 #    print(grList[0].GetPointY(p), " +-", grList[0].GetErrorY(p))
 #RHF.addRelativeErrors(grList[0], 0.01,"Y") # 3% uncertainty on y vals
@@ -105,6 +163,11 @@ sim_AvEff.GetYaxis().SetTitleOffset(1.3)
 mg_AvEff.Draw("A") # "ap"
 mg_AvEff.GetXaxis().SetRangeUser(0,2500)
 mg_AvEff.SetMinimum(0)
+<<<<<<< HEAD
+=======
+#data_AvEff.Draw("ap same")
+#grList[0].Draw("ap same")
+>>>>>>> b0886b9 (Low Threshold data set from W5R23 added in threshold range 200-700e-)
 leg = c.BuildLegend(0.18, 0.18, 0.6, 0.52) #0.18, 0.18, 0.58, 0.5)
 mg_AvEff.Add(xerror_band, "F")
 leg.SetFillStyle(0)
@@ -133,10 +196,16 @@ data_infile_LT = ROOT.TFile(data_filename_LowThr) # READ only
 data_AvClSize_LT = data_infile_LT.Get("MultiClSize").Clone()
 #data_AvEff.SetTitle("Data")
 
+<<<<<<< HEAD
 ## add low threshold points to data:
 grList_AvClSize = data_AvClSize_LT.GetListOfGraphs()
 RHF.addGrtoGr(grList_AvClSize[0], grList_AvClSize_HT[0])
 RHF.addRelativeErrors(grList_AvClSize[0], 0.03,"X", 20.) # 3% uncertainty on Threshold-values
+=======
+grList_AvClSize = data_AvClSize_LT.GetListOfGraphs()
+RHF.addGrtoGr(grList_AvClSize[0], grList_AvClSize_HT[0])
+RHF.addRelativeErrors(grList_AvClSize[0], 0.03,"X") # 3% uncertainty on Threshold-values
+>>>>>>> b0886b9 (Low Threshold data set from W5R23 added in threshold range 200-700e-)
 grList_AvClSize[0].SetTitle("#bf{Data}")
 grList_AvClSize[0].SetMarkerColor(ROOT.kBlue)
 grList_AvClSize[0].SetMarkerSize(2.4)

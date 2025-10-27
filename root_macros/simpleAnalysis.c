@@ -442,11 +442,18 @@ int threshold_loop(std::string inputFile, std::string outROOT){
     //double thresholds[] = {200., 300., 400., 500., 600., 700., 800., 900., 1000., 1200., 1400., 1600., 1800., 2000., 2200., 2400., 2600., 2800., 3000.};
     //double thresholds[] = {400, 1000, 2000.};
 <<<<<<< HEAD
+<<<<<<< HEAD
     double thresholds[] = {1200, 1400};
 =======
     //double thresholds[] = {1400};
 >>>>>>> 18e3f08 (removed sqrt2 from smoothstep)
+<<<<<<< HEAD:root_macros/simpleAnalysis.c
 >>>>>>> b3c9266 (rebasing, for merging. caused by: removed sqrt2 from smoothstep):root_macros/in_pixel_plots.c
+=======
+=======
+    double thresholds[] = {1200, 1400};
+>>>>>>> 72eed28 (Low Threshold data set from W5R23 added in threshold range 200-700e-)
+>>>>>>> b0886b9 (Low Threshold data set from W5R23 added in threshold range 200-700e-):root_macros/in_pixel_plots.c
 
     int num_values = sizeof(thresholds) / sizeof(thresholds[0]);
     double results[num_values][3];
@@ -504,6 +511,7 @@ void RunInt_loop(){
 =======
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
     for (int runNumber = 43; runNumber <= 45; ++runNumber) {
 =======
     for (int runNumber = 30; runNumber <= 39; ++runNumber) {
@@ -514,7 +522,13 @@ void RunInt_loop(){
 =======
     for (int runNumber = 40; runNumber <= 45; ++runNumber) {
 >>>>>>> 49ab774 (Changed variable name x to amplitude)
+<<<<<<< HEAD:root_macros/simpleAnalysis.c
 >>>>>>> 2379f84 (Changed variable name x to amplitude):root_macros/in_pixel_plots.c
+=======
+=======
+    for (int runNumber = 43; runNumber <= 45; ++runNumber) {
+>>>>>>> 72eed28 (Low Threshold data set from W5R23 added in threshold range 200-700e-)
+>>>>>>> b0886b9 (Low Threshold data set from W5R23 added in threshold range 200-700e-):root_macros/in_pixel_plots.c
         std::string inputFileName = "/Users/lucianfasselt/DECAL/Simulation/Geant4/MALTASIM/malta_simulation/Results/local_00"+ std::to_string(runNumber)+"/";  
         std::string outROOTName = "SimOutput_MaxCl8_MCTrue_distcut80_" + std::to_string(runNumber) + ".root";
         threshold_loop(inputFileName, outROOTName.c_str());
