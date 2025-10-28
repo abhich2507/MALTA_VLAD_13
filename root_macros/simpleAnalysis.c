@@ -257,6 +257,11 @@ void simpleAnalysis(std::string inputPath, std::string outROOTname, double resul
             inClusterTimes.clear();
         }
         rememberer = eventID;
+<<<<<<< HEAD:root_macros/simpleAnalysis.c
+=======
+        //if (simpleCounter > 4) // This line looks for eventIDs that correspond to clusters larger than 4
+        if (simpleCounter > 4) std::cout << "Counter: " << simpleCounter << std::endl;
+>>>>>>> ee2954b (Cleaned up analysis and merging of data for effiency graph):root_macros/in_pixel_plots.c
         if (eventID == 27437)
         {
             std::cout << "Event ID: " << eventID << "; pixX: " << entry.first.second.first << ";pixY: " << entry.first.second.second << "; corrEnergy: " << cenergy << std::endl;
@@ -308,25 +313,44 @@ void simpleAnalysis(std::string inputPath, std::string outROOTname, double resul
     result[0] = hInPixelClSize_trackunc->Integral() / hInPixelMatch_trackunc->Integral();
     std::cout << "Av. Cl size: " << result[0] << std::endl;
 
+<<<<<<< HEAD:root_macros/simpleAnalysis.c
     // divide cluster size and timing by number of events with hit (to get average across all events with hit)
     hInPixelClSize->Divide(hInPixelMatch); 
+=======
+    hInPixelClSize->Divide(hInPixelMatch);
+>>>>>>> ee2954b (Cleaned up analysis and merging of data for effiency graph):root_macros/in_pixel_plots.c
     hInPixelClSize_trackunc->Divide(hInPixelMatch_trackunc);
     hInPixelTime->Divide(hInPixelMatch);
 
+<<<<<<< HEAD:root_macros/simpleAnalysis.c
     result[1] = getEff(hInPixelMatch_trackunc->Integral(), hInPixelAll_trackunc->Integral());// in percent
     result[2] = getEffErr(hInPixelMatch_trackunc->Integral(), hInPixelAll_trackunc->Integral());// in percent
+=======
+    result[1] = getEff(hInPixelMatch_trackunc->Integral(), hInPixelPass_trackunc->Integral());// in percent
+    result[2] = getEffErr(hInPixelMatch_trackunc->Integral(), hInPixelPass_trackunc->Integral());// in percent
+>>>>>>> ee2954b (Cleaned up analysis and merging of data for effiency graph):root_macros/in_pixel_plots.c
 
     std::cout << "Matched tracks: " << hInPixelMatch->Integral() << std::endl;
     std::cout << "All tracks: " << hInPixelAll->Integral() << std::endl;
     std::cout << "Av. Eff.: " << result[1] << "+- " 
                 << result[2] << std::endl;
 
+<<<<<<< HEAD:root_macros/simpleAnalysis.c
     hInPixelMatch->Divide(hInPixelAll);
     hInPixelMatch_trackunc->Divide(hInPixelAll_trackunc);
     hInPixelMatch->Scale(100.); // in percent
     hInPixelMatch_trackunc->Scale(100.); // in percent
 
     /*
+=======
+    hInPixelMatch->Divide(hInPixelPass);
+    hInPixelMatch_trackunc->Divide(hInPixelPass_trackunc);
+    hInPixelMatch->Scale(100.); // in percent
+    hInPixelMatch_trackunc->Scale(100.); // in percent
+
+    
+    hInPixelTime->Divide(hInPixelPass);
+>>>>>>> ee2954b (Cleaned up analysis and merging of data for effiency graph):root_macros/in_pixel_plots.c
     auto h2 = h3->Project3D("xy");
     TCanvas *c1 = new TCanvas("c1", "XY Projection", 800, 600);
     h2->Draw("COLZ");
@@ -440,6 +464,7 @@ int threshold_loop(std::string inputFile, std::string outROOT){
     //double thresholds[] = {200, 230, 343, 448, 544, 632, 712}; // equivalent to thresholds of data points
 =======
     //double thresholds[] = {200., 300., 400., 500., 600., 700., 800., 900., 1000., 1200., 1400., 1600., 1800., 2000., 2200., 2400., 2600., 2800., 3000.};
+<<<<<<< HEAD
     //double thresholds[] = {400, 1000, 2000.};
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -453,7 +478,14 @@ int threshold_loop(std::string inputFile, std::string outROOT){
 =======
     double thresholds[] = {1200, 1400};
 >>>>>>> 72eed28 (Low Threshold data set from W5R23 added in threshold range 200-700e-)
+<<<<<<< HEAD:root_macros/simpleAnalysis.c
 >>>>>>> b0886b9 (Low Threshold data set from W5R23 added in threshold range 200-700e-):root_macros/in_pixel_plots.c
+=======
+=======
+    double thresholds[] = {400, 2000.};
+    //double thresholds[] = {200, 230, 343, 448, 544, 632, 712}; // equivalent to thresholds of data points
+>>>>>>> 0d7778e (Cleaned up analysis and merging of data for effiency graph)
+>>>>>>> ee2954b (Cleaned up analysis and merging of data for effiency graph):root_macros/in_pixel_plots.c
 
     int num_values = sizeof(thresholds) / sizeof(thresholds[0]);
     double results[num_values][3];

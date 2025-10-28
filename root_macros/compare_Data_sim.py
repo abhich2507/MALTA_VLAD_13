@@ -81,14 +81,13 @@ sim_inputs = [
     {"filename": "SimOutput_34.root", "label": "#sigma_{erf}=10.0#mum", "color": ROOT.kRed, "linestyle": 2, "linewidth": 1, "alpha": 0.5, "markerstyle": 21, "markersize": 1.0},
 ]
 
-
 ## Corrected sigma definition: Sim with sigma*sqrt(2) --> sigma 
 # and z = 29.1 um
 sim_inputs = [
     {"filename": "SimOutput_35.root", "label": "w/o charge sharing", "color": ROOT.kRed, "linestyle": 3, "linewidth": 1, "alpha": 0.5, "markerstyle": 25, "markersize": 1.0},
-    {"filename": "SimOutput_36.root", "label": "#sigma_{erf}=  2.0#mum", "color": ROOT.kBlack, "linestyle": 3, "linewidth": 1, "alpha": 0.5, "markerstyle": 25, "markersize": 1.0},
+    #{"filename": "SimOutput_36.root", "label": "#sigma_{erf}=  2.0#mum", "color": ROOT.kBlack, "linestyle": 3, "linewidth": 1, "alpha": 0.5, "markerstyle": 25, "markersize": 1.0},
     {"filename": "SimOutput_37.root", "label": "#sigma_{erf}=  4.3#mum", "color": ROOT.kRed, "linestyle": 1, "linewidth": 1, "alpha": 1.0, "markerstyle": 21, "markersize": 1.2},
-    {"filename": "SimOutput_38.root", "label": "#sigma_{erf}=  6.0#mum", "color": ROOT.kBlack, "linestyle": 2, "linewidth": 1, "alpha": 0.5, "markerstyle": 21, "markersize": 1.0},
+    #{"filename": "SimOutput_38.root", "label": "#sigma_{erf}=  6.0#mum", "color": ROOT.kBlack, "linestyle": 2, "linewidth": 1, "alpha": 0.5, "markerstyle": 21, "markersize": 1.0},
     {"filename": "SimOutput_39.root", "label": "#sigma_{erf}=10.0#mum", "color": ROOT.kRed, "linestyle": 2, "linewidth": 1, "alpha": 0.5, "markerstyle": 21, "markersize": 1.0},
 ]
 
@@ -106,14 +105,29 @@ sim_inputs_Zvar = [
 
 
 data_infile_HT = ROOT.TFile(data_filename_HighThr) # READ only
-data_AvEff = data_infile_HT.Get("MultiEff").Clone()
+data_infile_LT = ROOT.TFile(data_filename_LowThr) # READ only
+data_AvEff_HT = data_infile_HT.Get("MultiEff").Clone()
+grList_AvEff_HT = data_AvEff_HT.GetListOfGraphs()
 
-grList = data_AvEff.GetListOfGraphs()
-RHF.Remove_everyNpoints(grList[0], 2, 1) # remove every 2nd point
-RHF.Remove_everyNpoints(grList[0], 2, 1) # remove again every 2nd point
-grList[0].GetListOfFunctions().Clear() # clear fit function
+## data from High-threshold setting
+
+RHF.Remove_belowThresh(grList_AvEff_HT[0], 850.)
+RHF.Remove_everyNpoints(grList_AvEff_HT[0], 2, 1) # remove every 2nd point
+RHF.Remove_everyNpoints(grList_AvEff_HT[0], 2, 1) # remove again every 2nd point
+RHF.Remove_everyNpoints(grList_AvEff_HT[0], 2, 1) # remove again every 2nd point
+grList_AvEff_HT[0].GetListOfFunctions().Clear() # clear fit function
+
+## data from Low-Threshold setting
+data_AvEff_LT = data_infile_LT.Get("MultiEff").Clone()
+## add low threshold points to data:
+grList = data_AvEff_LT.GetListOfGraphs()
+RHF.addGrtoGr(grList[0], grList_AvEff_HT[0])
 RHF.addRelativeErrors(grList[0], 0.03,"X") # 3% uncertainty on Threshold-values
+<<<<<<< HEAD
 >>>>>>> b0886b9 (Low Threshold data set from W5R23 added in threshold range 200-700e-)
+=======
+
+>>>>>>> ee2954b (Cleaned up analysis and merging of data for effiency graph)
 #for p in range(grList[0].GetN()):
 #    print(grList[0].GetPointY(p), " +-", grList[0].GetErrorY(p))
 #RHF.addRelativeErrors(grList[0], 0.01,"Y") # 3% uncertainty on y vals
@@ -137,7 +151,7 @@ c=ROOT.TCanvas("cGr","Eff_1D",800,600)
 mg_AvEff = ROOT.TMultiGraph()
 mg_AvEff.SetTitle(";Threshold [{}];Efficiency [%]".format(latEl))
 #mg_AvEff.Add(yerror_band, "3")
-mg_AvEff.Add(grList[0], "PL")
+mg_AvEff.Add(grList[0], "P")
 
 for inp in sim_inputs:
     sim_infile = ROOT.TFile(inp["filename"]) # READ only
@@ -164,10 +178,13 @@ mg_AvEff.Draw("A") # "ap"
 mg_AvEff.GetXaxis().SetRangeUser(0,2500)
 mg_AvEff.SetMinimum(0)
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 #data_AvEff.Draw("ap same")
 #grList[0].Draw("ap same")
 >>>>>>> b0886b9 (Low Threshold data set from W5R23 added in threshold range 200-700e-)
+=======
+>>>>>>> ee2954b (Cleaned up analysis and merging of data for effiency graph)
 leg = c.BuildLegend(0.18, 0.18, 0.6, 0.52) #0.18, 0.18, 0.58, 0.5)
 mg_AvEff.Add(xerror_band, "F")
 leg.SetFillStyle(0)
@@ -197,11 +214,15 @@ data_AvClSize_LT = data_infile_LT.Get("MultiClSize").Clone()
 #data_AvEff.SetTitle("Data")
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 ## add low threshold points to data:
 grList_AvClSize = data_AvClSize_LT.GetListOfGraphs()
 RHF.addGrtoGr(grList_AvClSize[0], grList_AvClSize_HT[0])
 RHF.addRelativeErrors(grList_AvClSize[0], 0.03,"X", 20.) # 3% uncertainty on Threshold-values
 =======
+=======
+## add low threshold points to data:
+>>>>>>> ee2954b (Cleaned up analysis and merging of data for effiency graph)
 grList_AvClSize = data_AvClSize_LT.GetListOfGraphs()
 RHF.addGrtoGr(grList_AvClSize[0], grList_AvClSize_HT[0])
 RHF.addRelativeErrors(grList_AvClSize[0], 0.03,"X") # 3% uncertainty on Threshold-values
