@@ -210,6 +210,7 @@ void in_pixel_plots(std::string inputPath, std::string outROOTname, double resul
         }
         rememberer = eventID;
         //if (simpleCounter > 4) // This line looks for eventIDs that correspond to clusters larger than 4
+        if (simpleCounter > 4) std::cout << "Counter: " << simpleCounter << std::endl;
         if (eventID == 27437)
         {
             std::cout << "Event ID: " << eventID << "; pixX: " << entry.first.second.first << ";pixY: " << entry.first.second.second << "; corrEnergy: " << cenergy << std::endl;
@@ -251,8 +252,6 @@ void in_pixel_plots(std::string inputPath, std::string outROOTname, double resul
             hInPixelTime->Fill(xFolded, yFolded, itTime->second);
         }
 
-
-
         //hInPixelClSize->Fill(xFolded, yFolded, clSize); // Quick and dirty way to fill cluster size. No threshold implementation
         hInPixelPass->Fill(xFolded, yFolded, 1);
         hInPixelPass_trackunc->Fill(xIP_track, yIP_track, 1);
@@ -270,30 +269,11 @@ void in_pixel_plots(std::string inputPath, std::string outROOTname, double resul
         */
     }
 
-
     result[0] = hInPixelClSize_trackunc->Integral() / hInPixelMatch_trackunc->Integral();
-    std::cout << "Av. Cl size: " << hInPixelClSize->Integral() / hInPixelMatch->Integral() << std::endl;
-    std::cout << "Av. Cl size with track unc: " << hInPixelClSize_trackunc->Integral() / hInPixelMatch_trackunc->Integral() << std::endl;
-
+    std::cout << "Av. Cl size: " << result[0] << std::endl;
 
     hInPixelClSize->Divide(hInPixelMatch);
     hInPixelClSize_trackunc->Divide(hInPixelMatch_trackunc);
-
-    double weightedSum = 0.0;
-    double totalWeight = 0.0;
-    int nx = hInPixelClSize->GetNbinsX();
-    int ny = hInPixelClSize->GetNbinsY();
-    for (int ix = 1; ix <= nx; ++ix) {
-        for (int iy = 1; iy <= ny; ++iy) {
-            double content = hInPixelClSize->GetBinContent(ix, iy);
-            if (content <= 0) continue; // skip empty or negative bins
-            weightedSum += content * content; // weight by content
-            totalWeight += content;
-        }
-    }
-
-    double weightedMeanZ = (totalWeight > 0) ? weightedSum / totalWeight : 0.0;
-    std::cout << "Average Cluster Size: " << weightedMeanZ << std::endl;
 
     result[1] = getEff(hInPixelMatch_trackunc->Integral(), hInPixelPass_trackunc->Integral());// in percent
     result[2] = getEffErr(hInPixelMatch_trackunc->Integral(), hInPixelPass_trackunc->Integral());// in percent
@@ -303,27 +283,11 @@ void in_pixel_plots(std::string inputPath, std::string outROOTname, double resul
     std::cout << "Av. Eff.: " << result[1] << "+- " 
                 << result[2] << std::endl;
 
-
     hInPixelMatch->Divide(hInPixelPass);
     hInPixelMatch_trackunc->Divide(hInPixelPass_trackunc);
     hInPixelMatch->Scale(100.); // in percent
     hInPixelMatch_trackunc->Scale(100.); // in percent
 
-    weightedSum = 0.0;
-    totalWeight = 0.0;
-    nx = hInPixelMatch->GetNbinsX();
-    ny = hInPixelMatch->GetNbinsY();
-    for (int ix = 1; ix <= nx; ++ix) {
-        for (int iy = 1; iy <= ny; ++iy) {
-            double content = hInPixelMatch->GetBinContent(ix, iy);
-            if (content <= 0) continue; // skip empty or negative bins
-            weightedSum += content * content; // weight by content
-            totalWeight += content;
-        }
-    }
-
-    weightedMeanZ = (totalWeight > 0) ? weightedSum / totalWeight : 0.0;
-    std::cout << "Average eff.: " << weightedMeanZ << std::endl;
     
     hInPixelTime->Divide(hInPixelPass);
     auto h2 = h3->Project3D("xy");
@@ -397,6 +361,7 @@ void in_pixel_plots(std::string inputPath, std::string outROOTname, double resul
     hInPixelClSize_trackunc->GetZaxis()->SetTitleOffset(1.5);
     LinI1->Draw("SAMEL");
     LinI2->Draw("SAMEL");
+    t->DrawLatex(-2., pixelSizeY*2*1000. +2, Form("MALTA2 Sim.#bf{, 30#mum EPI, <cl. size> =%.2f}", result[0]));
     c2D->SaveAs(Form("2DIPClSize_trackunc_%.0fThr.pdf", threshold));
 
     // IP EFF plot with track unc
@@ -428,8 +393,8 @@ void in_pixel_plots(std::string inputPath, std::string outROOTname, double resul
 int threshold_loop(std::string inputFile, std::string outROOT){
     // List of threshold values:
     //double thresholds[] = {200., 300., 400., 500., 600., 700., 800., 900., 1000., 1200., 1400., 1600., 1800., 2000., 2200., 2400., 2600., 2800., 3000.};
-    //double thresholds[] = {400, 1000, 2000.};
-    double thresholds[] = {1200, 1400};
+    double thresholds[] = {400, 2000.};
+    //double thresholds[] = {200, 230, 343, 448, 544, 632, 712}; // equivalent to thresholds of data points
 
     int num_values = sizeof(thresholds) / sizeof(thresholds[0]);
     double results[num_values][3];
