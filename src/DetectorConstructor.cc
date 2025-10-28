@@ -26,9 +26,9 @@ G4VPhysicalVolume *DetectorConstruction::Construct()
     G4double detectorZOffset = fFlag->detectorZOffset *cm;
 
     // Define the world
-    G4double xWorld = 1. *m;
-    G4double yWorld = 1. *m;
-    G4double zWorld = 1. *m;
+    G4double xWorld = 2. *m;
+    G4double yWorld = 2. *m;
+    G4double zWorld = 2. *m;
     // Solid volume definition. 0.5* because G4Box takes the halflength as input
     G4Box *solidWorld = new G4Box("solidWorld", 0.5 * xWorld, 0.5 * yWorld, 0.5 * zWorld);
     // Logical world definition. Takes over solid volume and applies the worldMat material
@@ -64,7 +64,7 @@ G4VPhysicalVolume *DetectorConstruction::Construct()
     {
         //TODO: This is hardcoded. It has its own flag already. Fix it
         G4double maltaWidth = 18.6368 *mm; 
-        G4double maltaDepth = 30 * um;
+        G4double maltaDepth = 29.1 * um;
         G4Box *solidMALTA = new G4Box ("MALTASensor", maltaWidth/2, maltaWidth/2, maltaDepth/2);
         logicSensor = new G4LogicalVolume (solidMALTA, detMat, "logicSensor");
         G4VPhysicalVolume *physSensor  = new G4PVPlacement(0, G4ThreeVector(detectorXOffset, detectorYOffset, detectorZOffset), logicSensor, "physSensor", logicalWorld, false, 0, true);
@@ -73,6 +73,41 @@ G4VPhysicalVolume *DetectorConstruction::Construct()
         G4VisAttributes *pixelVisAtt = new G4VisAttributes(G4Color(0., 0., 1., 0.5));
         pixelVisAtt->SetForceSolid(true);
         logicSensor->SetVisAttributes(pixelVisAtt);
+
+        logicPlane1 = new G4LogicalVolume (solidMALTA, detMat, "logicPlane1");
+        G4VPhysicalVolume *physPlane1  = new G4PVPlacement(0, G4ThreeVector(detectorXOffset, detectorYOffset, detectorZOffset -64.2*cm), logicPlane1, "physPlane1", logicalWorld, false, 0, true);
+        logicPlane1->SetVisAttributes(pixelVisAtt);
+
+        logicPlane2 = new G4LogicalVolume (solidMALTA, detMat, "logicPlane2");
+        G4VPhysicalVolume *physPlane2  = new G4PVPlacement(0, G4ThreeVector(detectorXOffset, detectorYOffset, detectorZOffset -56.2*cm), logicPlane2, "physPlane2", logicalWorld, false, 0, true);
+        logicPlane2->SetVisAttributes(pixelVisAtt);
+
+        logicPlane3 = new G4LogicalVolume (solidMALTA, detMat, "logicPlane3");
+        G4VPhysicalVolume *physPlane3  = new G4PVPlacement(0, G4ThreeVector(detectorXOffset, detectorYOffset, detectorZOffset -48.2*cm), logicPlane3, "physPlane3", logicalWorld, false, 0, true);
+        logicPlane3->SetVisAttributes(pixelVisAtt);
+
+        logicPlane4 = new G4LogicalVolume (solidMALTA, detMat, "logicPlane4");
+        G4VPhysicalVolume *physPlane4  = new G4PVPlacement(0, G4ThreeVector(detectorXOffset, detectorYOffset, detectorZOffset + 29.8*cm), logicPlane4, "physPlane4", logicalWorld, false, 0, true);
+        logicPlane4->SetVisAttributes(pixelVisAtt);
+
+        logicPlane5 = new G4LogicalVolume (solidMALTA, detMat, "logicPlane5");
+        G4VPhysicalVolume *physPlane5  = new G4PVPlacement(0, G4ThreeVector(detectorXOffset, detectorYOffset, detectorZOffset + 37.8*cm), logicPlane5, "physPlane5", logicalWorld, false, 0, true);
+        logicPlane5->SetVisAttributes(pixelVisAtt);
+
+        logicPlane6 = new G4LogicalVolume (solidMALTA, detMat, "logicPlane6");
+        G4VPhysicalVolume *physPlane6  = new G4PVPlacement(0, G4ThreeVector(detectorXOffset, detectorYOffset, detectorZOffset + 45.8*cm), logicPlane6, "physPlane6", logicalWorld, false, 0, true);
+        logicPlane6->SetVisAttributes(pixelVisAtt);
+
+
+
+
+
+
+
+
+
+
+        
     }
 
 
@@ -192,5 +227,11 @@ void DetectorConstruction::ConstructSDandField()
         // Ensure that methods initialize at end of event
         G4SDManager::GetSDMpointer()->AddNewDetector(sensDet);
         logicSensor->SetSensitiveDetector(sensDet);
+        logicPlane1->SetSensitiveDetector(sensDet);
+        logicPlane2->SetSensitiveDetector(sensDet);
+        logicPlane3->SetSensitiveDetector(sensDet);
+        logicPlane4->SetSensitiveDetector(sensDet);
+        logicPlane5->SetSensitiveDetector(sensDet);
+        logicPlane6->SetSensitiveDetector(sensDet);
     }
 }

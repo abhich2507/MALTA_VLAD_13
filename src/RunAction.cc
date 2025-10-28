@@ -1,6 +1,8 @@
 #include "RunAction.hh"
 #include "CustomRun.hh"
 
+
+
 RunAction::RunAction(SimFlags* flags) : fFlag(flags)
 {
     // Simplified instantiation thanks to GEANT4 implementation
@@ -10,6 +12,7 @@ RunAction::RunAction(SimFlags* flags) : fFlag(flags)
     analysisManager->CreateNtuple("TruthEnDeposited", "Monte Carlo Truth Energy Deposited");
     // Create Integer Event # column
     analysisManager->CreateNtupleIColumn("iEvent");
+    analysisManager->CreateNtupleIColumn("iPlane");
     // Create Double position columns
     analysisManager->CreateNtupleDColumn("fX");
     analysisManager->CreateNtupleDColumn("fY");
@@ -19,7 +22,7 @@ RunAction::RunAction(SimFlags* flags) : fFlag(flags)
     analysisManager->CreateNtupleDColumn("vertexZ");
 
     // Create Integer Global time column = time that starts when each event begins. Local time = time when the particle is created
-    analysisManager->CreateNtupleIColumn("fGlobalTime");
+    analysisManager->CreateNtupleDColumn("fGlobalTime");
     // Create Double Energy column
     analysisManager->CreateNtupleDColumn("Energy");
     // Create Double corrected Energy column
@@ -52,12 +55,24 @@ RunAction::RunAction(SimFlags* flags) : fFlag(flags)
 
     analysisManager->CreateNtuple("RawPixelHits", "Raw Pixel Hits");
     analysisManager->CreateNtupleIColumn("iEvent");
+    analysisManager->CreateNtupleIColumn("iPlane");
     analysisManager->CreateNtupleIColumn("iHit");
     analysisManager->CreateNtupleIColumn("PixX");
     analysisManager->CreateNtupleIColumn("PixY");
     analysisManager->CreateNtupleDColumn("timeWalkHit");
     analysisManager->CreateNtupleDColumn("Energy");
     analysisManager->FinishNtuple(3);
+
+    // This NTuple is redundant with the (0) one. I will probably deprecate that one later
+    analysisManager->CreateNtuple("TruthVertex", "Monte Carlo Truth Vertex Position");
+    // Create Integer Event # column
+    analysisManager->CreateNtupleIColumn("iEvent");
+    analysisManager->CreateNtupleDColumn("vertexX");
+    analysisManager->CreateNtupleDColumn("vertexY");
+    analysisManager->CreateNtupleDColumn("vertexZ");
+    // Create Integer Global time column = time that starts when each event begins. Local time = time when the particle is created
+    analysisManager->CreateNtupleDColumn("fGlobalTime");
+    analysisManager->FinishNtuple(4);
 
     
 
@@ -74,6 +89,7 @@ void RunAction::BeginOfRunAction(const G4Run *run)
     G4int runID = run->GetRunID();
     std::stringstream strRunID;
     strRunID << runID;
+    
     //analysisManager->SetNtupleMerging(true);
     if (isMaster && fFlag->isBatch)
     {

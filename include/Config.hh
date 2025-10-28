@@ -38,6 +38,8 @@ struct SimFlags
     double sourceZOffset = 0.;
     int particleCount = 0;
     int numEvents = 0;
+    double intraSpillOffset = 0;
+    double beamVeto = 0;
     std::string particleType = "";
     std::string particleEnergy = "";
     double particleMomentumX = 0.;

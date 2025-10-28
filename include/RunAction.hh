@@ -18,6 +18,7 @@ public:
     virtual void EndOfRunAction(const G4Run *);
     virtual G4Run* GenerateRun() override;
     
+    
 private:
     SimFlags* fFlag;
     std::string fOutputPath;

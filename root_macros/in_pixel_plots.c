@@ -4,21 +4,30 @@
 #include <iostream>
 #include <math.h>
 
+// -------------- How to run: 
+
+// // for 2DEff 1400e- threshold plots:
+// specify threshold = 1400e- in threshold_loop()
+// .L in_pixel_plots.c
+// threshold_loop("/Users/lucianfasselt/DECAL/Simulation/Geant4/MALTASIM/malta_simulation/Results/local_0020/", "test_1400e-.root")
+
 // -------------- todo:
 // 1) clearly name "Energy", "corrEnergy", "Charge" and "corrCharge" (rename equivalently in RunAction.cc)
 // 2) Get eff. curve for uncorrected energy and compare models with data. (to show that CC-model makes more sense)
 
-double GetTimingOffset(double amplitude) 
+// this function is derived from data at threshold = 150e-.
+// It assumes that the front-end is readjusted for each threshold change.
+// Assumptions: 
+// 1) Time-walk for DeltaT vs. amplitude in volts is the same for each threshold
+// 2) calibration from volts to charge is linear with threshold. (larger threshold --> larger charge for same voltage amplitude.)
+// an upper limit of 200. is defined for amplitudes that fall below threshold. (Could also be set to inf or 0 ?)
+double GetTimingOffset(double amplitude, double threshold) 
 {
-    // assumes 1200e- correspond to 350 mV. Check calibration through injection scans.
-    //return 40. * std::exp(amplitude /(-191.));
-    if (amplitude < 100.) 
-    { // delay only down to amplitudes of 100e-. 
-        return 3230. /pow(100-67.0, 1.08);
+    if (amplitude < threshold) // if less than than threshold 
+    {
+        return 200.; // set to 200 ns delay if less than threshold (function diverges at threshold)
     }
-
-    return 3230. /pow(amplitude-67.0, 1.08);
-
+    return 390.0 / pow((amplitude * 150./threshold) - 149.8, 0.65);
 }
 
 // Efficiency in percent
@@ -44,7 +53,7 @@ void set_style() {
 
 // result stores [average cluster size, av. efficiency, error on av. eff]
 // Threshold in electrons
-void in_pixel_plots(double result[3], double threshold = 1000) {
+void in_pixel_plots(std::string inputPath, std::string outROOTname, double result[3], double threshold = 1000) {
     // // Usage:
     // // create subdirectory and run from there (pdf plots will be created in it)
     // root
@@ -60,7 +69,8 @@ void in_pixel_plots(double result[3], double threshold = 1000) {
     double trackunc_Y = 4.6/1000.; // tracking uncertainty in X in unit mm
 
     //std::string inputPath = "/home/vlad/Documents/Simu/Geant4/DECAL_REPO/Results/local_0044/";
-    std::string inputPath = "/Users/lucianfasselt/DECAL/Simulation/Geant4/MALTASIM/malta_simulation/Results/local_0014/";
+    //std::string inputPath = "/Users/lucianfasselt/DECAL/Simulation/Geant4/MALTASIM/malta_simulation/Results/local_0014/"; // reference before
+    //std::string inputPath = "/Users/lucianfasselt/DECAL/Simulation/Geant4/MALTASIM/malta_simulation/Results/local_0020/"; // vary 20-28
 
     //TFile *file = TFile::Open("/home/vlad/Documents/Simu/Geant4/DECAL/build/output0_t0.root");
     //TTree *tree = (TTree*)file->Get("EnDeposited");
@@ -77,8 +87,6 @@ void in_pixel_plots(double result[3], double threshold = 1000) {
 
     // Connect branches
     chain->SetBranchAddress("iEvent", &truthEventID);
-    
-    
     chain->SetBranchAddress("fX", &fX);
     chain->SetBranchAddress("fY", &fY);
     chain->SetBranchAddress("fZ", &fZ);
@@ -180,7 +188,7 @@ void in_pixel_plots(double result[3], double threshold = 1000) {
         int eventID = entry.first.first;
         //int hitID   = entry.first.second;
         double cenergy = entry.second; // corrected energy
-        inClusterTimes[eventID].push_back(GetTimingOffset(cenergy));
+        inClusterTimes[eventID].push_back(GetTimingOffset(cenergy, threshold));
         //std::cout << GetTimingOffset(cenergy) << std::endl;
         // Fill the cluster size map
         if (cenergy > threshold) 
@@ -338,6 +346,7 @@ void in_pixel_plots(double result[3], double threshold = 1000) {
     set_style();
     TCanvas *c2D = new TCanvas("c2D", "2DInPix ", 800, 800); // use same for all Inpixplots
     gStyle->SetOptStat(0);
+    c2D->SetTicks(1, 1);  // 1 = draw ticks on top/right as well
     c2D->SetRightMargin(0.16); // define margins for all IP plots
     c2D->SetBottomMargin(0.1);
     c2D->SetLeftMargin(0.1);
@@ -366,11 +375,13 @@ void in_pixel_plots(double result[3], double threshold = 1000) {
     // Create TLatex object
     TLatex *t = new TLatex();
     // Draw the formatted text
-    t->DrawLatex(pixelSizeX/2.*1000., pixelSizeY*2*1000. +2, Form("<eff> = %.2f #pm %.2f %%", result[1], result[2]));
+    //t->DrawLatex(pixelSizeX/2.*1000., pixelSizeY*2*1000. +2, Form("<eff> = %.2f #pm %.2f %%", result[1], result[2]));
+    t->DrawLatex(-2., pixelSizeY*2*1000. +2, Form("MALTA2 Sim.#bf{, 30#mum EPI, <eff> =%.1f%%}", result[1]));
     hInPixelMatch->GetZaxis()->SetTitleOffset(1.5);
     LinI1->Draw("SAMEL");
     LinI2->Draw("SAMEL");
     c2D->SaveAs(Form("2DIPMatch_%.0fThr.pdf", threshold));
+    c2D->SaveAs(Form("2DIPMatch_%.0fThr.C", threshold));
 
     // IP TIMING plot
     hInPixelTime->Draw("COLZ");
@@ -395,24 +406,30 @@ void in_pixel_plots(double result[3], double threshold = 1000) {
     hInPixelMatch_trackunc->GetZaxis()->SetTitleOffset(1.5);
     LinI1->Draw("SAMEL");
     LinI2->Draw("SAMEL");
-    t->DrawLatex(pixelSizeX/2.*1000., pixelSizeY*2*1000. +2, Form("<eff> = %.2f #pm %.2f %%", result[1], result[2]));
+    //t->DrawLatex(pixelSizeX/2.*1000., pixelSizeY*2*1000. +2, Form("<eff> = %.2f #pm %.2f %%", result[1], result[2]));
+    t->DrawLatex(-2., pixelSizeY*2*1000. +2, Form("MALTA2 Sim.#bf{, 30#mum EPI, <eff> =%.1f%%}", result[1]));
     c2D->SaveAs(Form("2DIPEff_trackunc_%.0fThr.pdf", threshold));
+    c2D->SaveAs(Form("2DIPEff_trackunc_%.0fThr.C", threshold));
     c2D->Close();
 
     // Save output
-    TFile outFile("SimOutput.root", "UPDATE");
-    h3->Write();
-    h2_fullChip->Write();
+    TFile outFile(outROOTname.c_str(), "UPDATE");
+    //h3->Write();
+    //h2_fullChip->Write();
     hInPixelClSize_trackunc->Write();
     hInPixelMatch_trackunc->Write();
     outFile.Close();
 
 }
 
-int threshold_loop(){
+// specify inputFile = "/Users/lucianfasselt/DECAL/Simulation/Geant4/MALTASIM/malta_simulation/Results/local_0020/"
+// specify outROOT = "SimOutput_20.root"
+// or use intLoop
+int threshold_loop(std::string inputFile, std::string outROOT){
     // List of threshold values:
-    double thresholds[] = {200., 300., 400., 500., 600., 700., 800., 900., 1000., 1200., 1400., 1600., 1800., 2000., 2200., 2400., 2600., 2800., 3000.};
+    //double thresholds[] = {200., 300., 400., 500., 600., 700., 800., 900., 1000., 1200., 1400., 1600., 1800., 2000., 2200., 2400., 2600., 2800., 3000.};
     //double thresholds[] = {400, 1000, 2000.};
+    double thresholds[] = {1200, 1400};
 
     int num_values = sizeof(thresholds) / sizeof(thresholds[0]);
     double results[num_values][3];
@@ -423,15 +440,15 @@ int threshold_loop(){
     TGraphErrors *gr_AvEff = new TGraphErrors(num_values);
     gr_AvEff->SetName("AverageEff");
 
-    TFile outFile("SimOutput.root", "RECREATE"); // create new file and fill in in_pixel_plots
+    TFile outFile(outROOT.c_str(), "RECREATE"); // create new file and fill in in_pixel_plots
     outFile.Close();
 
     // Get average cl. size and eff. for each threshold
     for (int i = 0; i < num_values; i++) {
-        in_pixel_plots(results[i], thresholds[i]);
+        in_pixel_plots(inputFile, outROOT, results[i], thresholds[i]);
         gr_AvClSize->SetPoint(i, thresholds[i], results[i][0]);
         gr_AvEff->SetPoint(i, thresholds[i], results[i][1]);
-        gr_AvEff->SetPointError(i, 0.03*thresholds[i], results[i][2]); // assume 3% unc. on threshold
+        gr_AvEff->SetPointError(i, 0.0, results[i][2]); // assume no unc. on threshold
     }
 
     // Draw graphs
@@ -451,7 +468,7 @@ int threshold_loop(){
     c2->SaveAs("AvEff.pdf");
     c2->Close();
 
-    TFile outFile2("SimOutput.root", "UPDATE"); // open again and fill with summary plots
+    TFile outFile2(outROOT.c_str(), "UPDATE"); // open again and fill with summary plots
     gr_AvClSize->Write();
     gr_AvEff->Write();
     outFile2.Close();
@@ -463,3 +480,14 @@ int threshold_loop(){
     }
     return 0;
 }
+
+void RunInt_loop(){
+    for (int runNumber = 43; runNumber <= 45; ++runNumber) {
+        std::string inputFileName = "/Users/lucianfasselt/DECAL/Simulation/Geant4/MALTASIM/malta_simulation/Results/local_00"+ std::to_string(runNumber)+"/";  
+        std::string outROOTName = "SimOutput_" + std::to_string(runNumber) + ".root";
+        threshold_loop(inputFileName, outROOTName.c_str());
+    }
+}
+
+
+
