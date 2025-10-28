@@ -49,6 +49,7 @@ G4VPhysicalVolume *DetectorConstruction::Construct()
     // MALTA implementation monolithic sensor
     if(fFlag->preDefinedGeometryFlag == "MALTA")
     {
+<<<<<<< HEAD
         G4double maltaWidthX = fFlag->detectorSizeX *cm; 
         G4double maltaWidthY = fFlag->detectorSizeY *cm; 
         G4double maltaDepth = fFlag->detectorDepth* um;
@@ -61,6 +62,12 @@ G4VPhysicalVolume *DetectorConstruction::Construct()
         }
 
         G4Box *solidMALTA = new G4Box ("MALTASensor", maltaWidthX/2, maltaWidthY/2, maltaDepth/2);
+=======
+        //TODO: This is hardcoded. It has its own flag already. Fix it
+        G4double maltaWidth = 18.6368 *mm; 
+        G4double maltaDepth = 29.1 * um;
+        G4Box *solidMALTA = new G4Box ("MALTASensor", maltaWidth/2, maltaWidth/2, maltaDepth/2);
+>>>>>>> 8149767 (Added digitization + tracking + clustering + analysis in an automatic fashion for each run)
         logicSensor = new G4LogicalVolume (solidMALTA, detMat, "logicSensor");
         G4VPhysicalVolume *physSensor  = new G4PVPlacement(0, G4ThreeVector(detectorXOffset, detectorYOffset, detectorZOffset), logicSensor, "physSensor", logicalWorld, false, 0, true);
 
@@ -68,6 +75,7 @@ G4VPhysicalVolume *DetectorConstruction::Construct()
         pixelVisAtt->SetForceSolid(true);
         logicSensor->SetVisAttributes(pixelVisAtt);
 
+<<<<<<< HEAD
         std::vector<double> planeCorrections = {-64.2, -56.2, -48.2, 29.8, 37.8, 45.8};
 
         for (const double& corr : planeCorrections)
@@ -110,6 +118,42 @@ G4VPhysicalVolume *DetectorConstruction::Construct()
 
 
  
+=======
+        logicPlane1 = new G4LogicalVolume (solidMALTA, detMat, "logicPlane1");
+        G4VPhysicalVolume *physPlane1  = new G4PVPlacement(0, G4ThreeVector(detectorXOffset, detectorYOffset, detectorZOffset -64.2*cm), logicPlane1, "physPlane1", logicalWorld, false, 0, true);
+        logicPlane1->SetVisAttributes(pixelVisAtt);
+
+        logicPlane2 = new G4LogicalVolume (solidMALTA, detMat, "logicPlane2");
+        G4VPhysicalVolume *physPlane2  = new G4PVPlacement(0, G4ThreeVector(detectorXOffset, detectorYOffset, detectorZOffset -56.2*cm), logicPlane2, "physPlane2", logicalWorld, false, 0, true);
+        logicPlane2->SetVisAttributes(pixelVisAtt);
+
+        logicPlane3 = new G4LogicalVolume (solidMALTA, detMat, "logicPlane3");
+        G4VPhysicalVolume *physPlane3  = new G4PVPlacement(0, G4ThreeVector(detectorXOffset, detectorYOffset, detectorZOffset -48.2*cm), logicPlane3, "physPlane3", logicalWorld, false, 0, true);
+        logicPlane3->SetVisAttributes(pixelVisAtt);
+
+        logicPlane4 = new G4LogicalVolume (solidMALTA, detMat, "logicPlane4");
+        G4VPhysicalVolume *physPlane4  = new G4PVPlacement(0, G4ThreeVector(detectorXOffset, detectorYOffset, detectorZOffset + 29.8*cm), logicPlane4, "physPlane4", logicalWorld, false, 0, true);
+        logicPlane4->SetVisAttributes(pixelVisAtt);
+
+        logicPlane5 = new G4LogicalVolume (solidMALTA, detMat, "logicPlane5");
+        G4VPhysicalVolume *physPlane5  = new G4PVPlacement(0, G4ThreeVector(detectorXOffset, detectorYOffset, detectorZOffset + 37.8*cm), logicPlane5, "physPlane5", logicalWorld, false, 0, true);
+        logicPlane5->SetVisAttributes(pixelVisAtt);
+
+        logicPlane6 = new G4LogicalVolume (solidMALTA, detMat, "logicPlane6");
+        G4VPhysicalVolume *physPlane6  = new G4PVPlacement(0, G4ThreeVector(detectorXOffset, detectorYOffset, detectorZOffset + 45.8*cm), logicPlane6, "physPlane6", logicalWorld, false, 0, true);
+        logicPlane6->SetVisAttributes(pixelVisAtt);
+
+
+
+
+
+
+
+
+
+
+        
+>>>>>>> 8149767 (Added digitization + tracking + clustering + analysis in an automatic fashion for each run)
     }
 
     else if(fFlag->preDefinedGeometryFlag == "PCB")

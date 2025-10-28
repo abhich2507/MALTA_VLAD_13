@@ -32,6 +32,9 @@ void SensitiveDetector::EndOfEvent(G4HCofThisEvent *)
 
 G4bool SensitiveDetector::ProcessHits(G4Step *aStep, G4TouchableHistory *)
 {
+
+
+    //TODO: Differentiate between different planes via a branchID
     G4int eventID = G4RunManager::GetRunManager()->GetCurrentEvent()->GetEventID();
 
     G4AnalysisManager *analysisManager = G4AnalysisManager::Instance();
@@ -87,6 +90,11 @@ G4bool SensitiveDetector::ProcessHits(G4Step *aStep, G4TouchableHistory *)
             planeID = -1;
         }
     }
+<<<<<<< HEAD
+=======
+
+    //G4cout << posPixel[0] << "," << posPixel[1] << G4endl;
+>>>>>>> 8149767 (Added digitization + tracking + clustering + analysis in an automatic fashion for each run)
     // get modulus for InPixel location.
     G4ThreeVector InPixPos = G4ThreeVector(std::fmod(posPixel[0],pixelSize), std::fmod(posPixel[1],pixelSize), posPixel[2]); // result in mm
     double efficiency = GetEfficiencyCorrectionXY(InPixPos);
@@ -134,6 +142,7 @@ G4bool SensitiveDetector::ProcessHits(G4Step *aStep, G4TouchableHistory *)
     double leadingEnergy = *it * energy; // leading energy in MeV
     for(int i = 0; i<4; i++)
     {
+<<<<<<< HEAD
         analysisManager->FillNtupleIColumn(1, 0, eventID);
         analysisManager->FillNtupleIColumn(1, 1, planeID);
         analysisManager->FillNtupleIColumn(1, 2, iHit);
@@ -144,6 +153,55 @@ G4bool SensitiveDetector::ProcessHits(G4Step *aStep, G4TouchableHistory *)
         analysisManager->FillNtupleDColumn(1, 6, effAnCopy[i] * energy *1000000/epsilon);
         analysisManager->AddNtupleRow(1); 
         iHit++;
+=======
+        //if (effAn[i] * energy *1000000/epsilon > 50) // Set a data supression threshold at 50 deposited el
+
+        analysisManager->FillNtupleIColumn(3, 0, eventID);
+        analysisManager->FillNtupleIColumn(3, 1, planeID);
+        analysisManager->FillNtupleIColumn(3, 2, iHit);
+        analysisManager->FillNtupleIColumn(3, 3, pixelCluster[i][0]);
+        analysisManager->FillNtupleIColumn(3, 4, pixelCluster[i][1]);
+        // This branch will be modified. Before it as encoding the timewalk of each hit. Now it stores the hit time of a particle.
+        analysisManager->FillNtupleDColumn(3, 5, fglobalTime *ns);
+        analysisManager->FillNtupleDColumn(3, 6, effAn[i] * energy *1000000/epsilon);
+        analysisManager->AddNtupleRow(3); 
+        iHit++;
+
+    }
+
+
+    analysisManager->FillNtupleIColumn(0, 0, eventID);
+    analysisManager->FillNtupleIColumn(0, 1, planeID);
+    // X, Y, Z position of the hit
+    analysisManager->FillNtupleDColumn(0, 2, posPixel[0]);
+    analysisManager->FillNtupleDColumn(0, 3, posPixel[1]);
+    analysisManager->FillNtupleDColumn(0, 4, posPixel[2]);
+
+    analysisManager->FillNtupleDColumn(0, 5, posVertex[0]);
+    analysisManager->FillNtupleDColumn(0, 6, posVertex[1]);
+    analysisManager->FillNtupleDColumn(0, 7, posVertex[2]);
+
+    analysisManager->FillNtupleDColumn(0, 8, fglobalTime *ns);
+    analysisManager->FillNtupleDColumn(0, 9, energy);
+    analysisManager->FillNtupleDColumn(0, 10, edep_corr);
+    analysisManager->FillNtupleIColumn(0, 11, iHit);
+    analysisManager->FillNtupleDColumn(0, 12, leadingEnergy);
+    analysisManager->FillNtupleDColumn(0, 13, leadingTime);
+    analysisManager->AddNtupleRow(0); 
+    
+
+
+
+
+
+    // Get out the secondary particle step length
+    if (aStep->GetTrack()->GetParentID() != 0)
+    {
+        fTrackLengths[aStep->GetTrack()->GetTrackID()] += aStep->GetStepLength();
+        analysisManager->FillNtupleIColumn(2, 0, eventID);
+        analysisManager->FillNtupleDColumn(2, 1,  fTrackLengths[aStep->GetTrack()->GetTrackID()] * 1000);
+        analysisManager->AddNtupleRow(2); 
+>>>>>>> 8149767 (Added digitization + tracking + clustering + analysis in an automatic fashion for each run)
     }
 
     return true;
@@ -257,4 +315,21 @@ std::pair<std::array<double, 4>, uint8_t>  SensitiveDetector::GetEfficiencyAnaly
     eff11 = eff_X1 * eff_Y1; // top right
 
     return {{eff00, eff01, eff10, eff11}, quadrantFlag} ; // ordering not certain yet.
+<<<<<<< HEAD
 }
+=======
+}
+
+// Get time-walk from parameterization.
+// amplitude in unit electrons
+// returns timing in ns
+G4double SensitiveDetector::GetTimingOffset(G4double amplitude) {
+    // function diverges at 150e-
+    if (amplitude < 150.) 
+    { // delay only down to amplitudes of 150e-. 
+        return 200;
+    }
+    return 390. /pow(amplitude-149.8, 0.65);
+
+}
+>>>>>>> 8149767 (Added digitization + tracking + clustering + analysis in an automatic fashion for each run)

@@ -3,6 +3,7 @@
 #include <TH3D.h>
 #include <TFile.h>
 
+<<<<<<< HEAD
 void Remove_everyNpoints(TGraph* g, int N, int startIndex = 0) 
 {
 
@@ -35,6 +36,15 @@ void summary_plots()
     std::vector<std::string> runFiles = {"Nominal"};
 
     std::vector<std::string> labels = {"Simulation"};
+=======
+
+void summary_plots()
+{
+    std::vector<int> runNumbers= {2};
+    std::vector<std::string> runFiles = {"Nominal"};
+
+    std::vector<std::string> labels = {"Nominal"};
+>>>>>>> 8149767 (Added digitization + tracking + clustering + analysis in an automatic fashion for each run)
 
     //std::vector<std::string> labels = {"Perfect matching", "Real matching", "Slow matching"};
 
@@ -69,34 +79,55 @@ void summary_plots()
                 continue;
             }
 
+<<<<<<< HEAD
             double threshold, efficiency, effError, timing, clSize, clSizeError;
+=======
+            double threshold, efficiency, effError, timing, clSize;
+>>>>>>> 8149767 (Added digitization + tracking + clustering + analysis in an automatic fashion for each run)
             summaryTree->SetBranchAddress("threshold", &threshold);
             summaryTree->SetBranchAddress("efficiency", &efficiency);
             summaryTree->SetBranchAddress("effError", &effError);
             summaryTree->SetBranchAddress("clSize", &clSize);
+<<<<<<< HEAD
             summaryTree->SetBranchAddress("clSizeError", &clSizeError);
+=======
+>>>>>>> 8149767 (Added digitization + tracking + clustering + analysis in an automatic fashion for each run)
             summaryTree->SetBranchAddress("timing", &timing);
 
             int nEntriesSummary = summaryTree->GetEntries();
 
+<<<<<<< HEAD
             std::vector<double> vThr, vThrErr, vEff, vEffErr, vClSize, vClSizeErr, vTiming;
+=======
+            std::vector<double> vThr, vThrErr, vEff, vEffErr, vClSize, vTiming;
+>>>>>>> 8149767 (Added digitization + tracking + clustering + analysis in an automatic fashion for each run)
             vThr.reserve(nEntriesSummary);
             vThrErr.reserve(nEntriesSummary);
             vEff.reserve(nEntriesSummary);
             vEffErr.reserve(nEntriesSummary);
             vClSize.reserve(nEntriesSummary);
+<<<<<<< HEAD
             vClSizeErr.reserve(nEntriesSummary);
+=======
+>>>>>>> 8149767 (Added digitization + tracking + clustering + analysis in an automatic fashion for each run)
             vTiming.reserve(nEntriesSummary);
 
             for (int i = 0; i< nEntriesSummary; i++) { // replace 11 with 
                 summaryTree->GetEntry(i);
 
                 vThr.push_back(threshold);
+<<<<<<< HEAD
                 vThrErr.push_back(threshold * 0.03); // 3% quoted from calibration paper
                 vEff.push_back(efficiency);
                 vEffErr.push_back(effError);
                 vClSize.push_back(clSize);
                 vClSizeErr.push_back(clSizeError);
+=======
+                vThrErr.push_back(threshold/3.0); // 3% quoted from calibration paper
+                vEff.push_back(efficiency);
+                vEffErr.push_back(effError);
+                vClSize.push_back(clSize);
+>>>>>>> 8149767 (Added digitization + tracking + clustering + analysis in an automatic fashion for each run)
                 vTiming.push_back(timing);
             }
             // Graphs
@@ -109,10 +140,16 @@ void summary_plots()
             //leg1->AddEntry(gThrVSEff, runFiles[colorIndex-1].c_str(), "p");
             leg1->AddEntry(gThrVSEff, labels[colorIndex-1].c_str(), "p");
 
+<<<<<<< HEAD
             TGraphErrors *gThrVSClSize = new TGraphErrors(nEntriesSummary, vThr.data(),  vClSize.data(), vThrErr.data(), vClSizeErr.data());
             gThrVSClSize->SetTitle("Cluster size vs Threshold;Threshold [e-];<Cluster size>");
             gThrVSClSize->SetMarkerStyle(21);
             gThrVSClSize->SetMarkerSize(2.);
+=======
+            TGraph *gThrVSClSize = new TGraph(nEntriesSummary, vThr.data(),  vClSize.data());
+            gThrVSClSize->SetTitle("Cluster size vs Threshold;Threshold [e-];Cluster size");
+            gThrVSClSize->SetMarkerStyle(21);
+>>>>>>> 8149767 (Added digitization + tracking + clustering + analysis in an automatic fashion for each run)
             gThrVSClSize->SetMarkerColor(colorIndex);
             //leg2->AddEntry(gThrVSClSize, runFiles[colorIndex-1].c_str(), "p");
             leg2->AddEntry(gThrVSClSize, labels[colorIndex-1].c_str(), "p");
@@ -148,6 +185,7 @@ void summary_plots()
     c3->cd(); leg3->Draw();
 
 
+<<<<<<< HEAD
     // Data plotting optional for data vs sim comparison
 
     TFile *dataInputLowIBIAS = TFile::Open("/home/vlad/Documents/Simu/Geant4/DECAL_REPO/root_macros/root_input/xybinsIDB100IBIAS05_Clsize_Xbin16_XNsteps1_Xstepsize0_Yfix-1.root");
@@ -215,4 +253,6 @@ void summary_plots()
     leg2->Draw();
 
 
+=======
+>>>>>>> 8149767 (Added digitization + tracking + clustering + analysis in an automatic fashion for each run)
 }
