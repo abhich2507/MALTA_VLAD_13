@@ -4,6 +4,9 @@
 #include <TFile.h>
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 6a22808 (Added Data plotting in summary_plots.c. All plotting capabailities of in_pixel_plots and compare_Data should now be implemented there.)
 void Remove_everyNpoints(TGraph* g, int N, int startIndex = 0) 
 {
 
@@ -29,6 +32,7 @@ void Remove_everyNpoints(TGraph* g, int N, int startIndex = 0)
         g->SetPoint(i, xNew[i], yNew[i]);
 
 }
+<<<<<<< HEAD
 
 void summary_plots()
 {
@@ -37,14 +41,20 @@ void summary_plots()
 
     std::vector<std::string> labels = {"Simulation"};
 =======
+=======
+>>>>>>> 6a22808 (Added Data plotting in summary_plots.c. All plotting capabailities of in_pixel_plots and compare_Data should now be implemented there.)
 
 void summary_plots()
 {
-    std::vector<int> runNumbers= {2};
+    std::vector<int> runNumbers= {1};
     std::vector<std::string> runFiles = {"Nominal"};
 
+<<<<<<< HEAD
     std::vector<std::string> labels = {"Nominal"};
 >>>>>>> 8149767 (Added digitization + tracking + clustering + analysis in an automatic fashion for each run)
+=======
+    std::vector<std::string> labels = {"Simulation"};
+>>>>>>> 6a22808 (Added Data plotting in summary_plots.c. All plotting capabailities of in_pixel_plots and compare_Data should now be implemented there.)
 
     //std::vector<std::string> labels = {"Perfect matching", "Real matching", "Slow matching"};
 
@@ -80,42 +90,59 @@ void summary_plots()
             }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
             double threshold, efficiency, effError, timing, clSize, clSizeError;
 =======
             double threshold, efficiency, effError, timing, clSize;
 >>>>>>> 8149767 (Added digitization + tracking + clustering + analysis in an automatic fashion for each run)
+=======
+            double threshold, efficiency, effError, timing, clSize, clSizeError;
+>>>>>>> 6a22808 (Added Data plotting in summary_plots.c. All plotting capabailities of in_pixel_plots and compare_Data should now be implemented there.)
             summaryTree->SetBranchAddress("threshold", &threshold);
             summaryTree->SetBranchAddress("efficiency", &efficiency);
             summaryTree->SetBranchAddress("effError", &effError);
             summaryTree->SetBranchAddress("clSize", &clSize);
 <<<<<<< HEAD
+<<<<<<< HEAD
             summaryTree->SetBranchAddress("clSizeError", &clSizeError);
 =======
 >>>>>>> 8149767 (Added digitization + tracking + clustering + analysis in an automatic fashion for each run)
+=======
+            summaryTree->SetBranchAddress("clSizeError", &clSizeError);
+>>>>>>> 6a22808 (Added Data plotting in summary_plots.c. All plotting capabailities of in_pixel_plots and compare_Data should now be implemented there.)
             summaryTree->SetBranchAddress("timing", &timing);
 
             int nEntriesSummary = summaryTree->GetEntries();
 
 <<<<<<< HEAD
+<<<<<<< HEAD
             std::vector<double> vThr, vThrErr, vEff, vEffErr, vClSize, vClSizeErr, vTiming;
 =======
             std::vector<double> vThr, vThrErr, vEff, vEffErr, vClSize, vTiming;
 >>>>>>> 8149767 (Added digitization + tracking + clustering + analysis in an automatic fashion for each run)
+=======
+            std::vector<double> vThr, vThrErr, vEff, vEffErr, vClSize, vClSizeErr, vTiming;
+>>>>>>> 6a22808 (Added Data plotting in summary_plots.c. All plotting capabailities of in_pixel_plots and compare_Data should now be implemented there.)
             vThr.reserve(nEntriesSummary);
             vThrErr.reserve(nEntriesSummary);
             vEff.reserve(nEntriesSummary);
             vEffErr.reserve(nEntriesSummary);
             vClSize.reserve(nEntriesSummary);
 <<<<<<< HEAD
+<<<<<<< HEAD
             vClSizeErr.reserve(nEntriesSummary);
 =======
 >>>>>>> 8149767 (Added digitization + tracking + clustering + analysis in an automatic fashion for each run)
+=======
+            vClSizeErr.reserve(nEntriesSummary);
+>>>>>>> 6a22808 (Added Data plotting in summary_plots.c. All plotting capabailities of in_pixel_plots and compare_Data should now be implemented there.)
             vTiming.reserve(nEntriesSummary);
 
             for (int i = 0; i< nEntriesSummary; i++) { // replace 11 with 
                 summaryTree->GetEntry(i);
 
                 vThr.push_back(threshold);
+<<<<<<< HEAD
 <<<<<<< HEAD
                 vThrErr.push_back(threshold * 0.03); // 3% quoted from calibration paper
                 vEff.push_back(efficiency);
@@ -128,6 +155,13 @@ void summary_plots()
                 vEffErr.push_back(effError);
                 vClSize.push_back(clSize);
 >>>>>>> 8149767 (Added digitization + tracking + clustering + analysis in an automatic fashion for each run)
+=======
+                vThrErr.push_back(threshold * 0.03); // 3% quoted from calibration paper
+                vEff.push_back(efficiency);
+                vEffErr.push_back(effError);
+                vClSize.push_back(clSize);
+                vClSizeErr.push_back(clSizeError);
+>>>>>>> 6a22808 (Added Data plotting in summary_plots.c. All plotting capabailities of in_pixel_plots and compare_Data should now be implemented there.)
                 vTiming.push_back(timing);
             }
             // Graphs
@@ -141,6 +175,7 @@ void summary_plots()
             leg1->AddEntry(gThrVSEff, labels[colorIndex-1].c_str(), "p");
 
 <<<<<<< HEAD
+<<<<<<< HEAD
             TGraphErrors *gThrVSClSize = new TGraphErrors(nEntriesSummary, vThr.data(),  vClSize.data(), vThrErr.data(), vClSizeErr.data());
             gThrVSClSize->SetTitle("Cluster size vs Threshold;Threshold [e-];<Cluster size>");
             gThrVSClSize->SetMarkerStyle(21);
@@ -150,6 +185,12 @@ void summary_plots()
             gThrVSClSize->SetTitle("Cluster size vs Threshold;Threshold [e-];Cluster size");
             gThrVSClSize->SetMarkerStyle(21);
 >>>>>>> 8149767 (Added digitization + tracking + clustering + analysis in an automatic fashion for each run)
+=======
+            TGraphErrors *gThrVSClSize = new TGraphErrors(nEntriesSummary, vThr.data(),  vClSize.data(), vThrErr.data(), vClSizeErr.data());
+            gThrVSClSize->SetTitle("Cluster size vs Threshold;Threshold [e-];<Cluster size>");
+            gThrVSClSize->SetMarkerStyle(21);
+            gThrVSClSize->SetMarkerSize(2.);
+>>>>>>> 6a22808 (Added Data plotting in summary_plots.c. All plotting capabailities of in_pixel_plots and compare_Data should now be implemented there.)
             gThrVSClSize->SetMarkerColor(colorIndex);
             //leg2->AddEntry(gThrVSClSize, runFiles[colorIndex-1].c_str(), "p");
             leg2->AddEntry(gThrVSClSize, labels[colorIndex-1].c_str(), "p");
@@ -186,6 +227,9 @@ void summary_plots()
 
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 6a22808 (Added Data plotting in summary_plots.c. All plotting capabailities of in_pixel_plots and compare_Data should now be implemented there.)
     // Data plotting optional for data vs sim comparison
 
     TFile *dataInputLowIBIAS = TFile::Open("/home/vlad/Documents/Simu/Geant4/DECAL_REPO/root_macros/root_input/xybinsIDB100IBIAS05_Clsize_Xbin16_XNsteps1_Xstepsize0_Yfix-1.root");
@@ -253,6 +297,9 @@ void summary_plots()
     leg2->Draw();
 
 
+<<<<<<< HEAD
 =======
 >>>>>>> 8149767 (Added digitization + tracking + clustering + analysis in an automatic fashion for each run)
+=======
+>>>>>>> 6a22808 (Added Data plotting in summary_plots.c. All plotting capabailities of in_pixel_plots and compare_Data should now be implemented there.)
 }
