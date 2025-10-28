@@ -113,6 +113,8 @@ void LoadSimFlagsFromFile(const std::string& filename, SimFlags& flags)
         else if (key == "pixelSize") flags.pixelSize = std::stod(value);
         else if (key == "detectorSizeX") flags.detectorSizeX = std::stod(value);
         else if (key == "detectorSizeY") flags.detectorSizeY = std::stod(value);
+        else if (key == "CCModelSigmaX") flags.CCModelSigmaX = std::stod(value);
+        else if (key == "CCModelSigmaY") flags.CCModelSigmaY = std::stod(value);
         else if (key == "outsideMaterial") flags.outsideMaterial = value;
         else if (key == "beamGeometry") flags.beamGeometry = value;
         else if (key == "beamXOffset") flags.beamXOffset = std::stod(value);
@@ -124,6 +126,8 @@ void LoadSimFlagsFromFile(const std::string& filename, SimFlags& flags)
         else if (key == "sourceZOffset") flags.sourceZOffset = std::stod(value);
         else if (key == "particleCount") flags.particleCount = std::stoi(value);
         else if (key == "numEvents") flags.numEvents = std::stoi(value);
+        else if (key == "intraSpillOffset") flags.intraSpillOffset = std::stod(value);
+        else if (key == "beamVeto") flags.beamVeto = std::stod(value);
         else if (key == "particleType") flags.particleType = value;
         else if (key == "particleEnergy") flags.particleEnergy = value;
         else if (key == "particleMomentumX") flags.particleMomentumX = std::stod(value);

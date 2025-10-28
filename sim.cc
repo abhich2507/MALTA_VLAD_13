@@ -40,7 +40,7 @@ int main (int argc, char** argv)
     {
         // fallback or error
         std::cout<< std::endl<<"NO CONFIGURATION of the SIMU_CONFIG path. Reverting to DEFAULT" 
-                 << std::endl<< "Configute it via: export SIMU_CONFIG=/path/to/my/file " << std::endl;
+                 << std::endl<< "Configure it via: export SIMU_CONFIG=/path/to/my/file " << std::endl;
         
         LoadSimFlagsFromFile("../configs/flags.cfg", *flags);
     }

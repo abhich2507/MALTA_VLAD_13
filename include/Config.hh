@@ -25,6 +25,8 @@ struct SimFlags
     double pixelSize = 0.;
     double detectorSizeX =0.;
     double detectorSizeY =0.;
+    double CCModelSigmaX =0.;
+    double CCModelSigmaY =0.;
     std::string outsideMaterial = "G4_Galactic";
     std::string beamGeometry = "";
     double beamXOffset = 0.;
@@ -36,6 +38,8 @@ struct SimFlags
     double sourceZOffset = 0.;
     int particleCount = 0;
     int numEvents = 0;
+    double intraSpillOffset = 0;
+    double beamVeto = 0;
     std::string particleType = "";
     std::string particleEnergy = "";
     double particleMomentumX = 0.;
