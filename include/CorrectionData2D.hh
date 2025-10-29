@@ -1,6 +1,6 @@
 #include <array>
 #pragma once
-
+//DEPRECATED. However, the deltaTable is needed. Please move it to another more appropriate position.
 constexpr int XSteps = 32; // 36 ?
 constexpr int YSteps = 32;
 extern const double spacingX;

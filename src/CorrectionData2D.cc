@@ -1,5 +1,5 @@
 #include "CorrectionData2D.hh"
-
+// DEPRECATED. Assign to Lucian for handling.
 const int nBinsX = 32;
 const int nBinsY = 32;
 const double spacingX = 2.275;
