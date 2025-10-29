@@ -2,6 +2,7 @@
 #define PRIMARYGENERATOR_HH
 
 #include "G4VUserPrimaryGeneratorAction.hh"
+#include "G4RunManager.hh"
 // Define particle types
 #include "G4ParticleDefinition.hh"
 // Particle Gun shoots particles

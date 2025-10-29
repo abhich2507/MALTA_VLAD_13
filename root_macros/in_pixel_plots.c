@@ -30,6 +30,19 @@ double GetTimingOffset(double amplitude, double threshold)
     return 390.0 / pow((amplitude * 150./threshold) - 149.8, 0.65);
 }
 
+inline std::pair<double,double> PixelPositionReconstruction(int pixelX, int pixelY)
+{
+    double pixelSize = 0.0364; // in mm
+    double detectorXOffset = 50.; // in mm
+    double detectorYOffset = 50.; // in mm
+    double detectorSizeX = 1.86368*10; // in mm
+    double detectorSizeY = 1.86368*10; // in mm
+
+    double xGlobal = pixelX * pixelSize + detectorXOffset - detectorSizeX / 2;
+    double yGlobal = pixelY * pixelSize + detectorYOffset - detectorSizeY / 2;
+    return {xGlobal, yGlobal};
+}
+
 // Efficiency in percent
 double getEff(int Npassed, int Nall) {
     if (Nall == 0) return 0.0;  // avoid division by zero
@@ -94,10 +107,54 @@ void in_pixel_plots(std::string inputPath, std::string outROOTname, double resul
     chain->SetBranchAddress("vertexY", &vertexY);
     chain->SetBranchAddress("vertexZ", &vertexZ);
     chain->SetBranchAddress("Energy", &Energy);
-    chain->SetBranchAddress("fGlobalTime", &fGlobalTime);
+    //chain->SetBranchAddress("fGlobalTime", &fGlobalTime);
     //chain->SetBranchAddress("ClSize", &clSize);
-    chain->SetBranchAddress("LeadingEnergy", &leadingEnergy);
-    chain->SetBranchAddress("LeadingTime", &leadingTime);
+    //chain->SetBranchAddress("LeadingEnergy", &leadingEnergy);
+    //chain->SetBranchAddress("LeadingTime", &leadingTime);
+    Long64_t nEntriesDepos = chain->GetEntries();
+
+
+
+    TChain *MCTruthchain = new TChain("TruthVertex");
+
+    for (int t = 0; t <= 5; ++t) {
+        MCTruthchain->Add(Form("%soutput0_t%d.root", inputPath.c_str() , t));
+    }
+
+    // Variables to hold values
+    double MCtrackX, MCtrackY, MCtrackZ, MCtrackGlobalTime;
+    int MCtrackEventID;
+
+    // Connect branches
+    MCTruthchain->SetBranchAddress("iEvent", &MCtrackEventID);
+    MCTruthchain->SetBranchAddress("vertexX", &MCtrackX);
+    MCTruthchain->SetBranchAddress("vertexY", &MCtrackY);
+    MCTruthchain->SetBranchAddress("vertexZ", &MCtrackZ);
+    MCTruthchain->SetBranchAddress("fGlobalTime", &MCtrackGlobalTime);
+    Long64_t nEntriesMCTruth = MCTruthchain->GetEntries();
+    std::cout << "Number of Events from MC track info: " << nEntriesMCTruth << std::endl;
+
+    // Lookup map: iEvent → (vertexX, vertexY)
+    std::unordered_map<int, std::pair<double, double>> vertexMap;
+    vertexMap.reserve(nEntriesMCTruth / 2); // heuristic for fewer rehashes
+
+    for (Long64_t i = 0; i < nEntriesMCTruth; ++i) {
+        MCTruthchain->GetEntry(i);
+        // Only insert the first time we encounter iEvent
+        if (vertexMap.find(MCtrackEventID) == vertexMap.end()) {
+            vertexMap[MCtrackEventID] = {MCtrackX, MCtrackY};
+        } else {
+            // Optional consistency check
+            auto [vx, vy] = vertexMap[MCtrackEventID];
+            if (vx != MCtrackX || vy != MCtrackY) {
+                std::cout << "("<< vx << ", " << vy << ")"<< std::endl;
+                std::cout << "("<< MCtrackX << ", " << MCtrackY << ")"<< std::endl;
+                std::cerr << "Warning: Inconsistent vertex for MCtrackEventID "
+                          << MCtrackEventID << "!\n";
+            }
+        }
+    }
+    std::cout << "Stored " << vertexMap.size() << " unique events.\n";
 
     int nX = 2*16, nY = 2*16, nZ = 100;
     double pixelSizeX = 0.0364 , pixelSizeY = 0.0364; // in mm
@@ -105,27 +162,18 @@ void in_pixel_plots(std::string inputPath, std::string outROOTname, double resul
     TH2D *h2_fullChip = new TH2D(Form("h2_fullChip_%.0fThr", threshold), "h2_fullChip", 512, 50 - 18.6/2, 50 + 18.6/2, 512, 50 - 18.6/2, 50 + 18.6/2);
     TH2D *hInPixelClSize = new TH2D(Form("InPixelClSize_%.0fThr", threshold), "InPixelClSize", nX, 0, 2*pixelSizeX *1000, nY, 0, 2*pixelSizeY *1000);
     hInPixelClSize->SetTitle(";X [#mum]; Y [#mum]; cluster size");
-    //TH2D *hInPixelClSize = new TH2D("InPixelClSize", "InPixelClSize", 100, 0, 36, 100, 0, 36);
-    TH2D *hInPixelPass = new TH2D(Form(";InPixelHit_%.0fThr", threshold), "InPixelHit", nX, 0, 2*pixelSizeX*1000, nY, 0, 2*pixelSizeY *1000);
-    hInPixelPass->SetTitle(";X [#mum]; Y [#mum]; Passed events");
-    //TH2D *hInPixelPass = new TH2D("InPixelHit", "InPixelHit", 100, 0, 36, 100, 0, 36);
+    TH2D *hInPixelAll = new TH2D(Form(";InPixelHit_%.0fThr", threshold), "InPixelHit", nX, 0, 2*pixelSizeX*1000, nY, 0, 2*pixelSizeY *1000);
+    hInPixelAll->SetTitle(";X [#mum]; Y [#mum]; All events");
     TH2D *hInPixelMatch = new TH2D(Form("InPixelMatch_%.0fThr", threshold), "InPixel Efficiency [\%]", nX, 0, 2*pixelSizeX *1000, nY, 0, 2*pixelSizeY *1000);
     hInPixelMatch->SetTitle(";X [#mum]; Y [#mum]; Efficiency [\%]");
-    //TH2D *hInPixelMatch = new TH2D("InPixelMatch", "InPixel Efficiency [\%]", 100, 0, 36, 100, 0, 36);
     TH2D *hInPixelTime = new TH2D(Form("InPixelTime_%.0fThr", threshold), "InPixelTime [ns]", nX, 0, 2*pixelSizeX *1000, nY, 0, 2*pixelSizeY *1000);
     hInPixelTime->SetTitle(";X [#mum]; Y [#mum]; InPixelTime [ns]");
-    //TH2D *hInPixelTime = new TH2D("InPixelTime", "InPixelTime [ns]", 100, 0, pixelSizeX *1000, 100, 0, 36);
-    //TH2F *hAvgClSize = (TH2F*) hInPixelClSize->Clone("hAvgClSize");
-    ///hAvgClSize->SetTitle("Average Cluster Size");
-    //TODO: Insure that no bins are 0. Could happen if low stats or fine binning
 
     // histograms with tracking uncertainty:
-    TH2D *hInPixelPass_trackunc = new TH2D(Form("InPixelHit_trackunc_%.0fThr", threshold), "InPixelHit_trackunc", nX, 0, 2*pixelSizeX*1000, nY, 0, 2*pixelSizeY *1000);
-    hInPixelPass_trackunc->SetTitle(";Track X pos [#mum];Track Y pos [#mum]; Passed tracks");
-
+    TH2D *hInPixelAll_trackunc = new TH2D(Form("InPixelHit_trackunc_%.0fThr", threshold), "InPixelHit_trackunc", nX, 0, 2*pixelSizeX*1000, nY, 0, 2*pixelSizeY *1000);
+    hInPixelAll_trackunc->SetTitle(";Track X pos [#mum];Track Y pos [#mum]; All tracks");
     TH2D *hInPixelMatch_trackunc = new TH2D(Form("InPixelMatch_trackunc_%.0fThr", threshold), "InPixel Efficiency_trackunc  [\%]", nX, 0, 2*pixelSizeX *1000, nY, 0, 2*pixelSizeY *1000);
     hInPixelMatch_trackunc->SetTitle(";Track X pos [#mum]; Track Y pos [#mum]; Efficiency [\%]");
-
     TH2D *hInPixelClSize_trackunc = new TH2D(Form("InPixelClSize_trackunc_%.0fThr", threshold), "InPixelClSize_trackunc", nX, 0, 2*pixelSizeX *1000, nY, 0, 2*pixelSizeY *1000);
     hInPixelClSize_trackunc->SetTitle(";Track X pos [#mum];Track Y pos [#mum]; cluster size");
 
@@ -147,33 +195,19 @@ void in_pixel_plots(std::string inputPath, std::string outROOTname, double resul
     //std::map<std::pair<int, int>, double> enMap; // Avoid O(n^2) nested loops via extra map 
     std::map<std::pair<int,std::pair<int, int>>, double> enMap; // Avoid O(n^2) nested loops via extra map 
     std::map<int, std::vector<double>> timeMap;
-    int eventIDHolder =0;
-    int pixXHolder = -1;
-    int pixYHolder = -1;
+
+    
+
+    
+    std::cout << "MC deposited entries: " << nEntriesDepos << " Raw hit entries: " << nRawEntries << std::endl;
     for (Long64_t j = 0; j < nRawEntries; j++)
     {
         chainPixel->GetEntry(j);
-        // This code snippet looks for events that have hits such that the seed crystal changes within the same event => delta like ray
-        /*
-        if (eventIDHolder == rawEventID && iHit == 0 && pixXHolder != pixX && pixYHolder != pixY)
-        {
-            std::cout << "Raw Event ID: " << rawEventID << "; Hit: " << iHit << "; PixX: " << pixX << "; PixY: " << pixY << "; Energy: " << corrEnergy << std::endl;
-        }
-
-        if (iHit == 0)
-        {
-            pixXHolder = pixX;
-            pixYHolder = pixY;
-        }
-        */
-        // This is an interesting event in run 43. If anyone is curious
-        //if(rawEventID == 352902) std::cout << "Raw Event ID: " << rawEventID << "; Hit: " << iHit << "; PixX: " << pixX << "; PixY: " << pixY << "; Energy: " << corrEnergy << std::endl;
 
         //enMap[{rawEventID, iHit}] += corrEnergy; // Accumulate energy for each hit in the event.
         enMap[{rawEventID, {pixX, pixY}}] += corrEnergy;
         // Deprecated will require to be purged
         timeMap[rawEventID].push_back(timeWalkHit); // Store all times
-        eventIDHolder = rawEventID;
 
     }
     std::map<int, int> clusterMap; // Map to hold cluster size per event
@@ -182,20 +216,46 @@ void in_pixel_plots(std::string inputPath, std::string outROOTname, double resul
     //TODO: This makes sense for primary particles. It fails for delta rays. X, Y position should be extracted from VertexPosition and maybe deltas approached carefully
     int simpleCounter = 0;
     int rememberer =0;
+    double timecut = 500; // ns
+    double dist_cut = 100/1000.; // in mm
     std::map<int, std::vector<double>> inClusterTimes;
     for (const auto& entry : enMap) 
     {
         int eventID = entry.first.first;
         //int hitID   = entry.first.second;
         double cenergy = entry.second; // corrected energy
-        inClusterTimes[eventID].push_back(GetTimingOffset(cenergy, threshold));
-        //std::cout << GetTimingOffset(cenergy) << std::endl;
+        double timing = GetTimingOffset(cenergy, threshold);
+        //if (timing > timecut) std::cout << eventID << "     charge: " << cenergy << "     time: " << timing << std::endl;
+
+        int pixelX = entry.first.second.first;
+        int pixelY = entry.first.second.second;
+        //std::cout << "Event ID: " << eventID << "; pixX: " << entry.first.second.first << ";pixY: " << entry.first.second.second << "; corrEnergy: " << cenergy << std::endl;
+        
+        bool distPass = true;
+        
+        // check for possible tracking cut based on MC truth vertex:        
+        std::pair<double, double> pixelGlobalPosition = PixelPositionReconstruction(pixelX, pixelY);
+
+        auto it = vertexMap.find(eventID);
+        if (it != vertexMap.end()) {
+            auto [vx, vy] = it->second;
+            if (abs(pixelGlobalPosition.first-vx)>dist_cut || abs(pixelGlobalPosition.second-vy)>dist_cut){
+                distPass = false; // filter out
+                //std::cout << eventID << std::endl;
+                //std::cout << "X " << pixelGlobalPosition.first << " - " << vx << " = " << pixelGlobalPosition.first-vx << std::endl;
+                //std::cout << "Y " << pixelGlobalPosition.second << " - " << vy << " = " << pixelGlobalPosition.second-vy << std::endl;              
+                //std::cout << "    ----   " << std::endl;
+            }
+        }
+        
+        inClusterTimes[eventID].push_back(timing);
+
         // Fill the cluster size map
-        if (cenergy > threshold) 
+        if (cenergy > threshold && timing < timecut && distPass) 
         {
             clusterMap[eventID]++; // Increment cluster size for this event
             //clusterEnergyMap[eventID] = std::max(clusterEnergyMap[eventID], cenergy); // Store the maximum correnergy for this event
-            //I take the fasest hit in an event (cluster) as MALTA does.
+            //I take the fastest hit in an event (cluster) as MALTA does.
             clusterTimeMap[eventID] = *std::min_element(inClusterTimes[eventID].begin(), inClusterTimes[eventID].end());
             //std::cout << "eventID: " << eventID << "timing: " <<  clusterTimeMap[eventID] << std::endl;
         }
@@ -209,18 +269,15 @@ void in_pixel_plots(std::string inputPath, std::string outROOTname, double resul
             inClusterTimes.clear();
         }
         rememberer = eventID;
-        //if (simpleCounter > 4) // This line looks for eventIDs that correspond to clusters larger than 4
-        if (simpleCounter > 4) std::cout << "Counter: " << simpleCounter << std::endl;
         if (eventID == 27437)
         {
             std::cout << "Event ID: " << eventID << "; pixX: " << entry.first.second.first << ";pixY: " << entry.first.second.second << "; corrEnergy: " << cenergy << std::endl;
         }
-
     }
 
     int previousID =  0;
-    Long64_t nEntries = chain->GetEntries();
-    for (Long64_t i = 0; i < nEntries; ++i) 
+    //Long64_t nEntriesDepos = chain->GetEntries();
+    for (Long64_t i = 0; i < nEntriesDepos; ++i) 
     {
         chain->GetEntry(i);
         // Do me once per event
@@ -231,7 +288,6 @@ void in_pixel_plots(std::string inputPath, std::string outROOTname, double resul
         double xFolded = fmod(vertexX, 2*pixelSizeX) * 1000; 
         double yFolded = fmod(vertexY, 2*pixelSizeY) * 1000;
         double zFolded = (50 - vertexZ) * 1000;
-        //cout << "xFolded = " << fX << "; yFolded = " << fY << "; zFolded = " << fZ << '/n';
 
         double xIP_track = fmod(vertexX + rng.Gaus(0., trackunc_X), 2*pixelSizeX) * 1000; 
         double yIP_track = fmod(vertexY + rng.Gaus(0., trackunc_Y), 2*pixelSizeX) * 1000; 
@@ -239,12 +295,15 @@ void in_pixel_plots(std::string inputPath, std::string outROOTname, double resul
         auto it = clusterMap.find(truthEventID);
         //std::cout << "Event ID: " << truthEventID << "; X: " << vertexX << "; Y: " << vertexY << "En.: " << it->second << std::endl;  
         if (it != clusterMap.end()) 
-        {
-            hInPixelClSize->Fill(xFolded, yFolded, it->second);
-            hInPixelMatch->Fill(xFolded, yFolded, it->second != 0 ? 1 : 0);
+        {   
+            int NumHits = min(it->second, 8); // restrict clusters to maximum size 8
+            //if (it->second > 8) std::cout << i << " " << it->second << " " << NumHits << std::endl;
 
-            hInPixelClSize_trackunc->Fill(xIP_track, yIP_track, it->second);
-            hInPixelMatch_trackunc->Fill(xIP_track, yIP_track, it->second != 0 ? 1 : 0);
+            hInPixelClSize->Fill(xFolded, yFolded, NumHits);
+            hInPixelMatch->Fill(xFolded, yFolded, NumHits != 0 ? 1 : 0);
+
+            hInPixelClSize_trackunc->Fill(xIP_track, yIP_track, NumHits);
+            hInPixelMatch_trackunc->Fill(xIP_track, yIP_track, NumHits != 0 ? 1 : 0);
         }
         auto itTime = clusterTimeMap.find(truthEventID);
         if (itTime != clusterTimeMap.end())
@@ -253,43 +312,37 @@ void in_pixel_plots(std::string inputPath, std::string outROOTname, double resul
         }
 
         //hInPixelClSize->Fill(xFolded, yFolded, clSize); // Quick and dirty way to fill cluster size. No threshold implementation
-        hInPixelPass->Fill(xFolded, yFolded, 1);
-        hInPixelPass_trackunc->Fill(xIP_track, yIP_track, 1);
+        hInPixelAll->Fill(xFolded, yFolded, 1);
+        hInPixelAll_trackunc->Fill(xIP_track, yIP_track, 1);
         if (Energy > 0)
         {
             h3->Fill(xFolded, yFolded, zFolded, Energy);
             h2_fullChip->Fill(fX, fY, Energy);
         }
-        /*
-        if (leadingEnergy > threshold)
-        {
-            hInPixelMatch->Fill(xFolded, yFolded, leadingEnergy);
-            hInPixelTime->Fill(xFolded, yFolded, leadingTime);
-        }
-        */
     }
 
     result[0] = hInPixelClSize_trackunc->Integral() / hInPixelMatch_trackunc->Integral();
     std::cout << "Av. Cl size: " << result[0] << std::endl;
 
-    hInPixelClSize->Divide(hInPixelMatch);
+    // divide cluster size and timing by number of events with hit (to get average across all events with hit)
+    hInPixelClSize->Divide(hInPixelMatch); 
     hInPixelClSize_trackunc->Divide(hInPixelMatch_trackunc);
+    hInPixelTime->Divide(hInPixelMatch);
 
-    result[1] = getEff(hInPixelMatch_trackunc->Integral(), hInPixelPass_trackunc->Integral());// in percent
-    result[2] = getEffErr(hInPixelMatch_trackunc->Integral(), hInPixelPass_trackunc->Integral());// in percent
+    result[1] = getEff(hInPixelMatch_trackunc->Integral(), hInPixelAll_trackunc->Integral());// in percent
+    result[2] = getEffErr(hInPixelMatch_trackunc->Integral(), hInPixelAll_trackunc->Integral());// in percent
 
     std::cout << "Matched tracks: " << hInPixelMatch->Integral() << std::endl;
-    std::cout << "All tracks: " << hInPixelPass->Integral() << std::endl;
+    std::cout << "All tracks: " << hInPixelAll->Integral() << std::endl;
     std::cout << "Av. Eff.: " << result[1] << "+- " 
                 << result[2] << std::endl;
 
-    hInPixelMatch->Divide(hInPixelPass);
-    hInPixelMatch_trackunc->Divide(hInPixelPass_trackunc);
+    hInPixelMatch->Divide(hInPixelAll);
+    hInPixelMatch_trackunc->Divide(hInPixelAll_trackunc);
     hInPixelMatch->Scale(100.); // in percent
     hInPixelMatch_trackunc->Scale(100.); // in percent
 
     
-    hInPixelTime->Divide(hInPixelPass);
     auto h2 = h3->Project3D("xy");
     TCanvas *c1 = new TCanvas("c1", "XY Projection", 800, 600);
     h2->Draw("COLZ");
@@ -330,14 +383,15 @@ void in_pixel_plots(std::string inputPath, std::string outROOTname, double resul
     hInPixelClSize->GetZaxis()->SetTitleOffset(1.5);
     LinI1->Draw("SAMEL");
     LinI2->Draw("SAMEL");
+    // Create TLatex object
+    TLatex *t = new TLatex();
+    t->DrawLatex(-2., pixelSizeY*2*1000. +2, Form("MALTA2 Sim.#bf{, 30#mum EPI, <cl. size> =%.2f}", result[0]));
     c2D->SaveAs(Form("2DIPClSize_%.0fThr.pdf", threshold));
 
     // IP Eff plot
     hInPixelMatch->Draw("COLZ");
     hInPixelMatch->SetMinimum(0.);
     hInPixelMatch->SetMaximum(100.);
-    // Create TLatex object
-    TLatex *t = new TLatex();
     // Draw the formatted text
     //t->DrawLatex(pixelSizeX/2.*1000., pixelSizeY*2*1000. +2, Form("<eff> = %.2f #pm %.2f %%", result[1], result[2]));
     t->DrawLatex(-2., pixelSizeY*2*1000. +2, Form("MALTA2 Sim.#bf{, 30#mum EPI, <eff> =%.1f%%}", result[1]));
@@ -381,6 +435,8 @@ void in_pixel_plots(std::string inputPath, std::string outROOTname, double resul
     TFile outFile(outROOTname.c_str(), "UPDATE");
     //h3->Write();
     //h2_fullChip->Write();
+    hInPixelMatch->Write();
+    hInPixelClSize->Write();
     hInPixelClSize_trackunc->Write();
     hInPixelMatch_trackunc->Write();
     outFile.Close();
@@ -392,8 +448,9 @@ void in_pixel_plots(std::string inputPath, std::string outROOTname, double resul
 // or use intLoop
 int threshold_loop(std::string inputFile, std::string outROOT){
     // List of threshold values:
-    //double thresholds[] = {200., 300., 400., 500., 600., 700., 800., 900., 1000., 1200., 1400., 1600., 1800., 2000., 2200., 2400., 2600., 2800., 3000.};
-    double thresholds[] = {400, 2000.};
+    double thresholds[] = {200., 300., 400., 500., 600., 700., 800., 900., 1000., 1200., 1400., 1600., 1800., 2000., 2200., 2400., 2600., 2800., 3000.};
+    //double thresholds[] = {200.};
+    //double thresholds[] = {1400., 200., 1200.};
     //double thresholds[] = {200, 230, 343, 448, 544, 632, 712}; // equivalent to thresholds of data points
 
     int num_values = sizeof(thresholds) / sizeof(thresholds[0]);
@@ -447,9 +504,9 @@ int threshold_loop(std::string inputFile, std::string outROOT){
 }
 
 void RunInt_loop(){
-    for (int runNumber = 43; runNumber <= 45; ++runNumber) {
+    for (int runNumber = 46; runNumber <= 50; ++runNumber) {
         std::string inputFileName = "/Users/lucianfasselt/DECAL/Simulation/Geant4/MALTASIM/malta_simulation/Results/local_00"+ std::to_string(runNumber)+"/";  
-        std::string outROOTName = "SimOutput_" + std::to_string(runNumber) + ".root";
+        std::string outROOTName = "SimOutput_MaxCl8_" + std::to_string(runNumber) + ".root";
         threshold_loop(inputFileName, outROOTName.c_str());
     }
 }
