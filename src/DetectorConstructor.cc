@@ -50,6 +50,7 @@ G4VPhysicalVolume *DetectorConstruction::Construct()
     if(fFlag->preDefinedGeometryFlag == "MALTA")
     {
 <<<<<<< HEAD
+<<<<<<< HEAD
         G4double maltaWidthX = fFlag->detectorSizeX *cm; 
         G4double maltaWidthY = fFlag->detectorSizeY *cm; 
         G4double maltaDepth = fFlag->detectorDepth* um;
@@ -68,6 +69,13 @@ G4VPhysicalVolume *DetectorConstruction::Construct()
         G4double maltaDepth = 29.1 * um;
         G4Box *solidMALTA = new G4Box ("MALTASensor", maltaWidth/2, maltaWidth/2, maltaDepth/2);
 >>>>>>> 8149767 (Added digitization + tracking + clustering + analysis in an automatic fashion for each run)
+=======
+
+        G4double maltaWidthX = fFlag->detectorSizeX *mm; 
+        G4double maltaWidthY = fFlag->detectorSizeY *mm;
+        G4double maltaDepth = fFlag->detetectorDepth * um;
+        G4Box *solidMALTA = new G4Box ("MALTASensor", maltaWidthX/2, maltaWidthY/2, maltaDepth/2);
+>>>>>>> 66f7594 (DEBUG)
         logicSensor = new G4LogicalVolume (solidMALTA, detMat, "logicSensor");
         G4VPhysicalVolume *physSensor  = new G4PVPlacement(0, G4ThreeVector(detectorXOffset, detectorYOffset, detectorZOffset), logicSensor, "physSensor", logicalWorld, false, 0, true);
 
@@ -142,21 +150,33 @@ G4VPhysicalVolume *DetectorConstruction::Construct()
         logicPlane6 = new G4LogicalVolume (solidMALTA, detMat, "logicPlane6");
         G4VPhysicalVolume *physPlane6  = new G4PVPlacement(0, G4ThreeVector(detectorXOffset, detectorYOffset, detectorZOffset + 45.8*cm), logicPlane6, "physPlane6", logicalWorld, false, 0, true);
         logicPlane6->SetVisAttributes(pixelVisAtt);
-
-
-
-
-
-
-
-
-
-
         
 >>>>>>> 8149767 (Added digitization + tracking + clustering + analysis in an automatic fashion for each run)
     }
 
+<<<<<<< HEAD
     else if(fFlag->preDefinedGeometryFlag == "PCB")
+=======
+    // FR4 flame retardant dielectric for PCB implementation. 
+    // Source: https://www.physics.smu.edu/web/research/preprints/SMU-HEP-08-11.pdf
+    G4Material* FR4 = new G4Material("FR4", 1.9*g/cm3, 6);
+    FR4->AddElement(nist->FindOrBuildElement("O"),  0.3782);
+    FR4->AddElement(nist->FindOrBuildElement("C"),  0.3344);
+    FR4->AddElement(nist->FindOrBuildElement("Si"), 0.2120);
+    FR4->AddElement(nist->FindOrBuildElement("H"),  0.0308);
+    FR4->AddElement(nist->FindOrBuildElement("Na"), 0.0246);
+    FR4->AddElement(nist->FindOrBuildElement("B"),  0.0200);
+
+    G4Material *metalPlane = nist->FindOrBuildMaterial("G4_Cu");
+
+    G4double PCBLateralSize = 12.7 *cm;
+    G4double CuPlaneThickness = 0.018 *mm;
+    G4double FR4OuterPlaneThickness = 0.02 *mm;
+    G4double FR4MiddlePlaneThickness = 0.1 *mm;
+    G4double FR4InnerPlaneThickness = 0.2 *mm;
+
+    if(fFlag->preDefinedGeometryFlag == "PCB")
+>>>>>>> 66f7594 (DEBUG)
     {
         // FR4 flame retardant dielectric for PCB implementation. 
         // Source: https://www.physics.smu.edu/web/research/preprints/SMU-HEP-08-11.pdf
@@ -257,11 +277,15 @@ G4VPhysicalVolume *DetectorConstruction::Construct()
         new G4PVPlacement(rotation, G4ThreeVector(5 *cm, 5 *cm, currentZ + 0.5 * CuPlaneThickness), logicCuPlane, "Cu10", logicalWorld, false, 9, true);
         currentZ += CuPlaneThickness;
         new G4PVPlacement(rotation, G4ThreeVector(5 *cm, 5 *cm, currentZ + 0.5 * FR4OuterPlaneThickness), logicFR4OuterPlane, "Outer2", logicalWorld, false, 1, true);
+<<<<<<< HEAD
     } 
     else
     {
         trowError("DetectorConstruct::Construct", "SamplingWarning", "Undefined Geometry");
     }       
+=======
+    }        
+>>>>>>> 66f7594 (DEBUG)
     return physWorld;
 }
 

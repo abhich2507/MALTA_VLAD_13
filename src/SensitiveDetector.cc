@@ -1,5 +1,11 @@
 #include "SensitiveDetector.hh"
 
+<<<<<<< HEAD
+=======
+// TODO: Create debug flags for different points of simulation.
+// WARNING A lot of work ahead 
+
+>>>>>>> 66f7594 (DEBUG)
 SensitiveDetector::SensitiveDetector(G4String name, SimFlags* flags): G4VSensitiveDetector(name), fFlag(flags)
 {
     fTotalEnergyDeposited = 0.;
@@ -32,11 +38,7 @@ void SensitiveDetector::EndOfEvent(G4HCofThisEvent *)
 
 G4bool SensitiveDetector::ProcessHits(G4Step *aStep, G4TouchableHistory *)
 {
-
-
-    //TODO: Differentiate between different planes via a branchID
     G4int eventID = G4RunManager::GetRunManager()->GetCurrentEvent()->GetEventID();
-
     G4AnalysisManager *analysisManager = G4AnalysisManager::Instance();
     // Implementation of all analysis info to be stored in nTuple
     // PreStep point includes all info of the first interaction within one step. Post step includes the last interaction of that particle.
@@ -93,9 +95,12 @@ G4bool SensitiveDetector::ProcessHits(G4Step *aStep, G4TouchableHistory *)
 <<<<<<< HEAD
 =======
 
+<<<<<<< HEAD
     //G4cout << posPixel[0] << "," << posPixel[1] << G4endl;
 >>>>>>> 8149767 (Added digitization + tracking + clustering + analysis in an automatic fashion for each run)
     // get modulus for InPixel location.
+=======
+>>>>>>> 66f7594 (DEBUG)
     G4ThreeVector InPixPos = G4ThreeVector(std::fmod(posPixel[0],pixelSize), std::fmod(posPixel[1],pixelSize), posPixel[2]); // result in mm
     double efficiency = GetEfficiencyCorrectionXY(InPixPos);
     G4double edep_corr = efficiency * energy;    
@@ -169,7 +174,7 @@ G4bool SensitiveDetector::ProcessHits(G4Step *aStep, G4TouchableHistory *)
 
     }
 
-
+    /**/
     analysisManager->FillNtupleIColumn(0, 0, eventID);
     analysisManager->FillNtupleIColumn(0, 1, planeID);
     // X, Y, Z position of the hit

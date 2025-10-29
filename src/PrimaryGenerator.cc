@@ -29,9 +29,9 @@ PrimaryGenerator::PrimaryGenerator(SimFlags* flags) : fFlag(flags), fEventCounte
     }
     
     std::string particleType = fFlag->particleType;
-    
     G4ParticleTable *particleTable = G4ParticleTable::GetParticleTable();
     G4ParticleDefinition *particle = particleTable->FindParticle(particleType);
+<<<<<<< HEAD
 
     if (!particle)
     {
@@ -39,6 +39,9 @@ PrimaryGenerator::PrimaryGenerator(SimFlags* flags) : fFlag(flags), fEventCounte
     }
 
     fParticleGun->SetParticleDefinition(particle);
+=======
+    fParticleGun->SetParticleDefinition(particle);   
+>>>>>>> 66f7594 (DEBUG)
 }
 // Destructor
 PrimaryGenerator::~PrimaryGenerator()
@@ -51,7 +54,6 @@ G4ThreeVector PrimaryGenerator::GetRandomPointOnCircle(G4double radius, G4ThreeV
     while (true)
     {
         G4double r = std::sqrt(G4UniformRand()) * radius;
-
         // Uniform angle
         G4double phi = 2 * CLHEP::pi * G4UniformRand();
         // Coordinates in XY plane
@@ -77,6 +79,7 @@ G4ThreeVector PrimaryGenerator::GetRandomPointOnRectangle(G4double height, G4dou
 
 void PrimaryGenerator::GeneratePrimaries(G4Event *oneEvent)
 {
+<<<<<<< HEAD
 <<<<<<< HEAD
     if(fFlag->verbosePG) std::cout << "This event contains " << fFlag->particleCount << " particles with:" << std::endl;
     for(int ev = 0; ev < fFlag->particleCount; ev++)
@@ -118,6 +121,10 @@ void PrimaryGenerator::GeneratePrimaries(G4Event *oneEvent)
         fParticleGun->SetParticlePosition(pos);
 
 =======
+=======
+    // If you look at this you are probably wondering why bother doing a for loop when you can simply set a higher number in 
+    // the particle gun argument. The answer why we dont do that is: Random sampling happens only outside the constructor. 
+>>>>>>> 66f7594 (DEBUG)
     for(int ev = 0; ev < fFlag->particleCount; ev++)
     {
         double beamWidth = fFlag->sourceRadius *mm;
@@ -149,10 +156,13 @@ void PrimaryGenerator::GeneratePrimaries(G4Event *oneEvent)
         }
 
         fParticleGun->SetParticlePosition(pos);
+<<<<<<< HEAD
         // Curently we hardcode a particle gun with 100 KHz frequency
         //fParticleGun->SetParticleTime(fEventCounter * 10.0 * us); 
 
 >>>>>>> 8149767 (Added digitization + tracking + clustering + analysis in an automatic fashion for each run)
+=======
+>>>>>>> 66f7594 (DEBUG)
         G4int evtID = oneEvent->GetEventID();
         double offSet =  fFlag->intraSpillOffset;
         fParticleGun->SetParticleTime(evtID * fFlag->beamVeto *ns + offSet *ns); // This is the only thread safe way to do this. Multithreading messes up life as always
@@ -175,11 +185,14 @@ void PrimaryGenerator::GeneratePrimaries(G4Event *oneEvent)
         analysisManager->FillNtupleDColumn(4, 4, evtID * fFlag->beamVeto * ns);
         analysisManager->AddNtupleRow(4); 
 
+<<<<<<< HEAD
 
 
 
 >>>>>>> 8149767 (Added digitization + tracking + clustering + analysis in an automatic fashion for each run)
 
+=======
+>>>>>>> 66f7594 (DEBUG)
         // Create Vertex
         fParticleGun->GeneratePrimaryVertex(oneEvent);
         fEventCounter++;

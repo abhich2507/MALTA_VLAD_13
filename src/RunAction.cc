@@ -46,6 +46,7 @@ RunAction::RunAction(SimFlags* flags) : fFlag(flags)
     analysisManager->CreateNtupleDColumn("MomentumVal");
     analysisManager->FinishNtuple(0);
 
+    // 1D histograms for measuring the impact of material in the beam line
     analysisManager->CreateH1("ScatteringAngle", "Scattering Angle", 100, 0., 180.0);
     analysisManager->CreateH1("MomentumDistribution", "Momentum Distribution", 100, 0., 190.0 *GeV);
 
@@ -64,7 +65,8 @@ RunAction::RunAction(SimFlags* flags) : fFlag(flags)
     analysisManager->CreateNtupleDColumn("Energy");
     analysisManager->FinishNtuple(3);
 
-    // This NTuple is redundant with the (0) one. I will probably deprecate that one later
+    // TODO: This NTuple is redundant with the (0) one. I will probably deprecate that one later
+    // WARNING A lot of walk ahead
     analysisManager->CreateNtuple("TruthVertex", "Monte Carlo Truth Vertex Position");
     // Create Integer Event # column
     analysisManager->CreateNtupleIColumn("iEvent");
@@ -74,6 +76,7 @@ RunAction::RunAction(SimFlags* flags) : fFlag(flags)
     // Create Integer Global time column = time that starts when each event begins. Local time = time when the particle is created
     analysisManager->CreateNtupleDColumn("fGlobalTime");
     analysisManager->FinishNtuple(4);
+<<<<<<< HEAD
 
     
 >>>>>>> 8149767 (Added digitization + tracking + clustering + analysis in an automatic fashion for each run)
@@ -89,6 +92,8 @@ RunAction::RunAction(SimFlags* flags) : fFlag(flags)
     analysisManager->CreateNtupleDColumn("trueGlobalTime");
     analysisManager->CreateNtupleDColumn("trueEnergy");
     analysisManager->FinishNtuple(2);
+=======
+>>>>>>> 66f7594 (DEBUG)
 }
 
 RunAction::~RunAction()
@@ -103,7 +108,6 @@ void RunAction::BeginOfRunAction(const G4Run *run)
     G4int runID = run->GetRunID();
     std::stringstream strRunID;
     strRunID << runID;
-    
     //analysisManager->SetNtupleMerging(true);
     if (isMaster && fFlag->isBatch)
     {

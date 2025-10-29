@@ -93,7 +93,11 @@ void LoadSimFlagsFromFile(const std::string& filename, SimFlags& flags)
         else if (key == "pixelSize") flags.pixelSize = std::stod(value);
         else if (key == "detectorSizeX") flags.detectorSizeX = std::stod(value);
         else if (key == "detectorSizeY") flags.detectorSizeY = std::stod(value);
+<<<<<<< HEAD
         else if (key == "detectorDepth") flags.detectorDepth = std::stod(value);
+=======
+        else if (key == "detetectorDepth") flags.detetectorDepth = std::stod(value);
+>>>>>>> 66f7594 (DEBUG)
         else if (key == "CCModelSigmaX") flags.CCModelSigmaX = std::stod(value);
         else if (key == "CCModelSigmaY") flags.CCModelSigmaY = std::stod(value);
         else if (key == "outsideMaterial") flags.outsideMaterial = value;
