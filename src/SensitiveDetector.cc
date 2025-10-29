@@ -1,7 +1,8 @@
 #include "SensitiveDetector.hh"
 
-// Implement the desired number of channels
-const G4int channelNum = 64;
+// TODO: Create debug flags for different points of simulation.
+// WARNING A lot of work ahead 
+
 SensitiveDetector::SensitiveDetector(G4String name, SimFlags* flags): G4VSensitiveDetector(name), fFlag(flags)
 {
     fTotalEnergyDeposited = 0.;
@@ -32,15 +33,9 @@ void SensitiveDetector::EndOfEvent(G4HCofThisEvent *)
 
 }
 
-
-
 G4bool SensitiveDetector::ProcessHits(G4Step *aStep, G4TouchableHistory *)
 {
-
-
-    //TODO: Differentiate between different planes via a branchID
     G4int eventID = G4RunManager::GetRunManager()->GetCurrentEvent()->GetEventID();
-
     G4AnalysisManager *analysisManager = G4AnalysisManager::Instance();
     // Implementation of all analysis info to be stored in nTuple
     // PreStep point includes all info of the first interaction within one step. Post step includes the last interaction of that particle.
@@ -95,10 +90,7 @@ G4bool SensitiveDetector::ProcessHits(G4Step *aStep, G4TouchableHistory *)
         }
     }
 
-    //G4cout << posPixel[0] << "," << posPixel[1] << G4endl;
-    // get modulus for InPixel location.
     G4ThreeVector InPixPos = G4ThreeVector(std::fmod(posPixel[0],pixelSize), std::fmod(posPixel[1],pixelSize), posPixel[2]); // result in mm
-    //G4double MPV_binsize = 36.4/16; // unit um
     double efficiency = GetEfficiencyCorrectionXY(InPixPos);
     G4double edep_corr = efficiency * energy;    
     auto [effAn, quadrantFlag] = GetEfficiencyAnalytical(InPixPos);
@@ -157,7 +149,7 @@ G4bool SensitiveDetector::ProcessHits(G4Step *aStep, G4TouchableHistory *)
 
     }
 
-
+    /**/
     analysisManager->FillNtupleIColumn(0, 0, eventID);
     analysisManager->FillNtupleIColumn(0, 1, planeID);
     // X, Y, Z position of the hit
@@ -237,10 +229,6 @@ G4double SensitiveDetector::GetEfficiencyCorrectionXY(const G4ThreeVector& InPix
 
     return eff;
 }
-
-
-// --- Helper function definitions ---
-//constexpr double SQRT2 = std::sqrt(2.0);
 
 // Error function-based 1D step
 // x is coordinate in range [0, pitch]. Hence, pixel is centered around pitch/2.

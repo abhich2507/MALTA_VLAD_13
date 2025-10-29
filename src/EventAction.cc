@@ -42,7 +42,7 @@ void EventAction::EndOfEventAction(const G4Event* event)
     G4int totalEvents = G4RunManager::GetRunManager()->GetCurrentRun()->GetNumberOfEventToBeProcessed();
 
     int barWidth = 50;
-    // GUard against low number of events in vis.mac
+    // Guard against low number of events in vis.mac
     int reportInterval = std::max(1, totalEvents / 100);
     if (eventID % reportInterval == 0 || eventID == totalEvents) {
         // Timing info

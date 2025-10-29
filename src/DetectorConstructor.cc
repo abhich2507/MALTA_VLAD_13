@@ -35,41 +35,18 @@ G4VPhysicalVolume *DetectorConstruction::Construct()
     G4LogicalVolume *logicalWorld = new G4LogicalVolume(solidWorld, worldMat, "logicalWorld");
     // Physical Volume
     G4VPhysicalVolume *physWorld = new G4PVPlacement(0, G4ThreeVector(0.,0.,0.), logicalWorld, "physWorld", 0, false, 0, checkOverlaps);
-    // MALTA implementation pixel like structure
-    /*
-    G4int nPixelsX = 512;
-    G4int nPixelsY = 512;
-
-    G4double pixelPitch = 36.4 * um;
-    G4double pixelDepth = 30.0 * um;
-
-    // Define pixel
-    G4Box* solidPixel = new G4Box("Pixel", pixelPitch/2, pixelPitch/2, pixelDepth/2);
-    logicPixel = new G4LogicalVolume(solidPixel, detMat, "Pixel");
-    // Loop to place each pixel
-    for (G4int ix = 0; ix < nPixelsX; ix++) 
-    {
-        for (G4int iy = 0; iy < nPixelsY; iy++) {
-            G4double xpos = (ix - nPixelsX/2 + 0.5) * pixelPitch;
-            G4double ypos = (iy - nPixelsY/2 + 0.5) * pixelPitch;
-            G4ThreeVector position(xpos + 5 *cm, ypos + 5 *cm, 5 *cm); 
-            
-            new G4PVPlacement(nullptr, position, logicPixel, "Pixel", logicalWorld, false, ix*nPixelsY + iy, false);
-        }
-    }
-    */
 
     // MALTA implementation monolithic sensor
     if(fFlag->preDefinedGeometryFlag == "MALTA")
     {
-        //TODO: This is hardcoded. It has its own flag already. Fix it
-        G4double maltaWidth = 18.6368 *mm; 
-        G4double maltaDepth = 29.1 * um;
-        G4Box *solidMALTA = new G4Box ("MALTASensor", maltaWidth/2, maltaWidth/2, maltaDepth/2);
+
+        G4double maltaWidthX = fFlag->detectorSizeX *mm; 
+        G4double maltaWidthY = fFlag->detectorSizeY *mm;
+        G4double maltaDepth = fFlag->detetectorDepth * um;
+        G4Box *solidMALTA = new G4Box ("MALTASensor", maltaWidthX/2, maltaWidthY/2, maltaDepth/2);
         logicSensor = new G4LogicalVolume (solidMALTA, detMat, "logicSensor");
         G4VPhysicalVolume *physSensor  = new G4PVPlacement(0, G4ThreeVector(detectorXOffset, detectorYOffset, detectorZOffset), logicSensor, "physSensor", logicalWorld, false, 0, true);
 
-        
         G4VisAttributes *pixelVisAtt = new G4VisAttributes(G4Color(0., 0., 1., 0.5));
         pixelVisAtt->SetForceSolid(true);
         logicSensor->SetVisAttributes(pixelVisAtt);
@@ -97,19 +74,8 @@ G4VPhysicalVolume *DetectorConstruction::Construct()
         logicPlane6 = new G4LogicalVolume (solidMALTA, detMat, "logicPlane6");
         G4VPhysicalVolume *physPlane6  = new G4PVPlacement(0, G4ThreeVector(detectorXOffset, detectorYOffset, detectorZOffset + 45.8*cm), logicPlane6, "physPlane6", logicalWorld, false, 0, true);
         logicPlane6->SetVisAttributes(pixelVisAtt);
-
-
-
-
-
-
-
-
-
-
         
     }
-
 
     // FR4 flame retardant dielectric for PCB implementation. 
     // Source: https://www.physics.smu.edu/web/research/preprints/SMU-HEP-08-11.pdf
@@ -210,12 +176,6 @@ G4VPhysicalVolume *DetectorConstruction::Construct()
         currentZ += CuPlaneThickness;
         new G4PVPlacement(rotation, G4ThreeVector(5 *cm, 5 *cm, currentZ + 0.5 * FR4OuterPlaneThickness), logicFR4OuterPlane, "Outer2", logicalWorld, false, 1, true);
     }        
-
-
-
-
-
-
     return physWorld;
 }
 
