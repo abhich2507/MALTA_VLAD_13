@@ -1,8 +1,8 @@
 #include "PrimaryGenerator.hh"
 //Constructor
-PrimaryGenerator::PrimaryGenerator(SimFlags* flags) : fFlag(flags)
+PrimaryGenerator::PrimaryGenerator(SimFlags* flags) : fFlag(flags), fEventCounter(0)
 {
-    fParticleGun = new G4ParticleGun(fFlag->particleCount); // 1 particle per event
+    fParticleGun = new G4ParticleGun(1); // 1 particle per event
     // Particle Direction (momentum)
     G4double px = fFlag->particleMomentumX;
     G4double py = fFlag->particleMomentumY;
@@ -69,33 +69,56 @@ G4ThreeVector PrimaryGenerator::GetRandomPointOnRectangle(G4double height, G4dou
 
 void PrimaryGenerator::GeneratePrimaries(G4Event *oneEvent)
 {
-    double beamWidth = fFlag->sourceRadius *mm;
-    G4double x = fFlag->beamXOffset *cm;
-    G4double y = fFlag->beamYOffset *cm;
-    G4double z = fFlag->beamZOffset *cm;
-    G4ThreeVector pos;
-    // Particle circular beam simulation
-    if(fFlag->beamGeometry == "pencil")
+    for(int ev = 0; ev < fFlag->particleCount; ev++)
     {
-        pos = G4ThreeVector(x, y, z);
-    }
-    else if(fFlag->beamGeometry == "circle")
-    {
-        pos = GetRandomPointOnCircle(0.5 *beamWidth, G4ThreeVector(x, y, z));
-    }
-    else if(fFlag->beamGeometry == "rectangle")
-    {
-        pos = GetRandomPointOnRectangle(beamWidth, beamWidth, G4ThreeVector(x, y, z));
-    }
-    else
-    {
-        G4Exception("PhMattPrimaryGenerator::GeneratePrimaries", "SamplingFailure", FatalException,
-            "Requested geometry not found.");
-    }
+        double beamWidth = fFlag->sourceRadius *mm;
+        G4double x = fFlag->beamXOffset *cm;
+        G4double y = fFlag->beamYOffset *cm;
+        G4double z = fFlag->beamZOffset *cm;
+        G4ThreeVector pos;
+        // Particle circular beam simulation
+        if(fFlag->beamGeometry == "pencil")
+        {
+            pos = G4ThreeVector(x, y, z);
+        }
+        else if(fFlag->beamGeometry == "circle")
+        {
+            pos = GetRandomPointOnCircle(0.5 *beamWidth, G4ThreeVector(x, y, z));
+        }
+        else if(fFlag->beamGeometry == "rectangle")
+        {
+            pos = GetRandomPointOnRectangle(beamWidth, beamWidth, G4ThreeVector(x, y, z));
+        }
+        else if (fFlag->beamGeometry == "granularBeam")
+        {
+            pos = G4ThreeVector(x + ev * 72.8 *um, y, z);
+        }
+        else
+        {
+            G4Exception("PhMattPrimaryGenerator::GeneratePrimaries", "SamplingFailure", FatalException,
+                "Requested geometry not found.");
+        }
 
-    fParticleGun->SetParticlePosition(pos);
+        fParticleGun->SetParticlePosition(pos);
+        // Curently we hardcode a particle gun with 100 KHz frequency
+        //fParticleGun->SetParticleTime(fEventCounter * 10.0 * us); 
 
-    // Create Vertex
-    fParticleGun->GeneratePrimaryVertex(oneEvent);
+        G4int evtID = oneEvent->GetEventID();
+        double offSet =  fFlag->intraSpillOffset;
+        fParticleGun->SetParticleTime(evtID * fFlag->beamVeto *ns + offSet *ns); // This is the only thread safe way to do this. Multithreading messes up life as always
 
+        // Save Vertex Info
+        G4AnalysisManager *analysisManager = G4AnalysisManager::Instance();
+        analysisManager->FillNtupleIColumn(4, 0, evtID);
+        analysisManager->FillNtupleDColumn(4, 1, pos[0]);
+        analysisManager->FillNtupleDColumn(4, 2, pos[1]);
+        analysisManager->FillNtupleDColumn(4, 3, pos[2]);
+        analysisManager->FillNtupleDColumn(4, 4, evtID * fFlag->beamVeto * ns);
+        analysisManager->AddNtupleRow(4); 
+
+
+        // Create Vertex
+        fParticleGun->GeneratePrimaryVertex(oneEvent);
+        fEventCounter++;
+    }
 }

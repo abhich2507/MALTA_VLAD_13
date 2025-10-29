@@ -59,6 +59,17 @@ RunAction::RunAction(SimFlags* flags) : fFlag(flags)
     analysisManager->CreateNtupleDColumn("Energy");
     analysisManager->FinishNtuple(3);
 
+    // This NTuple is redundant with the (0) one. I will probably deprecate that one later
+    analysisManager->CreateNtuple("TruthVertex", "Monte Carlo Truth Vertex Position");
+    // Create Integer Event # column
+    analysisManager->CreateNtupleIColumn("iEvent");
+    analysisManager->CreateNtupleDColumn("vertexX");
+    analysisManager->CreateNtupleDColumn("vertexY");
+    analysisManager->CreateNtupleDColumn("vertexZ");
+    // Create Integer Global time column = time that starts when each event begins. Local time = time when the particle is created
+    analysisManager->CreateNtupleDColumn("fGlobalTime");
+    analysisManager->FinishNtuple(4);
+
     
 
 }
