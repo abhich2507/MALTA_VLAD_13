@@ -58,6 +58,9 @@ RunAction::RunAction(SimFlags* flags) : fFlag(flags)
     analysisManager->CreateNtupleIColumn("PixY");
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> ebfd7f7 (Added the MC truth primary vertex of particle gun from develop_Vlad branch)
     analysisManager->CreateNtupleDColumn("hitTime");
     analysisManager->CreateNtupleDColumn("hitEnergy");
     analysisManager->FinishNtuple(1);
@@ -65,6 +68,7 @@ RunAction::RunAction(SimFlags* flags) : fFlag(flags)
     analysisManager->CreateNtupleDColumn("timeWalkHit");
     analysisManager->CreateNtupleDColumn("Energy");
     analysisManager->FinishNtuple(3);
+<<<<<<< HEAD
 =======
     analysisManager->CreateNtupleDColumn("hitTime");
     analysisManager->CreateNtupleDColumn("hitEnergy");
@@ -86,6 +90,22 @@ RunAction::RunAction(SimFlags* flags) : fFlag(flags)
 
     
 >>>>>>> 8149767 (Added digitization + tracking + clustering + analysis in an automatic fashion for each run)
+=======
+
+    // This NTuple is redundant with the (0) one. I will probably deprecate that one later
+    analysisManager->CreateNtuple("TruthVertex", "Monte Carlo Truth Vertex Position");
+    // Create Integer Event # column
+    analysisManager->CreateNtupleIColumn("iEvent");
+    analysisManager->CreateNtupleDColumn("vertexX");
+    analysisManager->CreateNtupleDColumn("vertexY");
+    analysisManager->CreateNtupleDColumn("vertexZ");
+    // Create Integer Global time column = time that starts when each event begins. Local time = time when the particle is created
+    analysisManager->CreateNtupleDColumn("fGlobalTime");
+    analysisManager->FinishNtuple(4);
+
+    
+>>>>>>> 689c0d7 (Added the MC truth primary vertex of particle gun from develop_Vlad branch)
+>>>>>>> ebfd7f7 (Added the MC truth primary vertex of particle gun from develop_Vlad branch)
 
     // MONTE CARLO Truth
     analysisManager->CreateNtuple("TruthVertex", "Monte Carlo Truth Vertex Position");

@@ -1,22 +1,33 @@
 #include "PrimaryGenerator.hh"
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 =======
 
 >>>>>>> 8a2e4b8 (Cleaned up the simulation files. Removed the Truth En tree as it was not used further in the analysis chain. Additionally, general clean up in terms of branch renaming. It most probably will impact the in_pixel_plots script. However the default analysis chain has already been modified to account for these changes.)
+=======
+=======
+>>>>>>> ebfd7f7 (Added the MC truth primary vertex of particle gun from develop_Vlad branch)
 //Constructor
 PrimaryGenerator::PrimaryGenerator(SimFlags* flags) : fFlag(flags), fEventCounter(0)
 {
     fParticleGun = new G4ParticleGun(1); // 1 particle per event
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> ebfd7f7 (Added the MC truth primary vertex of particle gun from develop_Vlad branch)
     // Particle Direction (momentum)
     G4double px = fFlag->particleMomentumX;
     G4double py = fFlag->particleMomentumY;
     G4double pz = fFlag->particleMomentumZ;
     G4ThreeVector mom(px,py,pz);
     fParticleGun->SetParticleMomentumDirection(mom);
+<<<<<<< HEAD
 >>>>>>> 8149767 (Added digitization + tracking + clustering + analysis in an automatic fashion for each run)
+=======
+>>>>>>> 689c0d7 (Added the MC truth primary vertex of particle gun from develop_Vlad branch)
+>>>>>>> ebfd7f7 (Added the MC truth primary vertex of particle gun from develop_Vlad branch)
 
 //Constructor
 PrimaryGenerator::PrimaryGenerator(SimFlags* flags) : fFlag(flags), fEventCounter(0)
@@ -97,6 +108,9 @@ void PrimaryGenerator::GeneratePrimaries(G4Event *oneEvent)
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> ebfd7f7 (Added the MC truth primary vertex of particle gun from develop_Vlad branch)
     if(fFlag->verbosePG) std::cout << "This event contains " << fFlag->particleCount << " particles with:" << std::endl;
     for(int ev = 0; ev < fFlag->particleCount; ev++)
     {
@@ -245,5 +259,58 @@ void PrimaryGenerator::GeneratePrimaries(G4Event *oneEvent)
 =======
 >>>>>>> 8a2e4b8 (Cleaned up the simulation files. Removed the Truth En tree as it was not used further in the analysis chain. Additionally, general clean up in terms of branch renaming. It most probably will impact the in_pixel_plots script. However the default analysis chain has already been modified to account for these changes.)
     }
+=======
+    for(int ev = 0; ev < fFlag->particleCount; ev++)
+    {
+        double beamWidth = fFlag->sourceRadius *mm;
+        G4double x = fFlag->beamXOffset *cm;
+        G4double y = fFlag->beamYOffset *cm;
+        G4double z = fFlag->beamZOffset *cm;
+        G4ThreeVector pos;
+        // Particle circular beam simulation
+        if(fFlag->beamGeometry == "pencil")
+        {
+            pos = G4ThreeVector(x, y, z);
+        }
+        else if(fFlag->beamGeometry == "circle")
+        {
+            pos = GetRandomPointOnCircle(0.5 *beamWidth, G4ThreeVector(x, y, z));
+        }
+        else if(fFlag->beamGeometry == "rectangle")
+        {
+            pos = GetRandomPointOnRectangle(beamWidth, beamWidth, G4ThreeVector(x, y, z));
+        }
+        else if (fFlag->beamGeometry == "granularBeam")
+        {
+            pos = G4ThreeVector(x + ev * 72.8 *um, y, z);
+        }
+        else
+        {
+            G4Exception("PhMattPrimaryGenerator::GeneratePrimaries", "SamplingFailure", FatalException,
+                "Requested geometry not found.");
+        }
 
+        fParticleGun->SetParticlePosition(pos);
+        // Curently we hardcode a particle gun with 100 KHz frequency
+        //fParticleGun->SetParticleTime(fEventCounter * 10.0 * us); 
+
+        G4int evtID = oneEvent->GetEventID();
+        double offSet =  fFlag->intraSpillOffset;
+        fParticleGun->SetParticleTime(evtID * fFlag->beamVeto *ns + offSet *ns); // This is the only thread safe way to do this. Multithreading messes up life as always
+>>>>>>> 689c0d7 (Added the MC truth primary vertex of particle gun from develop_Vlad branch)
+
+        // Save Vertex Info
+        G4AnalysisManager *analysisManager = G4AnalysisManager::Instance();
+        analysisManager->FillNtupleIColumn(4, 0, evtID);
+        analysisManager->FillNtupleDColumn(4, 1, pos[0]);
+        analysisManager->FillNtupleDColumn(4, 2, pos[1]);
+        analysisManager->FillNtupleDColumn(4, 3, pos[2]);
+        analysisManager->FillNtupleDColumn(4, 4, evtID * fFlag->beamVeto * ns);
+        analysisManager->AddNtupleRow(4); 
+
+
+        // Create Vertex
+        fParticleGun->GeneratePrimaryVertex(oneEvent);
+        fEventCounter++;
+    }
 }
