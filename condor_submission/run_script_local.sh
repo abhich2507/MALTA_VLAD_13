@@ -1,13 +1,5 @@
 #!/bin/bash
-<<<<<<< HEAD
-<<<<<<< HEAD
 
-=======
-source ../config.sh
->>>>>>> b9fbad2 (Updating include and configs)
-=======
-
->>>>>>> b73720e (Updating more folders with newest develop branch. Before was old version)
 if [ $HOME = "/home/vlad" ]; then
     source ../config.sh
     source "$LOCAL_GEANT"

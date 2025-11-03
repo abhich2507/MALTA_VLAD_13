@@ -25,30 +25,9 @@ struct SimFlags
     double pixelSize = 0.;
     double detectorSizeX =0.;
     double detectorSizeY =0.;
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> 8659d76 (Updating include and configs)
-=======
->>>>>>> 21a1a24 (Updating more folders with newest develop branch. Before was old version)
-    double detectorDepth =0.;
-=======
-    double detetectorDepth =0.;
->>>>>>> 66f7594 (DEBUG)
-=======
-    double detectorDepth =0.;
->>>>>>> 8a2e4b8 (Cleaned up the simulation files. Removed the Truth En tree as it was not used further in the analysis chain. Additionally, general clean up in terms of branch renaming. It most probably will impact the in_pixel_plots script. However the default analysis chain has already been modified to account for these changes.)
-    double CCModelSigmaX =0.;
-    double CCModelSigmaY =0.;
-=======
->>>>>>> b9fbad2 (Updating include and configs)
-=======
     double detectorDepth =0.;
     double CCModelSigmaX =0.;
     double CCModelSigmaY =0.;
->>>>>>> b73720e (Updating more folders with newest develop branch. Before was old version)
     std::string outsideMaterial = "G4_Galactic";
     std::string beamGeometry = "";
     double beamXOffset = 0.;
