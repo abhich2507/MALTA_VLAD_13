@@ -1,13 +1,12 @@
 #include "RunAction.hh"
 #include "CustomRun.hh"
 
-
-
 RunAction::RunAction(SimFlags* flags) : fFlag(flags)
 {
     // Simplified instantiation thanks to GEANT4 implementation
     G4AnalysisManager *analysisManager = G4AnalysisManager::Instance();
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 =======
     // Deposited Energy Ntuple. MONTE CARLO TRUTH
@@ -35,6 +34,8 @@ RunAction::RunAction(SimFlags* flags) : fFlag(flags)
     analysisManager->FinishNtuple(0);
 
 >>>>>>> 8149767 (Added digitization + tracking + clustering + analysis in an automatic fashion for each run)
+=======
+>>>>>>> 8a2e4b8 (Cleaned up the simulation files. Removed the Truth En tree as it was not used further in the analysis chain. Additionally, general clean up in terms of branch renaming. It most probably will impact the in_pixel_plots script. However the default analysis chain has already been modified to account for these changes.)
     // Scattering Angle Ntuple
     analysisManager->CreateNtuple("ScatAngle", "Scatering Angle");
     analysisManager->CreateNtupleIColumn("iEvent");
@@ -46,7 +47,6 @@ RunAction::RunAction(SimFlags* flags) : fFlag(flags)
     analysisManager->CreateNtupleDColumn("MomentumVal");
     analysisManager->FinishNtuple(0);
 
-    // 1D histograms for measuring the impact of material in the beam line
     analysisManager->CreateH1("ScatteringAngle", "Scattering Angle", 100, 0., 180.0);
     analysisManager->CreateH1("MomentumDistribution", "Momentum Distribution", 100, 0., 190.0 *GeV);
 
@@ -57,6 +57,7 @@ RunAction::RunAction(SimFlags* flags) : fFlag(flags)
     analysisManager->CreateNtupleIColumn("PixX");
     analysisManager->CreateNtupleIColumn("PixY");
 <<<<<<< HEAD
+<<<<<<< HEAD
     analysisManager->CreateNtupleDColumn("hitTime");
     analysisManager->CreateNtupleDColumn("hitEnergy");
     analysisManager->FinishNtuple(1);
@@ -64,16 +65,21 @@ RunAction::RunAction(SimFlags* flags) : fFlag(flags)
     analysisManager->CreateNtupleDColumn("timeWalkHit");
     analysisManager->CreateNtupleDColumn("Energy");
     analysisManager->FinishNtuple(3);
+=======
+    analysisManager->CreateNtupleDColumn("hitTime");
+    analysisManager->CreateNtupleDColumn("hitEnergy");
+    analysisManager->FinishNtuple(1);
+>>>>>>> 8a2e4b8 (Cleaned up the simulation files. Removed the Truth En tree as it was not used further in the analysis chain. Additionally, general clean up in terms of branch renaming. It most probably will impact the in_pixel_plots script. However the default analysis chain has already been modified to account for these changes.)
 
-    // TODO: This NTuple is redundant with the (0) one. I will probably deprecate that one later
-    // WARNING A lot of walk ahead
+    // MONTE CARLO Truth
     analysisManager->CreateNtuple("TruthVertex", "Monte Carlo Truth Vertex Position");
     // Create Integer Event # column
     analysisManager->CreateNtupleIColumn("iEvent");
-    analysisManager->CreateNtupleDColumn("vertexX");
-    analysisManager->CreateNtupleDColumn("vertexY");
-    analysisManager->CreateNtupleDColumn("vertexZ");
+    analysisManager->CreateNtupleDColumn("trueVertexX");
+    analysisManager->CreateNtupleDColumn("trueVertexY");
+    analysisManager->CreateNtupleDColumn("trueVertexZ");
     // Create Integer Global time column = time that starts when each event begins. Local time = time when the particle is created
+<<<<<<< HEAD
     analysisManager->CreateNtupleDColumn("fGlobalTime");
     analysisManager->FinishNtuple(4);
 <<<<<<< HEAD
@@ -94,6 +100,11 @@ RunAction::RunAction(SimFlags* flags) : fFlag(flags)
     analysisManager->FinishNtuple(2);
 =======
 >>>>>>> 66f7594 (DEBUG)
+=======
+    analysisManager->CreateNtupleDColumn("trueGlobalTime");
+    analysisManager->CreateNtupleDColumn("trueEnergy");
+    analysisManager->FinishNtuple(2);
+>>>>>>> 8a2e4b8 (Cleaned up the simulation files. Removed the Truth En tree as it was not used further in the analysis chain. Additionally, general clean up in terms of branch renaming. It most probably will impact the in_pixel_plots script. However the default analysis chain has already been modified to account for these changes.)
 }
 
 RunAction::~RunAction()
@@ -108,6 +119,7 @@ void RunAction::BeginOfRunAction(const G4Run *run)
     G4int runID = run->GetRunID();
     std::stringstream strRunID;
     strRunID << runID;
+    
     //analysisManager->SetNtupleMerging(true);
     if (isMaster && fFlag->isBatch)
     {

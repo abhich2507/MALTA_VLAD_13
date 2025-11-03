@@ -1,11 +1,14 @@
 #include "SensitiveDetector.hh"
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 // TODO: Create debug flags for different points of simulation.
 // WARNING A lot of work ahead 
 
 >>>>>>> 66f7594 (DEBUG)
+=======
+>>>>>>> 8a2e4b8 (Cleaned up the simulation files. Removed the Truth En tree as it was not used further in the analysis chain. Additionally, general clean up in terms of branch renaming. It most probably will impact the in_pixel_plots script. However the default analysis chain has already been modified to account for these changes.)
 SensitiveDetector::SensitiveDetector(G4String name, SimFlags* flags): G4VSensitiveDetector(name), fFlag(flags)
 {
     fTotalEnergyDeposited = 0.;
@@ -39,6 +42,7 @@ void SensitiveDetector::EndOfEvent(G4HCofThisEvent *)
 G4bool SensitiveDetector::ProcessHits(G4Step *aStep, G4TouchableHistory *)
 {
     G4int eventID = G4RunManager::GetRunManager()->GetCurrentEvent()->GetEventID();
+
     G4AnalysisManager *analysisManager = G4AnalysisManager::Instance();
     // Implementation of all analysis info to be stored in nTuple
     // PreStep point includes all info of the first interaction within one step. Post step includes the last interaction of that particle.
@@ -93,6 +97,7 @@ G4bool SensitiveDetector::ProcessHits(G4Step *aStep, G4TouchableHistory *)
         }
     }
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 
 <<<<<<< HEAD
@@ -101,6 +106,9 @@ G4bool SensitiveDetector::ProcessHits(G4Step *aStep, G4TouchableHistory *)
     // get modulus for InPixel location.
 =======
 >>>>>>> 66f7594 (DEBUG)
+=======
+    // get modulus for InPixel location.
+>>>>>>> 8a2e4b8 (Cleaned up the simulation files. Removed the Truth En tree as it was not used further in the analysis chain. Additionally, general clean up in terms of branch renaming. It most probably will impact the in_pixel_plots script. However the default analysis chain has already been modified to account for these changes.)
     G4ThreeVector InPixPos = G4ThreeVector(std::fmod(posPixel[0],pixelSize), std::fmod(posPixel[1],pixelSize), posPixel[2]); // result in mm
     double efficiency = GetEfficiencyCorrectionXY(InPixPos);
     G4double edep_corr = efficiency * energy;    
@@ -148,11 +156,15 @@ G4bool SensitiveDetector::ProcessHits(G4Step *aStep, G4TouchableHistory *)
     for(int i = 0; i<4; i++)
     {
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 8a2e4b8 (Cleaned up the simulation files. Removed the Truth En tree as it was not used further in the analysis chain. Additionally, general clean up in terms of branch renaming. It most probably will impact the in_pixel_plots script. However the default analysis chain has already been modified to account for these changes.)
         analysisManager->FillNtupleIColumn(1, 0, eventID);
         analysisManager->FillNtupleIColumn(1, 1, planeID);
         analysisManager->FillNtupleIColumn(1, 2, iHit);
         analysisManager->FillNtupleIColumn(1, 3, pixelCluster[i][0]);
         analysisManager->FillNtupleIColumn(1, 4, pixelCluster[i][1]);
+<<<<<<< HEAD
         // This branch will be modified. Before it as encoding the timewalk of each hit. Now it stores the hit time of a particle.
         analysisManager->FillNtupleDColumn(1, 5, fglobalTime *ns);
         analysisManager->FillNtupleDColumn(1, 6, effAnCopy[i] * energy *1000000/epsilon);
@@ -166,11 +178,14 @@ G4bool SensitiveDetector::ProcessHits(G4Step *aStep, G4TouchableHistory *)
         analysisManager->FillNtupleIColumn(3, 2, iHit);
         analysisManager->FillNtupleIColumn(3, 3, pixelCluster[i][0]);
         analysisManager->FillNtupleIColumn(3, 4, pixelCluster[i][1]);
+=======
+>>>>>>> 8a2e4b8 (Cleaned up the simulation files. Removed the Truth En tree as it was not used further in the analysis chain. Additionally, general clean up in terms of branch renaming. It most probably will impact the in_pixel_plots script. However the default analysis chain has already been modified to account for these changes.)
         // This branch will be modified. Before it as encoding the timewalk of each hit. Now it stores the hit time of a particle.
-        analysisManager->FillNtupleDColumn(3, 5, fglobalTime *ns);
-        analysisManager->FillNtupleDColumn(3, 6, effAn[i] * energy *1000000/epsilon);
-        analysisManager->AddNtupleRow(3); 
+        analysisManager->FillNtupleDColumn(1, 5, fglobalTime *ns);
+        analysisManager->FillNtupleDColumn(1, 6, effAnCopy[i] * energy *1000000/epsilon);
+        analysisManager->AddNtupleRow(1); 
         iHit++;
+<<<<<<< HEAD
 
     }
 
@@ -207,6 +222,8 @@ G4bool SensitiveDetector::ProcessHits(G4Step *aStep, G4TouchableHistory *)
         analysisManager->FillNtupleDColumn(2, 1,  fTrackLengths[aStep->GetTrack()->GetTrackID()] * 1000);
         analysisManager->AddNtupleRow(2); 
 >>>>>>> 8149767 (Added digitization + tracking + clustering + analysis in an automatic fashion for each run)
+=======
+>>>>>>> 8a2e4b8 (Cleaned up the simulation files. Removed the Truth En tree as it was not used further in the analysis chain. Additionally, general clean up in terms of branch renaming. It most probably will impact the in_pixel_plots script. However the default analysis chain has already been modified to account for these changes.)
     }
 
     return true;
@@ -321,6 +338,7 @@ std::pair<std::array<double, 4>, uint8_t>  SensitiveDetector::GetEfficiencyAnaly
 
     return {{eff00, eff01, eff10, eff11}, quadrantFlag} ; // ordering not certain yet.
 <<<<<<< HEAD
+<<<<<<< HEAD
 }
 =======
 }
@@ -338,3 +356,6 @@ G4double SensitiveDetector::GetTimingOffset(G4double amplitude) {
 
 }
 >>>>>>> 8149767 (Added digitization + tracking + clustering + analysis in an automatic fashion for each run)
+=======
+}
+>>>>>>> 8a2e4b8 (Cleaned up the simulation files. Removed the Truth En tree as it was not used further in the analysis chain. Additionally, general clean up in terms of branch renaming. It most probably will impact the in_pixel_plots script. However the default analysis chain has already been modified to account for these changes.)

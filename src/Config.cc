@@ -94,10 +94,14 @@ void LoadSimFlagsFromFile(const std::string& filename, SimFlags& flags)
         else if (key == "detectorSizeX") flags.detectorSizeX = std::stod(value);
         else if (key == "detectorSizeY") flags.detectorSizeY = std::stod(value);
 <<<<<<< HEAD
+<<<<<<< HEAD
         else if (key == "detectorDepth") flags.detectorDepth = std::stod(value);
 =======
         else if (key == "detetectorDepth") flags.detetectorDepth = std::stod(value);
 >>>>>>> 66f7594 (DEBUG)
+=======
+        else if (key == "detectorDepth") flags.detectorDepth = std::stod(value);
+>>>>>>> 8a2e4b8 (Cleaned up the simulation files. Removed the Truth En tree as it was not used further in the analysis chain. Additionally, general clean up in terms of branch renaming. It most probably will impact the in_pixel_plots script. However the default analysis chain has already been modified to account for these changes.)
         else if (key == "CCModelSigmaX") flags.CCModelSigmaX = std::stod(value);
         else if (key == "CCModelSigmaY") flags.CCModelSigmaY = std::stod(value);
         else if (key == "outsideMaterial") flags.outsideMaterial = value;
