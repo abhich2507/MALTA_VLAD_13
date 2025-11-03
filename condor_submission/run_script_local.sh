@@ -1,11 +1,9 @@
 #!/bin/bash
+source ../config.sh
 if [ $HOME = "/home/vlad" ]; then
-    source ../config.sh
     source "$LOCAL_GEANT"
     source "$LOCAL_ROOT"
     export $EXTRA_LOCAL
-else
-    source ../config_lucian.sh
 fi
 FLAG=$1
 
