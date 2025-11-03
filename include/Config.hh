@@ -28,8 +28,11 @@ struct SimFlags
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 >>>>>>> 8659d76 (Updating include and configs)
+=======
+>>>>>>> 21a1a24 (Updating more folders with newest develop branch. Before was old version)
     double detectorDepth =0.;
 =======
     double detetectorDepth =0.;
@@ -41,6 +44,11 @@ struct SimFlags
     double CCModelSigmaY =0.;
 =======
 >>>>>>> b9fbad2 (Updating include and configs)
+=======
+    double detectorDepth =0.;
+    double CCModelSigmaX =0.;
+    double CCModelSigmaY =0.;
+>>>>>>> b73720e (Updating more folders with newest develop branch. Before was old version)
     std::string outsideMaterial = "G4_Galactic";
     std::string beamGeometry = "";
     double beamXOffset = 0.;
@@ -52,6 +60,8 @@ struct SimFlags
     double sourceZOffset = 0.;
     int particleCount = 0;
     int numEvents = 0;
+    double intraSpillOffset = 0;
+    double beamVeto = 0;
     std::string particleType = "";
     std::string particleEnergy = "";
     double particleMomentumX = 0.;
