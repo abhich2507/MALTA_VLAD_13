@@ -13,6 +13,7 @@
 #include "TrackingAction.hh"
 #include "SubmissionTests.hh"
 
+
 int main (int argc, char** argv)
 // argc = argument count; argv = argument value - Command line arguments
 {
@@ -63,10 +64,10 @@ int main (int argc, char** argv)
     submissionTest(*flags);
     std::string homePath = std::getenv("HOME") ? std::getenv("HOME") : "";
 
-    // Check if running in local or naf mode
+    // Check if running in local or naf mode and set the fFlag runMode appropriately. This flag is not set via the flags file.
     if(homePath.empty() || homePath.find("desy.de")!= std::string::npos)
     {
-        std::cout<< "You are running from NAF!"<< "\n";
+        std::cout<< "\n" << "You are running from NAF!"<< "\n";
         flags->runMode = "naf";
 
     }
@@ -115,7 +116,7 @@ int main (int argc, char** argv)
     runManager->SetUserInitialization(new ActionInitialization(flags));
 
     // Sets up visualization manager.
-    G4VisManager *visManager = new G4VisExecutive();
+    G4VisManager *visManager = new G4VisExecutive("quiet");
     // Initializes the visualisation drivers(OpenGL,...)
     visManager->Initialize();
     // Pointer to the global UI manager instance. :: = scope resolution operator 
