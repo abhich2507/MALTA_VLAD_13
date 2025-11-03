@@ -169,6 +169,7 @@ void in_pixel_plots(std::string inputPath, std::string outROOTname, double resul
 
     // Connect branches
     MCTruthchain->SetBranchAddress("iEvent", &MCtrackEventID);
+<<<<<<< HEAD
     MCTruthchain->SetBranchAddress("vertexX", &MCtrackX);
     MCTruthchain->SetBranchAddress("vertexY", &MCtrackY);
     MCTruthchain->SetBranchAddress("vertexZ", &MCtrackZ);
@@ -177,6 +178,21 @@ void in_pixel_plots(std::string inputPath, std::string outROOTname, double resul
 >>>>>>> 57c5dd4 (Implemented spacial cut based on MC true primary particle position):root_macros/in_pixel_plots.c
 =======
 >>>>>>> c554082 (Keeping in_pixel_plots.c for now, but renaming it later)
+=======
+    bool oldtree = false;
+    if (oldtree){
+        MCTruthchain->SetBranchAddress("vertexX", &MCtrackX); // old naming of branch
+        MCTruthchain->SetBranchAddress("vertexY", &MCtrackY);
+        MCTruthchain->SetBranchAddress("vertexZ", &MCtrackZ);
+        MCTruthchain->SetBranchAddress("fGlobalTime", &MCtrackGlobalTime);
+    }
+    else {
+        MCTruthchain->SetBranchAddress("trueVertexX", &MCtrackX);
+        MCTruthchain->SetBranchAddress("trueVertexY", &MCtrackY);
+        MCTruthchain->SetBranchAddress("trueVertexZ", &MCtrackZ);
+        MCTruthchain->SetBranchAddress("trueGlobalTime", &MCtrackGlobalTime);
+    }
+>>>>>>> 1dc23f7 (branch should be mostly up to date with develop now)
     Long64_t nEntriesMCTruth = MCTruthchain->GetEntries();
     std::cout << "Number of Events from MC track info: " << nEntriesMCTruth << std::endl;
 
@@ -251,6 +267,7 @@ void in_pixel_plots(std::string inputPath, std::string outROOTname, double resul
         //chainPixel->Add(Form("%soutput0_t0.root", inputPath.c_str()));
     }
 <<<<<<< HEAD
+<<<<<<< HEAD
     //asdasd
 
     double corrEnergy, timeWalkHit;
@@ -259,11 +276,20 @@ void in_pixel_plots(std::string inputPath, std::string outROOTname, double resul
     double corrEnergy, timeWalkHit;
     int rawEventID, iHit, pixX, pixY;
 >>>>>>> c554082 (Keeping in_pixel_plots.c for now, but renaming it later)
+=======
+    //asdasd
+
+    double corrEnergy, timeWalkHit;
+    int rawEventID, iHit, pixX, pixY, iPlane;
+>>>>>>> 1dc23f7 (branch should be mostly up to date with develop now)
     chainPixel->SetBranchAddress("iEvent", &rawEventID);
     chainPixel->SetBranchAddress("iHit", &iHit);
     chainPixel->SetBranchAddress("PixX", &pixX);
     chainPixel->SetBranchAddress("PixY", &pixY);
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 1dc23f7 (branch should be mostly up to date with develop now)
     if (oldtree){
         iPlane = 0;
         chainPixel->SetBranchAddress("Energy", &corrEnergy); // old naming of branch
@@ -275,6 +301,7 @@ void in_pixel_plots(std::string inputPath, std::string outROOTname, double resul
         chainPixel->SetBranchAddress("hitTime", &timeWalkHit);
     }
 
+<<<<<<< HEAD
     Long64_t nRawEntries = chainPixel->GetEntries();
     std::map<std::pair<int,std::pair<int, int>>, double> enMap; // Avoid O(n^2) nested loops via extra map 
     std::map<int, std::vector<double>> timeMap;
@@ -298,11 +325,18 @@ void in_pixel_plots(std::string inputPath, std::string outROOTname, double resul
     std::map<int, std::vector<double>> timeMap;
 >>>>>>> c554082 (Keeping in_pixel_plots.c for now, but renaming it later)
 
+=======
+    Long64_t nRawEntries = chainPixel->GetEntries();
+    std::map<std::pair<int,std::pair<int, int>>, double> enMap; // Avoid O(n^2) nested loops via extra map 
+    std::map<int, std::vector<double>> timeMap;
+>>>>>>> 1dc23f7 (branch should be mostly up to date with develop now)
     
     std::cout << " Raw hit entries: " << nRawEntries << std::endl;
     for (Long64_t j = 0; j < nRawEntries; j++)
     {
         chainPixel->GetEntry(j);
+        //std::cout << j << " Plane: " << iPlane << " number" << std::endl;
+        if (iPlane != 0) continue; // only consider DUT with iPlane ==0
         enMap[{rawEventID, {pixX, pixY}}] += corrEnergy;
         // Deprecated will require to be purged
         timeMap[rawEventID].push_back(timeWalkHit); // Store all times
@@ -735,7 +769,7 @@ int threshold_loop(std::string inputFile, std::string outROOT){
     double thresholds[] = {400, 2000.};
 =======
     double thresholds[] = {200., 300., 400., 500., 600., 700., 800., 900., 1000., 1200., 1400., 1600., 1800., 2000., 2200., 2400., 2600., 2800., 3000.};
-    //double thresholds[] = {200.};
+    //double thresholds[] = {2000., 200.};
     //double thresholds[] = {1400., 200., 1200.};
 >>>>>>> 6b085e9 (Implemented spacial cut based on MC true primary particle position)
     //double thresholds[] = {200, 230, 343, 448, 544, 632, 712}; // equivalent to thresholds of data points
@@ -816,6 +850,7 @@ void RunInt_loop(){
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
     for (int runNumber = 43; runNumber <= 45; ++runNumber) {
 =======
     for (int runNumber = 30; runNumber <= 39; ++runNumber) {
@@ -843,6 +878,9 @@ void RunInt_loop(){
 =======
     for (int runNumber = 46; runNumber <= 50; ++runNumber) { // 46 to 50
 >>>>>>> 1bb9052 (Keeping in_pixel_plots.c for now, but renaming it later)
+=======
+    for (int runNumber = 55; runNumber <= 55; ++runNumber) { // 46 to 50
+>>>>>>> cfe6edc (branch should be mostly up to date with develop now)
         std::string inputFileName = "/Users/lucianfasselt/DECAL/Simulation/Geant4/MALTASIM/malta_simulation/Results/local_00"+ std::to_string(runNumber)+"/";  
 <<<<<<<< HEAD:root_macros/simpleAnalysis.c
         std::string outROOTName = "SimOutput_MaxCl8_" + std::to_string(runNumber) + ".root";
