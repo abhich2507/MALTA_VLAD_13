@@ -1,36 +1,33 @@
 #include "PrimaryGenerator.hh"
+
 //Constructor
 PrimaryGenerator::PrimaryGenerator(SimFlags* flags) : fFlag(flags), fEventCounter(0)
 {
     fParticleGun = new G4ParticleGun(1); // 1 particle per event
-    // Particle Direction (momentum)
-    G4double px = fFlag->particleMomentumX;
-    G4double py = fFlag->particleMomentumY;
-    G4double pz = fFlag->particleMomentumZ;
-    G4ThreeVector mom(px,py,pz);
-    fParticleGun->SetParticleMomentumDirection(mom);
-
     // Set primary particle energy if a constant value is passed. If not, an energy method is used below
     if(!fFlag->particleEnergy.empty() && fFlag->particleEnergy.find_first_not_of("0123456789") == std::string::npos)
     {
-        G4double particleEnergy = std::stoi(fFlag->particleEnergy) * GeV;
+        G4double particleEnergy = std::stod(fFlag->particleEnergy) * GeV;
         fParticleGun->SetParticleEnergy(particleEnergy);  //1.4608 * MeV K-40   0.661 * MeV Cs-137
     }
     else
     {
-        G4Exception("PhMattPrimaryGenerator::PrimaryGenerator", "SamplingFailure", FatalException,
-            "Aaaahm. How about inserting an actual energy value? Unless I implemented a conitnuous energy method and forgot to supress this print-out.");
+        trowError("PrimaryGenerator::PrimaryGenerator", "Sampling Failure", "Non-constant energy disrtibution selected but none is yet implemented.");                  
     }
     
     std::string particleType = fFlag->particleType;
     
     G4ParticleTable *particleTable = G4ParticleTable::GetParticleTable();
     G4ParticleDefinition *particle = particleTable->FindParticle(particleType);
+
+    if (!particle)
+    {
+        trowError("PrimaryGenerator::PrimaryGenerator", "Sampling Failure", "Given particle type does not match any predefined GEANT4 value.");
+    }
+
     fParticleGun->SetParticleDefinition(particle);
-    
-    
-    
 }
+// Destructor
 PrimaryGenerator::~PrimaryGenerator()
 {
     delete fParticleGun;
@@ -65,12 +62,18 @@ G4ThreeVector PrimaryGenerator::GetRandomPointOnRectangle(G4double height, G4dou
     return G4ThreeVector(x, y, z);
 }
 
-
-
 void PrimaryGenerator::GeneratePrimaries(G4Event *oneEvent)
 {
+    if(fFlag->verbosePG) std::cout << "This event contains " << fFlag->particleCount << " particles with:" << std::endl;
     for(int ev = 0; ev < fFlag->particleCount; ev++)
     {
+        // Particle Direction (momentum)
+        G4double px = fFlag->particleMomentumX;
+        G4double py = fFlag->particleMomentumY;
+        G4double pz = fFlag->particleMomentumZ;
+        G4ThreeVector mom(px,py,pz);
+        fParticleGun->SetParticleMomentumDirection(mom);
+
         double beamWidth = fFlag->sourceRadius *mm;
         G4double x = fFlag->beamXOffset *cm;
         G4double y = fFlag->beamYOffset *cm;
@@ -95,13 +98,10 @@ void PrimaryGenerator::GeneratePrimaries(G4Event *oneEvent)
         }
         else
         {
-            G4Exception("PhMattPrimaryGenerator::GeneratePrimaries", "SamplingFailure", FatalException,
-                "Requested geometry not found.");
+            trowError("PhMattPrimaryGenerator::GeneratePrimaries", "Sampling Failure", "Requested beam geometry not found.");
         }
 
         fParticleGun->SetParticlePosition(pos);
-        // Curently we hardcode a particle gun with 100 KHz frequency
-        //fParticleGun->SetParticleTime(fEventCounter * 10.0 * us); 
 
         G4int evtID = oneEvent->GetEventID();
         double offSet =  fFlag->intraSpillOffset;
@@ -109,20 +109,21 @@ void PrimaryGenerator::GeneratePrimaries(G4Event *oneEvent)
 
         // Save Vertex Info
         G4AnalysisManager *analysisManager = G4AnalysisManager::Instance();
-        analysisManager->FillNtupleIColumn(4, 0, evtID);
-        analysisManager->FillNtupleDColumn(4, 1, pos[0]);
-        analysisManager->FillNtupleDColumn(4, 2, pos[1]);
-        analysisManager->FillNtupleDColumn(4, 3, pos[2]);
-        analysisManager->FillNtupleDColumn(4, 4, evtID * fFlag->beamVeto * ns);
-        analysisManager->AddNtupleRow(4); 
-
-
-
-
+        analysisManager->FillNtupleIColumn(2, 0, evtID);
+        analysisManager->FillNtupleDColumn(2, 1, pos[0]);
+        analysisManager->FillNtupleDColumn(2, 2, pos[1]);
+        analysisManager->FillNtupleDColumn(2, 3, pos[2]);
+        analysisManager->FillNtupleDColumn(2, 4, evtID * fFlag->beamVeto * ns);
+        analysisManager->FillNtupleDColumn(2, 5, std::stod(fFlag->particleEnergy));
+        analysisManager->AddNtupleRow(2); 
 
         // Create Vertex
         fParticleGun->GeneratePrimaryVertex(oneEvent);
         fEventCounter++;
+
+        if(fFlag->verbosePG) std::cout << "              - " <<"Type: " << fFlag->particleType << "; X: " << pos[0] << "; Y: " << pos[1] << "; Z: " << pos[3] 
+                              << "; pX: " << px << "; pY: " << py << "; pZ: " << pz << "; Energy: " << fFlag->particleEnergy;
+                              
     }
 
 }

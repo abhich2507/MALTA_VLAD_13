@@ -1,6 +1,5 @@
 #include "PhysicsList.hh"
-
-// Consrtuctor call
+// Constructor call
 PhysicsList::PhysicsList(SimFlags* flags) : fFlag(flags)
 // Body of the contructor - contains all the physics for the simulation
 {
@@ -38,6 +37,11 @@ void PhysicsList::SetCuts()
         SetCutValue(fFlag->GEANT4CutValue *um, "e+");
 
         // Optionally print the cut values
-        DumpCutValuesTable();
+        if (fFlag->verbosePL)DumpCutValuesTable();
+    }
+
+    if(fFlag->GEANT4CutValue >= fFlag->detectorDepth)
+    {
+        trowWarning("PhysicsList::SetCuts", "Value Warning", "Energy cut value larger or equal than sensitive depth. Energy deposition in a single step.");
     }
 }
