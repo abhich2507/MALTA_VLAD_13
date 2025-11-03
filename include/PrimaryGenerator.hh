@@ -2,6 +2,7 @@
 #define PRIMARYGENERATOR_HH
 
 #include "G4VUserPrimaryGeneratorAction.hh"
+#include "G4RunManager.hh"
 // Define particle types
 #include "G4ParticleDefinition.hh"
 // Particle Gun shoots particles
@@ -26,5 +27,6 @@ private:
     G4ThreeVector GetRandomPointOnCircle(G4double radius, G4ThreeVector center);
     G4ThreeVector GetRandomPointOnRectangle(G4double height, G4double thickness, G4ThreeVector center);
     G4ParticleGun *fParticleGun;
+    G4int fEventCounter;
 };
 #endif
