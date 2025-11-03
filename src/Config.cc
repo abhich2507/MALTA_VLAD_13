@@ -95,6 +95,9 @@ void LoadSimFlagsFromFile(const std::string& filename, SimFlags& flags)
         else if (key == "detectorSizeY") flags.detectorSizeY = std::stod(value);
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 6f1d148 (Updating all src files from develop)
         else if (key == "detectorDepth") flags.detectorDepth = std::stod(value);
 =======
         else if (key == "detetectorDepth") flags.detetectorDepth = std::stod(value);
@@ -104,6 +107,8 @@ void LoadSimFlagsFromFile(const std::string& filename, SimFlags& flags)
 >>>>>>> 8a2e4b8 (Cleaned up the simulation files. Removed the Truth En tree as it was not used further in the analysis chain. Additionally, general clean up in terms of branch renaming. It most probably will impact the in_pixel_plots script. However the default analysis chain has already been modified to account for these changes.)
         else if (key == "CCModelSigmaX") flags.CCModelSigmaX = std::stod(value);
         else if (key == "CCModelSigmaY") flags.CCModelSigmaY = std::stod(value);
+=======
+>>>>>>> 48e3a0f (Updating all src files from develop)
         else if (key == "outsideMaterial") flags.outsideMaterial = value;
         else if (key == "beamGeometry") flags.beamGeometry = value;
         else if (key == "beamXOffset") flags.beamXOffset = std::stod(value);
@@ -115,8 +120,6 @@ void LoadSimFlagsFromFile(const std::string& filename, SimFlags& flags)
         else if (key == "sourceZOffset") flags.sourceZOffset = std::stod(value);
         else if (key == "particleCount") flags.particleCount = std::stoi(value);
         else if (key == "numEvents") flags.numEvents = std::stoi(value);
-        else if (key == "intraSpillOffset") flags.intraSpillOffset = std::stod(value);
-        else if (key == "beamVeto") flags.beamVeto = std::stod(value);
         else if (key == "particleType") flags.particleType = value;
         else if (key == "particleEnergy") flags.particleEnergy = value;
         else if (key == "particleMomentumX") flags.particleMomentumX = std::stod(value);

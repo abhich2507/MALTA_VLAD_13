@@ -10,13 +10,17 @@
 =======
 >>>>>>> ebfd7f7 (Added the MC truth primary vertex of particle gun from develop_Vlad branch)
 //Constructor
-PrimaryGenerator::PrimaryGenerator(SimFlags* flags) : fFlag(flags), fEventCounter(0)
+PrimaryGenerator::PrimaryGenerator(SimFlags* flags) : fFlag(flags)
 {
+<<<<<<< HEAD
     fParticleGun = new G4ParticleGun(1); // 1 particle per event
 <<<<<<< HEAD
 <<<<<<< HEAD
 =======
 >>>>>>> ebfd7f7 (Added the MC truth primary vertex of particle gun from develop_Vlad branch)
+=======
+    fParticleGun = new G4ParticleGun(fFlag->particleCount); // 1 particle per event
+>>>>>>> 6f1d148 (Updating all src files from develop)
     // Particle Direction (momentum)
     G4double px = fFlag->particleMomentumX;
     G4double py = fFlag->particleMomentumY;
@@ -109,8 +113,11 @@ void PrimaryGenerator::GeneratePrimaries(G4Event *oneEvent)
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 >>>>>>> ebfd7f7 (Added the MC truth primary vertex of particle gun from develop_Vlad branch)
+=======
+>>>>>>> 6f1d148 (Updating all src files from develop)
     if(fFlag->verbosePG) std::cout << "This event contains " << fFlag->particleCount << " particles with:" << std::endl;
     for(int ev = 0; ev < fFlag->particleCount; ev++)
     {
@@ -312,5 +319,35 @@ void PrimaryGenerator::GeneratePrimaries(G4Event *oneEvent)
         // Create Vertex
         fParticleGun->GeneratePrimaryVertex(oneEvent);
         fEventCounter++;
+=======
+    double beamWidth = fFlag->sourceRadius *mm;
+    G4double x = fFlag->beamXOffset *cm;
+    G4double y = fFlag->beamYOffset *cm;
+    G4double z = fFlag->beamZOffset *cm;
+    G4ThreeVector pos;
+    // Particle circular beam simulation
+    if(fFlag->beamGeometry == "pencil")
+    {
+        pos = G4ThreeVector(x, y, z);
+>>>>>>> 48e3a0f (Updating all src files from develop)
     }
+    else if(fFlag->beamGeometry == "circle")
+    {
+        pos = GetRandomPointOnCircle(0.5 *beamWidth, G4ThreeVector(x, y, z));
+    }
+    else if(fFlag->beamGeometry == "rectangle")
+    {
+        pos = GetRandomPointOnRectangle(beamWidth, beamWidth, G4ThreeVector(x, y, z));
+    }
+    else
+    {
+        G4Exception("PhMattPrimaryGenerator::GeneratePrimaries", "SamplingFailure", FatalException,
+            "Requested geometry not found.");
+    }
+
+    fParticleGun->SetParticlePosition(pos);
+
+    // Create Vertex
+    fParticleGun->GeneratePrimaryVertex(oneEvent);
+
 }
