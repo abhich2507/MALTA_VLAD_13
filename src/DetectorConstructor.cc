@@ -49,19 +49,6 @@ G4VPhysicalVolume *DetectorConstruction::Construct()
     // MALTA implementation monolithic sensor
     if(fFlag->preDefinedGeometryFlag == "MALTA")
     {
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> 8a2e4b8 (Cleaned up the simulation files. Removed the Truth En tree as it was not used further in the analysis chain. Additionally, general clean up in terms of branch renaming. It most probably will impact the in_pixel_plots script. However the default analysis chain has already been modified to account for these changes.)
-=======
->>>>>>> b3c9266 (rebasing, for merging. caused by: removed sqrt2 from smoothstep)
-=======
-=======
->>>>>>> fdaa68d (Updating src folder with newest develop branch. Before was old version)
->>>>>>> beda3d3 (Updating src folder with newest develop branch. Before was old version)
         G4double maltaWidthX = fFlag->detectorSizeX *cm; 
         G4double maltaWidthY = fFlag->detectorSizeY *cm; 
         G4double maltaDepth = fFlag->detectorDepth* um;
@@ -72,45 +59,8 @@ G4VPhysicalVolume *DetectorConstruction::Construct()
         {
             trowError("DetectorConstruct::Construct", "Invalid geometry", "DUT outside world");
         }
-<<<<<<< HEAD
 
         G4Box *solidMALTA = new G4Box ("MALTASensor", maltaWidthX/2, maltaWidthY/2, maltaDepth/2);
-<<<<<<< HEAD
-=======
-        //TODO: This is hardcoded. It has its own flag already. Fix it
-        G4double maltaWidth = 18.6368 *mm; 
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-        G4double maltaDepth = 29.1 * um;
-        G4Box *solidMALTA = new G4Box ("MALTASensor", maltaWidth/2, maltaWidth/2, maltaDepth/2);
->>>>>>> 8149767 (Added digitization + tracking + clustering + analysis in an automatic fashion for each run)
-=======
-=======
->>>>>>> 8a2e4b8 (Cleaned up the simulation files. Removed the Truth En tree as it was not used further in the analysis chain. Additionally, general clean up in terms of branch renaming. It most probably will impact the in_pixel_plots script. However the default analysis chain has already been modified to account for these changes.)
-
-        G4Box *solidMALTA = new G4Box ("MALTASensor", maltaWidthX/2, maltaWidthY/2, maltaDepth/2);
->>>>>>> 66f7594 (DEBUG)
-=======
-        G4double maltaDepth = 30 * um; // 29.1 * um; for measurement result
-=======
-        G4double maltaDepth = 29.1 * um; // 29.1 * um or 30.0 * um; for measurement result
->>>>>>> 580f2b4 (Tgain and agian. time-walk model extended to all thresholds based on simple assumptions.)
-=======
-        G4double maltaDepth = 29.1 * um;// 29.1 * um; // 29.1 * um or 30.0 * um; for measurement result
->>>>>>> b0886b9 (Low Threshold data set from W5R23 added in threshold range 200-700e-)
-=======
-        G4double maltaDepth = 30 * um;
->>>>>>> 6f1d148 (Updating all src files from develop)
-        G4Box *solidMALTA = new G4Box ("MALTASensor", maltaWidth/2, maltaWidth/2, maltaDepth/2);
->>>>>>> 18e3f08 (removed sqrt2 from smoothstep)
-<<<<<<< HEAD
->>>>>>> b3c9266 (rebasing, for merging. caused by: removed sqrt2 from smoothstep)
-=======
-=======
->>>>>>> fdaa68d (Updating src folder with newest develop branch. Before was old version)
->>>>>>> beda3d3 (Updating src folder with newest develop branch. Before was old version)
         logicSensor = new G4LogicalVolume (solidMALTA, detMat, "logicSensor");
         G4VPhysicalVolume *physSensor  = new G4PVPlacement(0, G4ThreeVector(detectorXOffset, detectorYOffset, detectorZOffset), logicSensor, "physSensor", logicalWorld, false, 0, true);
 
@@ -118,10 +68,6 @@ G4VPhysicalVolume *DetectorConstruction::Construct()
         pixelVisAtt->SetForceSolid(true);
         logicSensor->SetVisAttributes(pixelVisAtt);
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> 8a2e4b8 (Cleaned up the simulation files. Removed the Truth En tree as it was not used further in the analysis chain. Additionally, general clean up in terms of branch renaming. It most probably will impact the in_pixel_plots script. However the default analysis chain has already been modified to account for these changes.)
         std::vector<double> planeCorrections = {-64.2, -56.2, -48.2, 29.8, 37.8, 45.8};
 
         for (const double& corr : planeCorrections)
@@ -132,7 +78,6 @@ G4VPhysicalVolume *DetectorConstruction::Construct()
             }
         }
 
-<<<<<<< HEAD
         logicPlane1 = new G4LogicalVolume (solidMALTA, detMat, "logicPlane1");
         G4VPhysicalVolume *physPlane1  = new G4PVPlacement(0, G4ThreeVector(detectorXOffset, detectorYOffset, detectorZOffset + planeCorrections[0]*cm)
                                                             , logicPlane1, "physPlane1", logicalWorld, false, 0, true);
@@ -165,74 +110,9 @@ G4VPhysicalVolume *DetectorConstruction::Construct()
 
 
  
-=======
-=======
->>>>>>> 8a2e4b8 (Cleaned up the simulation files. Removed the Truth En tree as it was not used further in the analysis chain. Additionally, general clean up in terms of branch renaming. It most probably will impact the in_pixel_plots script. However the default analysis chain has already been modified to account for these changes.)
-        logicPlane1 = new G4LogicalVolume (solidMALTA, detMat, "logicPlane1");
-        G4VPhysicalVolume *physPlane1  = new G4PVPlacement(0, G4ThreeVector(detectorXOffset, detectorYOffset, detectorZOffset + planeCorrections[0]*cm)
-                                                            , logicPlane1, "physPlane1", logicalWorld, false, 0, true);
-        logicPlane1->SetVisAttributes(pixelVisAtt);
-
-        logicPlane2 = new G4LogicalVolume (solidMALTA, detMat, "logicPlane2");
-        G4VPhysicalVolume *physPlane2  = new G4PVPlacement(0, G4ThreeVector(detectorXOffset, detectorYOffset, detectorZOffset + planeCorrections[1]*cm)
-                                                            , logicPlane2, "physPlane2", logicalWorld, false, 0, true);
-        logicPlane2->SetVisAttributes(pixelVisAtt);
-
-        logicPlane3 = new G4LogicalVolume (solidMALTA, detMat, "logicPlane3");
-        G4VPhysicalVolume *physPlane3  = new G4PVPlacement(0, G4ThreeVector(detectorXOffset, detectorYOffset, detectorZOffset + planeCorrections[2]*cm)
-                                                            , logicPlane3, "physPlane3", logicalWorld, false, 0, true);
-        logicPlane3->SetVisAttributes(pixelVisAtt);
-
-        logicPlane4 = new G4LogicalVolume (solidMALTA, detMat, "logicPlane4");
-        G4VPhysicalVolume *physPlane4  = new G4PVPlacement(0, G4ThreeVector(detectorXOffset, detectorYOffset, detectorZOffset + planeCorrections[3]*cm)
-                                                            , logicPlane4, "physPlane4", logicalWorld, false, 0, true);
-        logicPlane4->SetVisAttributes(pixelVisAtt);
-
-        logicPlane5 = new G4LogicalVolume (solidMALTA, detMat, "logicPlane5");
-        G4VPhysicalVolume *physPlane5  = new G4PVPlacement(0, G4ThreeVector(detectorXOffset, detectorYOffset, detectorZOffset + planeCorrections[4]*cm)
-                                                            , logicPlane5, "physPlane5", logicalWorld, false, 0, true);
-        logicPlane5->SetVisAttributes(pixelVisAtt);
-
-        logicPlane6 = new G4LogicalVolume (solidMALTA, detMat, "logicPlane6");
-        G4VPhysicalVolume *physPlane6  = new G4PVPlacement(0, G4ThreeVector(detectorXOffset, detectorYOffset, detectorZOffset + planeCorrections[5]*cm)
-                                                            , logicPlane6, "physPlane6", logicalWorld, false, 0, true);
-        logicPlane6->SetVisAttributes(pixelVisAtt);
-<<<<<<< HEAD
-        
->>>>>>> 8149767 (Added digitization + tracking + clustering + analysis in an automatic fashion for each run)
-    }
-
-<<<<<<< HEAD
-    else if(fFlag->preDefinedGeometryFlag == "PCB")
-=======
-    // FR4 flame retardant dielectric for PCB implementation. 
-    // Source: https://www.physics.smu.edu/web/research/preprints/SMU-HEP-08-11.pdf
-    G4Material* FR4 = new G4Material("FR4", 1.9*g/cm3, 6);
-    FR4->AddElement(nist->FindOrBuildElement("O"),  0.3782);
-    FR4->AddElement(nist->FindOrBuildElement("C"),  0.3344);
-    FR4->AddElement(nist->FindOrBuildElement("Si"), 0.2120);
-    FR4->AddElement(nist->FindOrBuildElement("H"),  0.0308);
-    FR4->AddElement(nist->FindOrBuildElement("Na"), 0.0246);
-    FR4->AddElement(nist->FindOrBuildElement("B"),  0.0200);
-
-    G4Material *metalPlane = nist->FindOrBuildMaterial("G4_Cu");
-
-    G4double PCBLateralSize = 12.7 *cm;
-    G4double CuPlaneThickness = 0.018 *mm;
-    G4double FR4OuterPlaneThickness = 0.02 *mm;
-    G4double FR4MiddlePlaneThickness = 0.1 *mm;
-    G4double FR4InnerPlaneThickness = 0.2 *mm;
-
-    if(fFlag->preDefinedGeometryFlag == "PCB")
->>>>>>> 66f7594 (DEBUG)
-=======
-
-
- 
     }
 
     else if(fFlag->preDefinedGeometryFlag == "PCB")
->>>>>>> 8a2e4b8 (Cleaned up the simulation files. Removed the Truth En tree as it was not used further in the analysis chain. Additionally, general clean up in terms of branch renaming. It most probably will impact the in_pixel_plots script. However the default analysis chain has already been modified to account for these changes.)
     {
         // FR4 flame retardant dielectric for PCB implementation. 
         // Source: https://www.physics.smu.edu/web/research/preprints/SMU-HEP-08-11.pdf
@@ -333,21 +213,11 @@ G4VPhysicalVolume *DetectorConstruction::Construct()
         new G4PVPlacement(rotation, G4ThreeVector(5 *cm, 5 *cm, currentZ + 0.5 * CuPlaneThickness), logicCuPlane, "Cu10", logicalWorld, false, 9, true);
         currentZ += CuPlaneThickness;
         new G4PVPlacement(rotation, G4ThreeVector(5 *cm, 5 *cm, currentZ + 0.5 * FR4OuterPlaneThickness), logicFR4OuterPlane, "Outer2", logicalWorld, false, 1, true);
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> 8a2e4b8 (Cleaned up the simulation files. Removed the Truth En tree as it was not used further in the analysis chain. Additionally, general clean up in terms of branch renaming. It most probably will impact the in_pixel_plots script. However the default analysis chain has already been modified to account for these changes.)
     } 
     else
     {
         trowError("DetectorConstruct::Construct", "SamplingWarning", "Undefined Geometry");
     }       
-<<<<<<< HEAD
-=======
-    }        
->>>>>>> 66f7594 (DEBUG)
-=======
->>>>>>> 8a2e4b8 (Cleaned up the simulation files. Removed the Truth En tree as it was not used further in the analysis chain. Additionally, general clean up in terms of branch renaming. It most probably will impact the in_pixel_plots script. However the default analysis chain has already been modified to account for these changes.)
     return physWorld;
 }
 

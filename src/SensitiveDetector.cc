@@ -1,14 +1,5 @@
 #include "SensitiveDetector.hh"
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-// TODO: Create debug flags for different points of simulation.
-// WARNING A lot of work ahead 
-
->>>>>>> 66f7594 (DEBUG)
-=======
->>>>>>> 8a2e4b8 (Cleaned up the simulation files. Removed the Truth En tree as it was not used further in the analysis chain. Additionally, general clean up in terms of branch renaming. It most probably will impact the in_pixel_plots script. However the default analysis chain has already been modified to account for these changes.)
 SensitiveDetector::SensitiveDetector(G4String name, SimFlags* flags): G4VSensitiveDetector(name), fFlag(flags)
 {
     fTotalEnergyDeposited = 0.;
@@ -96,19 +87,7 @@ G4bool SensitiveDetector::ProcessHits(G4Step *aStep, G4TouchableHistory *)
             planeID = -1;
         }
     }
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-
-<<<<<<< HEAD
-    //G4cout << posPixel[0] << "," << posPixel[1] << G4endl;
->>>>>>> 8149767 (Added digitization + tracking + clustering + analysis in an automatic fashion for each run)
     // get modulus for InPixel location.
-=======
->>>>>>> 66f7594 (DEBUG)
-=======
-    // get modulus for InPixel location.
->>>>>>> 8a2e4b8 (Cleaned up the simulation files. Removed the Truth En tree as it was not used further in the analysis chain. Additionally, general clean up in terms of branch renaming. It most probably will impact the in_pixel_plots script. However the default analysis chain has already been modified to account for these changes.)
     G4ThreeVector InPixPos = G4ThreeVector(std::fmod(posPixel[0],pixelSize), std::fmod(posPixel[1],pixelSize), posPixel[2]); // result in mm
     double efficiency = GetEfficiencyCorrectionXY(InPixPos);
     G4double edep_corr = efficiency * energy;    
@@ -129,47 +108,6 @@ G4bool SensitiveDetector::ProcessHits(G4Step *aStep, G4TouchableHistory *)
     }
 
     if (fFlag->verboseSD)
-<<<<<<< HEAD
-    {
-        G4cout << "InPixPos: " << InPixPos[0]/um << ", " << InPixPos[1]/um << " --> Eff: " << efficiency << " of 4 pixels: " << effAn[0] << " " << effAn[1] << " " << effAn[2] << " " << effAn[3] << " " << G4endl;
-        G4cout << "Pix coordinate: " << pixX << ";" << pixY << G4endl;
-        G4cout << "Initial Pixel position: " << posPixel.x() << " ; "<< posPixel.y() << G4endl;
-        G4cout << "Cluster pixel positions: "<< G4endl << pixelCluster[0][0] << "," << pixelCluster[0][1] << " ; " << G4endl 
-                                            << pixelCluster[1][0] << "," << pixelCluster[1][1] << " ; " << G4endl 
-                                            << pixelCluster[2][0] << "," << pixelCluster[2][1] << " ; " << G4endl 
-                                            << pixelCluster[3][0] << "," << pixelCluster[3][1] << "  " << G4endl ;
-    }
-
-    // fill the 4 efficiencies and timing into a tree. 
-    // Apply a minimal threshold here already of 50 e-? edep in MeV --> if (edep*10^6/3.6 > 50) // threshold in e- // edep in MeV
-    // take care if hit is at boundary of sensor (minimal or maximal pix number.)
-    // associate timing based on amplitude (from time walk):
-<<<<<<< HEAD
-
-    // This line ensures that the compiler evaluates all effAn at the same time. If you dont do this float point fluctuations might appear
-    // This is most probably due to multithreading even though I cant prove it.
-    std::array<double,4> effAnCopy = effAn; // forces evaluation
-=======
-    std::array<G4double,4> pix_timing = {GetTimingOffset(effAn[0]*energy*1000000/3.6),GetTimingOffset(effAn[1]*energy*1000000/3.6),
-                                        GetTimingOffset(effAn[2]*energy*1000000/3.6),GetTimingOffset(effAn[3]*energy*1000000/3.6)}; // argument is pixel charge in electrons
->>>>>>> 0ff8c34 (Testing to push the sensitivedetector.cc taken from develop branch)
-    int iHit = 0;
-    // Store only the largest deposited energy in a cluster and its corresponding timing
-    auto it = std::max_element(effAnCopy.begin(), effAnCopy.end());
-    size_t maxIndex = std::distance(effAnCopy.begin(), it);
-    double leadingEnergy = *it * energy; // leading energy in MeV
-    for(int i = 0; i<4; i++)
-    {
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> 8a2e4b8 (Cleaned up the simulation files. Removed the Truth En tree as it was not used further in the analysis chain. Additionally, general clean up in terms of branch renaming. It most probably will impact the in_pixel_plots script. However the default analysis chain has already been modified to account for these changes.)
-=======
->>>>>>> c27c2b3 (Testing to push the sensitivedetector.cc taken from develop branch)
-=======
-=======
     {
         G4cout << "InPixPos: " << InPixPos[0]/um << ", " << InPixPos[1]/um << " --> Eff: " << efficiency << " of 4 pixels: " << effAn[0] << " " << effAn[1] << " " << effAn[2] << " " << effAn[3] << " " << G4endl;
         G4cout << "Pix coordinate: " << pixX << ";" << pixY << G4endl;
@@ -196,87 +134,16 @@ G4bool SensitiveDetector::ProcessHits(G4Step *aStep, G4TouchableHistory *)
     double leadingEnergy = *it * energy; // leading energy in MeV
     for(int i = 0; i<4; i++)
     {
->>>>>>> fdaa68d (Updating src folder with newest develop branch. Before was old version)
->>>>>>> beda3d3 (Updating src folder with newest develop branch. Before was old version)
         analysisManager->FillNtupleIColumn(1, 0, eventID);
         analysisManager->FillNtupleIColumn(1, 1, planeID);
         analysisManager->FillNtupleIColumn(1, 2, iHit);
         analysisManager->FillNtupleIColumn(1, 3, pixelCluster[i][0]);
         analysisManager->FillNtupleIColumn(1, 4, pixelCluster[i][1]);
-<<<<<<< HEAD
-        // This branch will be modified. Before it as encoding the timewalk of each hit. Now it stores the hit time of a particle.
-        analysisManager->FillNtupleDColumn(1, 5, fglobalTime *ns);
-        analysisManager->FillNtupleDColumn(1, 6, effAnCopy[i] * energy *1000000/epsilon);
-        analysisManager->AddNtupleRow(1); 
-<<<<<<< HEAD
-=======
-        //if (effAn[i] * energy *1000000/3.6 > 50) // Set a data supression threshold at 50 deposited el
-
-        analysisManager->FillNtupleIColumn(3, 0, eventID);
-        analysisManager->FillNtupleIColumn(3, 1, iHit);
-        analysisManager->FillNtupleIColumn(3, 2, pixelCluster[i][0]);
-        analysisManager->FillNtupleIColumn(3, 3, pixelCluster[i][1]);
-        analysisManager->FillNtupleDColumn(3, 4, pix_timing[i]);
-        analysisManager->FillNtupleDColumn(3, 5, effAn[i] * energy *1000000/3.6);
-        analysisManager->AddNtupleRow(3); 
->>>>>>> 0ff8c34 (Testing to push the sensitivedetector.cc taken from develop branch)
-=======
->>>>>>> fdaa68d (Updating src folder with newest develop branch. Before was old version)
-        iHit++;
-=======
-        //if (effAn[i] * energy *1000000/epsilon > 50) // Set a data supression threshold at 50 deposited el
-
-        analysisManager->FillNtupleIColumn(3, 0, eventID);
-        analysisManager->FillNtupleIColumn(3, 1, planeID);
-        analysisManager->FillNtupleIColumn(3, 2, iHit);
-        analysisManager->FillNtupleIColumn(3, 3, pixelCluster[i][0]);
-        analysisManager->FillNtupleIColumn(3, 4, pixelCluster[i][1]);
-=======
->>>>>>> 8a2e4b8 (Cleaned up the simulation files. Removed the Truth En tree as it was not used further in the analysis chain. Additionally, general clean up in terms of branch renaming. It most probably will impact the in_pixel_plots script. However the default analysis chain has already been modified to account for these changes.)
         // This branch will be modified. Before it as encoding the timewalk of each hit. Now it stores the hit time of a particle.
         analysisManager->FillNtupleDColumn(1, 5, fglobalTime *ns);
         analysisManager->FillNtupleDColumn(1, 6, effAnCopy[i] * energy *1000000/epsilon);
         analysisManager->AddNtupleRow(1); 
         iHit++;
-<<<<<<< HEAD
-
-    }
-
-    /**/
-    analysisManager->FillNtupleIColumn(0, 0, eventID);
-    analysisManager->FillNtupleIColumn(0, 1, planeID);
-    // X, Y, Z position of the hit
-    analysisManager->FillNtupleDColumn(0, 2, posPixel[0]);
-    analysisManager->FillNtupleDColumn(0, 3, posPixel[1]);
-    analysisManager->FillNtupleDColumn(0, 4, posPixel[2]);
-
-    analysisManager->FillNtupleDColumn(0, 5, posVertex[0]);
-    analysisManager->FillNtupleDColumn(0, 6, posVertex[1]);
-    analysisManager->FillNtupleDColumn(0, 7, posVertex[2]);
-
-    analysisManager->FillNtupleDColumn(0, 8, fglobalTime *ns);
-    analysisManager->FillNtupleDColumn(0, 9, energy);
-    analysisManager->FillNtupleDColumn(0, 10, edep_corr);
-    analysisManager->FillNtupleIColumn(0, 11, iHit);
-    analysisManager->FillNtupleDColumn(0, 12, leadingEnergy);
-    analysisManager->FillNtupleDColumn(0, 13, leadingTime);
-    analysisManager->AddNtupleRow(0); 
-    
-
-
-
-
-
-    // Get out the secondary particle step length
-    if (aStep->GetTrack()->GetParentID() != 0)
-    {
-        fTrackLengths[aStep->GetTrack()->GetTrackID()] += aStep->GetStepLength();
-        analysisManager->FillNtupleIColumn(2, 0, eventID);
-        analysisManager->FillNtupleDColumn(2, 1,  fTrackLengths[aStep->GetTrack()->GetTrackID()] * 1000);
-        analysisManager->AddNtupleRow(2); 
->>>>>>> 8149767 (Added digitization + tracking + clustering + analysis in an automatic fashion for each run)
-=======
->>>>>>> 8a2e4b8 (Cleaned up the simulation files. Removed the Truth En tree as it was not used further in the analysis chain. Additionally, general clean up in terms of branch renaming. It most probably will impact the in_pixel_plots script. However the default analysis chain has already been modified to account for these changes.)
     }
 
     return true;
@@ -335,19 +202,7 @@ G4double SensitiveDetector::GetEfficiencyCorrectionXY(const G4ThreeVector& InPix
 // error-fct that parameterize edge of pixel are at x = 0 and x = pitch
 // sigma is gaussian standard deviation
 G4double smoothStep(G4double x, G4double pitch, G4double sigma) {
-<<<<<<< HEAD
-<<<<<<< HEAD
     return 0.5 * (std::erf((x) / sigma) - std::erf((x - pitch) / sigma));
-<<<<<<< HEAD
-=======
-    //return 0.5 * (std::erf((x) / (sigma * std::sqrt(2.0))) - std::erf((x - pitch) / (sigma * std::sqrt(2.0))));
->>>>>>> 18e3f08 (removed sqrt2 from smoothstep)
-=======
-    return 0.5 * (std::erf((x) / (sigma * std::sqrt(2.0))) - std::erf((x - pitch) / (sigma * std::sqrt(2.0))));
->>>>>>> 0ff8c34 (Testing to push the sensitivedetector.cc taken from develop branch)
-=======
-    return 0.5 * (std::erf((x) / sigma) - std::erf((x - pitch) / sigma));
->>>>>>> fdaa68d (Updating src folder with newest develop branch. Before was old version)
 }
 
 // Analytical model of smeared rectangular box (error-functions in X and Y )
@@ -356,21 +211,9 @@ G4double smoothStep(G4double x, G4double pitch, G4double sigma) {
 // per definition the some of all 4 efficiencies = 1.0
 std::pair<std::array<double, 4>, uint8_t>  SensitiveDetector::GetEfficiencyAnalytical(const G4ThreeVector& InPixPosition) {
 
-<<<<<<< HEAD
-<<<<<<< HEAD
     double pitch = fFlag->pixelSize *1000; // convert from mm to um (default 36.4 um)
     double sigmaX = fFlag->CCModelSigmaX; // in um (default 4.3 um)
     double sigmaY = fFlag->CCModelSigmaY; // in um (default 4.3 um)
-=======
-    G4double pitch = 36.4; // in um
-    G4double sigmaX = 4.3; // in um;
-    G4double sigmaY = 4.3; // in um;
->>>>>>> 0ff8c34 (Testing to push the sensitivedetector.cc taken from develop branch)
-=======
-    double pitch = fFlag->pixelSize *1000; // convert from mm to um (default 36.4 um)
-    double sigmaX = fFlag->CCModelSigmaX; // in um (default 4.3 um)
-    double sigmaY = fFlag->CCModelSigmaY; // in um (default 4.3 um)
->>>>>>> fdaa68d (Updating src folder with newest develop branch. Before was old version)
 
     // contribution to 4 neighboring pixels
     // 00 is bottom left    (low X,     low Y)
@@ -414,73 +257,4 @@ std::pair<std::array<double, 4>, uint8_t>  SensitiveDetector::GetEfficiencyAnaly
     eff11 = eff_X1 * eff_Y1; // top right
 
     return {{eff00, eff01, eff10, eff11}, quadrantFlag} ; // ordering not certain yet.
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> 580f2b4 (Tgain and agian. time-walk model extended to all thresholds based on simple assumptions.)
-=======
->>>>>>> beda3d3 (Updating src folder with newest develop branch. Before was old version)
 }
-=======
-}
-
-// Get time-walk from parameterization.
-// amplitude in unit electrons
-// returns timing in ns
-<<<<<<< HEAD
-<<<<<<< HEAD
-G4double SensitiveDetector::GetTimingOffset(G4double amplitude) {
-    // function diverges at 150e-
-    if (amplitude < 150.) 
-    { // delay only down to amplitudes of 150e-. 
-        return 200;
-    }
-    return 390. /pow(amplitude-149.8, 0.65);
-
-}
->>>>>>> 8149767 (Added digitization + tracking + clustering + analysis in an automatic fashion for each run)
-=======
-}
->>>>>>> 8a2e4b8 (Cleaned up the simulation files. Removed the Truth En tree as it was not used further in the analysis chain. Additionally, general clean up in terms of branch renaming. It most probably will impact the in_pixel_plots script. However the default analysis chain has already been modified to account for these changes.)
-=======
-// at 150e- threshold
-=======
->>>>>>> c27c2b3 (Testing to push the sensitivedetector.cc taken from develop branch)
-G4double SensitiveDetector::GetTimingOffset(G4double amplitude) {
-    // assumes 1200e- correspond to 350 mV. Check calibration through injection scans.
-    //return 40. * std::exp(amplitude /(-191.));
-    if (amplitude < 100.) 
-    { // delay only down to amplitudes of 100e-. 
-        return 3230. /pow(100-67.0, 1.08);
-    }
-
-    return 3230. /pow(amplitude-67.0, 1.08);
-
-}
-<<<<<<< HEAD
-
-G4double SensitiveDetector::GetTimingOffsetatThreshold(G4double amplitude, G4double threshold) {
-    // function diverges at 150e-
-    if (amplitude < 160.) 
-    { // delay only down to amplitudes of 160e-. 
-        return 390. /pow(160-149.8, 0.65);
-    }
-
-    return 390. /pow(amplitude/threshold*150.-149.8, 0.65);
-
-}
->>>>>>> 2d19158 (Time-walk model extended to all thresholds based on simple assumptions.)
-<<<<<<< HEAD
->>>>>>> 580f2b4 (Tgain and agian. time-walk model extended to all thresholds based on simple assumptions.)
-=======
-=======
->>>>>>> 5de186b (Removed unnecessary function)
-<<<<<<< HEAD
->>>>>>> 6cc58b9 (Removed unnecessary function)
-=======
-=======
-}
->>>>>>> fdaa68d (Updating src folder with newest develop branch. Before was old version)
->>>>>>> beda3d3 (Updating src folder with newest develop branch. Before was old version)

@@ -93,30 +93,9 @@ void LoadSimFlagsFromFile(const std::string& filename, SimFlags& flags)
         else if (key == "pixelSize") flags.pixelSize = std::stod(value);
         else if (key == "detectorSizeX") flags.detectorSizeX = std::stod(value);
         else if (key == "detectorSizeY") flags.detectorSizeY = std::stod(value);
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> 6f1d148 (Updating all src files from develop)
-=======
->>>>>>> beda3d3 (Updating src folder with newest develop branch. Before was old version)
-        else if (key == "detectorDepth") flags.detectorDepth = std::stod(value);
-=======
-        else if (key == "detetectorDepth") flags.detetectorDepth = std::stod(value);
->>>>>>> 66f7594 (DEBUG)
-=======
-        else if (key == "detectorDepth") flags.detectorDepth = std::stod(value);
->>>>>>> 8a2e4b8 (Cleaned up the simulation files. Removed the Truth En tree as it was not used further in the analysis chain. Additionally, general clean up in terms of branch renaming. It most probably will impact the in_pixel_plots script. However the default analysis chain has already been modified to account for these changes.)
-        else if (key == "CCModelSigmaX") flags.CCModelSigmaX = std::stod(value);
-        else if (key == "CCModelSigmaY") flags.CCModelSigmaY = std::stod(value);
-=======
->>>>>>> 48e3a0f (Updating all src files from develop)
-=======
         else if (key == "detectorDepth") flags.detectorDepth = std::stod(value);
         else if (key == "CCModelSigmaX") flags.CCModelSigmaX = std::stod(value);
         else if (key == "CCModelSigmaY") flags.CCModelSigmaY = std::stod(value);
->>>>>>> fdaa68d (Updating src folder with newest develop branch. Before was old version)
         else if (key == "outsideMaterial") flags.outsideMaterial = value;
         else if (key == "beamGeometry") flags.beamGeometry = value;
         else if (key == "beamXOffset") flags.beamXOffset = std::stod(value);
