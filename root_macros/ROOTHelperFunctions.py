@@ -27,14 +27,20 @@ def Remove_belowThresh(gr, threshold=1000.):
 
 # add relative error to all X or Y values of a graph
 # axis = "X" or "Y" to set X or Y Error
-def addRelativeErrors(gr, fraction, axisError = "X"):
+# if addConst >0: this is constant uncert. that is added in quadrature to relative one.
+# typically for thresholds, this is at least 10e-
+def addRelativeErrors(gr, fraction, axisError = "X", addConst=0.):
     for i in range(gr.GetN()):
         xval = gr.GetPointX(i)
         yval = gr.GetPointY(i)
         if axisError=="X":
-            gr.SetPointError(i,xval*fraction, gr.GetErrorY(i))
+            rel_xerr = xval * fraction
+            xerr = (rel_xerr**2 + addConst**2)**0.5 if addConst > 0. else rel_xerr
+            gr.SetPointError(i,xerr, gr.GetErrorY(i))
         else:
-            gr.SetPointError(i,gr.GetErrorX(i), yval*fraction)
+            rel_yerr = yval * fraction
+            yerr = (rel_yerr**2 + addConst**2)**0.5 if addConst > 0. else rel_yerr
+            gr.SetPointError(i,gr.GetErrorX(i), yerr)
     return 0
 
 # add content of gr2 to gr

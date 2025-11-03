@@ -110,6 +110,9 @@ This class inherits the GEANT4 G4VSensitiveDetector class and allows GEANT4 acti
 
 The `SensitiveDetector::ProcessHits()` method populates the "EnDeposited" and "DebuggingInfo" ntuples.
 
+### Charge collection efficiency
+Each energy deposit is scaled by a charge collection efficiency that depends on the in-pixel location. The energy deposit is distributed among the seed and its 3 nearest neighboring pixels (the three neighbors of the nearest pixel corner). The analytical scaling is derived from testbeam data and based on error-functions: `SensitiveDetector::GetEfficiencyAnalytical()`.
+
 ### Timing
 The `SensitiveDetector::GetTimingOffset()` method calculates the timewalk based on amplitude and threshold. The parameterization was measured at a threshold of 150e-. Consequently, this threshold is used for reference. The timewalk for other thresholds is obtained by scaling the x-axis (charge-axis) accordingly. This is based on the assumption that the waveform of an n-times larger signal is the same at an n-times larger threshold. In data this is only valid if the front-end gain is changed through a different bias current. The same assumption can be phrased as: The gain scales with 1/threshold. This scaling is chosen because at the same gain setting (fixed front-end) only a limited threshold range can be covered. For example at "normal" gain a range of 200-700 e- can be covered. Larger threshold ranges can only be reached by lowering the gain. The threshold scaling is illustrated in [analysis/PlotTimeWalkCurves.py](analysis/PlotTimeWalkCurves.py)
 
