@@ -1,4 +1,5 @@
 #!/bin/bash
+
 if [ $HOME = "/home/vlad" ]; then
     source ../config.sh
     source "$LOCAL_GEANT"

@@ -1,10 +1,6 @@
 #include "Config.hh"
 
 
-
-
-
-
 void DumpConfigToFile(const std::string& filename) 
 {
     // Copy the config file used as input (from SIMU_CONFIG) to 'filename'
@@ -26,13 +22,19 @@ std::string CreateNextRunDirectory(bool flag, SimFlags* fFlags)
 {   
     namespace fs = std::filesystem;
     std::string path =  "";
+    std::string saveFile;
+    std::ostringstream newRunDir;
+    // Check if the run directory needs to be saved locally or on the cloud. This flag is set in sim.cc based on the directory. 
+    // It is not fully generalized so it might trow errors depending on the users home directory.
     if(fFlags->runMode == "local") 
     {
         path = fFlags->outputPathLocal;
+        saveFile = "/local_";
     }
     else
     {
         path = fFlags->outputPathNAF;
+        saveFile = "/naf_";
     }
     int runNumber = 0;
     std::vector<std::string> dirs;
@@ -41,7 +43,6 @@ std::string CreateNextRunDirectory(bool flag, SimFlags* fFlags)
     for (const auto& entry : fs::directory_iterator(path)) 
     {
         std::string name = entry.path().filename().string();
-        //std::cout << name << '\n';
         try
         {
             int digits = std::stoi(name.substr(name.size() - 4));
@@ -54,43 +55,22 @@ std::string CreateNextRunDirectory(bool flag, SimFlags* fFlags)
         {
             continue;
         }
-        
-
     }
-    std::ostringstream newRunDir;
-    std::string saveFile;
-    if(fFlags->runMode == "local")
-    {
-        saveFile = "/local_";
-    }
-    else
-    {
-        saveFile = "/naf_";
-    }
-
 
     if (flag)
     {   
         // Do this only in the Master thread
         newRunDir << path << saveFile << std::setw(4) << std::setfill('0') << maxRun + 1;
-        std::cout <<"Creating Directory: ";
+        std::cout <<"Creating Directory: " << newRunDir.str() << std::endl;
         fs::create_directories(newRunDir.str());
     }
     else
     {
         newRunDir << path << saveFile << std::setw(4) << std::setfill('0') << maxRun;
-
     }
 
-    //std::cout << newRunDir.str() << "\n";
-
-    
-    
     return newRunDir.str();
-    
 }
-
-
 
 void LoadSimFlagsFromFile(const std::string& filename, SimFlags& flags)
 {
@@ -113,7 +93,7 @@ void LoadSimFlagsFromFile(const std::string& filename, SimFlags& flags)
         else if (key == "pixelSize") flags.pixelSize = std::stod(value);
         else if (key == "detectorSizeX") flags.detectorSizeX = std::stod(value);
         else if (key == "detectorSizeY") flags.detectorSizeY = std::stod(value);
-        else if (key == "detetectorDepth") flags.detetectorDepth = std::stod(value);
+        else if (key == "detectorDepth") flags.detectorDepth = std::stod(value);
         else if (key == "CCModelSigmaX") flags.CCModelSigmaX = std::stod(value);
         else if (key == "CCModelSigmaY") flags.CCModelSigmaY = std::stod(value);
         else if (key == "outsideMaterial") flags.outsideMaterial = value;
@@ -145,6 +125,10 @@ void LoadSimFlagsFromFile(const std::string& filename, SimFlags& flags)
         else if (key == "numThreadsLocal") flags.numThreadsLocal = std::stoi(value);
         else if (key == "numThreadsNAF") flags.numThreadsNAF = std::stoi(value);
         else if (key == "runMode") flags.runMode == value;
+        else if (key == "verbosePL") flags.verbosePL = (value == "true");
+        else if (key == "verbosePG") flags.verbosePG = (value == "true");
+        else if (key == "verboseSD") flags.verboseSD = (value == "true");
+        else if (key == "verboseSA") flags.verboseSA = (value == "true");
 
         std::cout << "Loaded flag: " << key << " = " << value << std::endl;
     }
@@ -166,4 +150,16 @@ int GetRequestCpusFromSubmitFile(const std::string& submitFilePath) {
         }
     }
     return -1; // Not found
+}
+
+void trowWarning (G4String origin, G4String exceptionCode, G4String description)
+{
+    G4cout << "⚠️   ⚠️   ⚠️   ⚠️   ⚠️   ⚠️   ⚠️   ⚠️   ⚠️   ⚠️   ⚠️   ⚠️   ⚠️   ⚠️   ⚠️   ⚠️   ⚠️   ⚠️   ⚠️   ⚠️   ⚠️   ⚠️   ⚠️" << G4endl;
+    G4Exception(origin, exceptionCode, JustWarning, description);
+}
+
+void trowError (G4String origin, G4String exceptionCode, G4String description)
+{
+    G4cout << "🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑" << G4endl;
+    G4Exception(origin, exceptionCode, FatalException, description);
 }

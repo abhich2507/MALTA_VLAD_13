@@ -1,36 +1,10 @@
 #include "RunAction.hh"
 #include "CustomRun.hh"
 
-
-
 RunAction::RunAction(SimFlags* flags) : fFlag(flags)
 {
     // Simplified instantiation thanks to GEANT4 implementation
     G4AnalysisManager *analysisManager = G4AnalysisManager::Instance();
-
-    // Deposited Energy Ntuple. MONTE CARLO TRUTH
-    analysisManager->CreateNtuple("TruthEnDeposited", "Monte Carlo Truth Energy Deposited");
-    // Create Integer Event # column
-    analysisManager->CreateNtupleIColumn("iEvent");
-    analysisManager->CreateNtupleIColumn("iPlane");
-    // Create Double position columns
-    analysisManager->CreateNtupleDColumn("fX");
-    analysisManager->CreateNtupleDColumn("fY");
-    analysisManager->CreateNtupleDColumn("fZ");
-    analysisManager->CreateNtupleDColumn("vertexX");
-    analysisManager->CreateNtupleDColumn("vertexY");
-    analysisManager->CreateNtupleDColumn("vertexZ");
-
-    // Create Integer Global time column = time that starts when each event begins. Local time = time when the particle is created
-    analysisManager->CreateNtupleDColumn("fGlobalTime");
-    // Create Double Energy column
-    analysisManager->CreateNtupleDColumn("Energy");
-    // Create Double corrected Energy column
-    analysisManager->CreateNtupleDColumn("CorrEnergy");
-    analysisManager->CreateNtupleIColumn("ClSize");
-    analysisManager->CreateNtupleDColumn("LeadingEnergy");
-    analysisManager->CreateNtupleDColumn("LeadingTime");
-    analysisManager->FinishNtuple(0);
 
     // Scattering Angle Ntuple
     analysisManager->CreateNtuple("ScatAngle", "Scatering Angle");
@@ -41,18 +15,10 @@ RunAction::RunAction(SimFlags* flags) : fFlag(flags)
     analysisManager->CreateNtupleDColumn("fZ");
     analysisManager->CreateNtupleDColumn("ScateringAngle");
     analysisManager->CreateNtupleDColumn("MomentumVal");
-    analysisManager->FinishNtuple(1);
+    analysisManager->FinishNtuple(0);
 
-    // 1D histograms for measuring the impact of material in the beam line
     analysisManager->CreateH1("ScatteringAngle", "Scattering Angle", 100, 0., 180.0);
     analysisManager->CreateH1("MomentumDistribution", "Momentum Distribution", 100, 0., 190.0 *GeV);
-
-    // Create Ntuple for debugging info
-    analysisManager->CreateNtuple("DebuggingInfo", "Debugging Info");
-    analysisManager->CreateNtupleIColumn("iEvent");
-    // Create Double position columns
-    analysisManager->CreateNtupleDColumn("TravelLength");
-    analysisManager->FinishNtuple(2);    
 
     analysisManager->CreateNtuple("RawPixelHits", "Raw Pixel Hits");
     analysisManager->CreateNtupleIColumn("iEvent");
@@ -60,22 +26,23 @@ RunAction::RunAction(SimFlags* flags) : fFlag(flags)
     analysisManager->CreateNtupleIColumn("iHit");
     analysisManager->CreateNtupleIColumn("PixX");
     analysisManager->CreateNtupleIColumn("PixY");
-    analysisManager->CreateNtupleDColumn("timeWalkHit");
-    analysisManager->CreateNtupleDColumn("Energy");
-    analysisManager->FinishNtuple(3);
+    analysisManager->CreateNtupleDColumn("hitTime");
+    analysisManager->CreateNtupleDColumn("hitEnergy");
+    analysisManager->FinishNtuple(1);
 
-    // TODO: This NTuple is redundant with the (0) one. I will probably deprecate that one later
-    // WARNING A lot of walk ahead
+    // MONTE CARLO Truth
     analysisManager->CreateNtuple("TruthVertex", "Monte Carlo Truth Vertex Position");
     // Create Integer Event # column
     analysisManager->CreateNtupleIColumn("iEvent");
-    analysisManager->CreateNtupleDColumn("vertexX");
-    analysisManager->CreateNtupleDColumn("vertexY");
-    analysisManager->CreateNtupleDColumn("vertexZ");
+    analysisManager->CreateNtupleDColumn("trueVertexX");
+    analysisManager->CreateNtupleDColumn("trueVertexY");
+    analysisManager->CreateNtupleDColumn("trueVertexZ");
     // Create Integer Global time column = time that starts when each event begins. Local time = time when the particle is created
-    analysisManager->CreateNtupleDColumn("fGlobalTime");
-    analysisManager->FinishNtuple(4);
+    analysisManager->CreateNtupleDColumn("trueGlobalTime");
+    analysisManager->CreateNtupleDColumn("trueEnergy");
+    analysisManager->FinishNtuple(2);
 }
+
 RunAction::~RunAction()
 {
 
@@ -88,6 +55,7 @@ void RunAction::BeginOfRunAction(const G4Run *run)
     G4int runID = run->GetRunID();
     std::stringstream strRunID;
     strRunID << runID;
+    
     //analysisManager->SetNtupleMerging(true);
     if (isMaster && fFlag->isBatch)
     {
@@ -106,11 +74,8 @@ void RunAction::EndOfRunAction(const G4Run *run)
 {
     G4AnalysisManager *analysisManager = G4AnalysisManager::Instance();
     analysisManager->Write();
-
     analysisManager->CloseFile();
-
     G4int runID = run->GetRunID();
-
     G4cout << "Finishing run " << runID <<G4endl;
     
 }

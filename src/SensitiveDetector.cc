@@ -1,8 +1,5 @@
 #include "SensitiveDetector.hh"
 
-// TODO: Create debug flags for different points of simulation.
-// WARNING A lot of work ahead 
-
 SensitiveDetector::SensitiveDetector(G4String name, SimFlags* flags): G4VSensitiveDetector(name), fFlag(flags)
 {
     fTotalEnergyDeposited = 0.;
@@ -36,6 +33,7 @@ void SensitiveDetector::EndOfEvent(G4HCofThisEvent *)
 G4bool SensitiveDetector::ProcessHits(G4Step *aStep, G4TouchableHistory *)
 {
     G4int eventID = G4RunManager::GetRunManager()->GetCurrentEvent()->GetEventID();
+
     G4AnalysisManager *analysisManager = G4AnalysisManager::Instance();
     // Implementation of all analysis info to be stored in nTuple
     // PreStep point includes all info of the first interaction within one step. Post step includes the last interaction of that particle.
@@ -89,7 +87,7 @@ G4bool SensitiveDetector::ProcessHits(G4Step *aStep, G4TouchableHistory *)
             planeID = -1;
         }
     }
-
+    // get modulus for InPixel location.
     G4ThreeVector InPixPos = G4ThreeVector(std::fmod(posPixel[0],pixelSize), std::fmod(posPixel[1],pixelSize), posPixel[2]); // result in mm
     double efficiency = GetEfficiencyCorrectionXY(InPixPos);
     G4double edep_corr = efficiency * energy;    
@@ -109,82 +107,48 @@ G4bool SensitiveDetector::ProcessHits(G4Step *aStep, G4TouchableHistory *)
         pixelCluster[i][1] +=deltas[i][1] ;
     }
 
-    /*
-    G4cout << "InPixPos: " << InPixPos[0]/um << ", " << InPixPos[1]/um << " --> Eff: " << efficiency << " of 4 pixels: " << effAn[0] << " " << effAn[1] << " " << effAn[2] << " " << effAn[3] << " " << G4endl;
-    G4cout << "Pix coordinate: " << pixX << ";" << pixY << G4endl;
-    G4cout << "Initial Pixel position: " << posPixel.x() << " ; "<< posPixel.y() << G4endl;
-    G4cout << "Cluster pixel positions: "<< G4endl << pixelCluster[0][0] << "," << pixelCluster[0][1] << " ; " << G4endl 
-                                          << pixelCluster[1][0] << "," << pixelCluster[1][1] << " ; " << G4endl 
-                                          << pixelCluster[2][0] << "," << pixelCluster[2][1] << " ; " << G4endl 
-                                          << pixelCluster[3][0] << "," << pixelCluster[3][1] << "  " << G4endl ;
-    */
+    if (fFlag->verboseSD)
+    {
+        G4cout << "InPixPos: " << InPixPos[0]/um << ", " << InPixPos[1]/um << " --> Eff: " << efficiency << " of 4 pixels: " << effAn[0] << " " << effAn[1] << " " << effAn[2] << " " << effAn[3] << " " << G4endl;
+        G4cout << "Pix coordinate: " << pixX << ";" << pixY << G4endl;
+        G4cout << "Initial Pixel position: " << posPixel.x() << " ; "<< posPixel.y() << G4endl;
+        G4cout << "Cluster pixel positions: "<< G4endl << pixelCluster[0][0] << "," << pixelCluster[0][1] << " ; " << G4endl 
+                                            << pixelCluster[1][0] << "," << pixelCluster[1][1] << " ; " << G4endl 
+                                            << pixelCluster[2][0] << "," << pixelCluster[2][1] << " ; " << G4endl 
+                                            << pixelCluster[3][0] << "," << pixelCluster[3][1] << "  " << G4endl ;
+    }
 
     double epsilon = 3.66; // electron-hole pair creaton energy = (3.66 +- 0.03) eV
     // fill the 4 efficiencies and timing into a tree. 
     // Apply a minimal threshold here already of 50 e-? edep in MeV --> if (edep*10^6/epsilon > 50) // threshold in e- // edep in MeV
     // take care if hit is at boundary of sensor (minimal or maximal pix number.)
     // associate timing based on amplitude (from time walk):
-    std::array<G4double,4> pix_timing = {GetTimingOffset(effAn[0]*energy*1000000/epsilon),GetTimingOffset(effAn[1]*energy*1000000/epsilon),
-                                        GetTimingOffset(effAn[2]*energy*1000000/epsilon),GetTimingOffset(effAn[3]*energy*1000000/epsilon)}; // argument is pixel charge in electrons
+
+    // This line ensures that the compiler evaluates all effAn at the same time. If you dont do this float point fluctuations might appear
+    // This is most probably due to multithreading even though I cant prove it.
+    std::array<double,4> effAnCopy = effAn; // forces evaluation
     int iHit = 0;
     // Store only the largest deposited energy in a cluster and its corresponding timing
-    auto it = std::max_element(effAn.begin(), effAn.end());
-    size_t maxIndex = std::distance(effAn.begin(), it);
+    auto it = std::max_element(effAnCopy.begin(), effAnCopy.end());
+    size_t maxIndex = std::distance(effAnCopy.begin(), it);
     double leadingEnergy = *it * energy; // leading energy in MeV
-    double leadingTime = pix_timing[maxIndex];
     for(int i = 0; i<4; i++)
     {
-        //if (effAn[i] * energy *1000000/epsilon > 50) // Set a data supression threshold at 50 deposited el
-
-        analysisManager->FillNtupleIColumn(3, 0, eventID);
-        analysisManager->FillNtupleIColumn(3, 1, planeID);
-        analysisManager->FillNtupleIColumn(3, 2, iHit);
-        analysisManager->FillNtupleIColumn(3, 3, pixelCluster[i][0]);
-        analysisManager->FillNtupleIColumn(3, 4, pixelCluster[i][1]);
+        analysisManager->FillNtupleIColumn(1, 0, eventID);
+        analysisManager->FillNtupleIColumn(1, 1, planeID);
+        analysisManager->FillNtupleIColumn(1, 2, iHit);
+        analysisManager->FillNtupleIColumn(1, 3, pixelCluster[i][0]);
+        analysisManager->FillNtupleIColumn(1, 4, pixelCluster[i][1]);
         // This branch will be modified. Before it as encoding the timewalk of each hit. Now it stores the hit time of a particle.
-        analysisManager->FillNtupleDColumn(3, 5, fglobalTime *ns);
-        analysisManager->FillNtupleDColumn(3, 6, effAn[i] * energy *1000000/epsilon);
-        analysisManager->AddNtupleRow(3); 
+        analysisManager->FillNtupleDColumn(1, 5, fglobalTime *ns);
+        analysisManager->FillNtupleDColumn(1, 6, effAnCopy[i] * energy *1000000/epsilon);
+        analysisManager->AddNtupleRow(1); 
         iHit++;
-
-    }
-
-    /**/
-    analysisManager->FillNtupleIColumn(0, 0, eventID);
-    analysisManager->FillNtupleIColumn(0, 1, planeID);
-    // X, Y, Z position of the hit
-    analysisManager->FillNtupleDColumn(0, 2, posPixel[0]);
-    analysisManager->FillNtupleDColumn(0, 3, posPixel[1]);
-    analysisManager->FillNtupleDColumn(0, 4, posPixel[2]);
-
-    analysisManager->FillNtupleDColumn(0, 5, posVertex[0]);
-    analysisManager->FillNtupleDColumn(0, 6, posVertex[1]);
-    analysisManager->FillNtupleDColumn(0, 7, posVertex[2]);
-
-    analysisManager->FillNtupleDColumn(0, 8, fglobalTime *ns);
-    analysisManager->FillNtupleDColumn(0, 9, energy);
-    analysisManager->FillNtupleDColumn(0, 10, edep_corr);
-    analysisManager->FillNtupleIColumn(0, 11, iHit);
-    analysisManager->FillNtupleDColumn(0, 12, leadingEnergy);
-    analysisManager->FillNtupleDColumn(0, 13, leadingTime);
-    analysisManager->AddNtupleRow(0); 
-    
-
-
-
-
-
-    // Get out the secondary particle step length
-    if (aStep->GetTrack()->GetParentID() != 0)
-    {
-        fTrackLengths[aStep->GetTrack()->GetTrackID()] += aStep->GetStepLength();
-        analysisManager->FillNtupleIColumn(2, 0, eventID);
-        analysisManager->FillNtupleDColumn(2, 1,  fTrackLengths[aStep->GetTrack()->GetTrackID()] * 1000);
-        analysisManager->AddNtupleRow(2); 
     }
 
     return true;
 }
+
 
 // obtain a scalar efficiency based on the XY positions within a pixel.
 // binsize in unit um
@@ -202,26 +166,29 @@ G4double SensitiveDetector::GetEfficiencyCorrectionXY(const G4ThreeVector& InPix
     size_t dimX = sizeof(EffMap2D) / sizeof(EffMap2D[0]);       // nBinsX
     size_t dimY = sizeof(EffMap2D[0]) / sizeof(EffMap2D[0][0]); // nBinsY
 
-    if (dx < 0 || dy < 0 || dx > dimX || dy > dimY) { 
+    if (dx < 0 || dy < 0 || dx > dimX || dy > dimY) 
+    { 
         G4cout << " Extend range of input." << G4endl;
         return 0;
-        }
+    }
 
     c00 = EffMap2D[dx][dy];
     c10 = EffMap2D[dx+1][dy];
     c01 = EffMap2D[dx][dy+1];
     c11 = EffMap2D[dx+1][dy+1];
 
-    if ((c00<0.) or (c10<0.) or (c01<0.) or (c11<0.)) {
+    if ((c00<0.) or (c10<0.) or (c01<0.) or (c11<0.)) 
+    {
             eff = 0.; // if any close point is negative --> energy not detected
-        }
-    else {
+    }
+    else 
+    {
         G4double x1 = dx*spacingX;
         G4double x2 = (dx+1)*spacingX;
         G4double y1 = dy*spacingY;
         G4double y2 = (dy+1)*spacingY;
 
-        eff=( (y2-yy)*(x2-xx)*c00 + 
+        eff=(   (y2-yy)*(x2-xx)*c00 + 
                 (y2-yy)*(xx-x1)*c10 + 
                 (yy-y1)*(x2-xx)*c01 + 
                 (yy-y1)*(xx-x1)*c11)/(spacingX*spacingY); // for same binsize: division by *binsize^2
@@ -238,16 +205,13 @@ G4double smoothStep(G4double x, G4double pitch, G4double sigma) {
     return 0.5 * (std::erf((x) / sigma) - std::erf((x - pitch) / sigma));
 }
 
-
 // Analytical model of smeared rectangular box (error-functions in X and Y )
 // obtain a scalar efficiency based on the XY positions within a pixel.
 // binsize in unit um
 // per definition the some of all 4 efficiencies = 1.0
 std::pair<std::array<double, 4>, uint8_t>  SensitiveDetector::GetEfficiencyAnalytical(const G4ThreeVector& InPixPosition) {
 
-    //G4double pitch = 36.4; // in um
     double pitch = fFlag->pixelSize *1000; // convert from mm to um (default 36.4 um)
-
     double sigmaX = fFlag->CCModelSigmaX; // in um (default 4.3 um)
     double sigmaY = fFlag->CCModelSigmaY; // in um (default 4.3 um)
 
@@ -293,17 +257,4 @@ std::pair<std::array<double, 4>, uint8_t>  SensitiveDetector::GetEfficiencyAnaly
     eff11 = eff_X1 * eff_Y1; // top right
 
     return {{eff00, eff01, eff10, eff11}, quadrantFlag} ; // ordering not certain yet.
-}
-
-// Get time-walk from parameterization.
-// amplitude in unit electrons
-// returns timing in ns
-G4double SensitiveDetector::GetTimingOffset(G4double amplitude) {
-    // function diverges at 150e-
-    if (amplitude < 150.) 
-    { // delay only down to amplitudes of 150e-. 
-        return 200;
-    }
-    return 390. /pow(amplitude-149.8, 0.65);
-
 }
