@@ -1,9 +1,13 @@
 #include "SteppingAction.hh"
 
+SteppingAction::SteppingAction(SimFlags* flags): fFlag(flags)
+{
 
-
-SteppingAction::SteppingAction() {}
-SteppingAction::~SteppingAction() {}
+}
+SteppingAction::~SteppingAction() 
+{
+    
+}
 
 void SteppingAction::UserSteppingAction(const G4Step* aStep)
 {
@@ -14,7 +18,6 @@ void SteppingAction::UserSteppingAction(const G4Step* aStep)
         G4int eventID = G4RunManager::GetRunManager()->GetCurrentEvent()->GetEventID();
         G4AnalysisManager *analysisManager = G4AnalysisManager::Instance();
         
-
         // Get the pre and post step
         G4StepPoint* preStep = aStep->GetPreStepPoint();
         G4StepPoint* postStep = aStep->GetPostStepPoint();
@@ -33,15 +36,14 @@ void SteppingAction::UserSteppingAction(const G4Step* aStep)
         auto dirIt = entryDirections.find(aTrack->GetTrackID());
         auto posIt = entryPositions.find(aTrack->GetTrackID());
         // Proton that enters the PCB
-        if (!preInPCB && postInPCB) {
+        if (!preInPCB && postInPCB) 
+        {
             entryDirections[aTrack->GetTrackID()] = preStep->GetMomentumDirection();
             entryPositions[aTrack->GetTrackID()] = preStep->GetPosition();
-            //G4cout << "I am here!";
         }
         // Proton that leaves the PCB
         if (preInPCB && !postInPCB && dirIt != entryDirections.end() && posIt != entryPositions.end()) 
         {
-            //G4cout << "Now I am here!";
             G4ThreeVector inDir = dirIt->second;
             G4ThreeVector outDir = postStep->GetMomentumDirection();
             G4ThreeVector momVal = postStep->GetMomentum();
@@ -49,29 +51,24 @@ void SteppingAction::UserSteppingAction(const G4Step* aStep)
             G4double angle = inDir.angle(outDir);  // radians
             G4double angleDeg = angle * (180.0 / CLHEP::pi);
 
-
             // Save the scattering angle to nTuple
             G4ThreeVector entryPos = posIt->second;
 
-            //G4cout << "Track " << aTrack->GetTrackID() << entryPos.x() << entryPos.y() << entryPos.z() << " scattering angle (deg): " << angleDeg << G4endl;
-
+            if(fFlag->verboseSA) G4cout << "Track " << aTrack->GetTrackID() << entryPos.x() << entryPos.y() << entryPos.z() << " scattering angle (deg): " << angleDeg << G4endl;
             
-            analysisManager->FillNtupleIColumn(1, 0, eventID);
-            analysisManager->FillNtupleDColumn(1, 1, entryPos.x());
-            analysisManager->FillNtupleDColumn(1, 2, entryPos.y());
-            analysisManager->FillNtupleDColumn(1, 3, entryPos.z());
-            analysisManager->FillNtupleDColumn(1, 4, angleDeg);
-            analysisManager->FillNtupleDColumn(1, 5, momVal.mag());
-            analysisManager->AddNtupleRow(1); 
+            analysisManager->FillNtupleIColumn(0, 0, eventID);
+            analysisManager->FillNtupleDColumn(0, 1, entryPos.x());
+            analysisManager->FillNtupleDColumn(0, 2, entryPos.y());
+            analysisManager->FillNtupleDColumn(0, 3, entryPos.z());
+            analysisManager->FillNtupleDColumn(0, 4, angleDeg);
+            analysisManager->FillNtupleDColumn(0, 5, momVal.mag());
+            analysisManager->AddNtupleRow(0); 
 
             analysisManager->FillH1(0, angleDeg);
             analysisManager->FillH1(1, momVal.mag());
 
-
             entryDirections.erase(dirIt);
             entryPositions.erase(posIt);
         }
-
     }
-    
 }
