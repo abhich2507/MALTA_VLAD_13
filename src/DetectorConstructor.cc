@@ -60,7 +60,6 @@ G4VPhysicalVolume *DetectorConstruction::Construct()
             trowError("DetectorConstruct::Construct", "Invalid geometry", "DUT outside world");
         }
 
-        G4cout << maltaWidthX<< " " << maltaWidthY << " " << maltaDepth << G4endl;
         G4Box *solidMALTA = new G4Box ("MALTASensor", maltaWidthX/2, maltaWidthY/2, maltaDepth/2);
         logicSensor = new G4LogicalVolume (solidMALTA, detMat, "logicSensor");
         G4VPhysicalVolume *physSensor  = new G4PVPlacement(0, G4ThreeVector(detectorXOffset, detectorYOffset, detectorZOffset), logicSensor, "physSensor", logicalWorld, false, 0, true);

@@ -1,6 +1,7 @@
 # Set the minimum version required for cmake. The version 4.0 was 
 # chosen as the required version for Allpix squared compatibility
 cmake_minimum_required(VERSION 3.26 FATAL_ERROR)
+set(CMAKE_SKIP_RPATH ON)
 # Define the project with the name Tutorial.
 project(Tutorial)
 # Locate and configure Geant4. Required == Fatal Error if not 
@@ -27,6 +28,7 @@ add_executable(sim sim.cc ${sources})
 # added customizable functionality to the cmake. For vlad's machine it needs to be ran as 
 #cmake -DEXTRA_LIBS=uuid ..
 target_link_libraries(sim ${Geant4_LIBRARIES} ${EXTRA_LIBS})
+
 # Needs explicit link to libuuid library
 # Define target called Tutorial that depends on sim. Running make Tutorial builds sim
 add_custom_target(Tutorial DEPENDS sim)
