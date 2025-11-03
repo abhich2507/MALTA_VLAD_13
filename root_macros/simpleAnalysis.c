@@ -8,7 +8,11 @@
 
 // // for 2DEff 1400e- threshold plots:
 // specify threshold = 1400e- in threshold_loop()
+<<<<<<< HEAD
 // .L simpleAnalysis.c
+=======
+// .L in_pixel_plots.c
+>>>>>>> c554082 (Keeping in_pixel_plots.c for now, but renaming it later)
 // threshold_loop("/Users/lucianfasselt/DECAL/Simulation/Geant4/MALTASIM/malta_simulation/Results/local_0020/", "test_1400e-.root")
 
 // -------------- todo:
@@ -29,6 +33,7 @@ double GetTimingOffset(double amplitude, double threshold)
     }
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
     return 390.0 / pow((amplitude * 150./threshold) - 149.8, 0.65);
 =======
     return 390.0 / pow((x * 150./threshold) - 149.8, 0.65);
@@ -36,6 +41,9 @@ double GetTimingOffset(double amplitude, double threshold)
 =======
     return 390.0 / pow((amplitude * 150./threshold) - 149.8, 0.65);
 >>>>>>> 49ab774 (Changed variable name x to amplitude)
+=======
+    return 390.0 / pow((amplitude * 150./threshold) - 149.8, 0.65);
+>>>>>>> c554082 (Keeping in_pixel_plots.c for now, but renaming it later)
 }
 
 inline std::pair<double,double> PixelPositionReconstruction(int pixelX, int pixelY)
@@ -74,11 +82,19 @@ void set_style() {
 
 // result stores [average cluster size, av. efficiency, error on av. eff]
 // Threshold in electrons
+<<<<<<< HEAD
 void simpleAnalysis(std::string inputPath, std::string outROOTname, double result[3], double threshold = 1000) {
     // // Usage:
     // // create subdirectory and run from there (pdf plots will be created in it)
     // root
     // .L ~/Documents/Simu/Geant4/DECAL_REPO/root_macros/simpleAnalysis.c
+=======
+void in_pixel_plots(std::string inputPath, std::string outROOTname, double result[3], double threshold = 1000) {
+    // // Usage:
+    // // create subdirectory and run from there (pdf plots will be created in it)
+    // root
+    // .L ~/Documents/Simu/Geant4/DECAL_REPO/root_macros/in_pixel_plots.c
+>>>>>>> c554082 (Keeping in_pixel_plots.c for now, but renaming it later)
     // // specify threshold variable in threshold_loop(). Then run:
     // threshold_loop()
 
@@ -91,6 +107,8 @@ void simpleAnalysis(std::string inputPath, std::string outROOTname, double resul
 
     //std::string inputPath = "/home/vlad/Documents/Simu/Geant4/DECAL_REPO/Results/local_0044/";
     //std::string inputPath = "/Users/lucianfasselt/DECAL/Simulation/Geant4/MALTASIM/malta_simulation/Results/local_0046/"; // reference before
+<<<<<<< HEAD
+<<<<<<<< HEAD:root_macros/simpleAnalysis.c
 
     TChain *MCTruthchain = new TChain("TruthVertex");
 
@@ -134,6 +152,10 @@ void simpleAnalysis(std::string inputPath, std::string outROOTname, double resul
     Long64_t nEntriesDepos = chain->GetEntries();
 
 
+========
+>>>>>>>> c554082 (Keeping in_pixel_plots.c for now, but renaming it later):root_macros/in_pixel_plots.c
+=======
+>>>>>>> c554082 (Keeping in_pixel_plots.c for now, but renaming it later)
 
     TChain *MCTruthchain = new TChain("TruthVertex");
 
@@ -151,7 +173,10 @@ void simpleAnalysis(std::string inputPath, std::string outROOTname, double resul
     MCTruthchain->SetBranchAddress("vertexY", &MCtrackY);
     MCTruthchain->SetBranchAddress("vertexZ", &MCtrackZ);
     MCTruthchain->SetBranchAddress("fGlobalTime", &MCtrackGlobalTime);
+<<<<<<< HEAD
 >>>>>>> 57c5dd4 (Implemented spacial cut based on MC true primary particle position):root_macros/in_pixel_plots.c
+=======
+>>>>>>> c554082 (Keeping in_pixel_plots.c for now, but renaming it later)
     Long64_t nEntriesMCTruth = MCTruthchain->GetEntries();
     std::cout << "Number of Events from MC track info: " << nEntriesMCTruth << std::endl;
 
@@ -166,21 +191,34 @@ void simpleAnalysis(std::string inputPath, std::string outROOTname, double resul
             vertexMap[MCtrackEventID] = {MCtrackX, MCtrackY};
         } else {
             // Optional consistency check
+<<<<<<< HEAD
+<<<<<<<< HEAD:root_macros/simpleAnalysis.c
 <<<<<<< HEAD:root_macros/simpleAnalysis.c
+=======
+>>>>>>> c554082 (Keeping in_pixel_plots.c for now, but renaming it later)
                 auto [vx, vy] = vertexMap[MCtrackEventID];
                 std::cout << "("<< vx << ", " << vy << ")"<< std::endl;
                 std::cout << "("<< MCtrackX << ", " << MCtrackY << ")"<< std::endl;
                 std::cerr << "Warning: Vertex already exists for MCtrackEventID "
                           << MCtrackEventID << "!\n";
+<<<<<<< HEAD
 =======
             auto [vx, vy] = vertexMap[MCtrackEventID];
             if (vx != MCtrackX || vy != MCtrackY) {
+========
+                auto [vx, vy] = vertexMap[MCtrackEventID];
+>>>>>>>> c554082 (Keeping in_pixel_plots.c for now, but renaming it later):root_macros/in_pixel_plots.c
                 std::cout << "("<< vx << ", " << vy << ")"<< std::endl;
                 std::cout << "("<< MCtrackX << ", " << MCtrackY << ")"<< std::endl;
-                std::cerr << "Warning: Inconsistent vertex for MCtrackEventID "
+                std::cerr << "Warning: Vertex already exists for MCtrackEventID "
                           << MCtrackEventID << "!\n";
+<<<<<<<< HEAD:root_macros/simpleAnalysis.c
             }
 >>>>>>> 57c5dd4 (Implemented spacial cut based on MC true primary particle position):root_macros/in_pixel_plots.c
+========
+>>>>>>>> c554082 (Keeping in_pixel_plots.c for now, but renaming it later):root_macros/in_pixel_plots.c
+=======
+>>>>>>> c554082 (Keeping in_pixel_plots.c for now, but renaming it later)
         }
     }
     std::cout << "Stored " << vertexMap.size() << " unique events.\n";
@@ -212,14 +250,20 @@ void simpleAnalysis(std::string inputPath, std::string outROOTname, double resul
         chainPixel->Add(Form("%soutput0_t%d.root", inputPath.c_str() , t));
         //chainPixel->Add(Form("%soutput0_t0.root", inputPath.c_str()));
     }
+<<<<<<< HEAD
     //asdasd
 
     double corrEnergy, timeWalkHit;
     int rawEventID, iHit, pixX, pixY, iPlane;
+=======
+    double corrEnergy, timeWalkHit;
+    int rawEventID, iHit, pixX, pixY;
+>>>>>>> c554082 (Keeping in_pixel_plots.c for now, but renaming it later)
     chainPixel->SetBranchAddress("iEvent", &rawEventID);
     chainPixel->SetBranchAddress("iHit", &iHit);
     chainPixel->SetBranchAddress("PixX", &pixX);
     chainPixel->SetBranchAddress("PixY", &pixY);
+<<<<<<< HEAD
     if (oldtree){
         iPlane = 0;
         chainPixel->SetBranchAddress("Energy", &corrEnergy); // old naming of branch
@@ -246,21 +290,30 @@ void simpleAnalysis(std::string inputPath, std::string outROOTname, double resul
         // Deprecated will require to be purged
         timeMap[rawEventID].push_back(timeWalkHit); // Store all times
 =======
+=======
+    chainPixel->SetBranchAddress("Energy", &corrEnergy); // should probably be renamed from "Energy" to "corrCharge" (same in RunAction.cc)
+    chainPixel->SetBranchAddress("timeWalkHit", &timeWalkHit);
+    Long64_t nRawEntries = chainPixel->GetEntries();
+    std::map<std::pair<int,std::pair<int, int>>, double> enMap; // Avoid O(n^2) nested loops via extra map 
+    std::map<int, std::vector<double>> timeMap;
+>>>>>>> c554082 (Keeping in_pixel_plots.c for now, but renaming it later)
 
     
-
-    
-    std::cout << "MC deposited entries: " << nEntriesDepos << " Raw hit entries: " << nRawEntries << std::endl;
+    std::cout << " Raw hit entries: " << nRawEntries << std::endl;
     for (Long64_t j = 0; j < nRawEntries; j++)
     {
         chainPixel->GetEntry(j);
-
-        //enMap[{rawEventID, iHit}] += corrEnergy; // Accumulate energy for each hit in the event.
         enMap[{rawEventID, {pixX, pixY}}] += corrEnergy;
         // Deprecated will require to be purged
         timeMap[rawEventID].push_back(timeWalkHit); // Store all times
+<<<<<<< HEAD
+<<<<<<<< HEAD:root_macros/simpleAnalysis.c
 
 >>>>>>> 57c5dd4 (Implemented spacial cut based on MC true primary particle position):root_macros/in_pixel_plots.c
+========
+>>>>>>>> c554082 (Keeping in_pixel_plots.c for now, but renaming it later):root_macros/in_pixel_plots.c
+=======
+>>>>>>> c554082 (Keeping in_pixel_plots.c for now, but renaming it later)
     }
     std::map<int, int> clusterMap; // Map to hold cluster size per event
     std::map<int, double> clusterTimeMap; // Map to hold leading time per event
@@ -268,11 +321,19 @@ void simpleAnalysis(std::string inputPath, std::string outROOTname, double resul
     int simpleCounter = 0;
     int rememberer =0;
     double timecut = 500; // ns
+<<<<<<< HEAD
+<<<<<<<< HEAD:root_macros/simpleAnalysis.c
 <<<<<<< HEAD:root_macros/simpleAnalysis.c
     double dist_cut = 80/1000.; // in mm
 =======
     double dist_cut = 100/1000.; // in mm
 >>>>>>> 57c5dd4 (Implemented spacial cut based on MC true primary particle position):root_macros/in_pixel_plots.c
+========
+    double dist_cut = 80/1000.; // in mm
+>>>>>>>> c554082 (Keeping in_pixel_plots.c for now, but renaming it later):root_macros/in_pixel_plots.c
+=======
+    double dist_cut = 80/1000.; // in mm
+>>>>>>> c554082 (Keeping in_pixel_plots.c for now, but renaming it later)
     std::map<int, std::vector<double>> inClusterTimes;
     for (const auto& entry : enMap) 
     {
@@ -309,10 +370,16 @@ void simpleAnalysis(std::string inputPath, std::string outROOTname, double resul
         if (cenergy > threshold && timing < timecut && distPass) 
         {
             clusterMap[eventID]++; // Increment cluster size for this event
+<<<<<<< HEAD
+<<<<<<<< HEAD:root_macros/simpleAnalysis.c
 <<<<<<< HEAD:root_macros/simpleAnalysis.c
 =======
             //clusterEnergyMap[eventID] = std::max(clusterEnergyMap[eventID], cenergy); // Store the maximum correnergy for this event
 >>>>>>> 57c5dd4 (Implemented spacial cut based on MC true primary particle position):root_macros/in_pixel_plots.c
+========
+>>>>>>>> c554082 (Keeping in_pixel_plots.c for now, but renaming it later):root_macros/in_pixel_plots.c
+=======
+>>>>>>> c554082 (Keeping in_pixel_plots.c for now, but renaming it later)
             //I take the fastest hit in an event (cluster) as MALTA does.
             clusterTimeMap[eventID] = *std::min_element(inClusterTimes[eventID].begin(), inClusterTimes[eventID].end());
             //std::cout << "eventID: " << eventID << "timing: " <<  clusterTimeMap[eventID] << std::endl;
@@ -327,6 +394,7 @@ void simpleAnalysis(std::string inputPath, std::string outROOTname, double resul
             inClusterTimes.clear();
         }
         rememberer = eventID;
+<<<<<<< HEAD
 <<<<<<< HEAD:root_macros/simpleAnalysis.c
 <<<<<<< HEAD:root_macros/simpleAnalysis.c
 =======
@@ -335,6 +403,8 @@ void simpleAnalysis(std::string inputPath, std::string outROOTname, double resul
 >>>>>>> ee2954b (Cleaned up analysis and merging of data for effiency graph):root_macros/in_pixel_plots.c
 =======
 >>>>>>> 57c5dd4 (Implemented spacial cut based on MC true primary particle position):root_macros/in_pixel_plots.c
+=======
+>>>>>>> c554082 (Keeping in_pixel_plots.c for now, but renaming it later)
         if (eventID == 27437)
         {
             std::cout << "Event ID: " << eventID << "; pixX: " << entry.first.second.first << ";pixY: " << entry.first.second.second << "; corrEnergy: " << cenergy << std::endl;
@@ -342,6 +412,8 @@ void simpleAnalysis(std::string inputPath, std::string outROOTname, double resul
     }
 
     int previousID =  0;
+<<<<<<< HEAD
+<<<<<<<< HEAD:root_macros/simpleAnalysis.c
 <<<<<<< HEAD:root_macros/simpleAnalysis.c
     for (Long64_t i = 0; i < nEntriesMCTruth; ++i) 
 =======
@@ -359,19 +431,33 @@ void simpleAnalysis(std::string inputPath, std::string outROOTname, double resul
         if (truthEventID == previousID) continue;
         previousID = truthEventID;
         //std::cout << "Event ID: " << truthEventID << "; X: " << fX << "; Y: " << fY << "; Z: " << fZ << "; Energy: " << Energy << std::endl;
+========
+=======
+>>>>>>> c554082 (Keeping in_pixel_plots.c for now, but renaming it later)
+    for (Long64_t i = 0; i < nEntriesMCTruth; ++i) 
+    {
+        MCTruthchain->GetEntry(i);
+        // Do me once per event
+        if (MCtrackEventID == previousID) {
+            std::cout << "SameID: " << MCtrackEventID << " " << previousID << std::endl; // is this ever happening?
+            continue;
+        }
+        previousID = MCtrackEventID;
+<<<<<<< HEAD
+>>>>>>>> c554082 (Keeping in_pixel_plots.c for now, but renaming it later):root_macros/in_pixel_plots.c
         // Fold positions into 2x2 grid but convert to um (*1000)
-        double xFolded = fmod(vertexX, 2*pixelSizeX) * 1000; 
-        double yFolded = fmod(vertexY, 2*pixelSizeY) * 1000;
-        double zFolded = (50 - vertexZ) * 1000;
+        double xFolded = fmod(MCtrackX, 2*pixelSizeX) * 1000; 
+        double yFolded = fmod(MCtrackY, 2*pixelSizeY) * 1000;
+        double zFolded = (50 - MCtrackZ) * 1000;
 
-        double xIP_track = fmod(vertexX + rng.Gaus(0., trackunc_X), 2*pixelSizeX) * 1000; 
-        double yIP_track = fmod(vertexY + rng.Gaus(0., trackunc_Y), 2*pixelSizeX) * 1000; 
+        double xIP_track = fmod(MCtrackX + rng.Gaus(0., trackunc_X), 2*pixelSizeX) * 1000; 
+        double yIP_track = fmod(MCtrackY + rng.Gaus(0., trackunc_Y), 2*pixelSizeX) * 1000; 
 
-        auto it = clusterMap.find(truthEventID);
-        //std::cout << "Event ID: " << truthEventID << "; X: " << vertexX << "; Y: " << vertexY << "En.: " << it->second << std::endl;  
+        auto it = clusterMap.find(MCtrackEventID);
+        //std::cout << "Event ID: " << MCtrackEventID << "; X: " << MCtrackX << "; Y: " << MCtrackY << "En.: " << it->second << std::endl;  
         if (it != clusterMap.end()) 
         {   
-            int NumHits = min(it->second, 8); // restrict clusters to maximum size 8
+            int NumHits = min(it->second, 8); // restrict clusters to maximum size 8 // this is not needed if distance cut dist_cut is below order 3*pixel size (100um)
             //if (it->second > 8) std::cout << i << " " << it->second << " " << NumHits << std::endl;
 
             hInPixelClSize->Fill(xFolded, yFolded, NumHits);
@@ -381,7 +467,10 @@ void simpleAnalysis(std::string inputPath, std::string outROOTname, double resul
             hInPixelMatch_trackunc->Fill(xIP_track, yIP_track, NumHits != 0 ? 1 : 0);
 >>>>>>> 57c5dd4 (Implemented spacial cut based on MC true primary particle position):root_macros/in_pixel_plots.c
         }
+<<<<<<<< HEAD:root_macros/simpleAnalysis.c
         previousID = MCtrackEventID;
+=======
+>>>>>>> c554082 (Keeping in_pixel_plots.c for now, but renaming it later)
         // Fold positions into 2x2 grid but convert to um (*1000)
         double xFolded = fmod(MCtrackX, 2*pixelSizeX) * 1000; 
         double yFolded = fmod(MCtrackY, 2*pixelSizeY) * 1000;
@@ -403,6 +492,11 @@ void simpleAnalysis(std::string inputPath, std::string outROOTname, double resul
             hInPixelClSize_trackunc->Fill(xIP_track, yIP_track, NumHits);
             hInPixelMatch_trackunc->Fill(xIP_track, yIP_track, NumHits != 0 ? 1 : 0);
         }
+<<<<<<< HEAD
+========
+>>>>>>>> c554082 (Keeping in_pixel_plots.c for now, but renaming it later):root_macros/in_pixel_plots.c
+=======
+>>>>>>> c554082 (Keeping in_pixel_plots.c for now, but renaming it later)
         auto itTime = clusterTimeMap.find(MCtrackEventID);
         if (itTime != clusterTimeMap.end())
         {
@@ -412,6 +506,8 @@ void simpleAnalysis(std::string inputPath, std::string outROOTname, double resul
         //hInPixelClSize->Fill(xFolded, yFolded, clSize); // Quick and dirty way to fill cluster size. No threshold implementation
         hInPixelAll->Fill(xFolded, yFolded, 1);
         hInPixelAll_trackunc->Fill(xIP_track, yIP_track, 1);
+<<<<<<< HEAD
+<<<<<<<< HEAD:root_macros/simpleAnalysis.c
 <<<<<<< HEAD:root_macros/simpleAnalysis.c
 =======
         if (Energy > 0)
@@ -420,11 +516,16 @@ void simpleAnalysis(std::string inputPath, std::string outROOTname, double resul
             h2_fullChip->Fill(fX, fY, Energy);
         }
 >>>>>>> 57c5dd4 (Implemented spacial cut based on MC true primary particle position):root_macros/in_pixel_plots.c
+========
+>>>>>>>> c554082 (Keeping in_pixel_plots.c for now, but renaming it later):root_macros/in_pixel_plots.c
+=======
+>>>>>>> c554082 (Keeping in_pixel_plots.c for now, but renaming it later)
     }
 
     result[0] = hInPixelClSize_trackunc->Integral() / hInPixelMatch_trackunc->Integral();
     std::cout << "Av. Cl size: " << result[0] << std::endl;
 
+<<<<<<< HEAD
 <<<<<<< HEAD:root_macros/simpleAnalysis.c
 <<<<<<< HEAD:root_macros/simpleAnalysis.c
     // divide cluster size and timing by number of events with hit (to get average across all events with hit)
@@ -443,6 +544,8 @@ void simpleAnalysis(std::string inputPath, std::string outROOTname, double resul
     result[2] = getEffErr(hInPixelMatch_trackunc->Integral(), hInPixelPass_trackunc->Integral());// in percent
 >>>>>>> ee2954b (Cleaned up analysis and merging of data for effiency graph):root_macros/in_pixel_plots.c
 =======
+=======
+>>>>>>> c554082 (Keeping in_pixel_plots.c for now, but renaming it later)
     // divide cluster size and timing by number of events with hit (to get average across all events with hit)
     hInPixelClSize->Divide(hInPixelMatch); 
     hInPixelClSize_trackunc->Divide(hInPixelMatch_trackunc);
@@ -450,21 +553,29 @@ void simpleAnalysis(std::string inputPath, std::string outROOTname, double resul
 
     result[1] = getEff(hInPixelMatch_trackunc->Integral(), hInPixelAll_trackunc->Integral());// in percent
     result[2] = getEffErr(hInPixelMatch_trackunc->Integral(), hInPixelAll_trackunc->Integral());// in percent
+<<<<<<< HEAD
 >>>>>>> 57c5dd4 (Implemented spacial cut based on MC true primary particle position):root_macros/in_pixel_plots.c
+=======
+>>>>>>> c554082 (Keeping in_pixel_plots.c for now, but renaming it later)
 
     std::cout << "Matched tracks: " << hInPixelMatch->Integral() << std::endl;
     std::cout << "All tracks: " << hInPixelAll->Integral() << std::endl;
     std::cout << "Av. Eff.: " << result[1] << "+- " 
                 << result[2] << std::endl;
 
+<<<<<<< HEAD
 <<<<<<< HEAD:root_macros/simpleAnalysis.c
 <<<<<<< HEAD:root_macros/simpleAnalysis.c
+=======
+>>>>>>> c554082 (Keeping in_pixel_plots.c for now, but renaming it later)
     hInPixelMatch->Divide(hInPixelAll);
     hInPixelMatch_trackunc->Divide(hInPixelAll_trackunc);
     hInPixelMatch->Scale(100.); // in percent
     hInPixelMatch_trackunc->Scale(100.); // in percent
 
     /*
+<<<<<<< HEAD
+<<<<<<<< HEAD:root_macros/simpleAnalysis.c
 =======
     hInPixelMatch->Divide(hInPixelPass);
     hInPixelMatch_trackunc->Divide(hInPixelPass_trackunc);
@@ -481,6 +592,10 @@ void simpleAnalysis(std::string inputPath, std::string outROOTname, double resul
 >>>>>>> ee2954b (Cleaned up analysis and merging of data for effiency graph):root_macros/in_pixel_plots.c
 =======
 >>>>>>> 57c5dd4 (Implemented spacial cut based on MC true primary particle position):root_macros/in_pixel_plots.c
+========
+>>>>>>>> c554082 (Keeping in_pixel_plots.c for now, but renaming it later):root_macros/in_pixel_plots.c
+=======
+>>>>>>> c554082 (Keeping in_pixel_plots.c for now, but renaming it later)
     auto h2 = h3->Project3D("xy");
     TCanvas *c1 = new TCanvas("c1", "XY Projection", 800, 600);
     h2->Draw("COLZ");
@@ -587,6 +702,7 @@ void simpleAnalysis(std::string inputPath, std::string outROOTname, double resul
 // or use intLoop
 int threshold_loop(std::string inputFile, std::string outROOT){
     // List of threshold values:
+<<<<<<< HEAD
 <<<<<<< HEAD:root_macros/simpleAnalysis.c
 <<<<<<< HEAD:root_macros/simpleAnalysis.c
     double thresholds[] = {200., 300., 400., 500., 600., 700., 800., 900., 1000., 1200., 1400., 1600., 1800., 2000., 2200., 2400., 2600., 2800., 3000.};
@@ -625,6 +741,12 @@ int threshold_loop(std::string inputFile, std::string outROOT){
     //double thresholds[] = {200, 230, 343, 448, 544, 632, 712}; // equivalent to thresholds of data points
 >>>>>>> 0d7778e (Cleaned up analysis and merging of data for effiency graph)
 >>>>>>> ee2954b (Cleaned up analysis and merging of data for effiency graph):root_macros/in_pixel_plots.c
+=======
+    double thresholds[] = {200., 300., 400., 500., 600., 700., 800., 900., 1000., 1200., 1400., 1600., 1800., 2000., 2200., 2400., 2600., 2800., 3000.};
+    //double thresholds[] = {200.};
+    //double thresholds[] = {1400., 200., 1200.};
+    //double thresholds[] = {200, 230, 343, 448, 544, 632, 712}; // equivalent to thresholds of data points
+>>>>>>> c554082 (Keeping in_pixel_plots.c for now, but renaming it later)
 
     int num_values = sizeof(thresholds) / sizeof(thresholds[0]);
     double results[num_values][3];
@@ -635,12 +757,20 @@ int threshold_loop(std::string inputFile, std::string outROOT){
     TGraphErrors *gr_AvEff = new TGraphErrors(num_values);
     gr_AvEff->SetName("AverageEff");
 
+<<<<<<< HEAD
     TFile outFile(outROOT.c_str(), "RECREATE"); // create new file and fill in simpleAnalysis
+=======
+    TFile outFile(outROOT.c_str(), "RECREATE"); // create new file and fill in in_pixel_plots
+>>>>>>> c554082 (Keeping in_pixel_plots.c for now, but renaming it later)
     outFile.Close();
 
     // Get average cl. size and eff. for each threshold
     for (int i = 0; i < num_values; i++) {
+<<<<<<< HEAD
         simpleAnalysis(inputFile, outROOT, results[i], thresholds[i]);
+=======
+        in_pixel_plots(inputFile, outROOT, results[i], thresholds[i]);
+>>>>>>> c554082 (Keeping in_pixel_plots.c for now, but renaming it later)
         gr_AvClSize->SetPoint(i, thresholds[i], results[i][0]);
         gr_AvEff->SetPoint(i, thresholds[i], results[i][1]);
         gr_AvEff->SetPointError(i, 0.0, results[i][2]); // assume no unc. on threshold
@@ -677,9 +807,11 @@ int threshold_loop(std::string inputFile, std::string outROOT){
 }
 
 void RunInt_loop(){
+<<<<<<< HEAD
 <<<<<<< HEAD:root_macros/simpleAnalysis.c
     for (int runNumber = 55; runNumber <= 55; ++runNumber) { // 46 to 50
 =======
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -708,9 +840,16 @@ void RunInt_loop(){
 =======
     for (int runNumber = 46; runNumber <= 50; ++runNumber) {
 >>>>>>> 6b085e9 (Implemented spacial cut based on MC true primary particle position)
+=======
+    for (int runNumber = 46; runNumber <= 50; ++runNumber) { // 46 to 50
+>>>>>>> 1bb9052 (Keeping in_pixel_plots.c for now, but renaming it later)
         std::string inputFileName = "/Users/lucianfasselt/DECAL/Simulation/Geant4/MALTASIM/malta_simulation/Results/local_00"+ std::to_string(runNumber)+"/";  
+<<<<<<<< HEAD:root_macros/simpleAnalysis.c
         std::string outROOTName = "SimOutput_MaxCl8_" + std::to_string(runNumber) + ".root";
 >>>>>>> 57c5dd4 (Implemented spacial cut based on MC true primary particle position):root_macros/in_pixel_plots.c
+========
+        std::string outROOTName = "SimOutput_MaxCl8_MCTrue_distcut80_" + std::to_string(runNumber) + ".root";
+>>>>>>>> c554082 (Keeping in_pixel_plots.c for now, but renaming it later):root_macros/in_pixel_plots.c
         threshold_loop(inputFileName, outROOTName.c_str());
     }
 <<<<<<< HEAD:root_macros/simpleAnalysis.c
@@ -725,3 +864,11 @@ void RunInt_loop(){
 }
 >>>>>>> 18e3f08 (removed sqrt2 from smoothstep)
 >>>>>>> b3c9266 (rebasing, for merging. caused by: removed sqrt2 from smoothstep):root_macros/in_pixel_plots.c
+=======
+    for (int runNumber = 46; runNumber <= 50; ++runNumber) { // 46 to 50
+        std::string inputFileName = "/Users/lucianfasselt/DECAL/Simulation/Geant4/MALTASIM/malta_simulation/Results/local_00"+ std::to_string(runNumber)+"/";  
+        std::string outROOTName = "SimOutput_MaxCl8_MCTrue_distcut80_" + std::to_string(runNumber) + ".root";
+        threshold_loop(inputFileName, outROOTName.c_str());
+    }
+}
+>>>>>>> c554082 (Keeping in_pixel_plots.c for now, but renaming it later)
