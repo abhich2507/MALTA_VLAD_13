@@ -96,10 +96,19 @@ void simpleAnalysis(std::string inputPath, std::string outROOTname, double resul
 
     // Connect branches
     MCTruthchain->SetBranchAddress("iEvent", &MCtrackEventID);
-    MCTruthchain->SetBranchAddress("vertexX", &MCtrackX);
-    MCTruthchain->SetBranchAddress("vertexY", &MCtrackY);
-    MCTruthchain->SetBranchAddress("vertexZ", &MCtrackZ);
-    MCTruthchain->SetBranchAddress("fGlobalTime", &MCtrackGlobalTime);
+    bool oldtree = false;
+    if (oldtree){
+        MCTruthchain->SetBranchAddress("vertexX", &MCtrackX); // old naming of branch
+        MCTruthchain->SetBranchAddress("vertexY", &MCtrackY);
+        MCTruthchain->SetBranchAddress("vertexZ", &MCtrackZ);
+        MCTruthchain->SetBranchAddress("fGlobalTime", &MCtrackGlobalTime);
+    }
+    else {
+        MCTruthchain->SetBranchAddress("trueVertexX", &MCtrackX);
+        MCTruthchain->SetBranchAddress("trueVertexY", &MCtrackY);
+        MCTruthchain->SetBranchAddress("trueVertexZ", &MCtrackZ);
+        MCTruthchain->SetBranchAddress("trueGlobalTime", &MCtrackGlobalTime);
+    }
     Long64_t nEntriesMCTruth = MCTruthchain->GetEntries();
     std::cout << "Number of Events from MC track info: " << nEntriesMCTruth << std::endl;
 
@@ -150,23 +159,35 @@ void simpleAnalysis(std::string inputPath, std::string outROOTname, double resul
         chainPixel->Add(Form("%soutput0_t%d.root", inputPath.c_str() , t));
         //chainPixel->Add(Form("%soutput0_t0.root", inputPath.c_str()));
     }
+    //asdasd
+
     double corrEnergy, timeWalkHit;
-    int rawEventID, iHit, pixX, pixY;
+    int rawEventID, iHit, pixX, pixY, iPlane;
     chainPixel->SetBranchAddress("iEvent", &rawEventID);
     chainPixel->SetBranchAddress("iHit", &iHit);
     chainPixel->SetBranchAddress("PixX", &pixX);
     chainPixel->SetBranchAddress("PixY", &pixY);
-    chainPixel->SetBranchAddress("Energy", &corrEnergy); // should probably be renamed from "Energy" to "corrCharge" (same in RunAction.cc)
-    chainPixel->SetBranchAddress("timeWalkHit", &timeWalkHit);
+    if (oldtree){
+        iPlane = 0;
+        chainPixel->SetBranchAddress("Energy", &corrEnergy); // old naming of branch
+        chainPixel->SetBranchAddress("timeWalkHit", &timeWalkHit);
+    }
+    else {
+        chainPixel->SetBranchAddress("iPlane", &iPlane);
+        chainPixel->SetBranchAddress("hitEnergy", &corrEnergy); 
+        chainPixel->SetBranchAddress("hitTime", &timeWalkHit);
+    }
+
     Long64_t nRawEntries = chainPixel->GetEntries();
     std::map<std::pair<int,std::pair<int, int>>, double> enMap; // Avoid O(n^2) nested loops via extra map 
     std::map<int, std::vector<double>> timeMap;
-
     
     std::cout << " Raw hit entries: " << nRawEntries << std::endl;
     for (Long64_t j = 0; j < nRawEntries; j++)
     {
         chainPixel->GetEntry(j);
+        //std::cout << j << " Plane: " << iPlane << " number" << std::endl;
+        if (iPlane != 0) continue; // only consider DUT with iPlane ==0
         enMap[{rawEventID, {pixX, pixY}}] += corrEnergy;
         // Deprecated will require to be purged
         timeMap[rawEventID].push_back(timeWalkHit); // Store all times
@@ -405,7 +426,7 @@ void simpleAnalysis(std::string inputPath, std::string outROOTname, double resul
 int threshold_loop(std::string inputFile, std::string outROOT){
     // List of threshold values:
     double thresholds[] = {200., 300., 400., 500., 600., 700., 800., 900., 1000., 1200., 1400., 1600., 1800., 2000., 2200., 2400., 2600., 2800., 3000.};
-    //double thresholds[] = {200.};
+    //double thresholds[] = {2000., 200.};
     //double thresholds[] = {1400., 200., 1200.};
     //double thresholds[] = {200, 230, 343, 448, 544, 632, 712}; // equivalent to thresholds of data points
 
@@ -460,7 +481,7 @@ int threshold_loop(std::string inputFile, std::string outROOT){
 }
 
 void RunInt_loop(){
-    for (int runNumber = 46; runNumber <= 50; ++runNumber) { // 46 to 50
+    for (int runNumber = 55; runNumber <= 55; ++runNumber) { // 46 to 50
         std::string inputFileName = "/Users/lucianfasselt/DECAL/Simulation/Geant4/MALTASIM/malta_simulation/Results/local_00"+ std::to_string(runNumber)+"/";  
         std::string outROOTName = "SimOutput_MaxCl8_MCTrue_distcut80_" + std::to_string(runNumber) + ".root";
         threshold_loop(inputFileName, outROOTName.c_str());
