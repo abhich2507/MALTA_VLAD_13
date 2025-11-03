@@ -74,7 +74,6 @@ G4VPhysicalVolume *DetectorConstruction::Construct()
         }
 <<<<<<< HEAD
 
-        G4cout << maltaWidthX<< " " << maltaWidthY << " " << maltaDepth << G4endl;
         G4Box *solidMALTA = new G4Box ("MALTASensor", maltaWidthX/2, maltaWidthY/2, maltaDepth/2);
 <<<<<<< HEAD
 =======
