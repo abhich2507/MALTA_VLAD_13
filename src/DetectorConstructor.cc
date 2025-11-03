@@ -53,10 +53,15 @@ G4VPhysicalVolume *DetectorConstruction::Construct()
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 >>>>>>> 8a2e4b8 (Cleaned up the simulation files. Removed the Truth En tree as it was not used further in the analysis chain. Additionally, general clean up in terms of branch renaming. It most probably will impact the in_pixel_plots script. However the default analysis chain has already been modified to account for these changes.)
 =======
 >>>>>>> b3c9266 (rebasing, for merging. caused by: removed sqrt2 from smoothstep)
+=======
+=======
+>>>>>>> fdaa68d (Updating src folder with newest develop branch. Before was old version)
+>>>>>>> beda3d3 (Updating src folder with newest develop branch. Before was old version)
         G4double maltaWidthX = fFlag->detectorSizeX *cm; 
         G4double maltaWidthY = fFlag->detectorSizeY *cm; 
         G4double maltaDepth = fFlag->detectorDepth* um;
@@ -70,6 +75,7 @@ G4VPhysicalVolume *DetectorConstruction::Construct()
 <<<<<<< HEAD
 
         G4Box *solidMALTA = new G4Box ("MALTASensor", maltaWidthX/2, maltaWidthY/2, maltaDepth/2);
+<<<<<<< HEAD
 =======
         //TODO: This is hardcoded. It has its own flag already. Fix it
         G4double maltaWidth = 18.6368 *mm; 
@@ -99,7 +105,12 @@ G4VPhysicalVolume *DetectorConstruction::Construct()
 >>>>>>> 6f1d148 (Updating all src files from develop)
         G4Box *solidMALTA = new G4Box ("MALTASensor", maltaWidth/2, maltaWidth/2, maltaDepth/2);
 >>>>>>> 18e3f08 (removed sqrt2 from smoothstep)
+<<<<<<< HEAD
 >>>>>>> b3c9266 (rebasing, for merging. caused by: removed sqrt2 from smoothstep)
+=======
+=======
+>>>>>>> fdaa68d (Updating src folder with newest develop branch. Before was old version)
+>>>>>>> beda3d3 (Updating src folder with newest develop branch. Before was old version)
         logicSensor = new G4LogicalVolume (solidMALTA, detMat, "logicSensor");
         G4VPhysicalVolume *physSensor  = new G4PVPlacement(0, G4ThreeVector(detectorXOffset, detectorYOffset, detectorZOffset), logicSensor, "physSensor", logicalWorld, false, 0, true);
 

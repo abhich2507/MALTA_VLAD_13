@@ -129,6 +129,7 @@ G4bool SensitiveDetector::ProcessHits(G4Step *aStep, G4TouchableHistory *)
     }
 
     if (fFlag->verboseSD)
+<<<<<<< HEAD
     {
         G4cout << "InPixPos: " << InPixPos[0]/um << ", " << InPixPos[1]/um << " --> Eff: " << efficiency << " of 4 pixels: " << effAn[0] << " " << effAn[1] << " " << effAn[2] << " " << effAn[3] << " " << G4endl;
         G4cout << "Pix coordinate: " << pixX << ";" << pixY << G4endl;
@@ -162,10 +163,41 @@ G4bool SensitiveDetector::ProcessHits(G4Step *aStep, G4TouchableHistory *)
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 >>>>>>> 8a2e4b8 (Cleaned up the simulation files. Removed the Truth En tree as it was not used further in the analysis chain. Additionally, general clean up in terms of branch renaming. It most probably will impact the in_pixel_plots script. However the default analysis chain has already been modified to account for these changes.)
 =======
 >>>>>>> c27c2b3 (Testing to push the sensitivedetector.cc taken from develop branch)
+=======
+=======
+    {
+        G4cout << "InPixPos: " << InPixPos[0]/um << ", " << InPixPos[1]/um << " --> Eff: " << efficiency << " of 4 pixels: " << effAn[0] << " " << effAn[1] << " " << effAn[2] << " " << effAn[3] << " " << G4endl;
+        G4cout << "Pix coordinate: " << pixX << ";" << pixY << G4endl;
+        G4cout << "Initial Pixel position: " << posPixel.x() << " ; "<< posPixel.y() << G4endl;
+        G4cout << "Cluster pixel positions: "<< G4endl << pixelCluster[0][0] << "," << pixelCluster[0][1] << " ; " << G4endl 
+                                            << pixelCluster[1][0] << "," << pixelCluster[1][1] << " ; " << G4endl 
+                                            << pixelCluster[2][0] << "," << pixelCluster[2][1] << " ; " << G4endl 
+                                            << pixelCluster[3][0] << "," << pixelCluster[3][1] << "  " << G4endl ;
+    }
+
+    double epsilon = 3.66; // electron-hole pair creaton energy = (3.66 +- 0.03) eV
+    // fill the 4 efficiencies and timing into a tree. 
+    // Apply a minimal threshold here already of 50 e-? edep in MeV --> if (edep*10^6/epsilon > 50) // threshold in e- // edep in MeV
+    // take care if hit is at boundary of sensor (minimal or maximal pix number.)
+    // associate timing based on amplitude (from time walk):
+
+    // This line ensures that the compiler evaluates all effAn at the same time. If you dont do this float point fluctuations might appear
+    // This is most probably due to multithreading even though I cant prove it.
+    std::array<double,4> effAnCopy = effAn; // forces evaluation
+    int iHit = 0;
+    // Store only the largest deposited energy in a cluster and its corresponding timing
+    auto it = std::max_element(effAnCopy.begin(), effAnCopy.end());
+    size_t maxIndex = std::distance(effAnCopy.begin(), it);
+    double leadingEnergy = *it * energy; // leading energy in MeV
+    for(int i = 0; i<4; i++)
+    {
+>>>>>>> fdaa68d (Updating src folder with newest develop branch. Before was old version)
+>>>>>>> beda3d3 (Updating src folder with newest develop branch. Before was old version)
         analysisManager->FillNtupleIColumn(1, 0, eventID);
         analysisManager->FillNtupleIColumn(1, 1, planeID);
         analysisManager->FillNtupleIColumn(1, 2, iHit);
@@ -176,6 +208,7 @@ G4bool SensitiveDetector::ProcessHits(G4Step *aStep, G4TouchableHistory *)
         analysisManager->FillNtupleDColumn(1, 5, fglobalTime *ns);
         analysisManager->FillNtupleDColumn(1, 6, effAnCopy[i] * energy *1000000/epsilon);
         analysisManager->AddNtupleRow(1); 
+<<<<<<< HEAD
 =======
         //if (effAn[i] * energy *1000000/3.6 > 50) // Set a data supression threshold at 50 deposited el
 
@@ -187,6 +220,8 @@ G4bool SensitiveDetector::ProcessHits(G4Step *aStep, G4TouchableHistory *)
         analysisManager->FillNtupleDColumn(3, 5, effAn[i] * energy *1000000/3.6);
         analysisManager->AddNtupleRow(3); 
 >>>>>>> 0ff8c34 (Testing to push the sensitivedetector.cc taken from develop branch)
+=======
+>>>>>>> fdaa68d (Updating src folder with newest develop branch. Before was old version)
         iHit++;
 =======
         //if (effAn[i] * energy *1000000/epsilon > 50) // Set a data supression threshold at 50 deposited el
@@ -301,6 +336,7 @@ G4double SensitiveDetector::GetEfficiencyCorrectionXY(const G4ThreeVector& InPix
 // sigma is gaussian standard deviation
 G4double smoothStep(G4double x, G4double pitch, G4double sigma) {
 <<<<<<< HEAD
+<<<<<<< HEAD
     return 0.5 * (std::erf((x) / sigma) - std::erf((x - pitch) / sigma));
 <<<<<<< HEAD
 =======
@@ -309,6 +345,9 @@ G4double smoothStep(G4double x, G4double pitch, G4double sigma) {
 =======
     return 0.5 * (std::erf((x) / (sigma * std::sqrt(2.0))) - std::erf((x - pitch) / (sigma * std::sqrt(2.0))));
 >>>>>>> 0ff8c34 (Testing to push the sensitivedetector.cc taken from develop branch)
+=======
+    return 0.5 * (std::erf((x) / sigma) - std::erf((x - pitch) / sigma));
+>>>>>>> fdaa68d (Updating src folder with newest develop branch. Before was old version)
 }
 
 // Analytical model of smeared rectangular box (error-functions in X and Y )
@@ -318,6 +357,7 @@ G4double smoothStep(G4double x, G4double pitch, G4double sigma) {
 std::pair<std::array<double, 4>, uint8_t>  SensitiveDetector::GetEfficiencyAnalytical(const G4ThreeVector& InPixPosition) {
 
 <<<<<<< HEAD
+<<<<<<< HEAD
     double pitch = fFlag->pixelSize *1000; // convert from mm to um (default 36.4 um)
     double sigmaX = fFlag->CCModelSigmaX; // in um (default 4.3 um)
     double sigmaY = fFlag->CCModelSigmaY; // in um (default 4.3 um)
@@ -326,6 +366,11 @@ std::pair<std::array<double, 4>, uint8_t>  SensitiveDetector::GetEfficiencyAnaly
     G4double sigmaX = 4.3; // in um;
     G4double sigmaY = 4.3; // in um;
 >>>>>>> 0ff8c34 (Testing to push the sensitivedetector.cc taken from develop branch)
+=======
+    double pitch = fFlag->pixelSize *1000; // convert from mm to um (default 36.4 um)
+    double sigmaX = fFlag->CCModelSigmaX; // in um (default 4.3 um)
+    double sigmaY = fFlag->CCModelSigmaY; // in um (default 4.3 um)
+>>>>>>> fdaa68d (Updating src folder with newest develop branch. Before was old version)
 
     // contribution to 4 neighboring pixels
     // 00 is bottom left    (low X,     low Y)
@@ -372,8 +417,11 @@ std::pair<std::array<double, 4>, uint8_t>  SensitiveDetector::GetEfficiencyAnaly
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 >>>>>>> 580f2b4 (Tgain and agian. time-walk model extended to all thresholds based on simple assumptions.)
+=======
+>>>>>>> beda3d3 (Updating src folder with newest develop branch. Before was old version)
 }
 =======
 }
@@ -429,4 +477,10 @@ G4double SensitiveDetector::GetTimingOffsetatThreshold(G4double amplitude, G4dou
 =======
 =======
 >>>>>>> 5de186b (Removed unnecessary function)
+<<<<<<< HEAD
 >>>>>>> 6cc58b9 (Removed unnecessary function)
+=======
+=======
+}
+>>>>>>> fdaa68d (Updating src folder with newest develop branch. Before was old version)
+>>>>>>> beda3d3 (Updating src folder with newest develop branch. Before was old version)

@@ -59,8 +59,11 @@ RunAction::RunAction(SimFlags* flags) : fFlag(flags)
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 >>>>>>> ebfd7f7 (Added the MC truth primary vertex of particle gun from develop_Vlad branch)
+=======
+>>>>>>> beda3d3 (Updating src folder with newest develop branch. Before was old version)
     analysisManager->CreateNtupleDColumn("hitTime");
     analysisManager->CreateNtupleDColumn("hitEnergy");
     analysisManager->FinishNtuple(1);
@@ -94,7 +97,15 @@ RunAction::RunAction(SimFlags* flags) : fFlag(flags)
 
     
 >>>>>>> 689c0d7 (Added the MC truth primary vertex of particle gun from develop_Vlad branch)
+<<<<<<< HEAD
 >>>>>>> ebfd7f7 (Added the MC truth primary vertex of particle gun from develop_Vlad branch)
+=======
+=======
+    analysisManager->CreateNtupleDColumn("hitTime");
+    analysisManager->CreateNtupleDColumn("hitEnergy");
+    analysisManager->FinishNtuple(1);
+>>>>>>> fdaa68d (Updating src folder with newest develop branch. Before was old version)
+>>>>>>> beda3d3 (Updating src folder with newest develop branch. Before was old version)
 
     // MONTE CARLO Truth
     analysisManager->CreateNtuple("TruthVertex", "Monte Carlo Truth Vertex Position");

@@ -2,6 +2,9 @@
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> beda3d3 (Updating src folder with newest develop branch. Before was old version)
 =======
 =======
 
@@ -31,7 +34,12 @@ PrimaryGenerator::PrimaryGenerator(SimFlags* flags) : fFlag(flags)
 >>>>>>> 8149767 (Added digitization + tracking + clustering + analysis in an automatic fashion for each run)
 =======
 >>>>>>> 689c0d7 (Added the MC truth primary vertex of particle gun from develop_Vlad branch)
+<<<<<<< HEAD
 >>>>>>> ebfd7f7 (Added the MC truth primary vertex of particle gun from develop_Vlad branch)
+=======
+=======
+>>>>>>> fdaa68d (Updating src folder with newest develop branch. Before was old version)
+>>>>>>> beda3d3 (Updating src folder with newest develop branch. Before was old version)
 
 //Constructor
 PrimaryGenerator::PrimaryGenerator(SimFlags* flags) : fFlag(flags), fEventCounter(0)
@@ -114,10 +122,13 @@ void PrimaryGenerator::GeneratePrimaries(G4Event *oneEvent)
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 >>>>>>> ebfd7f7 (Added the MC truth primary vertex of particle gun from develop_Vlad branch)
 =======
 >>>>>>> 6f1d148 (Updating all src files from develop)
+=======
+>>>>>>> beda3d3 (Updating src folder with newest develop branch. Before was old version)
     if(fFlag->verbosePG) std::cout << "This event contains " << fFlag->particleCount << " particles with:" << std::endl;
     for(int ev = 0; ev < fFlag->particleCount; ev++)
     {
@@ -344,10 +355,68 @@ void PrimaryGenerator::GeneratePrimaries(G4Event *oneEvent)
         G4Exception("PhMattPrimaryGenerator::GeneratePrimaries", "SamplingFailure", FatalException,
             "Requested geometry not found.");
     }
+=======
+    if(fFlag->verbosePG) std::cout << "This event contains " << fFlag->particleCount << " particles with:" << std::endl;
+    for(int ev = 0; ev < fFlag->particleCount; ev++)
+    {
+        // Particle Direction (momentum)
+        G4double px = fFlag->particleMomentumX;
+        G4double py = fFlag->particleMomentumY;
+        G4double pz = fFlag->particleMomentumZ;
+        G4ThreeVector mom(px,py,pz);
+        fParticleGun->SetParticleMomentumDirection(mom);
+>>>>>>> fdaa68d (Updating src folder with newest develop branch. Before was old version)
 
-    fParticleGun->SetParticlePosition(pos);
+        double beamWidth = fFlag->sourceRadius *mm;
+        G4double x = fFlag->beamXOffset *cm;
+        G4double y = fFlag->beamYOffset *cm;
+        G4double z = fFlag->beamZOffset *cm;
+        G4ThreeVector pos;
+        // Particle circular beam simulation
+        if(fFlag->beamGeometry == "pencil")
+        {
+            pos = G4ThreeVector(x, y, z);
+        }
+        else if(fFlag->beamGeometry == "circle")
+        {
+            pos = GetRandomPointOnCircle(0.5 *beamWidth, G4ThreeVector(x, y, z));
+        }
+        else if(fFlag->beamGeometry == "rectangle")
+        {
+            pos = GetRandomPointOnRectangle(beamWidth, beamWidth, G4ThreeVector(x, y, z));
+        }
+        else if (fFlag->beamGeometry == "granularBeam")
+        {
+            pos = G4ThreeVector(x + ev * 72.8 *um, y, z);
+        }
+        else
+        {
+            trowError("PhMattPrimaryGenerator::GeneratePrimaries", "Sampling Failure", "Requested beam geometry not found.");
+        }
 
-    // Create Vertex
-    fParticleGun->GeneratePrimaryVertex(oneEvent);
+        fParticleGun->SetParticlePosition(pos);
+
+        G4int evtID = oneEvent->GetEventID();
+        double offSet =  fFlag->intraSpillOffset;
+        fParticleGun->SetParticleTime(evtID * fFlag->beamVeto *ns + offSet *ns); // This is the only thread safe way to do this. Multithreading messes up life as always
+
+        // Save Vertex Info
+        G4AnalysisManager *analysisManager = G4AnalysisManager::Instance();
+        analysisManager->FillNtupleIColumn(2, 0, evtID);
+        analysisManager->FillNtupleDColumn(2, 1, pos[0]);
+        analysisManager->FillNtupleDColumn(2, 2, pos[1]);
+        analysisManager->FillNtupleDColumn(2, 3, pos[2]);
+        analysisManager->FillNtupleDColumn(2, 4, evtID * fFlag->beamVeto * ns);
+        analysisManager->FillNtupleDColumn(2, 5, std::stod(fFlag->particleEnergy));
+        analysisManager->AddNtupleRow(2); 
+
+        // Create Vertex
+        fParticleGun->GeneratePrimaryVertex(oneEvent);
+        fEventCounter++;
+
+        if(fFlag->verbosePG) std::cout << "              - " <<"Type: " << fFlag->particleType << "; X: " << pos[0] << "; Y: " << pos[1] << "; Z: " << pos[3] 
+                              << "; pX: " << px << "; pY: " << py << "; pZ: " << pz << "; Energy: " << fFlag->particleEnergy;
+                              
+    }
 
 }
