@@ -86,13 +86,12 @@ G4bool SensitiveDetector::ProcessHits(G4Step *aStep, G4TouchableHistory *)
                                           << pixelCluster[3][0] << "," << pixelCluster[3][1] << "  " << G4endl ;
     */
 
-    double epsilon = 3.66; // electron-hole pair creaton energy = (3.66 +- 0.03) eV
     // fill the 4 efficiencies and timing into a tree. 
-    // Apply a minimal threshold here already of 50 e-? edep in MeV --> if (edep*10^6/epsilon > 50) // threshold in e- // edep in MeV
+    // Apply a minimal threshold here already of 50 e-? edep in MeV --> if (edep*10^6/3.6 > 50) // threshold in e- // edep in MeV
     // take care if hit is at boundary of sensor (minimal or maximal pix number.)
     // associate timing based on amplitude (from time walk):
-    std::array<G4double,4> pix_timing = {GetTimingOffset(effAn[0]*energy*1000000/epsilon),GetTimingOffset(effAn[1]*energy*1000000/epsilon),
-                                        GetTimingOffset(effAn[2]*energy*1000000/epsilon),GetTimingOffset(effAn[3]*energy*1000000/epsilon)}; // argument is pixel charge in electrons
+    std::array<G4double,4> pix_timing = {GetTimingOffset(effAn[0]*energy*1000000/3.6),GetTimingOffset(effAn[1]*energy*1000000/3.6),
+                                        GetTimingOffset(effAn[2]*energy*1000000/3.6),GetTimingOffset(effAn[3]*energy*1000000/3.6)}; // argument is pixel charge in electrons
     int iHit = 0;
     // Store only the largest deposited energy in a cluster and its corresponding timing
     auto it = std::max_element(effAn.begin(), effAn.end());
@@ -101,14 +100,14 @@ G4bool SensitiveDetector::ProcessHits(G4Step *aStep, G4TouchableHistory *)
     double leadingTime = pix_timing[maxIndex];
     for(int i = 0; i<4; i++)
     {
-        //if (effAn[i] * energy *1000000/epsilon > 50) // Set a data supression threshold at 50 deposited el
+        //if (effAn[i] * energy *1000000/3.6 > 50) // Set a data supression threshold at 50 deposited el
 
         analysisManager->FillNtupleIColumn(3, 0, eventID);
         analysisManager->FillNtupleIColumn(3, 1, iHit);
         analysisManager->FillNtupleIColumn(3, 2, pixelCluster[i][0]);
         analysisManager->FillNtupleIColumn(3, 3, pixelCluster[i][1]);
         analysisManager->FillNtupleDColumn(3, 4, pix_timing[i]);
-        analysisManager->FillNtupleDColumn(3, 5, effAn[i] * energy *1000000/epsilon);
+        analysisManager->FillNtupleDColumn(3, 5, effAn[i] * energy *1000000/3.6);
         analysisManager->AddNtupleRow(3); 
         iHit++;
 
@@ -204,8 +203,7 @@ G4double SensitiveDetector::GetEfficiencyCorrectionXY(const G4ThreeVector& InPix
 // error-fct that parameterize edge of pixel are at x = 0 and x = pitch
 // sigma is gaussian standard deviation
 G4double smoothStep(G4double x, G4double pitch, G4double sigma) {
-    return 0.5 * (std::erf((x) / sigma) - std::erf((x - pitch) / sigma));
-    //return 0.5 * (std::erf((x) / (sigma * std::sqrt(2.0))) - std::erf((x - pitch) / (sigma * std::sqrt(2.0))));
+    return 0.5 * (std::erf((x) / (sigma * std::sqrt(2.0))) - std::erf((x - pitch) / (sigma * std::sqrt(2.0))));
 }
 
 
@@ -215,11 +213,9 @@ G4double smoothStep(G4double x, G4double pitch, G4double sigma) {
 // per definition the some of all 4 efficiencies = 1.0
 std::pair<std::array<double, 4>, uint8_t>  SensitiveDetector::GetEfficiencyAnalytical(const G4ThreeVector& InPixPosition) {
 
-    //G4double pitch = 36.4; // in um
-    double pitch = fFlag->pixelSize *1000; // convert from mm to um (default 36.4 um)
-
-    double sigmaX = fFlag->CCModelSigmaX; // in um (default 4.3 um)
-    double sigmaY = fFlag->CCModelSigmaY; // in um (default 4.3 um)
+    G4double pitch = 36.4; // in um
+    G4double sigmaX = 4.3; // in um;
+    G4double sigmaY = 4.3; // in um;
 
     // contribution to 4 neighboring pixels
     // 00 is bottom left    (low X,     low Y)
@@ -268,13 +264,14 @@ std::pair<std::array<double, 4>, uint8_t>  SensitiveDetector::GetEfficiencyAnaly
 // Get time-walk from parameterization.
 // amplitude in unit electrons
 // returns timing in ns
-// at 150e- threshold
 G4double SensitiveDetector::GetTimingOffset(G4double amplitude) {
-    // function diverges at 150e-
-    if (amplitude < 150.) 
-    { // delay only down to amplitudes of 150e-. 
-        return 200;
+    // assumes 1200e- correspond to 350 mV. Check calibration through injection scans.
+    //return 40. * std::exp(amplitude /(-191.));
+    if (amplitude < 100.) 
+    { // delay only down to amplitudes of 100e-. 
+        return 3230. /pow(100-67.0, 1.08);
     }
-    return 390. /pow(amplitude-149.8, 0.65);
+
+    return 3230. /pow(amplitude-67.0, 1.08);
 
 }
