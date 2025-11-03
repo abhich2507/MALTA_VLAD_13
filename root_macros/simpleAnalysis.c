@@ -8,7 +8,7 @@
 
 // // for 2DEff 1400e- threshold plots:
 // specify threshold = 1400e- in threshold_loop()
-// .L simpleAnalysis.c
+// .L in_pixel_plots.c
 // threshold_loop("/Users/lucianfasselt/DECAL/Simulation/Geant4/MALTASIM/malta_simulation/Results/local_0020/", "test_1400e-.root")
 
 // -------------- todo:
@@ -66,11 +66,11 @@ void set_style() {
 
 // result stores [average cluster size, av. efficiency, error on av. eff]
 // Threshold in electrons
-void simpleAnalysis(std::string inputPath, std::string outROOTname, double result[3], double threshold = 1000) {
+void in_pixel_plots(std::string inputPath, std::string outROOTname, double result[3], double threshold = 1000) {
     // // Usage:
     // // create subdirectory and run from there (pdf plots will be created in it)
     // root
-    // .L ~/Documents/Simu/Geant4/DECAL_REPO/root_macros/simpleAnalysis.c
+    // .L ~/Documents/Simu/Geant4/DECAL_REPO/root_macros/in_pixel_plots.c
     // // specify threshold variable in threshold_loop(). Then run:
     // threshold_loop()
 
@@ -418,12 +418,12 @@ int threshold_loop(std::string inputFile, std::string outROOT){
     TGraphErrors *gr_AvEff = new TGraphErrors(num_values);
     gr_AvEff->SetName("AverageEff");
 
-    TFile outFile(outROOT.c_str(), "RECREATE"); // create new file and fill in simpleAnalysis
+    TFile outFile(outROOT.c_str(), "RECREATE"); // create new file and fill in in_pixel_plots
     outFile.Close();
 
     // Get average cl. size and eff. for each threshold
     for (int i = 0; i < num_values; i++) {
-        simpleAnalysis(inputFile, outROOT, results[i], thresholds[i]);
+        in_pixel_plots(inputFile, outROOT, results[i], thresholds[i]);
         gr_AvClSize->SetPoint(i, thresholds[i], results[i][0]);
         gr_AvEff->SetPoint(i, thresholds[i], results[i][1]);
         gr_AvEff->SetPointError(i, 0.0, results[i][2]); // assume no unc. on threshold
