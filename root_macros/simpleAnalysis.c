@@ -96,7 +96,7 @@ void simpleAnalysis(std::string inputPath, std::string outROOTname, double resul
 
     // Connect branches
     MCTruthchain->SetBranchAddress("iEvent", &MCtrackEventID);
-    bool oldtree = true; // only set to true for old simulation output ( before November 2025)
+    bool oldtree = false; // only set to true for old simulation output ( before November 2025)
     if (oldtree){
         MCTruthchain->SetBranchAddress("vertexX", &MCtrackX); // old naming of branch
         MCTruthchain->SetBranchAddress("vertexY", &MCtrackY);
