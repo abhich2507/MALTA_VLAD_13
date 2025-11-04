@@ -43,6 +43,12 @@ public:
 private:
     SimFlags* fFlag;
     G4LogicalVolume *logicSensor;
+    G4LogicalVolume *logicPlane1;
+    G4LogicalVolume *logicPlane2;
+    G4LogicalVolume *logicPlane3;
+    G4LogicalVolume *logicPlane4;
+    G4LogicalVolume *logicPlane5;
+    G4LogicalVolume *logicPlane6;
     // Method constructs any sensitive detector or additional field
     virtual void ConstructSDandField();
 };

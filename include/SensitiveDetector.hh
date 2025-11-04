@@ -14,6 +14,9 @@
 // Thread Safety
 #include <mutex>
 #include "CLHEP/Random/RandFlat.h"
+#include <cmath>
+#include "CorrectionData2D.hh" // Access EffMap2D
+
 class SensitiveDetector: public G4VSensitiveDetector
 {
 public:
@@ -23,6 +26,8 @@ public:
     //Getter
     const std::map<std::pair<int, int>, int>& GetChannelHitMap() const { return channelHitMap; }
     G4double GetEfficiencyCorrectionXY(const G4ThreeVector& InPixPosition);
+    std::pair<std::array<double, 4>, uint8_t>  GetEfficiencyAnalytical(const G4ThreeVector& InPixPosition);
+    G4double GetTimingOffset(G4double amplitude);
 
 private:
     SimFlags* fFlag;

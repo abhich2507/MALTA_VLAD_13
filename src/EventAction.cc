@@ -70,11 +70,5 @@ void EventAction::EndOfEventAction(const G4Event* event)
 
         if (eventID == totalEvents)
             std::cout << std::endl;
-        
     }
-    
-    
-
-
-
 }

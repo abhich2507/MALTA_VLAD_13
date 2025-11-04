@@ -1,4 +1,5 @@
 /process/em/verbose 0
+/process/had/verbose 0
 /process/verbose 0
 /run/beamOn 5
 

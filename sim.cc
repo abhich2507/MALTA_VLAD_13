@@ -1,4 +1,5 @@
 #include <iostream>
+#include <filesystem>
 #include <ctime>
 #include "G4RunManager.hh"
 #include "G4MTRunManager.hh"
@@ -13,6 +14,7 @@
 #include "TrackingAction.hh"
 #include "SubmissionTests.hh"
 
+
 int main (int argc, char** argv)
 // argc = argument count; argv = argument value - Command line arguments
 {
@@ -21,6 +23,35 @@ int main (int argc, char** argv)
     CLHEP::HepRandom::setTheSeed(seed);
     auto flags = new SimFlags;
     bool testRun = false;
+
+    // make the Results directory
+    try 
+    {
+        if (std::filesystem::create_directory("../Results")) 
+        {
+            std::cout << "Directory created: " << "../Results" << std::endl;
+        } else {
+            std::cout << "Directory already exists or failed to create.\n";
+        }
+    } 
+    catch (const std::filesystem::filesystem_error& e) 
+    {
+            std::cerr << "Error: " << e.what() << std::endl;
+    }
+    // make the Plots directory
+    try 
+    {
+        if (std::filesystem::create_directory("../Plots")) 
+        {
+            std::cout << "Directory created: " << "../Plots" << std::endl;
+        } else {
+            std::cout << "Directory already exists or failed to create.\n";
+        }
+    } 
+    catch (const std::filesystem::filesystem_error& e) 
+    {
+            std::cerr << "Error: " << e.what() << std::endl;
+    }
     //std::filesystem::create_directories(CreateNextRunDirectory()); 
     // *ui is a pointer to an object of class G4UIExecutive created with new
     // -> to access the object at the pointer
@@ -40,7 +71,7 @@ int main (int argc, char** argv)
     {
         // fallback or error
         std::cout<< std::endl<<"NO CONFIGURATION of the SIMU_CONFIG path. Reverting to DEFAULT" 
-                 << std::endl<< "Configute it via: export SIMU_CONFIG=/path/to/my/file " << std::endl;
+                 << std::endl<< "Configure it via: export SIMU_CONFIG=/path/to/my/file " << std::endl;
         
         LoadSimFlagsFromFile("../configs/flags.cfg", *flags);
     }
@@ -51,22 +82,14 @@ int main (int argc, char** argv)
     std::string localMacro = flags->macroFileLocal;
     flags->macroFileLocal = localPath + "build/" + localMacro;
 
-    std::string nafUser = std::getenv("NAF_USER");
-    std::string nafPath = std::getenv("NAF_PATH");
-    std::string nafFullPath = "/afs/desy.de/user/" + nafUser.substr(0,1) + "/" + nafUser + "/" + nafPath;
-    std::string nafName = flags->outputPathNAF;
-    flags->outputPathNAF = nafFullPath + "/" + nafName;
-    std::string nafMacro = flags->macroFileNAF;
-    flags->macroFileNAF = nafFullPath + + "/build/" + nafMacro;
-
     // Dry run test
     submissionTest(*flags);
     std::string homePath = std::getenv("HOME") ? std::getenv("HOME") : "";
 
-    // Check if running in local or naf mode
+    // Check if running in local or naf mode and set the fFlag runMode appropriately. This flag is not set via the flags file.
     if(homePath.empty() || homePath.find("desy.de")!= std::string::npos)
     {
-        std::cout<< "You are running from NAF!"<< "\n";
+        std::cout<< "\n" << "You are running from NAF!"<< "\n";
         flags->runMode = "naf";
 
     }
@@ -115,7 +138,7 @@ int main (int argc, char** argv)
     runManager->SetUserInitialization(new ActionInitialization(flags));
 
     // Sets up visualization manager.
-    G4VisManager *visManager = new G4VisExecutive();
+    G4VisManager *visManager = new G4VisExecutive("quiet");
     // Initializes the visualisation drivers(OpenGL,...)
     visManager->Initialize();
     // Pointer to the global UI manager instance. :: = scope resolution operator 
@@ -142,6 +165,13 @@ int main (int argc, char** argv)
         }
         else 
         {
+            std::string nafUser = std::getenv("NAF_USER");
+            std::string nafPath = std::getenv("NAF_PATH");
+            std::string nafFullPath = "/afs/desy.de/user/" + nafUser.substr(0,1) + "/" + nafUser + "/" + nafPath;
+            std::string nafName = flags->outputPathNAF;
+            flags->outputPathNAF = nafFullPath + "/" + nafName;
+            std::string nafMacro = flags->macroFileNAF;
+            flags->macroFileNAF = nafFullPath + + "/build/" + nafMacro;
             UImanager->ApplyCommand("/control/execute " + flags->macroFileNAF);
         }
         

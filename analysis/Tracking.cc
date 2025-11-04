@@ -1,0 +1,222 @@
+#include "Tracking.hh"
+
+// TODO: Move defaults to header only
+void Tracking(double threshold, int runNumber, std::string saveName)
+{
+
+    auto start = std::chrono::high_resolution_clock::now();
+    ////////// Function can be used for custom analysis paths
+    //std::string localPath = getVarFromConfig();
+    //////////////////////////////////////////////////////////
+    std::string localPath = "./";
+    std::string inputPath = localPath +  Form("Results/local_%04d/", runNumber);
+    std::string inputSubPath = localPath +  Form("Results/local_%04d/", runNumber) + saveName + "/";
+    std::string directoryPath = localPath + "Plots/";
+    std::string runPath = Form("local_%04d/", runNumber);
+
+    DetectorConfig cfg = LoadConfig(localPath + Form("Results/local_%04d/flags.cfg", runNumber));
+
+    std::cout << "############################# Tracking started for:" << std::endl;
+    std::cout << inputPath << std::endl;
+
+    auto analysisFlags = new SimFlags;
+    const char* configPath = std::getenv("ANALYSIS_CONFIG");
+    LoadAnalysisFlagsFromFile(configPath, *analysisFlags);
+    bool verbose = analysisFlags->verboseTracking;
+
+    double dCut = analysisFlags->distCut;
+    double matchWindow = analysisFlags->timeCut;
+
+    TChain *trackChain = new TChain("TruthVertex");
+
+    for (int t = 0; t <= analysisFlags->numThreads - 1; ++t) 
+    {
+        trackChain->Add(Form("%soutput0_t%d.root", inputPath.c_str() , t));
+    }
+
+    double vertexX, vertexY, vertexZ, globalTime;
+
+    // Connect branches
+    trackChain->SetBranchAddress("trueVertexX", &vertexX);
+    trackChain->SetBranchAddress("trueVertexY", &vertexY);
+    trackChain->SetBranchAddress("trueVertexZ", &vertexZ);
+    trackChain->SetBranchAddress("trueGlobalTime", &globalTime);
+
+    // Old format. DEPRECATED. Will be deleted on 01.03.2026
+    /*
+    trackChain->SetBranchAddress("vertexX", &vertexX);
+    trackChain->SetBranchAddress("vertexY", &vertexY);
+    trackChain->SetBranchAddress("vertexZ", &vertexZ);
+    trackChain->SetBranchAddress("fGlobalTime", &globalTime);
+    */
+
+    Long64_t nTrackEntries = trackChain->GetEntries();
+    // Once again multiThreading is a pain the ***. I need to first time order my hits.
+
+
+    std::vector<TrackEntry> tracks;
+    for (Long64_t i = 0; i < nTrackEntries; i++) 
+    {
+        trackChain->GetEntry(i);
+        TrackEntry tr;
+        tr.x = vertexX;
+        tr.y = vertexY;
+        tr.z = vertexZ;
+        tr.t = globalTime;
+        tracks.push_back(tr);
+    }
+
+    // sort by time
+    std::sort(tracks.begin(), tracks.end(),
+          [](const TrackEntry &a, const TrackEntry &b) {
+              return a.t < b.t;
+          });
+    // Save sorted tracks to a new tree
+    TTree *sortedTracks = new TTree("TracksSorted", "Time-sorted tracks");
+
+    double sx, sy, sz, st;
+    sortedTracks->Branch("vertexX", &sx, "vertexX/D");
+    sortedTracks->Branch("vertexY", &sy, "vertexY/D");
+    sortedTracks->Branch("vertexZ", &sz, "vertexZ/D");
+    sortedTracks->Branch("fGlobalTime", &st, "fGlobalTime/D");
+
+    for (auto &tr : tracks) {
+        sx = tr.x;
+        sy = tr.y;
+        sz = tr.z;
+        st = tr.t;
+        sortedTracks->Fill();
+    }
+    //sortedTracks->Write();
+
+    TFile *reconstructedFile = TFile::Open((inputSubPath + "Plane0ReconstructedHitsThr" + std::to_string(int(threshold)) + ".root").c_str(), "READ");
+
+
+    // Get tree
+    TTree *reconstructedTree = (TTree*) reconstructedFile->Get("ReconstructedHits");
+
+    int reconstructedPixX, reconstructedPixY;
+    double reconstructedTiming;
+    reconstructedTree->SetBranchAddress("PixX", &reconstructedPixX);
+    reconstructedTree->SetBranchAddress("PixY", &reconstructedPixY);
+    reconstructedTree->SetBranchAddress("timing", &reconstructedTiming);
+    Long64_t nReconstructedEntries = reconstructedTree->GetEntries();
+
+    // Save to file
+
+    TFile *outfile = new TFile((inputSubPath + "LocalTrackedHitsThr" + std::to_string(int(threshold)) + ".root").c_str(), "RECREATE");
+
+    // Create a TTree
+    TTree *trackedTree = new TTree("TrackedHits", "Tracked Hits");
+
+    // Variables for branches
+    double reconstructedVertexX, reconstructedVertexY, reconstructedGlobalTime, reconstructedLocalTime;
+    int pixX, pixY, trackID, nHits;
+
+    // Create branches
+    trackedTree->Branch("trackID", &trackID, "trackID/I");
+    trackedTree->Branch("reconstructedVertexX", &reconstructedVertexX, "reconstructedVertexX/D");
+    trackedTree->Branch("reconstructedVertexY", &reconstructedVertexY, "reconstructedVertexY/D");
+    trackedTree->Branch("reconstructedGlobalTime", &reconstructedGlobalTime, "reconstructedGlobalTime/D");
+    trackedTree->Branch("PixX", &pixX, "PixX/I");
+    trackedTree->Branch("PixY", &pixY, "PixY/I");
+    trackedTree->Branch("nHits", &nHits, "nHits/I");
+    trackedTree->Branch("reconstructedLocalTime", &reconstructedLocalTime, "reconstructedLocalTime/D");
+
+
+    // Save monitoring plots + save hits in vectors to avoid further repeated ROOT calls
+    std::vector<double> recoPixX, recoPixY, recoTiming;
+    recoPixX.resize(nReconstructedEntries);
+    recoPixY.resize(nReconstructedEntries);
+    recoTiming.resize(nReconstructedEntries);
+    TH2D *h2DUTHits    = new TH2D("h2DUTHits", "h2DUTHits", 512, 0, 512, 512, 0, 512);
+    for (int i = 0; i<nReconstructedEntries; i++)
+    {
+        reconstructedTree->GetEntry(i);
+        h2DUTHits->Fill(reconstructedPixX, reconstructedPixY, 1);
+
+        recoPixX[i] = reconstructedPixX;
+        recoPixY[i] = reconstructedPixY;
+        recoTiming[i] = reconstructedTiming;
+        //std::cout << "i: " << i << " ;reconstructedX" <<reconstructedPixX << " ;reconstructedY: " << reconstructedPixY << std::endl;
+    }
+    
+
+    savePlot(directoryPath, runPath, threshold, saveName, h2DUTHits, "h2DUTHits");
+
+    TH1D *h1ResidualX = new TH1D("h1ResidualX", "h1ResidualX", 100, -2, 2);
+    TH1D *h1ResidualY = new TH1D("h1ResidualY", "h1ResidualY", 100, -2, 2);
+
+    outfile->cd();
+    
+    // To avoid O(NxN) I will use a sliding window
+    Long64_t detIdx = 0; // pointer in detector tree
+    bool foundHit;
+    
+    for (int i =0; i< nTrackEntries; i++)
+    {
+        sortedTracks->GetEntry(i);
+        
+        if(verbose) std::cout << "Track Entry: " << i << "; VertexX: " << sx << "; VertexY: " << sy << "; VertexZ: " << sz << "; GlobalTime: " << st << std::endl;
+        // Now find matching reconstructed hits
+        trackID = i;
+        reconstructedVertexX = sx;
+        reconstructedVertexY = sy;
+        reconstructedGlobalTime = st;
+        // First we set up the sliding window
+        while (detIdx < nReconstructedEntries) 
+        {
+            if (recoTiming[detIdx] >= st) break;
+            detIdx++;
+        }
+        // now check all hits in [t, t+Δt]
+        Long64_t j = detIdx;
+        foundHit = false;
+        nHits = 0;
+        while (j < nReconstructedEntries) 
+        {
+            if (recoTiming[j] >= st + matchWindow) break; // left the window
+            pixX = recoPixX[j];
+            pixY = recoPixY[j];
+            
+            reconstructedLocalTime = recoTiming[j] - st;
+
+            // Now do position cut
+            std::pair<double, double> pixelGlobalPosition = PixelPositionReconstruction(pixX, pixY, cfg);
+
+            h1ResidualX->Fill(pixelGlobalPosition.first  - reconstructedVertexX);
+            h1ResidualY->Fill(pixelGlobalPosition.second - reconstructedVertexY);
+
+
+            if ( ( pixelGlobalPosition.first > reconstructedVertexX - dCut / 1000. && pixelGlobalPosition.first < reconstructedVertexX + dCut / 1000. ) 
+            &&  ( pixelGlobalPosition.second > reconstructedVertexY - dCut / 1000. && pixelGlobalPosition.second < reconstructedVertexY + dCut / 1000. ))
+            {
+                if(verbose) std::cout << "Matched hit at Pixel (" << pixX << ", " << pixY << ") with Global Position (" << pixelGlobalPosition.first << ", " << pixelGlobalPosition.second << ")" << "; Timing:" << reconstructedLocalTime << std::endl;
+                nHits++;
+                trackedTree->Fill();   // <-- one Fill per matching hit
+                foundHit = true;
+            }
+            j++;
+        }    
+        if (!foundHit) 
+        {
+            // no hit matched: fill with sentinel values
+            pixX = -1;
+            pixY = -1;
+            reconstructedLocalTime = -1;
+
+            trackedTree->Fill();   // <-- one Fill per track with no hit
+        } 
+    }
+    savePlot(directoryPath, runPath, threshold, saveName, h1ResidualX, "h1ResidualX");
+    savePlot(directoryPath, runPath, threshold, saveName, h1ResidualY, "h1ResidualY");
+    outfile->cd();
+    auto end = std::chrono::high_resolution_clock::now(); 
+    std::chrono::duration<double, std::milli> elapsed = end - start;     
+
+    trackedTree->Write();
+    outfile->Close();
+
+    std::cout << "############################# Tracking stopped after " << elapsed.count() << " ms" << std::endl;
+
+}
