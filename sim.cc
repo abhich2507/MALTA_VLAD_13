@@ -1,4 +1,5 @@
 #include <iostream>
+#include <filesystem>
 #include <ctime>
 #include "G4RunManager.hh"
 #include "G4MTRunManager.hh"
@@ -22,6 +23,35 @@ int main (int argc, char** argv)
     CLHEP::HepRandom::setTheSeed(seed);
     auto flags = new SimFlags;
     bool testRun = false;
+
+    // make the Results directory
+    try 
+    {
+        if (std::filesystem::create_directory("../Results")) 
+        {
+            std::cout << "Directory created: " << "../Results" << std::endl;
+        } else {
+            std::cout << "Directory already exists or failed to create.\n";
+        }
+    } 
+    catch (const std::filesystem::filesystem_error& e) 
+    {
+            std::cerr << "Error: " << e.what() << std::endl;
+    }
+    // make the Plots directory
+    try 
+    {
+        if (std::filesystem::create_directory("../Plots")) 
+        {
+            std::cout << "Directory created: " << "../Plots" << std::endl;
+        } else {
+            std::cout << "Directory already exists or failed to create.\n";
+        }
+    } 
+    catch (const std::filesystem::filesystem_error& e) 
+    {
+            std::cerr << "Error: " << e.what() << std::endl;
+    }
     //std::filesystem::create_directories(CreateNextRunDirectory()); 
     // *ui is a pointer to an object of class G4UIExecutive created with new
     // -> to access the object at the pointer
@@ -51,14 +81,6 @@ int main (int argc, char** argv)
     flags->outputPathLocal = localPath + localName;
     std::string localMacro = flags->macroFileLocal;
     flags->macroFileLocal = localPath + "build/" + localMacro;
-
-    std::string nafUser = std::getenv("NAF_USER");
-    std::string nafPath = std::getenv("NAF_PATH");
-    std::string nafFullPath = "/afs/desy.de/user/" + nafUser.substr(0,1) + "/" + nafUser + "/" + nafPath;
-    std::string nafName = flags->outputPathNAF;
-    flags->outputPathNAF = nafFullPath + "/" + nafName;
-    std::string nafMacro = flags->macroFileNAF;
-    flags->macroFileNAF = nafFullPath + + "/build/" + nafMacro;
 
     // Dry run test
     submissionTest(*flags);
@@ -143,6 +165,13 @@ int main (int argc, char** argv)
         }
         else 
         {
+            std::string nafUser = std::getenv("NAF_USER");
+            std::string nafPath = std::getenv("NAF_PATH");
+            std::string nafFullPath = "/afs/desy.de/user/" + nafUser.substr(0,1) + "/" + nafUser + "/" + nafPath;
+            std::string nafName = flags->outputPathNAF;
+            flags->outputPathNAF = nafFullPath + "/" + nafName;
+            std::string nafMacro = flags->macroFileNAF;
+            flags->macroFileNAF = nafFullPath + + "/build/" + nafMacro;
             UImanager->ApplyCommand("/control/execute " + flags->macroFileNAF);
         }
         

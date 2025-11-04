@@ -14,10 +14,10 @@ void SimulationToProteus(int runNumber = 96)
     double vertexX, vertexY, vertexZ, globalTime;
 
     // Connect branches
-    trackChain->SetBranchAddress("vertexX", &vertexX);
-    trackChain->SetBranchAddress("vertexY", &vertexY);
-    trackChain->SetBranchAddress("vertexZ", &vertexZ);
-    trackChain->SetBranchAddress("fGlobalTime", &globalTime);
+    trackChain->SetBranchAddress("trueVertexX", &vertexX);
+    trackChain->SetBranchAddress("trueVertexY", &vertexY);
+    trackChain->SetBranchAddress("trueVertexZ", &vertexZ);
+    trackChain->SetBranchAddress("trueGlobalTime", &globalTime);
 
 
     Long64_t nTrackEntries = trackChain->GetEntries();

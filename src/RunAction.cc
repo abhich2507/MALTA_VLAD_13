@@ -57,6 +57,7 @@ void RunAction::BeginOfRunAction(const G4Run *run)
     strRunID << runID;
     
     //analysisManager->SetNtupleMerging(true);
+    std::string saveName;
     if (isMaster && fFlag->isBatch)
     {
         fOutputPath = CreateNextRunDirectory(true, fFlag);
@@ -66,8 +67,31 @@ void RunAction::BeginOfRunAction(const G4Run *run)
     {
         fOutputPath = CreateNextRunDirectory(false, fFlag);
     }
+    if(fFlag->macroFileLocal.find("run") != std::string::npos)
+    {
+        saveName = "/output";    
+        analysisManager->OpenFile(fOutputPath + saveName + strRunID.str() + ".root");
+    }
+    else
+    {
+        saveName = "/visOut";
+        std::string visPath = "../Results/VisOutput/";
+        try 
+        {
+            if (std::filesystem::create_directory(visPath)) 
+            {
+                std::cout << "Directory created: " << visPath << std::endl;
+            } else {
+                std::cout << "Directory already exists or failed to create.\n";
+            }
+        } 
+        catch (const std::filesystem::filesystem_error& e) 
+        {
+                std::cerr << "Error: " << e.what() << std::endl;
+        }
+        analysisManager->OpenFile(visPath + saveName + ".root");
+    }
 
-    analysisManager->OpenFile(fOutputPath + "/output" + strRunID.str() + ".root");
 }
 
 void RunAction::EndOfRunAction(const G4Run *run)
