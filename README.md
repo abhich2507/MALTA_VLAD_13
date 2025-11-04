@@ -134,27 +134,20 @@ TODO
 ## Installation
 
 ```bash
-# Create a working directory
-mkdir directory_name
-cd directory_name
-
-# Initialize Git repository
-git init
-git remote set-url origin git@gitlab.cern.ch:7999/dberlea/malta_simulation.git
-git pull origin master
-
-# Create build and results directories
-mkdir build Results
-
-# Review and edit configuration
-cat config.sh
-# Edit config.sh with the correct paths
-
-# Build the project
+# Clone Repository
+git clone https://gitlab.cern.ch/dberlea/malta_simulation.git
+cd malta_simulation
+# Setup environment
+source setup.sh
+# Create the build directory
+mkdir build 
 cd build
-cmake ..
+# Build the project
+cmake $CMAKE_ARGS ..
 make
 
+
+# Instructions for NAF
 # Log in to NAF
 ssh username@naf-atlas.desy.de
 
@@ -173,8 +166,13 @@ mkdir build Results condor_log
 
 
 
-## Usage
+## GEANT4 Usage
 ```bash
-cd /build
-source ../run_sim.sh local/naf flag_name.cfg
+cd build/
+source ../run_sim.sh local flag.cfg
+```
+## Analysis Usage
+```bash
+cd malta_simulation/
+python run_analysis.py -r runNumber -i analysis_flags.cfg -thr thrValue -s saveName -d digitizer Flag -t Tracking flag -c Clustering flag -a Analysis flag
 ```
