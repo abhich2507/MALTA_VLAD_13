@@ -1,42 +1,14 @@
 #include "Tracking.hh"
 
-DetectorConfig LoadConfig(const std::string& configPath) {
-    std::ifstream infile(configPath);
-    std::map<std::string, double> config;
-    std::string line;
-
-    while (std::getline(infile, line)) {
-        if (line.empty() || line[0] == '#' || line.rfind("//",0) == 0) continue;
-        std::istringstream iss(line);
-        std::string key, eq;
-        double value;
-        if (iss >> key >> eq >> value && eq == "=") {
-            config[key] = value;
-        }
-    }
-
-    DetectorConfig dc;
-    dc.detectorXOffset = config["detectorXOffset"] * 10;
-    dc.detectorYOffset = config["detectorYOffset"] * 10;
-    dc.pixelSize       = config["pixelSize"];
-    dc.detectorSizeX   = config["detectorSizeX"] * 10;
-    dc.detectorSizeY   = config["detectorSizeY"] * 10;
-    return dc;
-}
-
-inline std::pair<double,double> PixelPositionReconstruction(int pixelX, int pixelY, const DetectorConfig& cfg)
-{
-    double xGlobal = pixelX * cfg.pixelSize + cfg.detectorXOffset - cfg.detectorSizeX / 2;
-    double yGlobal = pixelY * cfg.pixelSize + cfg.detectorYOffset - cfg.detectorSizeY / 2;
-    return {xGlobal, yGlobal};
-}
-
-void Tracking(double threshold = 1, int runNumber = 91, std::string saveName = "default")
+// TODO: Move defaults to header only
+void Tracking(double threshold, int runNumber, std::string saveName)
 {
 
     auto start = std::chrono::high_resolution_clock::now();
-
-    std::string localPath = getVarFromConfig();
+    ////////// Function can be used for custom analysis paths
+    //std::string localPath = getVarFromConfig();
+    //////////////////////////////////////////////////////////
+    std::string localPath = "./";
     std::string inputPath = localPath +  Form("Results/local_%04d/", runNumber);
     std::string inputSubPath = localPath +  Form("Results/local_%04d/", runNumber) + saveName + "/";
     std::string directoryPath = localPath + "Plots/";
@@ -47,15 +19,17 @@ void Tracking(double threshold = 1, int runNumber = 91, std::string saveName = "
     std::cout << "############################# Tracking started for:" << std::endl;
     std::cout << inputPath << std::endl;
 
-    bool debug = false;
+    auto analysisFlags = new SimFlags;
+    const char* configPath = std::getenv("ANALYSIS_CONFIG");
+    LoadAnalysisFlagsFromFile(configPath, *analysisFlags);
+    bool verbose = analysisFlags->verboseTracking;
 
-    double dCut = 100; // in um
-    double matchWindow = 60; // ns
-    
+    double dCut = analysisFlags->distCut;
+    double matchWindow = analysisFlags->timeCut;
 
     TChain *trackChain = new TChain("TruthVertex");
 
-    for (int t = 0; t <= 5; ++t) 
+    for (int t = 0; t <= analysisFlags->numThreads - 1; ++t) 
     {
         trackChain->Add(Form("%soutput0_t%d.root", inputPath.c_str() , t));
     }
@@ -63,16 +37,20 @@ void Tracking(double threshold = 1, int runNumber = 91, std::string saveName = "
     double vertexX, vertexY, vertexZ, globalTime;
 
     // Connect branches
+    trackChain->SetBranchAddress("trueVertexX", &vertexX);
+    trackChain->SetBranchAddress("trueVertexY", &vertexY);
+    trackChain->SetBranchAddress("trueVertexZ", &vertexZ);
+    trackChain->SetBranchAddress("trueGlobalTime", &globalTime);
+
+    // Old format. DEPRECATED. Will be deleted on 01.03.2026
+    /*
     trackChain->SetBranchAddress("vertexX", &vertexX);
     trackChain->SetBranchAddress("vertexY", &vertexY);
     trackChain->SetBranchAddress("vertexZ", &vertexZ);
     trackChain->SetBranchAddress("fGlobalTime", &globalTime);
-
-    //TODO: Problem with this tree I add every hit to it. Keep it to only truth.
+    */
 
     Long64_t nTrackEntries = trackChain->GetEntries();
-    //std::cout << "Number of track entries: " << nTrackEntries << std::endl;
-
     // Once again multiThreading is a pain the ***. I need to first time order my hits.
 
 
@@ -162,13 +140,12 @@ void Tracking(double threshold = 1, int runNumber = 91, std::string saveName = "
         recoTiming[i] = reconstructedTiming;
         //std::cout << "i: " << i << " ;reconstructedX" <<reconstructedPixX << " ;reconstructedY: " << reconstructedPixY << std::endl;
     }
-     // Plot save path
-     // TODO: Move me to a function
     
 
     savePlot(directoryPath, runPath, threshold, saveName, h2DUTHits, "h2DUTHits");
 
-
+    TH1D *h1ResidualX = new TH1D("h1ResidualX", "h1ResidualX", 100, -2, 2);
+    TH1D *h1ResidualY = new TH1D("h1ResidualY", "h1ResidualY", 100, -2, 2);
 
     outfile->cd();
     
@@ -179,8 +156,8 @@ void Tracking(double threshold = 1, int runNumber = 91, std::string saveName = "
     for (int i =0; i< nTrackEntries; i++)
     {
         sortedTracks->GetEntry(i);
-        // 0.018906 ms
-        if(debug) std::cout << "Track Entry: " << i << "; VertexX: " << sx << "; VertexY: " << sy << "; VertexZ: " << sz << "; GlobalTime: " << st << std::endl;
+        
+        if(verbose) std::cout << "Track Entry: " << i << "; VertexX: " << sx << "; VertexY: " << sy << "; VertexZ: " << sz << "; GlobalTime: " << st << std::endl;
         // Now find matching reconstructed hits
         trackID = i;
         reconstructedVertexX = sx;
@@ -189,34 +166,32 @@ void Tracking(double threshold = 1, int runNumber = 91, std::string saveName = "
         // First we set up the sliding window
         while (detIdx < nReconstructedEntries) 
         {
-            //reconstructedTree->GetEntry(detIdx);
-            //if(debug) std::cout << "Particle " << detIdx << " PixX=" <<  recoPixX[detIdx] << " PixY=" << recoPixY[detIdx] << " timing=" << recoTiming[detIdx] << std::endl;
-
             if (recoTiming[detIdx] >= st) break;
             detIdx++;
         }
-        // 0.0622 ms
-
         // now check all hits in [t, t+Δt]
         Long64_t j = detIdx;
         foundHit = false;
         nHits = 0;
         while (j < nReconstructedEntries) 
         {
-            //reconstructedTree->GetEntry(j);
             if (recoTiming[j] >= st + matchWindow) break; // left the window
-            //if(debug) std::cout << "Particle " << i << " PixX=" <<  recoPixX[j] << " PixY=" << recoPixY[j] << " timing=" << recoTiming[j] << " st= " << st << std::endl;
             pixX = recoPixX[j];
             pixY = recoPixY[j];
+            
             reconstructedLocalTime = recoTiming[j] - st;
 
             // Now do position cut
             std::pair<double, double> pixelGlobalPosition = PixelPositionReconstruction(pixX, pixY, cfg);
 
+            h1ResidualX->Fill(pixelGlobalPosition.first  - reconstructedVertexX);
+            h1ResidualY->Fill(pixelGlobalPosition.second - reconstructedVertexY);
+
+
             if ( ( pixelGlobalPosition.first > reconstructedVertexX - dCut / 1000. && pixelGlobalPosition.first < reconstructedVertexX + dCut / 1000. ) 
             &&  ( pixelGlobalPosition.second > reconstructedVertexY - dCut / 1000. && pixelGlobalPosition.second < reconstructedVertexY + dCut / 1000. ))
             {
-                if(debug) std::cout << "Matched hit at Pixel (" << pixX << ", " << pixY << ") with Global Position (" << pixelGlobalPosition.first << ", " << pixelGlobalPosition.second << ")" << "; Timing:" << reconstructedLocalTime << std::endl;
+                if(verbose) std::cout << "Matched hit at Pixel (" << pixX << ", " << pixY << ") with Global Position (" << pixelGlobalPosition.first << ", " << pixelGlobalPosition.second << ")" << "; Timing:" << reconstructedLocalTime << std::endl;
                 nHits++;
                 trackedTree->Fill();   // <-- one Fill per matching hit
                 foundHit = true;
@@ -231,11 +206,11 @@ void Tracking(double threshold = 1, int runNumber = 91, std::string saveName = "
             reconstructedLocalTime = -1;
 
             trackedTree->Fill();   // <-- one Fill per track with no hit
-        }  
-        //34 ms
+        } 
     }
-    
-
+    savePlot(directoryPath, runPath, threshold, saveName, h1ResidualX, "h1ResidualX");
+    savePlot(directoryPath, runPath, threshold, saveName, h1ResidualY, "h1ResidualY");
+    outfile->cd();
     auto end = std::chrono::high_resolution_clock::now(); 
     std::chrono::duration<double, std::milli> elapsed = end - start;     
 

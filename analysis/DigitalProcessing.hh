@@ -10,12 +10,26 @@
 #include <sys/types.h>
 #include <chrono>
 #include <random>
+#include "ConfigAnalysis.hh"
+#include "Tracking.hh"
+
 // Returns timing offset for a given amplitude
-double GetTimingOffset(double amplitude, double threshold);
+double GetTimingOffset(double amplitude, double threshold, double T, double Tdiv, double TrefThr, double x0, double n, double t0 );
+
+void set_style() {
+    gStyle->SetOptStat(0);
+    gStyle->SetPalette(112);
+    gStyle->SetNumberContours(255);
+    // gStyle->SetPalette(1); // old default rainbow palette, optional
+    gROOT->SetBatch(kTRUE);
+}
 
 // Save diagnostic plots
 inline void savePlot (std::string directoryPath, std::string runPath, double threshold, std::string saveName, TH1* hist, std::string histName)
 {
+    // TODO this doesnt work as I want it to. 
+    set_style();
+    TCanvas *c2D = new TCanvas(histName.c_str(), histName.c_str(), 800, 800);
     std::string filePath = directoryPath + runPath + saveName + "/histos.root";
 
     mkdir(directoryPath.c_str(), 0777);
@@ -45,14 +59,11 @@ inline void savePlot (std::string directoryPath, std::string runPath, double thr
 std::vector<int> getSetBitPositions(uint16_t maltaPixel);
 
 // Decodes a digital word into pixel positions and hit counts
-std::vector< std::pair<std::pair<int,int>, int> > decodedDigitalWord(unsigned int word);
+std::vector< std::pair<std::pair<int,int>, int> > decodedDigitalWord(unsigned int word, int groupSize, int groupLeng, int parityLeng, int dColLeng);
 
 inline std::string getVarFromConfig()
 {
     //Get path stored in config.sh
-    
-    //std::string cmd = "bash -c 'source " + configFile + " && echo $" + var + "'";
-
     std::string cmd = "bash -c 'source config.sh && echo $LOCAL_PATH'";
 
     std::array<char, 128> buffer;
@@ -71,6 +82,9 @@ inline std::string getVarFromConfig()
     //std::cout << result << std::endl;
     return result;
 }
+
+// Customizable mask for decoding digital subwords in a MALTA word.
+std::vector<UInt_t> decodingMaskMSB(UInt_t word, const std::vector<int>& field_sizes);
 
 // Main digital processing function
 void DigitalProcessing(double threshold = 2, int runNumber = 91, std::string saveName = "default", bool proteusFlag = false);
