@@ -1,11 +1,11 @@
 import subprocess
 import argparse
-
+import os
 ################################### WARNING
 ### Currently the threshold 2000 is used just for the Proteus conversion
 
 parser = argparse.ArgumentParser()
-parser.add_argument("-r", "--run"         , help="Run number"      , type=int           , required=True)
+parser.add_argument("-r", "--run"         , help="Run number"      , type=int           , required =True)
 parser.add_argument("-s", "--save"        , help="Save name"       , type = str         , required = True)
 parser.add_argument("-d", "--digitize"    , help="Digitize the raw data"                , action="store_true")
 parser.add_argument("-t", "--tracking"    , help="Track matching"                       , action="store_true")
@@ -13,10 +13,15 @@ parser.add_argument("-c", "--clustering"  , help="Cluster the hits"             
 parser.add_argument("-a", "--analysis"    , help="Analyze and generate plots"           , action="store_true")
 parser.add_argument("-p", "--proteus"     , help="Create to Proteus Merged file"        , action="store_true")
 parser.add_argument("-thr", "--threshold" , help="Threshold list"  , type= str          , required = False)
+parser.add_argument("-i", "--input"        , help="Input configuration .cfg", type = str , required = True)
 args=parser.parse_args()
 
 runNumber  = args.run
 saveName   = args.save
+
+# Pass the path for the config input as env variable
+config_name = args.input
+os.environ["ANALYSIS_CONFIG"] = f"configs/{config_name}"
 
 if not args.proteus:
     thresholds = args.threshold.split(",")
