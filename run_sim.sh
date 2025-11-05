@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source ../config.sh
+source ../configs/config.sh
 NAF_HOST="naf-atlas.desy.de"
 NAF_DIR="/afs/desy.de/user/"${NAF_USER:0:1}"/$NAF_USER/$NAF_PATH"
 SOCKET="$HOME/.ssh/naf-socket"

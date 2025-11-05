@@ -1,15 +1,15 @@
 #!/bin/bash
 
 if [ $HOME = "/home/vlad" ]; then
-    source ../config_vlad.sh
+    source ../configs/config_vlad.sh
     source "$LOCAL_GEANT"
     source "$LOCAL_ROOT"
     export $EXTRA_LOCAL
-    
-elif [$HOME = "home/lucian"]; then
-    source ../config_lucian.sh
+
+elif [$HOME = "/Users/lucianfasselt"]; then
+    source ../configs/config_lucian.sh
 else 
-    source ../config.sh
+    source ../configs/config.sh
 fi
 FLAG=$1
 
