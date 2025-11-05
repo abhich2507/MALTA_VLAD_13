@@ -101,7 +101,7 @@ G4bool SensitiveDetector::ProcessHits(G4Step *aStep, G4TouchableHistory *)
     pixelCluster[i] = {pixX, pixY};
     }
     const auto& deltas = deltaTable[quadrantFlag];
-    for(int i = 0; i<=4; i++)
+    for(int i = 0; i<4; i++)
     {
         pixelCluster[i][0] +=deltas[i][0] ;
         pixelCluster[i][1] +=deltas[i][1] ;
