@@ -14,7 +14,6 @@ bool verbose = true;
 
 void MALTAClustering(double threshold = 200, int runNumber = 2, std::string saveName = "Test")
 {
-
     std::string localPath = getVarFromConfig();
     std::string inputPath = localPath +  Form("Results/local_%04d/", runNumber);
     std::string inputSubPath = localPath +  Form("Results/local_%04d/", runNumber) + saveName + "/";
