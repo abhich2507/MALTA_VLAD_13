@@ -69,8 +69,8 @@ int ExportTH2DToArray(const std::string& inputFileName, const std::string& outpu
 
 // Main function where you can set parameters
 int main() {
-    std::string inputFile = "250710_MPV_EPI_data/W5R23IBIAS03SUB06/TOT_PASSRes2/W5R23IBIAS03SUB06_2D_MPV_Res2_TOT_PASS_LandauCDF2Eff.root";
-    std::string outputFile = "CorrectionData2D_EPI.cc";
+    std::string inputFile = "../plotting_scripts/root_input/250710_MPV_EPI_data/W5R23IBIAS03SUB06/TOT_PASSRes2/W5R23IBIAS03SUB06_2D_MPV_Res2_TOT_PASS_LandauCDF2Eff.root";
+    std::string outputFile = "../plotting_scripts/root_output/CorrectionData2D_EPI.cc";
     std::string histName = "MPV_2D";
 
     ExportTH2DToArray(inputFile, outputFile, histName);
