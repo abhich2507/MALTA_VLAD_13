@@ -16,6 +16,8 @@ include_directories(${PROJECT_SOURCE_DIR}/include)
 # glob function to find all .cc source files in the src directory and puts it in
 # the sources variable. No need to list all source files by hand
 file(GLOB sources ${PROJECT_SOURCE_DIR}/src/*.cc)
+# Remove this line because it requires a CMake level ROOT sourcing which is not yet compatible.
+list(REMOVE_ITEM sources ${PROJECT_SOURCE_DIR}/src/Create2DEffMap.cc)
 # Copy all te macro files in the macros directory
 file(GLOB MACRO_FILES "macros/*.mac")
 file(COPY ${MACRO_FILES} DESTINATION ${CMAKE_BINARY_DIR}/)
