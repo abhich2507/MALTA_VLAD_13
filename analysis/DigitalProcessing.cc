@@ -23,6 +23,30 @@ std::vector<int> getSetBitPositions(uint16_t maltaPixel, int groupSize)
     return positions;
 }
 
+UInt_t encodeWord(int pixX, int pixY, bool verbose)
+{
+    UInt_t maltaDColumn, maltaGroup, maltaDelay, maltaParity, maltaPixel;
+    // TODO: Bit length not yet generalized
+    maltaDColumn = pixX / 2;
+    maltaGroup = pixY / 16;
+    maltaDelay = 1;
+    maltaParity = (pixY /8) %2; 
+    maltaPixel = 0b0000000000000000;
+    //maltaPixel ^= (1 << pixY % 8 + 8 *(pixX %2)); //* (pixX % 2 +1));
+    maltaPixel ^= (1 << ( (pixY % 8) + (8 * (pixX % 2)) ));
+    UInt_t word = 0;
+    word |= (maltaPixel & 0xFFFF) << (5 + 1 + 8); // shift left by 14 bits
+    word |= (maltaGroup & 0x1F)       << (1 + 8);     // shift left by 9 bits
+    word |= (maltaParity & 0x1)       << 8;           // shift left by 8 bits
+    word |= (maltaDColumn & 0xFF);                    // stays in lower 8 bits
+    if (verbose)
+    {
+        std::cout << "DColumn: " << std::bitset<8>(maltaDColumn) << "; Group: " << std::bitset<5>(maltaGroup) << "; Parity: " << std::bitset<1>(maltaParity) << "; MaltaPixel: " << std::bitset<16>(maltaPixel) << std::endl;
+        std::cout << "Encoded word: " << std::bitset<32>(word) << std::endl;
+    }
+    return word; 
+}
+
 std::vector<UInt_t> decodingMaskMSB(UInt_t word, const std::vector<int>& field_sizes)
 {
 
@@ -269,26 +293,13 @@ void DigitalProcessing(double inputThreshold, int runNumber, std::string saveNam
             double cenergy = it->second;
             
             if (cenergy < threshold) continue;
-            // TODO: Bit length not yet generalized
-            maltaDColumn = pixX / 2;
-            maltaGroup = pixY / 16;
-            maltaDelay = 1;
-            maltaParity = (pixY /8) %2; 
-            maltaPixel = 0b0000000000000000;
-            //maltaPixel ^= (1 << pixY % 8 + 8 *(pixX %2)); //* (pixX % 2 +1));
-            maltaPixel ^= (1 << ( (pixY % 8) + (8 * (pixX % 2)) ));
-            UInt_t word = 0;
-            word |= (maltaPixel & 0xFFFF) << (5 + 1 + 8); // shift left by 14 bits
-            word |= (maltaGroup & 0x1F)       << (1 + 8);     // shift left by 9 bits
-            word |= (maltaParity & 0x1)       << 8;           // shift left by 8 bits
-            word |= (maltaDColumn & 0xFF);                    // stays in lower 8 bits
+
             if (verbose)
             {
                 std::cout << "Event ID: " << eventID << "; pixX: " << pixX << ";pixY: " << pixY << "; corrEnergy: " << cenergy << "; Timing: " << std::setprecision(10) <<  timing << std::endl;
-                std::cout << "DColumn: " << std::bitset<8>(maltaDColumn) << "; Group: " << std::bitset<5>(maltaGroup) << "; Parity: " << std::bitset<1>(maltaParity) << "; MaltaPixel: " << std::bitset<16>(maltaPixel) << std::endl;
-                std::cout << "Encoded word: " << std::bitset<32>(word) << std::endl;
             }
-            
+            UInt_t word = encodeWord(pixX, pixY, verbose);
+
             //Now I digitized all my words. Next step is merging them based on timing
             if (timing >= t0 && timing < t0 + wordSpacing)
             {

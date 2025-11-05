@@ -14,6 +14,7 @@ void Clustering(double threshold, int runNumber, std::string saveName = "default
     std::cout << inputPath << std::endl;
 
     TFile *trackedFile = TFile::Open((inputPath + "LocalTrackedHitsThr" + std::to_string(int(threshold)) + ".root").c_str(), "READ");
+    
     auto analysisFlags = new SimFlags;
     const char* configPath = std::getenv("ANALYSIS_CONFIG");
     LoadAnalysisFlagsFromFile(configPath, *analysisFlags);
