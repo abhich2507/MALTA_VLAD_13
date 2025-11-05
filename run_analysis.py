@@ -50,3 +50,10 @@ else:
 
     command = f"root -l -b -q 'analysis/SimulationToProteus.cc({runNumber})'"
     subprocess.run(command, shell=True, check=True)
+
+
+
+savePath = f"Plots/local_{runNumber:04d}/{saveName}"
+command = f"cp configs/{config_name} {savePath}"
+print(f"Copying configuration file to: {savePath}")
+subprocess.run(command, shell = True, check = True)
