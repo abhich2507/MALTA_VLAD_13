@@ -261,15 +261,13 @@ void DigitalProcessing(double inputThreshold, int runNumber, std::string saveNam
             auto itThr       = thresholdMap.find({pixX, pixY});
             double threshold = itThr->second;
             double cenergy   = entry.second;
-            double timing    = GetTimingOffset(cenergy, threshold, T, Tdiv, TrefThr, x0, n, t0); // This is the global timing
-            double timeWalk  = GetTimingOffset(cenergy, threshold, T, Tdiv, TrefThr, x0, n, t0); // This is just the time walk
+            double timing    = GetTimingOffset(cenergy, threshold, T, Tdiv, TrefThr, x0, n, t0);
 
             auto it = timeMap.find({eventID, {pixX, pixY}});
             // Row correction also of 7ns/ 512 rows + global GEANT4 timestamp
+            if(verbose) std::cout << "Event ID: " << eventID << "; pixX: " << pixX << ";pixY: " << pixY << "; corrEnergy: " << cenergy << "; timewalk: "<< timing << std::endl;
             timing += *std::max_element(it->second.begin(), it->second.end()) + pixX * 0.0125; 
-            timeWalk += pixX * 0.0125;
 
-            if(verbose) std::cout << "Event ID: " << eventID << "; pixX: " << pixX << ";pixY: " << pixY << "; corrEnergy: " << cenergy << "; timewalk: "<< timeWalk << std::endl;
             sortedTimings.emplace_back(entry.first,timing);
         }
         std::sort(sortedTimings.begin(), sortedTimings.end(),
