@@ -314,70 +314,102 @@ Root macro that takes as input E-TCT data as analog waveforms. Outputs pixel cha
 The user is encouraged to create their own configuration file as desired. The simulation (e.g. flags.cfg) and analysis (e.g. analysis_flags.cfg) flags can be easily passed via the argument line. If a foreign local installation of the package is desired, additional path configuration might be needed. The default ALMA9 path configuration is implemented via config.sh. Customized examples of local path sourcing can be seen in the config_vlad.sh and config_lucian.sh. A manual pointing towards the GEANT4, ROOT and any other non intialized libraries is needed for other local implementations. The passing of the correct config file is explained in the run_files section. 
 
 ## analysis_flags
+
 Time walk calibration scaling default values:
     -T = 390, Tdiv = 200, TrefThr = 150, x0 = 149.8, n = 0.65, t0 = 0
+
 MALTA2 digital encoding information default values:
     -groupSize = 16, groupLeng = 5, parityLeng = 1, dColLeng = 8
+
 MALTA2 meging time bucket size default value:
     -wordSpacing = 1.6
+
 Number of thread-wise data files to analyze default value:
     -numThreads = 6
+
 Charge loss scaling of the deposited charge default value:
     -chLoss = 1
+
 Threshold smearing in the mean and column default values:
     -meanSmearing = 0.08, colSmearing = 0.02
+
 Tracking and clustering distance and time cut default values:
     -distCut = 100, timeCut = 500
+
 Tracking uncertainty enable/disable default value:
     -trkUnc = true
+    
 Verbose flags for each analysis step default values:
     -verboseDigital = false, verboseTracking = false, verboseClustering = false, verboseAnalysis = false
 
 ## flags.cfg
+
 Geometry flag used for switching between the MALTA geometry implementation and the PCB geometry implementation
     -preDefinedGeometryFlag = MALTA / PCB
+
 Detector X,Y,Z offsets relative to the GEANT4 origin in [cm]. Default values:
     -detectorXOffset = 5., detectorYOffset = 5. ,detectorZOffset = 5.
+
 Pixel size default value [mm]:
     -pixelSize = 0.0364 
+
 Sensor dimension default values X, Y[cm], sensitive Depth [um]:
     -detectorSizeX = 1.86368, detectorSizeY = 1.86368, detectorDepth = 29.1
+
 Charge sharing model parametrization in X and Y default values:
     -CCModelSigmaX = 4.3, CCModelSigmaY = 4.3   
+    
 World volume material. Accepted values are G4_GALACTIC (vacuum) and G4_AIR:
     -outsideMaterial = G4_Galactic / G4_AIR
+
 Particle source geometry. Available presets: pencil, circle, rectangle, granularBeam = 1 particle every 2 pixels in X (simulate out of group hits)
     -beamGeometry = pencil / circle / rectangle / granularBeam
+
 Beam offset in X, Y, Z default values [cm]:
     -beamXOffset = 5., beamYOffset = 5., beamZOffset = - 100.
+
 Beam size, assuming only symmetrical beam geometry implementation, default value [mm]:
     -sourceRadius = 18.6368
+
 Spill size, or number of particles fired in a coincidence time window, default value:
     -particleCount = 1
+
 Number of events in a GEANT4 run, default value:
     -numEvents = 100000
+
 Intra spill offset that can simulate the delays introduced by cabling in real devices, default value:
     -intraSpillOffset = 0
+
 Period of the beam, default value [ns]:
     -beamVeto = 1000
+
 Primary particle type, default:
     -particleType = proton
+
 Primary particle energy, default value [GeV]:
     -particleEnergy = 120
+
 Momentum of the primary particle, default values:
     -particleMomentumX = 0., particleMomentumY = 0., particleMomentumZ = 1.
+
 Physics list flags. Enable/disable different physics processes, default values:
     -EMPhysics = true, hadronPhysics = true
+
 Distance cut values for e-,e+ and photons, default value:
-    -GEANT4CutValue = 1    
+    -GEANT4CutValue = 1
+
 Raw data storage path for local and naf running, default values:
     -outputPathLocal = Results, outputPathNAF = Results
+
 GEANT4 macro files for local and naf running, default values (run - batch mode, vis - gui mode):
     -macroFileLocal = run.mac, macroFileNAF = run.mac
+
 Number of Threads. Should match the number of usable cores. Optimization between physical/ virtual cores. Default values:
     -numThreadsLocal = 6, numThreadsNAF = 12
+
 Verbose flags for different parts of the simulation, default values:
     -verbosePL = false, verbosePG = false, verboseSD = false, verboseSA = false
+
 ## config.sh
 For expert users only. If a local GEANT4 installation is available and desired, the following path format should be replicated:
 export LOCAL_PATH=/home/path/to/repo 
@@ -397,9 +429,15 @@ Three GEANT4 macros are implemented:
 # Run files. run_files/
 Three shell scripts are implemented in this directory that schedule the running of the simulation package:
 
-    - run_script_local.sh handles the running locally. The term locally also applies for running a simulation on a remote machine as long as no job submission to a computer cluster is involved.
-    - run_script_naf.sh handles the cluster computing job submission. This assumes access to the naf computing infrastructure or any other compatible infrastructure. However, path compatibility needs to be resolved. WARNING! such a run mode only works with a Condor job submission format.
-    - run_script_local_test.sh handles the running of a local dry run before the submission of a job to the cluster, in order to ensure correct compilation of the package before requesting computing resources.
+    - run_script_local.sh handles the running locally. 
+    
+    The term locally also applies for running a simulation on a remote machine as long as no job submission to a computer cluster is involved.
+    - run_script_naf.sh handles the cluster computing job submission. 
+    
+    This assumes access to the naf computing infrastructure or any other compatible infrastructure. However, path compatibility needs to be resolved. WARNING! such a run mode only works with a Condor job submission format.
+    - run_script_local_test.sh handles the running of a local dry run
+    
+     before the submission of a job to the cluster, in order to ensure correct compilation of the package before requesting computing resources.
 
 Instructions for passing a customized config.sh file:
 
