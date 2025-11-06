@@ -2,119 +2,6 @@
 
 // TODO: We are in dire need of value checks for all user inputs.
 
-double GetTimingOffset(double amplitude, double threshold, double T, double Tdiv, double TrefThr, double x0, double n, double t0) 
-{
-    if (amplitude < threshold) // if less than than threshold 
-    {
-        return Tdiv; // set to 200 ns delay if less than threshold (function diverges at threshold)
-    }
-    return T / pow((amplitude * TrefThr/threshold) - x0, n) + t0;
-}
-
-std::vector<int> getSetBitPositions(uint16_t maltaPixel, int groupSize)
-// Checks for all flipped bits in a 16-bit word and returns their positions in a vector
-{
-    std::vector<int> positions;
-    for (int i = 0; i < groupSize; i++) {
-        if (maltaPixel & (1 << i)) {
-            positions.push_back(i);
-        }
-    }
-    return positions;
-}
-
-UInt_t encodeWord(int pixX, int pixY, bool verbose)
-{
-    UInt_t maltaDColumn, maltaGroup, maltaDelay, maltaParity, maltaPixel;
-    // TODO: Bit length not yet generalized
-    maltaDColumn = pixX / 2;
-    maltaGroup = pixY / 16;
-    maltaDelay = 1;
-    maltaParity = (pixY /8) %2; 
-    maltaPixel = 0b0000000000000000;
-    //maltaPixel ^= (1 << pixY % 8 + 8 *(pixX %2)); //* (pixX % 2 +1));
-    maltaPixel ^= (1 << ( (pixY % 8) + (8 * (pixX % 2)) ));
-    UInt_t word = 0;
-    word |= (maltaPixel & 0xFFFF) << (5 + 1 + 8); // shift left by 14 bits
-    word |= (maltaGroup & 0x1F)       << (1 + 8);     // shift left by 9 bits
-    word |= (maltaParity & 0x1)       << 8;           // shift left by 8 bits
-    word |= (maltaDColumn & 0xFF);                    // stays in lower 8 bits
-    if (verbose)
-    {
-        std::cout << "DColumn: " << std::bitset<8>(maltaDColumn) << "; Group: " << std::bitset<5>(maltaGroup) << "; Parity: " << std::bitset<1>(maltaParity) << "; MaltaPixel: " << std::bitset<16>(maltaPixel) << std::endl;
-        std::cout << "Encoded word: " << std::bitset<32>(word) << std::endl;
-    }
-    return word; 
-}
-
-std::vector<UInt_t> decodingMaskMSB(UInt_t word, const std::vector<int>& field_sizes)
-{
-
-    // Simplified description of the code operation for nominal MALTA parameters:
-    /*
-    UInt_t maltaPixel   = (word >> (5 + 1 + 8)) & 0xFFFF; // top 16 bits
-    UInt_t maltaGroup   = (word >> (1 + 8))   & 0x1F;     // next 5 bits
-    UInt_t maltaParity  = (word >> 8)         & 0x1;      // 1 bit
-    UInt_t maltaDColumn =  word               & 0xFF;     // last 8 bits
-    */
-    std::vector<UInt_t> fields;
-    int total_bits = 0;
-    for (int s : field_sizes) total_bits += s;
-    int shift = total_bits;
-
-    for (int size : field_sizes)
-    {
-        shift -= size;
-        UInt_t mask = (1u << size) - 1u;
-        UInt_t value = (word >> shift) & mask;
-        fields.push_back(value);
-    }
-
-    return fields;
-}
-
-std::vector< std::pair<std::pair<int,int>, int> > decodedDigitalWord(UInt_t word, int groupSize, int groupLeng, int parityLeng, int dColLeng)
-{
-    //Expert debug statement. Should not come up unless modifications on the digitization logic are made.
-    bool debug = false;
-    std::vector<int> field_sizes = {groupSize, groupLeng, parityLeng, dColLeng};
-    auto decodedWords   = decodingMaskMSB(word, field_sizes);
-    UInt_t maltaPixel   = decodedWords[0];
-    UInt_t maltaGroup   = decodedWords[1];
-    UInt_t maltaParity  = decodedWords[2];
-    UInt_t maltaDColumn = decodedWords[3]; 
-
-    std::vector <std::pair<std::pair<int,int>, int> > pixelPositions;
-    std::vector<int> hitInGroup = getSetBitPositions(maltaPixel, groupSize);
-
-    if(debug)
-    {
-        std::cout << "-------------------------------" << std::endl;
-        std::cout << "Input word: " << std::bitset<32>(word) << std::endl;
-        std::cout << "Decoded Pixel word: " << std::bitset<16>(maltaPixel) << std::endl;
-        std::cout << "Decoded Group: " << std::bitset<5>(maltaGroup) << std::endl; 
-        std::cout << "Decoded Parity: " << std::bitset<1>(maltaParity) << std::endl;
-        std::cout << "Decoded DColumn: " << std::bitset<8>(maltaDColumn) << std::endl;
-    }
-    
-    int nHits = 0;
-    for (int hit :hitInGroup)
-    {
-        nHits ++;
-        // TODO: Source of errors when the bit sizes change. Revisit for further implementation
-        int pixX = maltaDColumn *2 + hit /8;
-        int pixY = maltaGroup *16 + 8 * maltaParity + hit %8;
-        pixelPositions.push_back(std::make_pair(std::make_pair(pixX, pixY), nHits));
-        if (debug)    
-        {
-            std::cout << "Decoded pixel position: (" << pixX << ", " << pixY << ")" << std::endl;
-        }
-    }
-    if (debug) std::cout << "-------------------------------" << std::endl;
-    
-    return pixelPositions;
-}
-
 void DigitalProcessing(double inputThreshold, int runNumber, std::string saveName, bool proteusFlag)
 {
     auto start = std::chrono::high_resolution_clock::now();
@@ -261,15 +148,13 @@ void DigitalProcessing(double inputThreshold, int runNumber, std::string saveNam
             auto itThr       = thresholdMap.find({pixX, pixY});
             double threshold = itThr->second;
             double cenergy   = entry.second;
-            double timing    = GetTimingOffset(cenergy, threshold, T, Tdiv, TrefThr, x0, n, t0); // This is the global timing
-            double timeWalk  = GetTimingOffset(cenergy, threshold, T, Tdiv, TrefThr, x0, n, t0); // This is just the time walk
+            double timing    = GetTimingOffset(cenergy, threshold, T, Tdiv, TrefThr, x0, n, t0);
 
             auto it = timeMap.find({eventID, {pixX, pixY}});
             // Row correction also of 7ns/ 512 rows + global GEANT4 timestamp
+            if(verbose) std::cout << "Event ID: " << eventID << "; pixX: " << pixX << ";pixY: " << pixY << "; corrEnergy: " << cenergy << "; timewalk: "<< timing << std::endl;
             timing += *std::max_element(it->second.begin(), it->second.end()) + pixX * 0.0125; 
-            timeWalk += pixX * 0.0125;
 
-            if(verbose) std::cout << "Event ID: " << eventID << "; pixX: " << pixX << ";pixY: " << pixY << "; corrEnergy: " << cenergy << "; timewalk: "<< timeWalk << std::endl;
             sortedTimings.emplace_back(entry.first,timing);
         }
         std::sort(sortedTimings.begin(), sortedTimings.end(),
@@ -378,3 +263,5 @@ void DigitalProcessing(double inputThreshold, int runNumber, std::string saveNam
     std::chrono::duration<double, std::milli> elapsed = end - start;
     std::cout << "############################# Digital Processing stopped after " << elapsed.count() << "ms" << std::endl;
 }
+
+
