@@ -316,6 +316,7 @@ The user is encouraged to create their own configuration file as desired. The si
 ## analysis_flags
 
 Time walk calibration scaling default values:
+
     -T = 390, Tdiv = 200, TrefThr = 150, x0 = 149.8, n = 0.65, t0 = 0
 
 MALTA2 digital encoding information default values:
@@ -430,13 +431,12 @@ Three GEANT4 macros are implemented:
 Three shell scripts are implemented in this directory that schedule the running of the simulation package:
 
     - run_script_local.sh handles the running locally. 
-    
     The term locally also applies for running a simulation on a remote machine as long as no job submission to a computer cluster is involved.
+    
     - run_script_naf.sh handles the cluster computing job submission. 
-    
     This assumes access to the naf computing infrastructure or any other compatible infrastructure. However, path compatibility needs to be resolved. WARNING! such a run mode only works with a Condor job submission format.
-    - run_script_local_test.sh handles the running of a local dry run
     
+    - run_script_local_test.sh handles the running of a local dry run
      before the submission of a job to the cluster, in order to ensure correct compilation of the package before requesting computing resources.
 
 Instructions for passing a customized config.sh file:
