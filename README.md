@@ -206,13 +206,14 @@ Provides the digital processing of the hits. The main steps of this analysis ste
 8. Decode all hits inside a word and encode this value in NHits
 
 The digital processing outputs the following data:
-Results/SaveName/PlaneIDReconstructedHitsThrvalue.root/ReconstructedHits: 
-    -PixX
-    -PixY
-    -Timing
-    -NHits
-Plots/SaveName/histos.root/h1Dthreshold - 1D dsitribution of the threshold smearing
-Plots/SaveName/histos.root/h2Dthreshold - 2D dsitribution of the threshold smearing
+
+    -Results/SaveName/PlaneIDReconstructedHitsThrvalue.root/ReconstructedHits: 
+    -   PixX
+    -   PixY
+    -   Timing
+    -   NHits
+    -Plots/SaveName/histos.root/h1Dthreshold - 1D dsitribution of the threshold smearing
+    -Plots/SaveName/histos.root/h2Dthreshold - 2D dsitribution of the threshold smearing
 
 ## Tracking
 Performs the matching between tracks reconstructed from MONTE CARLO truth information and reconstructed hits given spatial and timing cuts
@@ -222,18 +223,19 @@ Performs the matching between tracks reconstructed from MONTE CARLO truth inform
 4. Save all the valid hits and give any invalids sentinel values (-1)
 
 The tracking outputs the following data:
-Results/SaveName/LocalTrackedHitsThrValue.root/TrackedHits:
-    -trackID
-    -reconstructedVertexX
-    -reconstructedVertexY
-    -reconstructedGolbalTime
-    -PixX
-    -PixY
-    -nHits
-    -reconstructedLocalTime
-Plots/SaveName/histos.root/h2DUTHits - Hits reconstructed but not yet tracked on the DUT
-Plots/SaveName/histos.root/h1ResidualX - X tracking residual distribution
-Plots/SaveName/histos.root/h1ResidualY - Y tracking residual distribution
+
+    -Results/SaveName/LocalTrackedHitsThrValue.root/TrackedHits:
+    -   trackID
+    -   reconstructedVertexX
+    -   reconstructedVertexY
+    -   reconstructedGolbalTime
+    -   PixX
+    -   PixY
+    -   nHits
+    -   reconstructedLocalTime
+    -Plots/SaveName/histos.root/h2DUTHits - Hits reconstructed but not yet tracked on the DUT
+    -Plots/SaveName/histos.root/h1ResidualX - X tracking residual distribution
+    -Plots/SaveName/histos.root/h1ResidualY - Y tracking residual distribution
 
 ## Clustering
 Provides the clustering of hits that were found to be time and space adjacent to a track in the previous tracking processing
@@ -242,33 +244,36 @@ Provides the clustering of hits that were found to be time and space adjacent to
 3. A cluster filtering algorithm is applied to check for valid clusters. Valid cluster criterion: Only spatially adjacent hits can form a cluster. Diagonally adjacent hits are cut from the final cluster formation.
 
 The clustering outputs the following data:
-Results/SaveName/analysisThrValue.root/analyzedHits:
-    -analysisVertexX
-    -analysisVertexY
-    -clSize
-    -timing
+
+    -Results/SaveName/analysisThrValue.root/analyzedHits:
+    -   analysisVertexX
+    -   analysisVertexY
+    -   clSize
+    -   timing
 
 ## Analysis
 Provides the final analysis step which computes the per bin efficiency, cluster size and timing. 
 
 The analysis outputs the following files:
-Plots/SaveName/histos.root/h2PASS - 2D sensor efficiency
-Plots/SaveName/histos.root/h2ClSize - 2D sensor Cluster Size
-Plots/SaveName/histos.root/h2Timing - 2D sensor Timing
-Plots/SaveName/histos.root/h2PASSInPixel - 2D 2x2 in pixel projection efficiency
-Plots/SaveName/histos.root/h2ClSizeInPixel - 2D 2x2 in pixel projection cluster size
-Plots/SaveName/histos.root/h2TimingInPixel - 2D 2x2 in pixel projection timing
-Plots/SaveName/histos.root/h2PASSInPixel - debugging histogram. passed hits 2x2 in pixel projection
-Plots/SaveName/histos.root/h2ALLInPixel - debugging histogram. all hits 2x2 in pixel projection
+
+    -Plots/SaveName/histos.root/h2PASS - 2D sensor efficiency
+    -Plots/SaveName/histos.root/h2ClSize - 2D sensor Cluster Size
+    -Plots/SaveName/histos.root/h2Timing - 2D sensor Timing
+    -Plots/SaveName/histos.root/h2PASSInPixel - 2D 2x2 in pixel projection efficiency
+    -Plots/SaveName/histos.root/h2ClSizeInPixel - 2D 2x2 in pixel projection cluster size
+    -Plots/SaveName/histos.root/h2TimingInPixel - 2D 2x2 in pixel projection timing
+    -Plots/SaveName/histos.root/h2PASSInPixel - debugging histogram. passed hits 2x2 in pixel projection
+    -Plots/SaveName/histos.root/h2ALLInPixel - debugging histogram. all hits 2x2 in pixel projection
 
 Summary data of average efficiency, cluster size, timing, threshold is saved in the following nTuple:
-Plots/SaveName/summary.root/sumarryTree:
-    -threshold
-    -efficiency
-    -effError
-    -clSize
-    -clSizeError
-    -timing
+
+    -Plots/SaveName/summary.root/sumarryTree:
+    -   threshold
+    -   efficiency
+    -   effError
+    -   clSize
+    -   clSizeError
+    -   timing
 
 ## SimulationToProteus
 Optional/ Alternative analysis path. Formats the 7 plane data (1 DUT + 6 tracking planes) to the usual Proteus MALTA format. This allows for analysing the simulated data with the help of the standard test beam framework.
@@ -478,9 +483,9 @@ Instructions for passing a customized config.sh file:
     echo $HOME
 3. Edit the run_script_local.sh file, following the format:
 
-elif [$HOME = "/Users/lucianfasselt"]; then
-    echo "Running as user lucian"
-    source ../configs/config_lucian.sh
+    -elif [$HOME = "/Users/lucianfasselt"]; then
+    -    echo "Running as user lucian"
+    -    source ../configs/config_lucian.sh
 
 
 ## Visuals
