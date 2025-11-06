@@ -483,9 +483,9 @@ Instructions for passing a customized config.sh file:
     echo $HOME
 3. Edit the run_script_local.sh file, following the format:
 
-    -elif [$HOME = "/Users/lucianfasselt"]; then
-    -    echo "Running as user lucian"
-    -    source ../configs/config_lucian.sh
+    elif [$HOME = "/Users/lucianfasselt"]; then
+        echo "Running as user lucian"
+        source ../configs/config_lucian.sh
 
 
 ## Visuals
