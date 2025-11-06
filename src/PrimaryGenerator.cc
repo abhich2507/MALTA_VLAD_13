@@ -105,7 +105,7 @@ void PrimaryGenerator::GeneratePrimaries(G4Event *oneEvent)
 
         G4int evtID = oneEvent->GetEventID();
         double offSet =  fFlag->intraSpillOffset;
-        double particleTime = evtID * fFlag->beamVeto *ns + offSet *ns
+        double particleTime = evtID * fFlag->beamVeto *ns + offSet *ns;
         fParticleGun->SetParticleTime(particleTime); // This is the only thread safe way to do this. Multithreading messes up life as always
 
         // Save Vertex Info
