@@ -443,16 +443,18 @@ Verbose flags for different parts of the simulation, default values:
 
 ## config.sh
 For expert users only. If a local GEANT4 installation is available and desired, the following path format should be replicated:
-export LOCAL_PATH=/home/path/to/repo 
-export LOCAL_GEANT=/home/path/to/geant4/geant4.sh 
-export LOCAL_ROOT=/home/path/to/root/thisroot.sh 
-export EXTRA_LOCAL=NEEDED_LIBRARY_HERE=/path/to/lib 
-export NAF_GEANT=/cloud/path/to/geant/geant4.sh 
-export NAF_PATH=cloud/path/to/repo
-export NAF_USER=user
+
+    -export LOCAL_PATH=/home/path/to/repo 
+    -export LOCAL_GEANT=/home/path/to/geant4/geant4.sh 
+    -export LOCAL_ROOT=/home/path/to/root/thisroot.sh 
+    -export EXTRA_LOCAL=NEEDED_LIBRARY_HERE=/path/to/lib 
+    -export NAF_GEANT=/cloud/path/to/geant/geant4.sh 
+    -export NAF_PATH=cloud/path/to/repo
+    -export NAF_USER=user
 
 # Run macros. macros/
 Three GEANT4 macros are implemented:
+
     - run.mac. The main batch mode run macro. Supresses all GEANT4 verbosity. Can be enable by setting the fields to 1
     - run_test.mac. The run macro for the dry runnin before a job submission.
     - vis.mac The visualization macro. Particle colour scheme or other visualization values possible.
