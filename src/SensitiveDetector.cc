@@ -101,7 +101,7 @@ G4bool SensitiveDetector::ProcessHits(G4Step *aStep, G4TouchableHistory *)
     pixelCluster[i] = {pixX, pixY};
     }
     const auto& deltas = deltaTable[quadrantFlag];
-    for(int i = 0; i<=4; i++)
+    for(int i = 0; i<4; i++)
     {
         pixelCluster[i][0] +=deltas[i][0] ;
         pixelCluster[i][1] +=deltas[i][1] ;
@@ -256,5 +256,5 @@ std::pair<std::array<double, 4>, uint8_t>  SensitiveDetector::GetEfficiencyAnaly
     eff10 = eff_X1 * eff_Y0; // top left
     eff11 = eff_X1 * eff_Y1; // top right
 
-    return {{eff00, eff01, eff10, eff11}, quadrantFlag} ; // ordering not certain yet.
+    return {{eff00, eff01, eff10, eff11}, quadrantFlag} ; // ordering not certain yet. 
 }

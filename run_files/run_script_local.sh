@@ -1,15 +1,18 @@
 #!/bin/bash
 
 if [ $HOME = "/home/vlad" ]; then
-    source ../config_vlad.sh
+    echo "Running as user vlad"
+    source ../configs/config_vlad.sh
     source "$LOCAL_GEANT"
     source "$LOCAL_ROOT"
     export $EXTRA_LOCAL
-    
-elif [$HOME = "home/lucian"]; then
-    source ../config_lucian.sh
+
+elif [$HOME = "/Users/lucianfasselt"]; then
+    echo "Running as user lucian"
+    source ../configs/config_lucian.sh
 else 
-    source ../config.sh
+    echo "REVERTING TO ALMA9 cvmfs sourcing"
+    source ../configs/config.sh
 fi
 FLAG=$1
 

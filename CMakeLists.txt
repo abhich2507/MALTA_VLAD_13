@@ -1,7 +1,7 @@
 # Set the minimum version required for cmake. The version 4.0 was 
 # chosen as the required version for Allpix squared compatibility
 cmake_minimum_required(VERSION 3.26 FATAL_ERROR)
-set(CMAKE_SKIP_RPATH ON)
+#set(CMAKE_SKIP_RPATH ON)
 # Define the project with the name Tutorial.
 project(Tutorial)
 # Locate and configure Geant4. Required == Fatal Error if not 
@@ -16,10 +16,12 @@ include_directories(${PROJECT_SOURCE_DIR}/include)
 # glob function to find all .cc source files in the src directory and puts it in
 # the sources variable. No need to list all source files by hand
 file(GLOB sources ${PROJECT_SOURCE_DIR}/src/*.cc)
+# Remove this line because it requires a CMake level ROOT sourcing which is not yet compatible.
+list(REMOVE_ITEM sources ${PROJECT_SOURCE_DIR}/src/Create2DEffMap.cc)
 # Copy all te macro files in the macros directory
 file(GLOB MACRO_FILES "macros/*.mac")
 file(COPY ${MACRO_FILES} DESTINATION ${CMAKE_BINARY_DIR}/)
-file(GLOB CONDOR_FILES "condor_submission/*")
+file(GLOB CONDOR_FILES "run_files/*")
 file(COPY ${CONDOR_FILES} DESTINATION ${CMAKE_BINARY_DIR}/)
 # Create executable called sim that compilse sim.cc and all source files from sources
 # sim.cc is the main file with main() function
