@@ -105,7 +105,8 @@ void PrimaryGenerator::GeneratePrimaries(G4Event *oneEvent)
 
         G4int evtID = oneEvent->GetEventID();
         double offSet =  fFlag->intraSpillOffset;
-        fParticleGun->SetParticleTime(evtID * fFlag->beamVeto *ns + offSet *ns); // This is the only thread safe way to do this. Multithreading messes up life as always
+        double particleTime = evtID * fFlag->beamVeto *ns + offSet *ns;
+        fParticleGun->SetParticleTime(particleTime); // This is the only thread safe way to do this. Multithreading messes up life as always
 
         // Save Vertex Info
         G4AnalysisManager *analysisManager = G4AnalysisManager::Instance();
@@ -113,7 +114,7 @@ void PrimaryGenerator::GeneratePrimaries(G4Event *oneEvent)
         analysisManager->FillNtupleDColumn(2, 1, pos[0]);
         analysisManager->FillNtupleDColumn(2, 2, pos[1]);
         analysisManager->FillNtupleDColumn(2, 3, pos[2]);
-        analysisManager->FillNtupleDColumn(2, 4, evtID * fFlag->beamVeto * ns);
+        analysisManager->FillNtupleDColumn(2, 4, particleTime);
         analysisManager->FillNtupleDColumn(2, 5, std::stod(fFlag->particleEnergy));
         analysisManager->AddNtupleRow(2); 
 

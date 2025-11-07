@@ -34,9 +34,6 @@ struct SimFlags
     double beamYOffset = 0.;
     double beamZOffset = 0.;
     double sourceRadius =  0.;
-    double sourceXOffset = 0.;
-    double sourceYOffset = 0.;
-    double sourceZOffset = 0.;
     int particleCount = 0;
     int numEvents = 0;
     double intraSpillOffset = 0;

@@ -102,9 +102,6 @@ void LoadSimFlagsFromFile(const std::string& filename, SimFlags& flags)
         else if (key == "beamYOffset") flags.beamYOffset = std::stod(value);
         else if (key == "beamZOffset") flags.beamZOffset = std::stod(value);
         else if (key == "sourceRadius") flags.sourceRadius = std::stod(value);
-        else if (key == "sourceXOffset") flags.sourceXOffset = std::stod(value);
-        else if (key == "sourceYOffset") flags.sourceYOffset = std::stod(value);
-        else if (key == "sourceZOffset") flags.sourceZOffset = std::stod(value);
         else if (key == "particleCount") flags.particleCount = std::stoi(value);
         else if (key == "numEvents") flags.numEvents = std::stoi(value);
         else if (key == "intraSpillOffset") flags.intraSpillOffset = std::stod(value);
