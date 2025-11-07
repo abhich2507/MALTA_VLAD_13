@@ -70,7 +70,7 @@ void simpleAnalysis(std::string inputPath, std::string outROOTname, double resul
     // // Usage:
     // // create subdirectory and run from there (pdf plots will be created in it)
     // root
-    // .L ~/Documents/Simu/Geant4/DECAL_REPO/root_macros/simpleAnalysis.c
+    // .L ~/Documents/Simu/Geant4/DECAL_REPO/plotting_scripts/simpleAnalysis.c
     // // specify threshold variable in threshold_loop(). Then run:
     // threshold_loop()
 

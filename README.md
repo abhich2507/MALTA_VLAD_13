@@ -10,7 +10,7 @@ The project is built with the help of a Cmake file: CMakeLists.txt. The simulati
 
 - /analysis. Directory contains all the C++ ROOT scripts for data processing, reconstruction and analysis
 - /build. Directory contains all the built files via CMake
-- /configs. Directory contains all the configuration files used in the simultaion and analysis.
+- /configs. Directory contains all the configuration files used in the simulation and analysis.
 - /include. GEANT4 header files
 - /macros. GEANT4 run and vis macros. They are called via config flags
 - /plotting_scripts. Directory contains all plotting scripts which can be used to quickly generate plots
@@ -50,7 +50,7 @@ python run_analysis.py -r runNumber -i analysis_flags.cfg -thr thrValue -s saveN
 The GEANT4 simulation is structured based on the usual file format. The functionality of each class is described further below:
 
 ## ActionInitialization
-This class inherit the GEANT4 class G4VUserActionInitialization. It is used to to intialize all the actions at the different GEANT4 levels in the package. The following actions are currently defined in the package: PrimaryGenerator, RunAction, EventAction, SteppingAction, TrackingAction. All initializations are done at the thread level, except for the run action which is additionally defined at the master thread level.
+This class inherit the GEANT4 class G4VUserActionInitialization. It is used to initialize all the actions at the different GEANT4 levels in the package. The following actions are currently defined in the package: PrimaryGenerator, RunAction, EventAction, SteppingAction, TrackingAction. All initializations are done at the thread level, except for the run action which is additionally defined at the master thread level.
 
 ## Config
 This class implements all the methods for importing and saving configurations and also creating run directories and handling path managements
@@ -64,10 +64,11 @@ This class implements all the methods for importing and saving configurations an
 Detailed explanation of the simulation flag functionality is described in another subsection below. [TODO: Link?]
 
 ## CorrectionData2D
-[Lucian Please fill]
+The current simulation code does not use this function.
+CorrectionData2D.cc is the input file of a 2D in-pixel efficiency map. This is useful if instead of the analytical efficiency parameterization, a direct data input is preferred. nBinsX and nBinsY defines the number of bins and spacingX, spacingY the distance between bins in microns. The data can incorporate asymmetries or a more detailed structure than the simple analytical function.
 
 ## Create2DEffMap
-[Lucian Please fill]
+This function is used to generate CorrectionData2D.cc based on a TH2D "histName" in a specified root input file.
 
 ## DetectorConstruction
 This class inherits the GEANT4 class G4VUserDetectorConstruction. It is used to define the solid, logic and physical volumes associated to the elements of the simulation. The aim of this class is to create an accurate simulation of the real MALTA2 sensor and fixtures but at the same time keep the geometry of the active detector simple enough in order to keep the computation times low.
@@ -92,7 +93,7 @@ Currently 7 MALTA planes are implemted where the z positions were taken from the
     - last 3 tracking planes planeID 4 -6
 
 ### PCB Volume
-The Printed Circuit Board (PCB) to which the MALTA samples are glued to is simulated. Currently, the PCB implementation is implemented separatelly to the sensor simulation, allowing a switch between the 2 via a flag. A unitary implementation might be desired in the future, however the PCB stack is subject to change between diferent iterations.
+The Printed Circuit Board (PCB) to which the MALTA samples are glued to is simulated. Currently, the PCB implementation is implemented separately to the sensor simulation, allowing a switch between the 2 via a flag. A unitary implementation might be desired in the future, however the PCB stack is subject to change between different iterations.
 
 The PCB is implemented as Copper and dielectric planes with the help of the edms files of the E-TCT PCB. Two materials are used in the simulation. The pre-defined nist G4_Cu and a custom defined material: FR4. The FR4 material is defined as a mixture of O, C, Si, H, Na, B. The component percentage of each element was computed taking into account the atomic formula of a typical fire retardant PCB material found at reference: https://www.physics.smu.edu/web/research/preprints/SMU-HEP-08-11.pdf and the molar mass of each element. All Copper and FR4 planes are defined as rectangular 12.7 x 12.7 cm^2 but with various thicknesses as defined in the design file. (TODO: The current geometrical implementation does not match the exact physical dimensions of the board. For a more accurate implementation, define custom volume and not a G4Box). All Copper planes have the same thickness of 18 microns. Three FR4 thickness planes are defined depending on their position in the stack: Outer plane (20 microns), Middle plane (100 microns), Inner plane (200 microns). All planes are arranged side by side with no gaps between them. 
 
@@ -113,9 +114,9 @@ Currently, physics lists are switched with the help of flags.
 The SetCuts() method is implemented to modify the production cuts of e-, e+ and gammas. This has an impact on secondary particle propagation in thin sensors, such is the case of the MALTA2 sensor. A very low production cut has an impact on the size of the stored data, however it improves accuracy in simulating secondar propagation. A value of 1 um was found to yield reasonable results for the tracking of a single MALTA2 sensor.
 
 ## PrimaryGenerator
-This class inherits the GEANT4 class G4VUserPrimaryGeneratorAction and defines the particle generator. All particles are generated via the G4ParticleGun(1) method. This defines the number of primaries (1) that GEANT4 will shoot at the generator level of the class. The number of primaries that GEANT4 shoots at the same time can however be customized with the help of the particleCount flag which is implemented at the GeneratePrimaries level in order to accound for random sampling of desired parameters: position, momentum, energy, particle type.
+This class inherits the GEANT4 class G4VUserPrimaryGeneratorAction and defines the particle generator. All particles are generated via the G4ParticleGun(1) method. This defines the number of primaries (1) that GEANT4 will shoot at the generator level of the class. The number of primaries that GEANT4 shoots at the same time can however be customized with the help of the particleCount flag which is implemented at the GeneratePrimaries level in order to account for random sampling of desired parameters: position, momentum, energy, particle type.
 
-Currently, continuous distributions of the primary position is implmented via the following functions:
+Currently, continuous distributions of the primary position is implemented via the following functions:
 
 1. Pencil beam: define a fixed position in PhMattPrimaryGenerator() as a G4ThreeVector
 2. Circular beam: defined with the GetRandomPointOnCircle() method in GeneratePrimaries()
@@ -166,20 +167,16 @@ In the class constructor the following Ntuples are defined:
 
 5. "MomentumDistribution" H1 ID 0 is populated in SteppingAction::UserSteppingAction. Contains the same information as the "ScatAngle" Ntuple. TODO: probably remove implementation.
 
-The class additionally handles the IO calls for opening and closeing the output root files in the BeginofAction() and EndofAction() methods respectively.
+The class additionally handles the IO calls for opening and closing the output root files in the BeginofAction() and EndofAction() methods respectively.
 
 ## SensitiveDetector
 This class inherits the GEANT4 G4VSensitiveDetector class and allows GEANT4 actions limited to volumes defined as sensitive in `DetectorConstruction::ConstructSDandField()`.
 
 
 ### Charge collection efficiency
-TODO: Lucian Please check the validity of this section.
-
 Each energy deposit is scaled by a charge collection efficiency that depends on the in-pixel location. The energy deposit is distributed among the seed and its 3 nearest neighboring pixels (the three neighbors of the nearest pixel corner). The analytical scaling is derived from testbeam data and based on error-functions: `SensitiveDetector::GetEfficiencyAnalytical()`.
 
 ### Timing
-TODO: Lucian Please check the validity of this section.
-
 The `SensitiveDetector::GetTimingOffset()` method calculates the timewalk based on amplitude and threshold. The parameterization was measured at a threshold of 150e-. Consequently, this threshold is used for reference. The timewalk for other thresholds is obtained by scaling the x-axis (charge-axis) accordingly. This is based on the assumption that the waveform of an n-times larger signal is the same at an n-times larger threshold. In data this is only valid if the front-end gain is changed through a different bias current. The same assumption can be phrased as: The gain scales with 1/threshold. This scaling is chosen because at the same gain setting (fixed front-end) only a limited threshold range can be covered. For example at "normal" gain a range of 200-700 e- can be covered. Larger threshold ranges can only be reached by lowering the gain. The threshold scaling is illustrated in [analysis/PlotTimeWalkCurves.py](analysis/PlotTimeWalkCurves.py)
 
 ## SteppingAction
@@ -287,16 +284,17 @@ Alternative tracking algorithm designed to mimic the MALTA TB analysis. In this 
 # Plotting scripts. plotting_scripts/
 
 ## compare_data_sim
-[Lucian Please fill]
+A simple python script that reads in data-points as well as simulation output. The simulation output is that of simpleAnalysis.c.
+A list of root-simulation output files can be specified in `sim_inputs` together with a plot label and some marker and line styles.
 
 ## plot_timewalk_curves
-[Lucian Please fill]
+This illustrates the timewalk scaling as discussed above. The measured timewalk at a threshold of 150e- is scaled to other threshold values by x-axis (charge axis) multiplication.
 
 ## ratio_data_sim
-[Lucian Please fill]
+This is to quantify the agreement or mismatch between two TH2Ds. It reads in histograms from data and simulation and calculates their ratio bin-by-bin. There is a check for the same bin numbers in x and y. The resulting TH2D is saved as pdf.
 
 ## ROOTTHelperFunctions
-[Lucian Please fill]
+A list of useful functions for pyroot which is only used in compare_data_sim.py.
 
 ## simpleAnalysis
 Root macro that takes as input the thread-wise root output files. The analysis assumes the Geant4 events as independent and performs a tracking and timing cut of the MALTA hits relative to the MCtrue primary vertex. (TODO: Currently the path is hardcoded. Find smarter way of passing the path)
