@@ -162,9 +162,9 @@ In the class constructor the following Ntuples are defined:
     - "trueGlobalTime" stores the global time stamp derived from the event ID via evtID * fFlag->beamVeto *ns + offSet *ns
     - "trueEnergy" stores the true energy of the primary particle defined by the particleEnergy flag
 
-4. "ScatteringAngle" H1 ID 0 is populated in SteppingAction::UserSteppingAction. Contains the same information as the "ScatAngle" Ntuple. TODO: probably remove implementation.
+4. "ScatteringAngle" H1 ID 0 is populated in SteppingAction::UserSteppingAction. Contains the same information as the "ScatAngle" Ntuple. 
 
-5. "MomentumDistribution" H1 ID 0 is populated in SteppingAction::UserSteppingAction. Contains the same information as the "ScatAngle" Ntuple. TODO: probably remove implementation.
+5. "MomentumDistribution" H1 ID 0 is populated in SteppingAction::UserSteppingAction. Contains the same information as the "ScatAngle" Ntuple.
 
 The class additionally handles the IO calls for opening and closeing the output root files in the BeginofAction() and EndofAction() methods respectively.
 
@@ -173,12 +173,10 @@ This class inherits the GEANT4 G4VSensitiveDetector class and allows GEANT4 acti
 
 
 ### Charge collection efficiency
-TODO: Lucian Please check the validity of this section.
 
 Each energy deposit is scaled by a charge collection efficiency that depends on the in-pixel location. The energy deposit is distributed among the seed and its 3 nearest neighboring pixels (the three neighbors of the nearest pixel corner). The analytical scaling is derived from testbeam data and based on error-functions: `SensitiveDetector::GetEfficiencyAnalytical()`.
 
 ### Timing
-TODO: Lucian Please check the validity of this section.
 
 The `SensitiveDetector::GetTimingOffset()` method calculates the timewalk based on amplitude and threshold. The parameterization was measured at a threshold of 150e-. Consequently, this threshold is used for reference. The timewalk for other thresholds is obtained by scaling the x-axis (charge-axis) accordingly. This is based on the assumption that the waveform of an n-times larger signal is the same at an n-times larger threshold. In data this is only valid if the front-end gain is changed through a different bias current. The same assumption can be phrased as: The gain scales with 1/threshold. This scaling is chosen because at the same gain setting (fixed front-end) only a limited threshold range can be covered. For example at "normal" gain a range of 200-700 e- can be covered. Larger threshold ranges can only be reached by lowering the gain. The threshold scaling is illustrated in [plotting_scripts/plot_timewalk_curves.py](plotting_scripts/plot_timewalk_curves.py)
 
