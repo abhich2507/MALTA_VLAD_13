@@ -22,6 +22,8 @@ saveName   = args.save
 # Pass the path for the config input as env variable
 config_name = args.input
 os.environ["ANALYSIS_CONFIG"] = f"configs/{config_name}"
+command = f"echo $ANALYSIS_CONFIG"
+subprocess.run(command, shell = True)
 
 if not args.proteus:
     thresholds = args.threshold.split(",")
