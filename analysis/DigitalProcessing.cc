@@ -19,11 +19,15 @@ void DigitalProcessing(double inputThreshold, int runNumber, std::string saveNam
     double x0 = analysisFlags->x0;
     double t0 = analysisFlags->t0;
     int groupSize  = analysisFlags->groupSize;
+    int groupSizeX = analysisFlags->groupSizeX;
+    int groupSizeY = analysisFlags->groupSizeY;
     int groupLeng  = analysisFlags->groupLeng;
     int parityLeng = analysisFlags->parityLeng;
     int dColLeng   = analysisFlags->dColLeng;
     int numThreads = analysisFlags->numThreads; 
     double wordSpacing = analysisFlags->wordSpacing;
+
+    //std::cout << groupSize << " ; " << groupSizeX << " ; " << groupSizeY << " ; " << groupLeng << std::endl;
     
     // get local path
     if (proteusFlag) saveName = ""; // Threshold 2000 is the special case of saving all planes
@@ -87,15 +91,20 @@ void DigitalProcessing(double inputThreshold, int runNumber, std::string saveNam
     // Save the threshold 
     TH1D *h1DThreshold =  new TH1D("h1DUTThreshold", "h1DThreshold", 100, inputThreshold - inputThreshold / 2,inputThreshold + inputThreshold / 2);
     TH2D *h2DThreshold    = new TH2D("h2DUTThreshold", "h2DUTThreshold", 512, 0, 512, 512, 0, 512);
+    TH2D *h2MissMerged    = new TH2D("h2MissMerged", "h2MissMerged", 512, 0, 512, 512, 0, 512);
 
     // - threshold distrubution should be the sum of N distrubutions, one every
     // 32 columns, the width smaller than 5% each time, but the mean changes 3-5%.
 
+    // This is an example data input for data sim threshold dispersion validation
+    std::vector<double> vThrMeanData = {959.2, 1004.8, 986.9, 1003.7, 1030.1, 1037.2, 1002.7, 983.7, 938.2, 952.7, 976.5, 943.4, 960.7, 930.8, 884.3, 875.2};
     for (int i = 0; i< pixXNum/groupRepetition; i++)
     {
         static std::mt19937 gen(std::random_device{}());
         std::normal_distribution<> dist(1.0, relativeThresholdSmearingMean);
         double thresholdMean = inputThreshold * dist(gen);
+        //std::cout << thresholdMean << std::endl;
+        //double thresholdMean = vThrMeanData[i];
         for (int x = 0; x < pixXNum; x++)
         {
             for (int y = 0; y < pixYNum; y++)
@@ -129,13 +138,13 @@ void DigitalProcessing(double inputThreshold, int runNumber, std::string saveNam
             eventIDHolder = rawEventID;
         }
         // Now I have energy and time maps of events in the pixel matrix
-        UInt_t maltaPixel;
-        UInt_t maltaGroup;
-        UInt_t maltaParity;
-        UInt_t maltaDelay;
-        UInt_t maltaDColumn;
-        std::vector<std::vector<std::pair<UInt_t, double>>> digitizedWords;
-        std::vector<std::pair<UInt_t, double>> merger;
+        __uint128_t maltaPixel;
+        __uint128_t maltaGroup;
+        __uint128_t maltaParity;
+        __uint128_t maltaDelay;
+        __uint128_t maltaDColumn;
+        std::vector<std::vector<std::pair<__uint128_t, double>>> digitizedWords;
+        std::vector<std::pair<__uint128_t, double>> merger;
         // Sort all words based on the timing. 
         std::vector<std::pair<std::pair<int,std::pair<int,int>>, double>> sortedTimings;
 
@@ -152,7 +161,7 @@ void DigitalProcessing(double inputThreshold, int runNumber, std::string saveNam
 
             auto it = timeMap.find({eventID, {pixX, pixY}});
             // Row correction also of 7ns/ 512 rows + global GEANT4 timestamp
-            if(verbose) std::cout << "Event ID: " << eventID << "; pixX: " << pixX << ";pixY: " << pixY << "; corrEnergy: " << cenergy << "; timewalk: "<< timing << std::endl;
+            //if(verbose) std::cout << "Event ID: " << eventID << "; pixX: " << pixX << ";pixY: " << pixY << "; corrEnergy: " << cenergy << "; timewalk: "<< timing << std::endl;
             timing += *std::max_element(it->second.begin(), it->second.end()) + pixX * 0.0125; 
 
             sortedTimings.emplace_back(entry.first,timing);
@@ -183,46 +192,70 @@ void DigitalProcessing(double inputThreshold, int runNumber, std::string saveNam
             {
                 std::cout << "Event ID: " << eventID << "; pixX: " << pixX << ";pixY: " << pixY << "; corrEnergy: " << cenergy << "; Timing: " << std::setprecision(10) <<  timing << std::endl;
             }
-            UInt_t word = encodeWord(pixX, pixY, verbose);
+            
+            __uint128_t word = encodeWord(pixX, pixY, groupSizeX, groupSizeY, groupLeng, parityLeng, dColLeng, verbose);
 
             //Now I digitized all my words. Next step is merging them based on timing
             if (timing >= t0 && timing < t0 + wordSpacing)
             {
-                //std::cout << "Merging into current word bucket with timing." << timing << std::endl;
+                if(verbose)std::cout << "Merging into current word bucket with timing." << timing << std::endl;
                 merger.push_back(std::make_pair(word, timing));
             }
             else
             {
                 t0 = timing;
                 digitizedWords.push_back(merger);
-                if(merger.size() == 0) std::cout << "Word Size = " << merger.size() << std::endl; 
+                if(verbose)std::cout << "Word Size = " << merger.size() << std::endl; 
                 merger.clear();
                 merger.push_back(std::make_pair(word, timing)); 
             }
         }
+        // Also push the very last merged word.
+        if (!merger.empty()) digitizedWords.push_back(merger);
         // Now I have my words in their correct time buckets. Next is the merging logic.
 
-        std::vector<std::pair<UInt_t, double>> mergedWords;
+        std::vector<std::pair<__uint128_t, double>> mergedWords;
         for (int i =0; i< digitizedWords.size(); i++)
         {
-            UInt_t mergedWord; 
+            // This was not initialized before leading to weird first word
+            __uint128_t mergedWord = 0; 
             std::vector<double> leadingTime;
             int aux = 0;
             for (auto [word, timing] : digitizedWords[i])
             {
+                if(verbose)std::cout << "Word: " << std::bitset<30>(word) << std::endl;
                 mergedWord |= word;
                 leadingTime.push_back(timing);
                 aux++;
+
+                // A merging has taken place. Debug information on merging.
+                if (aux == 2)
+                {   
+                    // Check if the 14 least significant bits are the same. If not than a mismerging happened
+                    if ( (mergedWord & 0x3FFF) != (word & 0x3FFF) )
+                    {
+                        std::vector< std::pair<std::pair<int,int>, int> > pixelPositions = decodedDigitalWord(mergedWord, groupSize, groupSizeX, groupSizeY, groupLeng, parityLeng, dColLeng);
+                        for (const auto& pos : pixelPositions) 
+                        {
+                            int reconstructedPixX = pos.first.first;
+                            int reconstructedPixY = pos.first.second;
+                            h2MissMerged->Fill(reconstructedPixX, reconstructedPixY, 1);
+                        }
+                    }
+                }
             }
-            //if (aux >1) std::cout << "A MERGING HAS OCCURED" << std::endl;
+
+            
             // Save the merged word and the fastest hit time
             if (digitizedWords[i].size() == 0) continue; // Skip empty vectors
             mergedWords.push_back({mergedWord, *std::max_element(leadingTime.begin(), leadingTime.end())});
+            if (verbose) std::cout << "##############" << std::endl << "Merged word: " << std::bitset<30>(mergedWord) << std::endl;
             // TODO: Timing should be given via a clock. Find from Carlos the frequency.
             // Reset fot next iteration
             mergedWord = 0;
             leadingTime.clear();
         }
+        savePlot(directoryPath, runPath, inputThreshold, saveName, h2MissMerged, "h2MissMerged");
 
         // Now I have merged words. Next step is decoding them back to position and time
         // However, first I need the infrastructure to save them in a root tree.
@@ -242,7 +275,7 @@ void DigitalProcessing(double inputThreshold, int runNumber, std::string saveNam
 
         for (auto [word, timing] : mergedWords) 
         {
-            std::vector< std::pair<std::pair<int,int>, int> > pixelPositions = decodedDigitalWord(word, groupSize, groupLeng, parityLeng, dColLeng);
+            std::vector< std::pair<std::pair<int,int>, int> > pixelPositions = decodedDigitalWord(word, groupSize, groupSizeX, groupSizeY, groupLeng, parityLeng, dColLeng);
 
             for (const auto& pos : pixelPositions) 
             {

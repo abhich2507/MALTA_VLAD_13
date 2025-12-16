@@ -1,6 +1,23 @@
 
 #include "Clustering.hh"
 
+struct Hit
+{
+    int x;
+    int y;
+    double t;
+};
+
+bool hasHitAt(const std::vector<Hit>& cluster, int x, int y)
+{
+    return std::any_of(cluster.begin(), cluster.end(), [&](const Hit& h)
+        {
+            return h.x == x && h.y == y;
+        });
+}
+
+
+
 void Clustering(double threshold, int runNumber, std::string saveName = "default")
 {
     auto start = std::chrono::high_resolution_clock::now();
@@ -58,81 +75,99 @@ void Clustering(double threshold, int runNumber, std::string saveName = "default
     int currentTrack = 0;
     int realHits;
     
+    
     std::set<std::pair<int,int>> clusterCandidate;
     std::vector<double> clusterTiming;
+    std::vector<Hit> cluster;
     double currentX, currentY;
     int entry = 0;
+    
     for (int i = 0; i < nTrackedEntries; i++)
     {
         trackedTree->GetEntry(i);
         //trackVertixes.push_back(std::make_pair(vertexX, vertexY));      
         if(trackID == entry) 
         {
-            clusterCandidate.insert(std::make_pair(pixX, pixY));
-            clusterTiming.push_back(reconstructedTime);
+            //clusterCandidate.insert(std::make_pair(pixX, pixY));
+            //clusterTiming.push_back(reconstructedTime);
+            cluster.push_back(Hit{pixX, pixY, reconstructedTime});
             currentX = vertexX;
             currentY = vertexY;
         }
-        else if (! clusterCandidate.empty())
+        else if (! cluster.empty())
         {
             entry++;
             int clSize = 0;
             // Now that we have a set of cluster candidates. Check that they actually are valid
             int j = 0;
-            for (const auto& [xPos, yPos] : clusterCandidate) 
+            for (auto it = cluster.begin(); it != cluster.end(); )
             {
-                clSize++;
-                double hitTiming = clusterTiming[j];
-                if(verbose)std::cout << "Proposed hit in cluster with: " << " ;xPos: " << xPos << " ;yPos: " << yPos << " ;hitTiming: " << hitTiming << std::endl;
-                
+                const int xPos = it->x;
+                const int yPos = it->y;
+                const double hitTiming = it->t;
+
+                if (verbose)
+                {
+                    std::cout << "Proposed hit in cluster with:"
+                            << " xPos=" << xPos
+                            << " yPos=" << yPos
+                            << " hitTiming=" << hitTiming
+                            << std::endl;
+                }
+
+                bool erase = false;
+
+                // invalid pixel
                 if (xPos == -1 || yPos == -1)
                 {
-                    clSize--;
-                    clusterTiming.erase(clusterTiming.begin() + j);
+                    erase = true;
                 }
-                
-                for (auto& [dx, dy] : diagonals)
+
+                // diagonal-only adjacency check
+                for (const auto& [dx, dy] : diagonals)
                 {
-                    // Here we check if there are non-adjacent pixel clusters.
-                    if (clSize > 1 && clusterCandidate.count(std::make_pair(xPos + dx, yPos +dy)) &&
-                        !(clusterCandidate.count(std::make_pair(xPos +dx, yPos)) || clusterCandidate.count(std::make_pair(xPos, yPos + dy) ) ))
+                    if (!erase &&
+                        hasHitAt(cluster, xPos + dx, yPos + dy) &&
+                        !(hasHitAt(cluster, xPos + dx, yPos) ||
+                        hasHitAt(cluster, xPos, yPos + dy)))
                     {
-                        clSize--;
-                        clusterTiming.erase(clusterTiming.begin() + j);
+                        erase = true;
                     }
                 }
-                j++;
-            }
 
+                if (erase)
+                {
+                    it = cluster.erase(it);
+                }
+                else
+                {
+                    ++clSize;
+                    ++it;
+                }
+            }
             analysisVertexX = currentX;
             analysisVertexY = currentY;                
             analysisClSize = clSize;
-            timing = *std::min_element(clusterTiming.begin(), clusterTiming.end());
+            timing = std::min_element(cluster.begin(), cluster.end(), [](const Hit& a, const Hit& b)
+            {
+                return a.t < b.t;
+            })->t;
 
             if(verbose)std::cout << "Saving to tree: " << " X = " << analysisVertexX << " ;Y = " << analysisVertexY << " ;clSize = " <<  clSize << " ;timing = " << timing << std::endl;
 
             analysisTree->Fill();
             // Reset and dont forget this event
-            clusterCandidate.clear();
-            clusterTiming.clear();
-            clusterCandidate.insert(std::make_pair(pixX, pixY));
-            clusterTiming.push_back(reconstructedTime);
-            currentX = vertexX;
-            currentY = vertexY;
-        }
-        else
-        {
-            entry++;
-            clusterCandidate.clear();
-            clusterTiming.clear();
-            clusterCandidate.insert(std::make_pair(pixX, pixY));
-            clusterTiming.push_back(reconstructedTime);
+            cluster.clear();
+            cluster.push_back({pixX, pixY, reconstructedTime});
             currentX = vertexX;
             currentY = vertexY;
         }
         if (verbose && nHits == 1) std::cout << "NEW TRACK: " << " trackID: " << trackID << " ;xPos: " << vertexX << " ;yPos: " << vertexY << " ;LocalTime: " << reconstructedTime << std::endl;
-        
+    
     }
+
+
+
 
     analysisTree->Write();
     outfile->Close();

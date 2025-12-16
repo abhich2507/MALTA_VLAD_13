@@ -86,44 +86,57 @@ double GetTimingOffset(double amplitude, double threshold, double T, double Tdiv
 }
 
 // Returns positions of set bits in a 16-bit word
-std::vector<int> getSetBitPositions(uint16_t maltaPixel, int groupSize)
+std::vector<int> getSetBitPositions(__uint128_t maltaPixel, int groupSize)
 // Checks for all flipped bits in a 16-bit word and returns their positions in a vector
 {
     std::vector<int> positions;
     for (int i = 0; i < groupSize; i++) {
-        if (maltaPixel & (1 << i)) {
+        if (maltaPixel & (__uint128_t(1) << i)) {
             positions.push_back(i);
         }
     }
     return positions;
 }
 
-UInt_t encodeWord(int pixX, int pixY, bool verbose)
+__uint128_t encodeWord(int pixX, int pixY, int groupSizeX, int groupSizeY , int groupLeng, int parityLeng, int dColLeng, bool verbose)
 {
-    UInt_t maltaDColumn, maltaGroup, maltaDelay, maltaParity, maltaPixel;
-    // TODO: Bit length not yet generalized
-    maltaDColumn = pixX / 2;
-    maltaGroup = pixY / 16;
+    __uint128_t maltaDColumn, maltaGroup, maltaDelay, maltaParity, maltaPixel;
+    // Lesson learned UInt_t is 32 bit word. All the most meaningful bits above that get truncated. Use 64 bits ULong or even larger for future?
+    
+    maltaDColumn = pixX / groupSizeY;
+    maltaGroup = pixY / (groupSizeX *2);
     maltaDelay = 1;
-    maltaParity = (pixY /8) %2; 
-    maltaPixel = 0b0000000000000000;
-    //maltaPixel ^= (1 << pixY % 8 + 8 *(pixX %2)); //* (pixX % 2 +1));
-    maltaPixel ^= (1 << ( (pixY % 8) + (8 * (pixX % 2)) ));
-    UInt_t word = 0;
-    word |= (maltaPixel & 0xFFFF) << (5 + 1 + 8); // shift left by 14 bits
-    word |= (maltaGroup & 0x1F)       << (1 + 8);     // shift left by 9 bits
-    word |= (maltaParity & 0x1)       << 8;           // shift left by 8 bits
-    word |= (maltaDColumn & 0xFF);                    // stays in lower 8 bits
+    maltaParity = (pixY /groupSizeX) %2; 
+    maltaPixel = 0;
+    maltaPixel ^= (__uint128_t(1) << ( (pixY % groupSizeX) + (groupSizeX * (pixX % groupSizeY)) ));
+    //UInt_t PIXEL_MASK   = (1u << (groupSizeX *groupSizeY))   - 1;
+    /*
+    ULong64_t PIXEL_MASK   = (UInt_t)((1ULL << (groupSizeX * groupSizeY)) - 1ULL);
+    ULong64_t GROUP_MASK   = (UInt_t)((1ULL << groupLeng) - 1ULL);
+    ULong64_t PARITY_MASK  = (UInt_t)((1ULL << parityLeng) - 1ULL);
+    ULong64_t DCOLUMN_MASK = (UInt_t)((1ULL << dColLeng) - 1ULL);
+    ULong64_t word = 0;
+    */
+    __uint128_t PIXEL_MASK   = (__uint128_t(1) << (groupSizeX * groupSizeY)) - 1;
+    __uint128_t GROUP_MASK   = (__uint128_t(1) << groupLeng) - 1;
+    __uint128_t PARITY_MASK  = (__uint128_t(1) << parityLeng) - 1;
+    __uint128_t DCOLUMN_MASK = (__uint128_t(1) << dColLeng) - 1;
+    __uint128_t word = 0;
+
+    word |= (maltaPixel & PIXEL_MASK)         << (dColLeng + parityLeng + groupLeng); // shift left by 14 bits
+    word |= (maltaGroup & GROUP_MASK)         << (dColLeng + parityLeng);     // shift left by 9 bits
+    word |= (maltaParity & PARITY_MASK)       << dColLeng;           // shift left by 8 bits
+    word |= (maltaDColumn & DCOLUMN_MASK);                    // stays in lower 8 bits
     if (verbose)
     {
-        std::cout << "DColumn: " << std::bitset<8>(maltaDColumn) << "; Group: " << std::bitset<5>(maltaGroup) << "; Parity: " << std::bitset<1>(maltaParity) << "; MaltaPixel: " << std::bitset<16>(maltaPixel) << std::endl;
-        std::cout << "Encoded word: " << std::bitset<32>(word) << std::endl;
+        std::cout << "DColumn: " << std::bitset<6>(maltaDColumn) << "; Group: " << std::bitset<5>(maltaGroup) << "; Parity: " << std::bitset<1>(maltaParity) << "; MaltaPixel: " << std::bitset<64>(maltaPixel) << std::endl;
+        std::cout << "Encoded word: " << std::bitset<77>(word) << std::endl;
     }
     return word; 
 }
 
 // Customizable mask for decoding digital subwords in a MALTA word.
-std::vector<UInt_t> decodingMaskMSB(UInt_t word, const std::vector<int>& field_sizes)
+std::vector<__uint128_t> decodingMaskMSB(__uint128_t word, const std::vector<int>& field_sizes)
 {
     // Simplified description of the code operation for nominal MALTA parameters:
     /*
@@ -132,7 +145,7 @@ std::vector<UInt_t> decodingMaskMSB(UInt_t word, const std::vector<int>& field_s
     UInt_t maltaParity  = (word >> 8)         & 0x1;      // 1 bit
     UInt_t maltaDColumn =  word               & 0xFF;     // last 8 bits
     */
-    std::vector<UInt_t> fields;
+    std::vector<__uint128_t> fields;
     int total_bits = 0;
     for (int s : field_sizes) total_bits += s;
     int shift = total_bits;
@@ -140,8 +153,8 @@ std::vector<UInt_t> decodingMaskMSB(UInt_t word, const std::vector<int>& field_s
     for (int size : field_sizes)
     {
         shift -= size;
-        UInt_t mask = (1u << size) - 1u;
-        UInt_t value = (word >> shift) & mask;
+        __uint128_t mask = (__uint128_t(1) << size) - 1;
+        __uint128_t value = (word >> shift) & mask;
         fields.push_back(value);
     }
 
@@ -149,28 +162,30 @@ std::vector<UInt_t> decodingMaskMSB(UInt_t word, const std::vector<int>& field_s
 }
 
 // Decodes a digital word into pixel positions and hit counts
-std::vector< std::pair<std::pair<int,int>, int> > decodedDigitalWord(UInt_t word, int groupSize, int groupLeng, int parityLeng, int dColLeng)
+std::vector< std::pair<std::pair<int,int>, int> > decodedDigitalWord(__uint128_t word, int groupSize,int groupSizeX, int groupSizeY, int groupLeng, int parityLeng, int dColLeng)
 {
     //Expert debug statement. Should not come up unless modifications on the digitization logic are made.
     bool debug = false;
     std::vector<int> field_sizes = {groupSize, groupLeng, parityLeng, dColLeng};
     auto decodedWords   = decodingMaskMSB(word, field_sizes);
-    UInt_t maltaPixel   = decodedWords[0];
-    UInt_t maltaGroup   = decodedWords[1];
-    UInt_t maltaParity  = decodedWords[2];
-    UInt_t maltaDColumn = decodedWords[3]; 
+    __uint128_t maltaPixel   = decodedWords[0];
+    __uint128_t maltaGroup   = decodedWords[1];
+    __uint128_t maltaParity  = decodedWords[2];
+    __uint128_t maltaDColumn = decodedWords[3]; 
 
     std::vector <std::pair<std::pair<int,int>, int> > pixelPositions;
     std::vector<int> hitInGroup = getSetBitPositions(maltaPixel, groupSize);
 
     if(debug)
     {
+        std::cout << "field_sizes: " << groupSize << " ; " << groupLeng << " ; " << parityLeng << " ; " << dColLeng << std::endl;
+
         std::cout << "-------------------------------" << std::endl;
-        std::cout << "Input word: " << std::bitset<32>(word) << std::endl;
-        std::cout << "Decoded Pixel word: " << std::bitset<16>(maltaPixel) << std::endl;
+        std::cout << "Input word: " << std::bitset<77>(word) << std::endl;
+        std::cout << "Decoded Pixel word: " << std::bitset<64>(maltaPixel) << std::endl;
         std::cout << "Decoded Group: " << std::bitset<5>(maltaGroup) << std::endl; 
         std::cout << "Decoded Parity: " << std::bitset<1>(maltaParity) << std::endl;
-        std::cout << "Decoded DColumn: " << std::bitset<8>(maltaDColumn) << std::endl;
+        std::cout << "Decoded DColumn: " << std::bitset<6>(maltaDColumn) << std::endl;
     }
     
     int nHits = 0;
@@ -178,11 +193,22 @@ std::vector< std::pair<std::pair<int,int>, int> > decodedDigitalWord(UInt_t word
     {
         nHits ++;
         // TODO: Source of errors when the bit sizes change. Revisit for further implementation
-        int pixX = maltaDColumn *2 + hit /8;
-        int pixY = maltaGroup *16 + 8 * maltaParity + hit %8;
+        /*
+        int x_half = (hit >= groupSizeX) ? 1 : 0;
+        int pixX = maltaDColumn *groupSizeY + x_half;
+        int y_in_half = hit % groupSizeX;
+        int pixY = maltaGroup *(groupSizeX * groupSizeY) + groupSizeX * maltaParity + y_in_half;
+        */
+        int x_subgroup = hit / groupSizeX;      // 0 .. (groupSizeY-1)
+        int y_in_subgroup = hit % groupSizeX;   // 0 .. (groupSizeX-1)
+
+        int pixX = maltaDColumn * groupSizeY + x_subgroup;
+        int pixY = maltaGroup * (groupSizeX * 2) + maltaParity * groupSizeX + y_in_subgroup;
+
         pixelPositions.push_back(std::make_pair(std::make_pair(pixX, pixY), nHits));
         if (debug)    
         {
+            std:cout << "Hit: " << hit << std::endl;
             std::cout << "Decoded pixel position: (" << pixX << ", " << pixY << ")" << std::endl;
         }
     }
@@ -194,17 +220,17 @@ std::vector< std::pair<std::pair<int,int>, int> > decodedDigitalWord(UInt_t word
 void digitalTest(std::vector<std::pair<int,int>> hits)
 {
     // Takes as input a set of hit positions and outputs the merged hit positions
-    UInt_t mergedWord = 0;
+    __uint128_t mergedWord = 0;
     for(auto& hit: hits)
     {
         std::cout << "Input Hits: X: " << hit.first << "; Y: " << hit.second << std::endl; 
-        UInt_t word = encodeWord(hit.first,hit.second, false);
-        std::cout << "Encoded word: " << std::bitset<30>(word) << std::endl;
+        __uint128_t word = encodeWord(hit.first, hit.second, 8, 8, 5, 1, 6, false);
+        std::cout << "Encoded word: " << std::bitset<77>(word) << std::endl;
         mergedWord |= word;
     }
-    std::cout << "Merged word:  " << std::bitset<30>(mergedWord) << std::endl;
+    std::cout << "Merged word:  " << std::bitset<77>(mergedWord) << std::endl;
 
-    std::vector< std::pair<std::pair<int,int>, int> > pixPos = decodedDigitalWord(mergedWord, 16, 5, 1, 8);
+    std::vector< std::pair<std::pair<int,int>, int> > pixPos = decodedDigitalWord(mergedWord, 64, 8, 8, 5, 1, 6);
     for (const auto& pos : pixPos) 
     {
         int reconstructedPixX = pos.first.first;

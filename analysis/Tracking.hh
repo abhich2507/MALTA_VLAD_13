@@ -52,8 +52,8 @@ DetectorConfig LoadConfig(const std::string& configPath)
 // Reconstruct position of planes from the config file
 inline std::pair<double,double> PixelPositionReconstruction(int pixelX, int pixelY, const DetectorConfig& cfg)
 {
-    double xGlobal = pixelX * cfg.pixelSize + cfg.detectorXOffset - cfg.detectorSizeX / 2;
-    double yGlobal = pixelY * cfg.pixelSize + cfg.detectorYOffset - cfg.detectorSizeY / 2;
+    double xGlobal = pixelX * cfg.pixelSize + cfg.detectorXOffset - cfg.detectorSizeX / 2 + cfg.pixelSize /2;//+ cfg.pixelSize /2; //  Correct to pixel middle
+    double yGlobal = pixelY * cfg.pixelSize + cfg.detectorYOffset - cfg.detectorSizeY / 2 + cfg.pixelSize /2;//+ cfg.pixelSize /2; //  Correct to pixel middle
     return {xGlobal, yGlobal};
 }
 
