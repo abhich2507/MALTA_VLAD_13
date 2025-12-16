@@ -95,12 +95,50 @@ G4bool SensitiveDetector::ProcessHits(G4Step *aStep, G4TouchableHistory *)
 
     int pixX = static_cast<int>((posPixel.x() - detXOffset + detX / 2) / pixelSize);
     int pixY = static_cast<int>((posPixel.y() - detYOffset + detY / 2) / pixelSize);
+
+    // Handle edge cases:
+    if(pixX == 0 && ((quadrantFlag & 0x1) == 0 ))
+    {
+        effAn[1]+=effAn[0];
+        effAn[0] = 0;
+        effAn[3]+=effAn[2];
+        effAn[2] = 0;
+
+    }
+
+    if(pixX == 511 && (quadrantFlag & 0x1) )
+    {
+        effAn[0]+=effAn[1];
+        effAn[1] = 0;
+        effAn[2]+=effAn[3];
+        effAn[3] = 0;
+    }
+
+    if(pixY == 0 && ( (quadrantFlag & (1 << 1)) == 0) )
+    {
+        effAn[2]+=effAn[0];
+        effAn[0] = 0;
+        effAn[3]+=effAn[1];
+        effAn[1] = 0;
+
+    }
+
+    if(pixY == 511 && (quadrantFlag & (1 << 1)) )
+    {
+        effAn[0]+=effAn[2];
+        effAn[2] = 0;
+        effAn[1]+=effAn[3];
+        effAn[3] = 0;
+    }
+
+
     std::array<std::array<int, 2>, 4> pixelCluster;
     for (int i = 0; i < 4; ++i) 
     {
     pixelCluster[i] = {pixX, pixY};
     }
     const auto& deltas = deltaTable[quadrantFlag];
+    // Found BUG: Edge is not handled. 
     for(int i = 0; i<4; i++)
     {
         pixelCluster[i][0] +=deltas[i][0] ;
