@@ -7,7 +7,7 @@ if [ $HOME = "/home/vlad" ]; then
     source "$LOCAL_ROOT"
     export $EXTRA_LOCAL
 
-elif [$HOME = "/Users/lucianfasselt"]; then
+elif [ $HOME = "/Users/lucianfasselt"]; then
     echo "Running as user lucian"
     source ../configs/config_lucian.sh
 else 
