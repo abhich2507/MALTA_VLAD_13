@@ -26,6 +26,7 @@ private:
     SimFlags* fFlag;
     G4ThreeVector GetRandomPointOnCircle(G4double radius, G4ThreeVector center);
     G4ThreeVector GetRandomPointOnRectangle(G4double height, G4double thickness, G4ThreeVector center);
+    G4double GetRandomPointInLine( G4double xMin, G4double xMax);
     G4ParticleGun *fParticleGun;
     G4int fEventCounter;
 };
