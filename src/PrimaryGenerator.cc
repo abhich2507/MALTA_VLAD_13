@@ -62,6 +62,11 @@ G4ThreeVector PrimaryGenerator::GetRandomPointOnRectangle(G4double height, G4dou
     return G4ThreeVector(x, y, z);
 }
 
+G4double PrimaryGenerator::GetRandomPointInLine( G4double xMin, G4double xMax)
+{
+    return xMin + (xMax - xMin) * G4UniformRand();
+}
+
 void PrimaryGenerator::GeneratePrimaries(G4Event *oneEvent)
 {
     if(fFlag->verbosePG) std::cout << "This event contains " << fFlag->particleCount << " particles with:" << std::endl;
@@ -95,6 +100,16 @@ void PrimaryGenerator::GeneratePrimaries(G4Event *oneEvent)
         else if (fFlag->beamGeometry == "granularBeam")
         {
             pos = G4ThreeVector(x + ev * 72.8 *um, y, z);
+        }
+        else if (fFlag->beamGeometry == "DColScanX")
+        {
+            // Currently the defualt is to scan the second double column for fixed y and z
+            pos = G4ThreeVector(GetRandomPointInLine(4.07302 *cm, 4.07302 *cm + 600*um), y, z);
+        }
+        else if (fFlag->beamGeometry == "DColScanY")
+        {
+            // Currently the defualt is to scan the second double column for fixed y and z
+            pos = G4ThreeVector(x, GetRandomPointInLine(4.27302 *cm, 4.27302 *cm + 36.4*um), z);
         }
         else
         {
