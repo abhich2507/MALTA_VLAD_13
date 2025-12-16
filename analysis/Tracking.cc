@@ -186,12 +186,13 @@ void Tracking(double threshold, int runNumber, std::string saveName)
 
             h1ResidualX->Fill(pixelGlobalPosition.first  - reconstructedVertexX);
             h1ResidualY->Fill(pixelGlobalPosition.second - reconstructedVertexY);
+            if(verbose) std::cout << "(?) Candidate found at Pixel (" << pixX << ", " << pixY << ") with Global Position (" << pixelGlobalPosition.first << ", " << pixelGlobalPosition.second << ")" << "; Timing:" << reconstructedLocalTime << std::endl;               
 
-
-            if ( ( pixelGlobalPosition.first > reconstructedVertexX - dCut / 1000. && pixelGlobalPosition.first < reconstructedVertexX + dCut / 1000. ) 
-            &&  ( pixelGlobalPosition.second > reconstructedVertexY - dCut / 1000. && pixelGlobalPosition.second < reconstructedVertexY + dCut / 1000. ))
+            //if ( ( pixelGlobalPosition.first >= reconstructedVertexX - dCut / 1000. && pixelGlobalPosition.first <= reconstructedVertexX + dCut / 1000. ) 
+            //&&  ( pixelGlobalPosition.second >= reconstructedVertexY - dCut / 1000. && pixelGlobalPosition.second <= reconstructedVertexY + dCut / 1000. ))
+            if(std::abs(pixelGlobalPosition.first - reconstructedVertexX) <= dCut / 1000 && std::abs(pixelGlobalPosition.second - reconstructedVertexY) <= dCut / 1000)
             {
-                if(verbose) std::cout << "Matched hit at Pixel (" << pixX << ", " << pixY << ") with Global Position (" << pixelGlobalPosition.first << ", " << pixelGlobalPosition.second << ")" << "; Timing:" << reconstructedLocalTime << std::endl;
+                if(verbose) std::cout << "(!) Matched hit at Pixel (" << pixX << ", " << pixY << ") with Global Position (" << pixelGlobalPosition.first << ", " << pixelGlobalPosition.second << ")" << "; Timing:" << reconstructedLocalTime << std::endl;
                 nHits++;
                 trackedTree->Fill();   // <-- one Fill per matching hit
                 foundHit = true;

@@ -22,6 +22,8 @@ struct SimFlags
     double n = 0.;
     double t0 = 0.;
     int groupSize = 0;
+    int groupSizeX = 0;
+    int groupSizeY = 0;
     int groupLeng = 0;
     int parityLeng = 0;
     int dColLeng = 0;
@@ -37,6 +39,9 @@ struct SimFlags
     bool verboseTracking = false;
     bool verboseClustering = false;
     bool verboseAnalysis = false;
+
+    double trackOffsetX = 0.;
+    double trackOffsetY = 0.;
 };
 
 void LoadAnalysisFlagsFromFile(const std::string& filename, SimFlags& flags)
@@ -67,6 +72,8 @@ void LoadAnalysisFlagsFromFile(const std::string& filename, SimFlags& flags)
         else if (key == "n") flags.n = std::stod(value);
         else if (key == "t0") flags.t0 = std::stod(value);
         else if (key == "groupSize") flags.groupSize = std::stoi(value);
+        else if (key == "groupSizeX") flags.groupSizeX = std::stoi(value);
+        else if (key == "groupSizeY") flags.groupSizeY = std::stoi(value);
         else if (key == "groupLeng") flags.groupLeng = std::stoi(value);
         else if (key == "parityLeng") flags.parityLeng = std::stoi(value);
         else if (key == "dColLeng") flags.dColLeng = std::stoi(value);
@@ -82,6 +89,8 @@ void LoadAnalysisFlagsFromFile(const std::string& filename, SimFlags& flags)
         else if (key == "verboseTracking") flags.verboseTracking = (value == "true");
         else if (key == "verboseClustering") flags.verboseClustering = (value == "true");
         else if (key == "verboseAnalysis") flags.verboseAnalysis = (value == "true");
+        else if (key == "trackOffsetX") flags.trackOffsetX = std::stod(value);
+        else if (key == "trackOffsetY") flags.trackOffsetY = std::stod(value);
 
         //std::cout << "Loaded flag: " << key << " = " << value << std::endl;
     }

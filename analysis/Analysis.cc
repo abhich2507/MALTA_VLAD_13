@@ -27,6 +27,8 @@ void Analysis(double threshold, int runNumber = 91, std::string saveName = "defa
     //////////////////////////////////////////////////////////
     std::string localPath = "./";
     std::string inputPath = localPath +  Form("Results/local_%04d/", runNumber) + saveName + "/";
+    // Quick hack for fast reanalysis:
+    //std::string inputPath = localPath +  Form("Results/local_%04d/", runNumber) + "Final/";
 
     std::cout << "############################# Analysis started for:" << std::endl;
     std::cout << inputPath << std::endl;
@@ -36,6 +38,7 @@ void Analysis(double threshold, int runNumber = 91, std::string saveName = "defa
     double trackunc_X = 4.6/1000.; // tracking uncertainty in X in unit mm
     double trackunc_Y = 4.6/1000.; // tracking uncertainty in X in unit mm
     int nX = 2*16, nY = 2*16, nZ = 100;
+    //int nX = 10*16, nY = 10*16, nZ = 100;
     double pixelSizeX = 0.0364 , pixelSizeY = 0.0364; // in mm
 
     TFile *analysisFile = TFile::Open((inputPath + "analysisThr" + std::to_string(int(threshold)) + ".root").c_str(), "READ");
@@ -46,7 +49,8 @@ void Analysis(double threshold, int runNumber = 91, std::string saveName = "defa
 
     double fX, fY, timing;
     int clSize;
-
+    int numPixlesX = 2;
+    int numPixlesY = 2;
     analysisTree->SetBranchAddress("analysisVertexX", &fX);
     analysisTree->SetBranchAddress("analysisVertexY", &fY);
     analysisTree->SetBranchAddress("clSize", &clSize);  
@@ -57,13 +61,22 @@ void Analysis(double threshold, int runNumber = 91, std::string saveName = "defa
     TH2D *h2ClSize = new TH2D("h2ClSize", "h2ClSize", 100, 50 - 18.6/2, 50 + 18.6/2, 100, 50 - 18.6/2, 50 + 18.6/2);
     TH2D *h2Timing = new TH2D("h2Timing", "h2Timing", 100, 50 - 18.6/2, 50 + 18.6/2, 100, 50 - 18.6/2, 50 + 18.6/2);
     // In-pixel histrograms
-    TH2D *h2ALLInPixel   = new TH2D("h2ALLInPixel", "h2ALLInPixel", nX, 0, 2*pixelSizeX*1000, nY, 0, 2*pixelSizeY *1000);
-    TH2D *h2PASSInPixel  = new TH2D("h2PASSInPixel", "h2PASSInPixel", nX, 0, 2*pixelSizeX*1000, nY, 0, 2*pixelSizeY *1000);
-    TH2D *h2ClSizeInPixel= new TH2D("h2ClSizeInPixel", "h2ClSizeInPixel", nX, 0, 2*pixelSizeX*1000, nY, 0, 2*pixelSizeY *1000);
-    TH2D *h2TimingInPixel= new TH2D("h2TimingInPixel", "h2TimingInPixel", nX, 0, 2*pixelSizeX*1000, nY, 0, 2*pixelSizeY *1000);
+    TH2D *h2ALLInPixel   = new TH2D("h2ALLInPixel", "h2ALLInPixel", nX, 0, numPixlesX*pixelSizeX*1000, nY, 0, numPixlesY*pixelSizeY *1000);
+    TH2D *h2PASSInPixel  = new TH2D("h2PASSInPixel", "h2PASSInPixel", nX, 0, numPixlesX*pixelSizeX*1000, nY, 0, numPixlesY*pixelSizeY *1000);
+    TH2D *h2ClSizeInPixel= new TH2D("h2ClSizeInPixel", "h2ClSizeInPixel", nX, 0, numPixlesX*pixelSizeX*1000, nY, 0, numPixlesY*pixelSizeY *1000);
+    TH2D *h2TimingInPixel= new TH2D("h2TimingInPixel", "h2TimingInPixel", nX, 0, numPixlesX*pixelSizeX*1000, nY, 0, numPixlesY*pixelSizeY *1000);
+    TH2D *h2MissMergedInPixel= new TH2D("h2MissMergedInPixel", "h2MissMergedInPixel", nX, 0, 0, nY, numPixlesX, numPixlesY);
+
+    // Projections
+    TH1D *h1PASSInPixelXProj = new TH1D("h1PASSInPixelXProj", "h1PASSInPixelXProj", nX, 0, numPixlesX*36.4);
+    TH1D *h1PASSInPixelYProj = new TH1D("h1PASSInPixelYProj", "h1PASSInPixelYProj", nY, 0, numPixlesY*36.4);
 
     Long64_t nAnalyzedEntries = analysisTree->GetEntries();
     std::cout << nAnalyzedEntries << std::endl;
+
+    double trackOffsetX = analysisFlags->trackOffsetX;
+    double trackOffsetY = analysisFlags->trackOffsetY;
+
     // Fill the histograms with events
     for (int i =0; i< nAnalyzedEntries; i++)
     {
@@ -74,17 +87,29 @@ void Analysis(double threshold, int runNumber = 91, std::string saveName = "defa
         h2ClSize->Fill(fX, fY, clSize);
         h2Timing->Fill(fX, fY, timing);
         double foldedX, foldedY;
+        
         if(analysisFlags->trkUnc == true)
         {
-            foldedX = fmod(fX + rng.Gaus(0., trackunc_X), 2*pixelSizeX) * 1000; 
-            foldedY = fmod(fY + rng.Gaus(0., trackunc_Y), 2*pixelSizeX) * 1000;
+            foldedX = fmod(fX + trackOffsetX + rng.Gaus(0., trackunc_X), numPixlesX*pixelSizeX) * 1000;  //- 50 + 18.6368 /2
+            foldedY = fmod(fY + trackOffsetY + rng.Gaus(0., trackunc_Y), numPixlesY*pixelSizeX) * 1000;  //- 50 + 18.6368 /2
         } 
         else
         {        
-            foldedX = fmod(fX, 2*pixelSizeX) * 1000; 
-            foldedY = fmod(fY, 2*pixelSizeY) * 1000;
+            foldedX = fmod(fX + trackOffsetX, numPixlesX*pixelSizeX) * 1000;  //- 50 + 18.6368 /2
+            foldedY = fmod(fY + trackOffsetY, numPixlesY*pixelSizeY) * 1000;   // - 50 + 18.6368 /2
 
         }
+        
+
+        //foldedX = (fX - 56.159 +4*0.0364) *1000;
+        //foldedY = (fY - 51.00924+ 18*0.0364) *1000;
+        /*
+        if(foldedX >= 22.75 && foldedX <= 43.2 && foldedY >= 482 && foldedY <= 536)
+        {
+            std::cout << fX << "; " <<fY <<std::endl;
+        }
+        */
+
         h2ALLInPixel   ->Fill(foldedX, foldedY, 1);
         h2PASSInPixel  ->Fill(foldedX, foldedY, clSize > 0 ? 1 : 0);
         h2ClSizeInPixel->Fill(foldedX, foldedY, clSize);
@@ -109,17 +134,24 @@ void Analysis(double threshold, int runNumber = 91, std::string saveName = "defa
     h2PASSInPixel->Scale(100.);
     h2TimingInPixel->Divide(h2PASSInPixelAux);
 
-
     double errClSize = getEffErr(h2ClSizeInPixel->Integral(), h2PASSInPixelAux->Integral());
+
+
+    h1PASSInPixelXProj = h2PASSInPixel->ProjectionX();
+    h1PASSInPixelYProj = h2PASSInPixel->ProjectionY();
 
     // Set histogram titles:
     h2ClSizeInPixel->SetTitle( Form("#bf{MALTA2 Sim.}, 30#mum EPI, <cl. size> =%.2f;Track X pos [#mum];Track Y pos [#mum];Cluster size", avgClSize) );
     h2PASSInPixel->SetTitle( Form("In-pixel eff. = %.2f %% pm %.2f %% ;Track X pos [#mum];Track Y pos [#mum]; Eff. [%%] ", avgEff, errEff) );
     h2TimingInPixel->SetTitle( Form("In-pixel timing. = %.2f ns ;Track X pos [#mum];Track Y pos [#mum]; Timing [ns] ", avgTiming) );
-
+    h1PASSInPixelXProj->SetTitle("In-pixel eff.;Track X pos [#mum];Eff.[%]");
+    h1PASSInPixelYProj->SetTitle("In-pixel eff.;Track Y pos [#mum];Eff.[%]");
     // Plot save path
     std::string directoryPath = localPath +"/Plots/";
     std::string runPath = Form("local_%04d/", runNumber);
+
+
+
 
     // Write histograms into the directory
     savePlot(directoryPath, runPath, threshold, saveName, h2PASS, "h2PASS");
@@ -130,6 +162,40 @@ void Analysis(double threshold, int runNumber = 91, std::string saveName = "defa
     savePlot(directoryPath, runPath, threshold, saveName, h2TimingInPixel, "h2TimingInPixel");
     savePlot(directoryPath, runPath, threshold, saveName, h2PASSInPixelAux, "h2PASSInPixelAux");
     savePlot(directoryPath, runPath, threshold, saveName, h2ALLInPixel, "h2ALLInPixel");
+    savePlot(directoryPath, runPath, threshold, saveName, h1PASSInPixelXProj, "h1PASSInPixelXProj");
+    savePlot(directoryPath, runPath, threshold, saveName, h1PASSInPixelYProj, "h1PASSInPixelYProj");
+    /*
+    // Look at miss merged hits only. This is saved previously in DigitalProcessing.cc
+    std::string histosPath = (directoryPath + runPath + saveName + "/histos.root").c_str();
+    // Check if the tree exists
+    TFile *histos = TFile::Open(histosPath.c_str(), "UPDATE");
+    if (!histos || histos->IsZombie()) {
+        std::cout << "Creating new file: " << histosPath << std::endl;
+        histos = new TFile(histosPath.c_str(), "RECREATE");
+    }
+    TDirectory *dirMerger = (TDirectory*)histos->Get(Form("Thr%i", int(threshold)));
+    TH2D *h2MissMerged = (TH2D*) dirMerger->Get("h2MissMerged");
+
+    for (int ix = 1; ix <= h2MissMerged->GetNbinsX(); ix++) 
+    {
+        for (int iy = 1; iy <= h2MissMerged->GetNbinsY(); iy++) 
+        {
+
+            double content = h2MissMerged->GetBinContent(ix, iy);
+            double xCenter = h2MissMerged->GetXaxis()->GetBinCenter(ix);
+            double yCenter = h2MissMerged->GetYaxis()->GetBinCenter(iy);
+            double foldedX = fmod(xCenter, numPixlesX);
+            double foldedY = fmod(yCenter, numPixlesY);   
+            h2MissMergedInPixel->Fill(foldedX, foldedY, 1);
+
+        }
+    }
+    dirMerger->cd();                  
+    h2MissMergedInPixel->Write("", TObject::kOverwrite);
+    histos->Write();                  
+    histos->Close();
+    */
+
 
     // Lastly populate a root tree with the average values for later summary plotting
     // Try opening the file in UPDATE mode (read + write)
