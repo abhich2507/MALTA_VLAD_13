@@ -96,7 +96,9 @@ G4bool SensitiveDetector::ProcessHits(G4Step *aStep, G4TouchableHistory *)
     int pixX = static_cast<int>((posPixel.x() - detXOffset + detX / 2) / pixelSize);
     int pixY = static_cast<int>((posPixel.y() - detYOffset + detY / 2) / pixelSize);
 
-    // Handle edge cases:
+    // Handle edge cases: The filtering of out of bound pixels is graciously done in the DigitalProcessing via threshold mapping, 
+    // This block however, also correctly endowes charge sharing to the right side of the pixel edge.
+    
     if(pixX == 0 && ((quadrantFlag & 0x1) == 0 ))
     {
         effAn[1]+=effAn[0];
@@ -130,6 +132,7 @@ G4bool SensitiveDetector::ProcessHits(G4Step *aStep, G4TouchableHistory *)
         effAn[1]+=effAn[3];
         effAn[3] = 0;
     }
+    
 
 
     std::array<std::array<int, 2>, 4> pixelCluster;
