@@ -43,8 +43,10 @@ source ../run_sim.sh local flag.cfg
 ## Analysis Usage
 ```bash
 cd malta_simulation/
-python run_analysis.py -r runNumber -i analysis_flags.cfg -thr thrValue -s saveName -d digitizer Flag -t Tracking flag -c Clustering flag -a Analysis flag
+python run_analysis.py -r runNumber -i analysis_flags.cfg -thr thrValue -s saveName -d -t -c -a 
 ```
+
+-d digitizer Flag -t Tracking flag -c Clustering flag -a Analysis flag
 
 # GEANT4 Simulation structure
 The GEANT4 simulation is structured based on the usual file format. The functionality of each class is described further below:
