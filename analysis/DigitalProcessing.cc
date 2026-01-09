@@ -1,5 +1,7 @@
 #include "DigitalProcessing.hh"
 
+
+
 // TODO: We are in dire need of value checks for all user inputs.
 
 void DigitalProcessing(double inputThreshold, int runNumber, std::string saveName, bool proteusFlag)
@@ -155,11 +157,17 @@ void DigitalProcessing(double inputThreshold, int runNumber, std::string saveNam
             int pixY = entry.first.second.second;
 
             auto itThr       = thresholdMap.find({pixX, pixY});
+            if (itThr == thresholdMap.end()) continue;
+
             double threshold = itThr->second;
             double cenergy   = entry.second;
             double timing    = GetTimingOffset(cenergy, threshold, T, Tdiv, TrefThr, x0, n, t0);
 
+            if(pixX < 0 || pixX > 511 || pixY < 0 || pixY > 511) std::cout << "Warning! Out of bounds pixels! pixX: " << pixX << "; pixY: " << pixY << std::endl; 
+
+
             auto it = timeMap.find({eventID, {pixX, pixY}});
+            if(it == timeMap.end()) continue;
             // Row correction also of 7ns/ 512 rows + global GEANT4 timestamp
             //if(verbose) std::cout << "Event ID: " << eventID << "; pixX: " << pixX << ";pixY: " << pixY << "; corrEnergy: " << cenergy << "; timewalk: "<< timing << std::endl;
             timing += *std::max_element(it->second.begin(), it->second.end()) + pixX * 0.0125; 
@@ -180,14 +188,20 @@ void DigitalProcessing(double inputThreshold, int runNumber, std::string saveNam
             int pixY   = entry.first.second.second;
 
             auto itThr = thresholdMap.find({pixX, pixY});
+            if (itThr == thresholdMap.end()) 
+            {
+                std::cout << "Missing threshold for pixX=" << pixX
+                        << " pixY=" << pixY << std::endl;
+                continue;
+            }
             double threshold = itThr->second;
 
             double timing = entry.second;
             auto it = enMap.find({eventID, {pixX, pixY}});
             double cenergy = it->second;
-            
+        
             if (cenergy < threshold) continue;
-
+            
             if (verbose)
             {
                 std::cout << "Event ID: " << eventID << "; pixX: " << pixX << ";pixY: " << pixY << "; corrEnergy: " << cenergy << "; Timing: " << std::setprecision(10) <<  timing << std::endl;
