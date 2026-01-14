@@ -42,6 +42,8 @@ struct SimFlags
 
     double trackOffsetX = 0.;
     double trackOffsetY = 0.;
+
+    double veto = 0.;
 };
 
 void LoadAnalysisFlagsFromFile(const std::string& filename, SimFlags& flags)
@@ -91,6 +93,7 @@ void LoadAnalysisFlagsFromFile(const std::string& filename, SimFlags& flags)
         else if (key == "verboseAnalysis") flags.verboseAnalysis = (value == "true");
         else if (key == "trackOffsetX") flags.trackOffsetX = std::stod(value);
         else if (key == "trackOffsetY") flags.trackOffsetY = std::stod(value);
+        else if (key == "veto") flags.veto = std::stod(value);
 
         //std::cout << "Loaded flag: " << key << " = " << value << std::endl;
     }
