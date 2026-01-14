@@ -98,6 +98,7 @@ void LoadSimFlagsFromFile(const std::string& filename, SimFlags& flags)
         else if (key == "CCModelSigmaY") flags.CCModelSigmaY = std::stod(value);
         else if (key == "outsideMaterial") flags.outsideMaterial = value;
         else if (key == "beamGeometry") flags.beamGeometry = value;
+        else if (key == "gausSmearing") flags.gausSmearing = std::stod(value);
         else if (key == "beamXOffset") flags.beamXOffset = std::stod(value);
         else if (key == "beamYOffset") flags.beamYOffset = std::stod(value);
         else if (key == "beamZOffset") flags.beamZOffset = std::stod(value);
@@ -113,6 +114,8 @@ void LoadSimFlagsFromFile(const std::string& filename, SimFlags& flags)
         else if (key == "particleMomentumZ") flags.particleMomentumZ = std::stod(value);
         else if (key == "EMPhysics") flags.EMPhysics = (value == "true");
         else if (key == "hadronPhysics") flags.hadronPhysics = (value == "true");
+        else if (key == "dutTungstenAbsorberFlag") flags.dutTungstenAbsorberFlag = (value == "true");
+        else if (key == "absorberThickness") flags.absorberThickness = std::stod(value);
         else if (key == "setGEANT4Cuts") flags.setGEANT4Cuts = (value == "true");
         else if (key == "GEANT4CutValue") flags.GEANT4CutValue = std::stod(value);
         else if (key == "outputPathLocal") flags.outputPathLocal = value;

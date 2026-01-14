@@ -89,6 +89,15 @@ void PrimaryGenerator::GeneratePrimaries(G4Event *oneEvent)
         {
             pos = G4ThreeVector(x, y, z);
         }
+        if (fFlag->beamGeometry == "gaussian")
+        {
+            G4double sigma = fFlag->gausSmearing *cm;
+            G4double xGauss = G4RandGauss::shoot(x, sigma);
+            G4double yGauss = G4RandGauss::shoot(y, sigma);
+            //G4double zGauss = G4RandGauss::shoot(z, sigma);
+            pos = G4ThreeVector(xGauss, yGauss, z);
+
+        }
         else if(fFlag->beamGeometry == "circle")
         {
             pos = GetRandomPointOnCircle(0.5 *beamWidth, G4ThreeVector(x, y, z));

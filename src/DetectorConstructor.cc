@@ -35,6 +35,8 @@ G4VPhysicalVolume *DetectorConstruction::Construct()
     G4double detectorYOffset = fFlag->detectorYOffset *cm;
     G4double detectorZOffset = fFlag->detectorZOffset *cm;
 
+    
+
     // Define the world
     G4double xWorld = 2. *m;
     G4double yWorld = 2. *m;
@@ -45,6 +47,23 @@ G4VPhysicalVolume *DetectorConstruction::Construct()
     G4LogicalVolume *logicalWorld = new G4LogicalVolume(solidWorld, worldMat, "logicalWorld");
     // Physical Volume
     G4VPhysicalVolume *physWorld = new G4PVPlacement(0, G4ThreeVector(0.,0.,0.), logicalWorld, "physWorld", 0, false, 0, checkOverlaps);
+
+
+    // Define an absorber. Hard coded for now
+    G4Material *absorberMat = nist->FindOrBuildMaterial("G4_W");
+    G4double absorberX = fFlag->detectorSizeX *cm;
+    G4double absorberY = fFlag->detectorSizeY *cm;
+    G4double absorberZ = fFlag->absorberThickness *cm;
+    G4Box *solidAbsorber = new G4Box("solidAbsorber", 0.5 *absorberX, 0.5 *absorberY, 0.5 *absorberZ);
+    G4LogicalVolume *logicalAbsorber = new G4LogicalVolume(solidAbsorber, absorberMat, "logicalAbsorber");
+    if(fFlag->dutTungstenAbsorberFlag == true) 
+    {
+        G4VPhysicalVolume *physAbsorber = new G4PVPlacement(0, G4ThreeVector(detectorXOffset, detectorYOffset, detectorZOffset - 0.5 *absorberZ - 0.01 *cm), logicalAbsorber, "physAbsorber", logicalWorld, false, 0, checkOverlaps); 
+        G4VisAttributes *absorberVisAtt = new G4VisAttributes(G4Color(0.9, 0.4, 0.0, 0.6));
+        absorberVisAtt->SetForceSolid(true);
+        logicalAbsorber->SetVisAttributes(absorberVisAtt);
+    }
+
 
     // MALTA implementation monolithic sensor
     if(fFlag->preDefinedGeometryFlag == "MALTA")
@@ -59,6 +78,11 @@ G4VPhysicalVolume *DetectorConstruction::Construct()
         {
             trowError("DetectorConstruct::Construct", "Invalid geometry", "DUT outside world");
         }
+        
+        auto DUTrotation = new G4RotationMatrix();
+        // WARNING: Hardcoded values. This part of the simulation is not part of the core MALTA simulation
+        // Repurpose as desired on own cost.
+        DUTrotation->rotateY(60 * deg);
 
         G4Box *solidMALTA = new G4Box ("MALTASensor", maltaWidthX/2, maltaWidthY/2, maltaDepth/2);
         logicSensor = new G4LogicalVolume (solidMALTA, detMat, "logicSensor");

@@ -30,6 +30,7 @@ struct SimFlags
     double CCModelSigmaY =0.;
     std::string outsideMaterial = "G4_Galactic";
     std::string beamGeometry = "";
+    double gausSmearing = 0.;
     double beamXOffset = 0.;
     double beamYOffset = 0.;
     double beamZOffset = 0.;
@@ -45,6 +46,8 @@ struct SimFlags
     double particleMomentumZ = 0.;
     bool EMPhysics = true;
     bool hadronPhysics = true;
+    bool dutTungstenAbsorberFlag = false;
+    double absorberThickness = 0.;
     bool setGEANT4Cuts = false;
     double GEANT4CutValue = 0.01;
     std::string outputPathLocal = "";
