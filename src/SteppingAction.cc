@@ -1,18 +1,21 @@
-#include "SteppingAction.hh"
+#include "SteppingAction.h"
+#include "globals.hh"
+#include "G4OpBoundaryProcess.hh"
+#include "G4ProcessManager.hh"
+#include "G4RunManager.hh"
+#include "G4AnalysisManager.hh"
+#include "G4Proton.hh"
+#include "Config.h"
 
-SteppingAction::SteppingAction(SimFlags* flags): fFlag(flags)
+SteppingAction::SteppingAction(const SimFlags* flags): m_flag(flags)
 {
 
-}
-SteppingAction::~SteppingAction() 
-{
-    
 }
 
 void SteppingAction::UserSteppingAction(const G4Step* aStep)
 {
     // Look only at protons
-    G4Track* aTrack = aStep->GetTrack();
+    const G4Track* aTrack = aStep->GetTrack();
     if(aTrack->GetDefinition() == G4Proton::Definition()) 
     {
         G4int eventID = G4RunManager::GetRunManager()->GetCurrentEvent()->GetEventID();
@@ -54,7 +57,7 @@ void SteppingAction::UserSteppingAction(const G4Step* aStep)
             // Save the scattering angle to nTuple
             G4ThreeVector entryPos = posIt->second;
 
-            if(fFlag->verboseSA) G4cout << "Track " << aTrack->GetTrackID() << entryPos.x() << entryPos.y() << entryPos.z() << " scattering angle (deg): " << angleDeg << G4endl;
+            if(m_flag->verboseSA) G4cout << "Track " << aTrack->GetTrackID() << entryPos.x() << entryPos.y() << entryPos.z() << " scattering angle (deg): " << angleDeg << G4endl;
             
             analysisManager->FillNtupleIColumn(0, 0, eventID);
             analysisManager->FillNtupleDColumn(0, 1, entryPos.x());

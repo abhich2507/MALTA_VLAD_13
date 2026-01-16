@@ -1,26 +1,22 @@
-#ifndef ACTIONINITIALIATION_HH
-#define ACTIONINITIALIATION_HH
+#ifndef ACTIONINITIALIZATION_H
+#define ACTIONINITIALIZATION_H
 
 #include "G4VUserActionInitialization.hh"
-#include "PrimaryGenerator.hh"
-#include "RunAction.hh"
-#include "Config.hh"
-#include "SteppingAction.hh"
-#include "EventAction.hh"
-#include "TrackingAction.hh"
+
+class SimFlags;
 
 class ActionInitialization: public G4VUserActionInitialization
 {
 public:
-    ActionInitialization(SimFlags* flags);
-    ~ActionInitialization();
+    explicit ActionInitialization(const SimFlags* flags);
+    ~ActionInitialization() override = default;
     //Master thread if multithreading
-    virtual void BuildForMaster() const;
+    void BuildForMaster() const override;
     //Single thread
-    virtual void Build() const;
+    void Build() const override;
 
 private:
-    SimFlags* fFlag;
+    const SimFlags* m_flag{};
     
 };
 #endif

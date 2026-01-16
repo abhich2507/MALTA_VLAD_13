@@ -1,4 +1,14 @@
-#include "EventAction.hh"
+#include "EventAction.h"
+#include "globals.hh"
+#include "G4AutoLock.hh"
+#include "G4Event.hh"
+#include "G4Run.hh"
+#include "G4RunManager.hh"
+#include <chrono>
+#include <iostream>
+#include <iomanip>
+#include <sstream>
+#include <algorithm>
 
 // Thread safe event progress 
 namespace
@@ -9,29 +19,15 @@ namespace
     bool gStartTimeInitialized = false;
 }
 
-
-EventAction::EventAction()
+void EventAction::EndOfEventAction(const G4Event*) 
 {
     
-}
-
-EventAction::~EventAction()
-{
-   
-}
-
-void EventAction::BeginOfEventAction(const G4Event* event)
-{
-
-}
-
-void EventAction::EndOfEventAction(const G4Event* event) 
-{
     // Implementation of a rudimentary progress bar. Added thread safety
     G4AutoLock lock(&g4CounterMutex);
     ++g4EventCounter;
     // Initialize the timing only once in working thread space
-    if (!gStartTimeInitialized) {
+    if (!gStartTimeInitialized) 
+    {
         g4StartTime = std::chrono::steady_clock::now();
         gStartTimeInitialized = true;
     }
@@ -41,22 +37,25 @@ void EventAction::EndOfEventAction(const G4Event* event)
     // Total # of events
     G4int totalEvents = G4RunManager::GetRunManager()->GetCurrentRun()->GetNumberOfEventToBeProcessed();
 
-    int barWidth = 50;
     // GUard against low number of events in vis.mac
     int reportInterval = std::max(1, totalEvents / 100);
     if (eventID % reportInterval == 0 || eventID == totalEvents) {
         // Timing info
         auto now = std::chrono::steady_clock::now();
-        auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(now - g4StartTime).count();
+        std::chrono::seconds::rep elapsed = std::chrono::duration_cast<std::chrono::seconds>(now - g4StartTime).count();
         // Run percentage info
         G4double percent = 100.0 * eventID / totalEvents;
-        int eta = (percent > 0.0) ? static_cast<int>((elapsed * (100 / percent))) :0;
-
+        int eta = 0;
+        if (percent > 0.0) 
+        {
+            double elapsedD = static_cast<double>(elapsed);
+            eta = static_cast<int>(elapsedD * (100 / percent));
+        }
         // Timing format
-        auto formatTime = [](int seconds) {
-            int h = seconds / 3600;
-            int m = (seconds % 3600) / 60;
-            int s = seconds % 60;
+        auto formatTime = [](std::chrono::seconds::rep seconds) {
+            std::chrono::seconds::rep h = seconds / 3600;
+            std::chrono::seconds::rep m = (seconds % 3600) / 60;
+            std::chrono::seconds::rep s = seconds % 60;
             std::ostringstream oss;
             if (h > 0) oss << h << "h ";
             if (m > 0 || h > 0) oss << m << "m ";

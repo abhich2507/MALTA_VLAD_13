@@ -1,27 +1,23 @@
-#ifndef RUNACTION_HH
-#define RUNACTION_HH
+#ifndef RUNACTION_H
+#define RUNACTION_H
 
 #include "G4UserRunAction.hh"
-#include "G4Run.hh"
-#include "G4AnalysisManager.hh"
-#include "G4SystemOfUnits.hh"
-#include "G4UnitsTable.hh"
-#include "Config.hh"
-#include <filesystem>
+
+class SimFlags;
 
 class RunAction: public G4UserRunAction
 {
 public:
-    RunAction(SimFlags* flags);
-    ~RunAction();
+    explicit RunAction(const SimFlags* flags);
+    ~RunAction() override = default;
 
-    virtual void BeginOfRunAction(const G4Run *);
-    virtual void EndOfRunAction(const G4Run *);
-    virtual G4Run* GenerateRun() override;
+    void BeginOfRunAction(const G4Run *) override;
+    void EndOfRunAction(const G4Run *) override;
+    G4Run* GenerateRun() override;
     
     
 private:
-    SimFlags* fFlag;
-    std::string fOutputPath;
+    const SimFlags* m_flag{};
+    std::string m_outputPath{};
 };
 #endif

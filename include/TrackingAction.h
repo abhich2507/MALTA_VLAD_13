@@ -1,19 +1,16 @@
-#ifndef TRACKINGACTION_HH
-#define TRACKINGACTION_HH
+#ifndef TRACKINGACTION_H
+#define TRACKINGACTION_H
 
 #include "G4UserTrackingAction.hh"
-#include "G4Track.hh"
-#include "G4ParticleDefinition.hh"
-#include "G4ParticleTypes.hh"
+class G4Track;
 
 class TrackingAction : public G4UserTrackingAction
 {
 public:
-TrackingAction();
-    virtual ~TrackingAction();
-
-    virtual void PreUserTrackingAction(const G4Track*);
-    virtual void PostUserTrackingAction(const G4Track*);
+    TrackingAction();
+    ~TrackingAction() override = default;
+    void PreUserTrackingAction(const G4Track*) override;
+    void PostUserTrackingAction(const G4Track*) override;
 };
 
 #endif

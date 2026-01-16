@@ -1,46 +1,75 @@
-#include "DetectorConstruction.hh"
+#include "DetectorConstruction.h"
+//Solid Volume e.g. Box
+#include "G4Box.hh"
+#include "G4Sphere.hh"
+#include "G4Tubs.hh"
+#include "G4SubtractionSolid.hh"
+#include "G4UnionSolid.hh"
+// Logical Volume
+#include "G4LogicalVolume.hh"
+// Physical Volume
+#include "G4VPhysicalVolume.hh"
+// Placement in world
+#include "G4PVPlacement.hh"
+// Material definition
+#include "G4Material.hh"
+#include "G4NistManager.hh"
+#include "G4SystemOfUnits.hh"
+#include "G4UnitsTable.hh"
+// Visualization attribute
+#include "G4VisAttributes.hh"
+// Color just for visualization
+#include "G4Color.hh"
+// Sensitive Detector Manager
+#include "G4SDManager.hh"
+#include "Config.h"
+#include "SensitiveDetector.h"
+// Optical surface coupling imports
+#include "G4OpticalSurface.hh"
+#include "G4LogicalBorderSurface.hh"
+#include "G4LogicalSkinSurface.hh"
+#include <cassert>
+
+
 // Constructor
-DetectorConstruction::DetectorConstruction(SimFlags* flags) : fFlag(flags)
+DetectorConstruction::DetectorConstruction(const SimFlags* flags) : m_flag(flags)
 {
 
 }
-// Destructor
-DetectorConstruction::~DetectorConstruction()
-{
-    
-}
+
 // Build the geometry
 G4VPhysicalVolume *DetectorConstruction::Construct()
 {
+    assert(m_flag != nullptr);
     // Volume overlap check needed to ensure correct physics simulation
-    G4bool checkOverlaps = true;
+    const G4bool checkOverlaps {true};
     // Instantiate NIST material manager
     G4NistManager *nist = G4NistManager::Instance();
     // Define world material
-    G4String outsideMat =  fFlag->outsideMaterial;
+    G4String outsideMat =  m_flag->outsideMaterial;
     G4Material *worldMat = nist->FindOrBuildMaterial(outsideMat);
     
     if (!worldMat)
     {
-        trowError("DetectorConstruct::Construct", "SamplingError", "Material \"" + outsideMat + "\" not found in NIST database.");
+        throwError("DetectorConstruct::Construct", "SamplingError", "Material \"" + outsideMat + "\" not found in NIST database.");
     }
 
     if (outsideMat != "G4_Galactic" && outsideMat != "G4_Air")
     {
-        trowWarning("DetectorConstruct::Construct", "SamplingWarning", "World material is not air or vacuum. Are you sure about this?");
+        throwWarning("DetectorConstruct::Construct", "SamplingWarning", "World material is not air or vacuum. Are you sure about this?");
     }
     
     G4Material *detMat = nist->FindOrBuildMaterial("G4_Si");
-    G4double detectorXOffset = fFlag->detectorXOffset *cm;
-    G4double detectorYOffset = fFlag->detectorYOffset *cm;
-    G4double detectorZOffset = fFlag->detectorZOffset *cm;
+    G4double detectorXOffset = m_flag->detectorXOffset *cm;
+    G4double detectorYOffset = m_flag->detectorYOffset *cm;
+    G4double detectorZOffset = m_flag->detectorZOffset *cm;
 
     
 
     // Define the world
-    G4double xWorld = 2. *m;
-    G4double yWorld = 2. *m;
-    G4double zWorld = 2. *m;
+    const G4double xWorld = 2. *m;
+    const G4double yWorld = 2. *m;
+    const G4double zWorld = 2. *m;
     // Solid volume definition. 0.5* because G4Box takes the halflength as input
     G4Box *solidWorld = new G4Box("solidWorld", 0.5 * xWorld, 0.5 * yWorld, 0.5 * zWorld);
     // Logical world definition. Takes over solid volume and applies the worldMat material
@@ -51,14 +80,14 @@ G4VPhysicalVolume *DetectorConstruction::Construct()
 
     // Define an absorber. Hard coded for now
     G4Material *absorberMat = nist->FindOrBuildMaterial("G4_W");
-    G4double absorberX = fFlag->detectorSizeX *cm;
-    G4double absorberY = fFlag->detectorSizeY *cm;
-    G4double absorberZ = fFlag->absorberThickness *cm;
+    G4double absorberX = m_flag->detectorSizeX *cm;
+    G4double absorberY = m_flag->detectorSizeY *cm;
+    G4double absorberZ = m_flag->absorberThickness *cm;
     G4Box *solidAbsorber = new G4Box("solidAbsorber", 0.5 *absorberX, 0.5 *absorberY, 0.5 *absorberZ);
     G4LogicalVolume *logicalAbsorber = new G4LogicalVolume(solidAbsorber, absorberMat, "logicalAbsorber");
-    if(fFlag->dutTungstenAbsorberFlag == true) 
+    if(m_flag->dutTungstenAbsorberFlag == true) 
     {
-        G4VPhysicalVolume *physAbsorber = new G4PVPlacement(0, G4ThreeVector(detectorXOffset, detectorYOffset, detectorZOffset - 0.5 *absorberZ - 0.01 *cm), logicalAbsorber, "physAbsorber", logicalWorld, false, 0, checkOverlaps); 
+        new G4PVPlacement(0, G4ThreeVector(detectorXOffset, detectorYOffset, detectorZOffset - 0.5 *absorberZ - 0.01 *cm), logicalAbsorber, "physAbsorber", logicalWorld, false, 0, checkOverlaps); 
         G4VisAttributes *absorberVisAtt = new G4VisAttributes(G4Color(0.9, 0.4, 0.0, 0.6));
         absorberVisAtt->SetForceSolid(true);
         logicalAbsorber->SetVisAttributes(absorberVisAtt);
@@ -66,17 +95,17 @@ G4VPhysicalVolume *DetectorConstruction::Construct()
 
 
     // MALTA implementation monolithic sensor
-    if(fFlag->preDefinedGeometryFlag == "MALTA")
+    if(m_flag->preDefinedGeometryFlag == "MALTA")
     {
-        G4double maltaWidthX = fFlag->detectorSizeX *cm; 
-        G4double maltaWidthY = fFlag->detectorSizeY *cm; 
-        G4double maltaDepth = fFlag->detectorDepth* um;
+        G4double maltaWidthX = m_flag->detectorSizeX *cm; 
+        G4double maltaWidthY = m_flag->detectorSizeY *cm; 
+        G4double maltaDepth  = m_flag->detectorDepth* um;
 
         if (std::abs(detectorXOffset) + maltaWidthX > xWorld /2 
          || std::abs(detectorYOffset) + maltaWidthY > yWorld /2 
          || std::abs(detectorZOffset) + maltaDepth > zWorld /2)
         {
-            trowError("DetectorConstruct::Construct", "Invalid geometry", "DUT outside world");
+            throwError("DetectorConstruct::Construct", "Invalid geometry", "DUT outside world");
         }
         
         auto DUTrotation = new G4RotationMatrix();
@@ -85,58 +114,58 @@ G4VPhysicalVolume *DetectorConstruction::Construct()
         DUTrotation->rotateY(60 * deg);
 
         G4Box *solidMALTA = new G4Box ("MALTASensor", maltaWidthX/2, maltaWidthY/2, maltaDepth/2);
-        logicSensor = new G4LogicalVolume (solidMALTA, detMat, "logicSensor");
-        G4VPhysicalVolume *physSensor  = new G4PVPlacement(0, G4ThreeVector(detectorXOffset, detectorYOffset, detectorZOffset), logicSensor, "physSensor", logicalWorld, false, 0, true);
+        m_logicSensor = new G4LogicalVolume (solidMALTA, detMat, "logicSensor");
+        new G4PVPlacement(0, G4ThreeVector(detectorXOffset, detectorYOffset, detectorZOffset), m_logicSensor, "physSensor", logicalWorld, false, 0, true);
 
         G4VisAttributes *pixelVisAtt = new G4VisAttributes(G4Color(0., 0., 1., 0.5));
         pixelVisAtt->SetForceSolid(true);
-        logicSensor->SetVisAttributes(pixelVisAtt);
+        m_logicSensor->SetVisAttributes(pixelVisAtt);
 
-        std::vector<double> planeCorrections = {-64.2, -56.2, -48.2, 29.8, 37.8, 45.8};
+        std::vector< G4double> planeCorrections = {-64.2, -56.2, -48.2, 29.8, 37.8, 45.8};
 
         for (const double& corr : planeCorrections)
         {
             if (std::abs(corr) * cm + maltaDepth > zWorld /2)
             {
-                trowError("DetectorConstruct::Construct", "Invalid geometry", "Tracking Plane outside world");
+                throwError("DetectorConstruct::Construct", "Invalid geometry", "Tracking Plane outside world");
             }
         }
 
-        logicPlane1 = new G4LogicalVolume (solidMALTA, detMat, "logicPlane1");
-        G4VPhysicalVolume *physPlane1  = new G4PVPlacement(0, G4ThreeVector(detectorXOffset, detectorYOffset, detectorZOffset + planeCorrections[0]*cm)
-                                                            , logicPlane1, "physPlane1", logicalWorld, false, 0, true);
-        logicPlane1->SetVisAttributes(pixelVisAtt);
+        m_logicPlane1 = new G4LogicalVolume (solidMALTA, detMat, "logicPlane1");
+        new G4PVPlacement(0, G4ThreeVector(detectorXOffset, detectorYOffset, detectorZOffset + planeCorrections[0]*cm)
+                                                            , m_logicPlane1, "physPlane1", logicalWorld, false, 0, true);
+        m_logicPlane1->SetVisAttributes(pixelVisAtt);
 
-        logicPlane2 = new G4LogicalVolume (solidMALTA, detMat, "logicPlane2");
-        G4VPhysicalVolume *physPlane2  = new G4PVPlacement(0, G4ThreeVector(detectorXOffset, detectorYOffset, detectorZOffset + planeCorrections[1]*cm)
-                                                            , logicPlane2, "physPlane2", logicalWorld, false, 0, true);
-        logicPlane2->SetVisAttributes(pixelVisAtt);
+        m_logicPlane2 = new G4LogicalVolume (solidMALTA, detMat, "logicPlane2");
+        new G4PVPlacement(0, G4ThreeVector(detectorXOffset, detectorYOffset, detectorZOffset + planeCorrections[1]*cm)
+                                                            , m_logicPlane2, "physPlane2", logicalWorld, false, 0, true);
+        m_logicPlane2->SetVisAttributes(pixelVisAtt);
 
-        logicPlane3 = new G4LogicalVolume (solidMALTA, detMat, "logicPlane3");
-        G4VPhysicalVolume *physPlane3  = new G4PVPlacement(0, G4ThreeVector(detectorXOffset, detectorYOffset, detectorZOffset + planeCorrections[2]*cm)
-                                                            , logicPlane3, "physPlane3", logicalWorld, false, 0, true);
-        logicPlane3->SetVisAttributes(pixelVisAtt);
+        m_logicPlane3 = new G4LogicalVolume (solidMALTA, detMat, "logicPlane3");
+        new G4PVPlacement(0, G4ThreeVector(detectorXOffset, detectorYOffset, detectorZOffset + planeCorrections[2]*cm)
+                                                            , m_logicPlane3, "physPlane3", logicalWorld, false, 0, true);
+        m_logicPlane3->SetVisAttributes(pixelVisAtt);
 
-        logicPlane4 = new G4LogicalVolume (solidMALTA, detMat, "logicPlane4");
-        G4VPhysicalVolume *physPlane4  = new G4PVPlacement(0, G4ThreeVector(detectorXOffset, detectorYOffset, detectorZOffset + planeCorrections[3]*cm)
-                                                            , logicPlane4, "physPlane4", logicalWorld, false, 0, true);
-        logicPlane4->SetVisAttributes(pixelVisAtt);
+        m_logicPlane4 = new G4LogicalVolume (solidMALTA, detMat, "logicPlane4");
+        new G4PVPlacement(0, G4ThreeVector(detectorXOffset, detectorYOffset, detectorZOffset + planeCorrections[3]*cm)
+                                                            , m_logicPlane4, "physPlane4", logicalWorld, false, 0, true);
+        m_logicPlane4->SetVisAttributes(pixelVisAtt);
 
-        logicPlane5 = new G4LogicalVolume (solidMALTA, detMat, "logicPlane5");
-        G4VPhysicalVolume *physPlane5  = new G4PVPlacement(0, G4ThreeVector(detectorXOffset, detectorYOffset, detectorZOffset + planeCorrections[4]*cm)
-                                                            , logicPlane5, "physPlane5", logicalWorld, false, 0, true);
-        logicPlane5->SetVisAttributes(pixelVisAtt);
+        m_logicPlane5 = new G4LogicalVolume (solidMALTA, detMat, "logicPlane5");
+        new G4PVPlacement(0, G4ThreeVector(detectorXOffset, detectorYOffset, detectorZOffset + planeCorrections[4]*cm)
+                                                            , m_logicPlane5, "physPlane5", logicalWorld, false, 0, true);
+        m_logicPlane5->SetVisAttributes(pixelVisAtt);
 
-        logicPlane6 = new G4LogicalVolume (solidMALTA, detMat, "logicPlane6");
-        G4VPhysicalVolume *physPlane6  = new G4PVPlacement(0, G4ThreeVector(detectorXOffset, detectorYOffset, detectorZOffset + planeCorrections[5]*cm)
-                                                            , logicPlane6, "physPlane6", logicalWorld, false, 0, true);
-        logicPlane6->SetVisAttributes(pixelVisAtt);
+        m_logicPlane6 = new G4LogicalVolume (solidMALTA, detMat, "logicPlane6");
+        new G4PVPlacement(0, G4ThreeVector(detectorXOffset, detectorYOffset, detectorZOffset + planeCorrections[5]*cm)
+                                                            , m_logicPlane6, "physPlane6", logicalWorld, false, 0, true);
+        m_logicPlane6->SetVisAttributes(pixelVisAtt);
 
 
  
     }
 
-    else if(fFlag->preDefinedGeometryFlag == "PCB")
+    else if(m_flag->preDefinedGeometryFlag == "PCB")
     {
         // FR4 flame retardant dielectric for PCB implementation. 
         // Source: https://www.physics.smu.edu/web/research/preprints/SMU-HEP-08-11.pdf
@@ -183,7 +212,7 @@ G4VPhysicalVolume *DetectorConstruction::Construct()
         G4LogicalVolume* logicFR4InnerPlane = new G4LogicalVolume(solidFR4InnerPlane, FR4, "logicFR4InnerPlane");
         G4VisAttributes *FR4InnerVisAtt = new G4VisAttributes(G4Color(0., 0.39, 0., 0.5));
         FR4InnerVisAtt->SetForceSolid(true);
-        logicFR4MiddlePlane->SetVisAttributes(FR4InnerVisAtt);
+        logicFR4InnerPlane->SetVisAttributes(FR4InnerVisAtt);
 
         // Rotation for inclined measurements
         auto rotation = new G4RotationMatrix();
@@ -194,7 +223,6 @@ G4VPhysicalVolume *DetectorConstruction::Construct()
 
         // Construct the physical PCB stack
         G4double currentZ = 6.0 * cm;
-        G4double halfThickness = 0.5 * FR4OuterPlaneThickness;
         
         new G4PVPlacement(rotation, G4ThreeVector(5 *cm, 5 *cm, currentZ), logicFR4OuterPlane, "Outer1", logicalWorld, false, 0, true);
         currentZ += FR4OuterPlaneThickness;
@@ -240,24 +268,24 @@ G4VPhysicalVolume *DetectorConstruction::Construct()
     } 
     else
     {
-        trowError("DetectorConstruct::Construct", "SamplingWarning", "Undefined Geometry");
+        throwError("DetectorConstruct::Construct", "FatalException", "Undefined Geometry");
     }       
     return physWorld;
 }
 
 void DetectorConstruction::ConstructSDandField()
 {
-    if(fFlag->preDefinedGeometryFlag == "MALTA")
+    if(m_flag->preDefinedGeometryFlag == "MALTA")
     {
-        SensitiveDetector *sensDet = new SensitiveDetector("SensitiveDetector", fFlag);
+        SensitiveDetector *sensDet = new SensitiveDetector("SensitiveDetector", m_flag);
         // Ensure that methods initialize at end of event
         G4SDManager::GetSDMpointer()->AddNewDetector(sensDet);
-        logicSensor->SetSensitiveDetector(sensDet);
-        logicPlane1->SetSensitiveDetector(sensDet);
-        logicPlane2->SetSensitiveDetector(sensDet);
-        logicPlane3->SetSensitiveDetector(sensDet);
-        logicPlane4->SetSensitiveDetector(sensDet);
-        logicPlane5->SetSensitiveDetector(sensDet);
-        logicPlane6->SetSensitiveDetector(sensDet);
+        m_logicSensor->SetSensitiveDetector(sensDet);
+        m_logicPlane1->SetSensitiveDetector(sensDet);
+        m_logicPlane2->SetSensitiveDetector(sensDet);
+        m_logicPlane3->SetSensitiveDetector(sensDet);
+        m_logicPlane4->SetSensitiveDetector(sensDet);
+        m_logicPlane5->SetSensitiveDetector(sensDet);
+        m_logicPlane6->SetSensitiveDetector(sensDet);
     }
 }
