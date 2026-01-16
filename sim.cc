@@ -7,12 +7,12 @@
 #include "G4VisManager.hh"
 #include "G4VisExecutive.hh"
 #include "G4UIExecutive.hh"
-#include "Config.hh"
-#include "PhysicsList.hh"
-#include "DetectorConstruction.hh"
-#include "ActionInitialization.hh"
-#include "TrackingAction.hh"
-#include "SubmissionTests.hh"
+#include "Config.h"
+#include "PhysicsList.h"
+#include "DetectorConstruction.h"
+#include "ActionInitialization.h"
+#include "TrackingAction.h"
+#include "SubmissionTests.h"
 
 
 int main (int argc, char** argv)
@@ -119,7 +119,6 @@ int main (int argc, char** argv)
     #endif
 
     // Check to see if this is a dry run.
-    std::string macroFileTest= "";
     for (int i = 1; i < argc; ++i) {
         std::string arg = argv[i];
         if (arg == "--test") {
@@ -158,7 +157,7 @@ int main (int argc, char** argv)
     }
     else if (testRun == false)
     {
-        if(!testRun){flags->isBatch = true;}
+        flags->isBatch = true;
         if(flags->runMode == "local") 
         {
             UImanager->ApplyCommand("/control/execute " + flags->macroFileLocal);
@@ -178,7 +177,7 @@ int main (int argc, char** argv)
         // Add configurable lines to the run.mac file. The runBeamOn is implemented below
         std::ostringstream cmd;
         cmd << "/run/beamOn " << flags->numEvents;
-        if(!testRun){UImanager->ApplyCommand(cmd.str());}
+        UImanager->ApplyCommand(cmd.str());
 
     }
 
