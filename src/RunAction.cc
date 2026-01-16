@@ -1,7 +1,13 @@
-#include "RunAction.hh"
-#include "CustomRun.hh"
+#include "RunAction.h"
+#include "CustomRun.h"
+#include "G4Run.hh"
+#include "G4AnalysisManager.hh"
+#include "G4SystemOfUnits.hh"
+#include "G4UnitsTable.hh"
+#include "Config.h"
+#include <filesystem>
 
-RunAction::RunAction(SimFlags* flags) : fFlag(flags)
+RunAction::RunAction(const SimFlags* flags) : m_flag(flags)
 {
     // Simplified instantiation thanks to GEANT4 implementation
     G4AnalysisManager *analysisManager = G4AnalysisManager::Instance();
@@ -43,11 +49,6 @@ RunAction::RunAction(SimFlags* flags) : fFlag(flags)
     analysisManager->FinishNtuple(2);
 }
 
-RunAction::~RunAction()
-{
-
-}
-
 void RunAction::BeginOfRunAction(const G4Run *run)
 {
     G4AnalysisManager *analysisManager = G4AnalysisManager::Instance();
@@ -57,20 +58,20 @@ void RunAction::BeginOfRunAction(const G4Run *run)
     strRunID << runID;
     
     //analysisManager->SetNtupleMerging(true);
-    std::string saveName;
-    if (isMaster && fFlag->isBatch)
+    std::string saveName{};
+    if (isMaster && m_flag->isBatch)
     {
-        fOutputPath = CreateNextRunDirectory(true, fFlag);
-        DumpConfigToFile(fOutputPath + "/flags.cfg");
+        m_outputPath = CreateNextRunDirectory(true, m_flag);
+        DumpConfigToFile(m_outputPath + "/flags.cfg");
     }
     else
     {
-        fOutputPath = CreateNextRunDirectory(false, fFlag);
+        m_outputPath = CreateNextRunDirectory(false, m_flag);
     }
-    if(fFlag->macroFileLocal.find("run") != std::string::npos)
+    if(m_flag->macroFileLocal.find("run") != std::string::npos)
     {
         saveName = "/output";    
-        analysisManager->OpenFile(fOutputPath + saveName + strRunID.str() + ".root");
+        analysisManager->OpenFile(m_outputPath + saveName + strRunID.str() + ".root");
     }
     else
     {
@@ -78,11 +79,11 @@ void RunAction::BeginOfRunAction(const G4Run *run)
         std::string visPath = "../Results/VisOutput/";
         try 
         {
-            if (std::filesystem::create_directory(visPath)) 
+            if (std::filesystem::create_directories(visPath)) 
             {
-                std::cout << "Directory created: " << visPath << std::endl;
+                G4cout << "Directory created: " << visPath << std::endl;
             } else {
-                std::cout << "Directory already exists or failed to create.\n";
+                G4cout << "Directory already exists or failed to create.\n";
             }
         } 
         catch (const std::filesystem::filesystem_error& e) 
@@ -105,7 +106,8 @@ void RunAction::EndOfRunAction(const G4Run *run)
 }
 
 // Overload the runID method to increment the run ID
-G4Run* RunAction::GenerateRun() {
+G4Run* RunAction::GenerateRun() 
+{
     static G4int runCounter = 0;
     return new CustomRun(runCounter++);
 }

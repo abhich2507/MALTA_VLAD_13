@@ -1,19 +1,7 @@
-#ifndef CONFIG_HH
-#define CONFIG_HH
+#ifndef CONFIG_H
+#define CONFIG_H
 
 #include <string>
-#include <array>
-#include <vector>
-#include <filesystem>
-#include <sstream>
-#include <iomanip>
-#include <fstream>
-#include <algorithm>
-#include <thread>
-#include <chrono>
-#include <iostream>
-#include "G4UnitsTable.hh"
-#include "G4SystemOfUnits.hh"
 
 struct SimFlags
 {
@@ -66,10 +54,14 @@ struct SimFlags
 
 void DumpConfigToFile(const std::string& filename);
 void LoadSimFlagsFromFile(const std::string& filename, SimFlags& flags);
-std::string CreateNextRunDirectory(bool flag, SimFlags* fFlags);
+std::string CreateNextRunDirectory(bool flag, const SimFlags* fFlags);
 int GetRequestCpusFromSubmitFile(const std::string& submitFilePath);
-void trowWarning (G4String origin, G4String exceptionCode, G4String description);
-void trowError (G4String origin, G4String exceptionCode, G4String description);
+void throwWarning (const std::string& origin, 
+                   const std::string& exceptionCode, 
+                   const std::string& description);
+void throwError (const std::string& origin,
+                 const std::string& exceptionCode,
+                 const std::string& description);
 
 
 #endif

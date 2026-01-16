@@ -1,24 +1,40 @@
-#include "Config.hh"
+#include "Config.h"
+#include <array>
+#include <cassert>
+#include <filesystem>
+#include <sstream>
+#include <iomanip>
+#include <fstream>
+#include <algorithm>
+#include <chrono>
+#include <iostream>
+#include "G4UnitsTable.hh"
+#include "G4SystemOfUnits.hh"
 
 
 void DumpConfigToFile(const std::string& filename) 
 {
     // Copy the config file used as input (from SIMU_CONFIG) to 'filename'
-    const char* configPath = std::getenv("SIMU_CONFIG");
-    if (configPath && std::filesystem::exists(configPath)) {
-        try {
+    const std::string configPath = std::getenv("SIMU_CONFIG");
+    if (configPath.c_str() && std::filesystem::exists(configPath)) 
+    {
+        try 
+        {
             std::filesystem::copy_file(configPath, filename, std::filesystem::copy_options::overwrite_existing);
             std::cout << "Copied config file from " << configPath << " to " << filename << std::endl;
-        } catch (const std::exception& e) {
+        } catch (const std::exception& e) 
+        {
             std::cerr << "Failed to copy config file: " << e.what() << std::endl;
         }
-    } else {
+    } 
+    else 
+    {
         std::cerr << "SIMU_CONFIG not set or file does not exist, skipping config copy." << std::endl;
     }
 }
 
 
-std::string CreateNextRunDirectory(bool flag, SimFlags* fFlags) 
+std::string CreateNextRunDirectory(bool flag, const SimFlags* fFlags) 
 {   
     namespace fs = std::filesystem;
     std::string path =  "";
@@ -26,6 +42,8 @@ std::string CreateNextRunDirectory(bool flag, SimFlags* fFlags)
     std::ostringstream newRunDir;
     // Check if the run directory needs to be saved locally or on the cloud. This flag is set in sim.cc based on the directory. 
     // It is not fully generalized so it might trow errors depending on the users home directory.
+    assert(fFlags != nullptr);
+
     if(fFlags->runMode == "local") 
     {
         path = fFlags->outputPathLocal;
@@ -36,8 +54,6 @@ std::string CreateNextRunDirectory(bool flag, SimFlags* fFlags)
         path = fFlags->outputPathNAF;
         saveFile = "/naf_";
     }
-    int runNumber = 0;
-    std::vector<std::string> dirs;
     int maxRun = 0;
 
     for (const auto& entry : fs::directory_iterator(path)) 
@@ -124,7 +140,7 @@ void LoadSimFlagsFromFile(const std::string& filename, SimFlags& flags)
         else if (key == "macroFileNAF") flags.macroFileNAF = value;
         else if (key == "numThreadsLocal") flags.numThreadsLocal = std::stoi(value);
         else if (key == "numThreadsNAF") flags.numThreadsNAF = std::stoi(value);
-        else if (key == "runMode") flags.runMode == value;
+        else if (key == "runMode") flags.runMode = value;
         else if (key == "verbosePL") flags.verbosePL = (value == "true");
         else if (key == "verbosePG") flags.verbosePG = (value == "true");
         else if (key == "verboseSD") flags.verboseSD = (value == "true");
@@ -152,14 +168,18 @@ int GetRequestCpusFromSubmitFile(const std::string& submitFilePath) {
     return -1; // Not found
 }
 
-void trowWarning (G4String origin, G4String exceptionCode, G4String description)
+void throwWarning (const std::string& origin, 
+                   const std::string& exceptionCode, 
+                   const std::string& description)
 {
     G4cout << "⚠️   ⚠️   ⚠️   ⚠️   ⚠️   ⚠️   ⚠️   ⚠️   ⚠️   ⚠️   ⚠️   ⚠️   ⚠️   ⚠️   ⚠️   ⚠️   ⚠️   ⚠️   ⚠️   ⚠️   ⚠️   ⚠️   ⚠️" << G4endl;
-    G4Exception(origin, exceptionCode, JustWarning, description);
+    G4Exception(origin.c_str(), exceptionCode.c_str(), JustWarning, description.c_str());
 }
 
-void trowError (G4String origin, G4String exceptionCode, G4String description)
+void throwError (const std::string& origin, 
+                 const std::string& exceptionCode, 
+                 const std::string& description)
 {
     G4cout << "🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑" << G4endl;
-    G4Exception(origin, exceptionCode, FatalException, description);
+    G4Exception(origin.c_str(), exceptionCode.c_str(), FatalException, description.c_str());
 }

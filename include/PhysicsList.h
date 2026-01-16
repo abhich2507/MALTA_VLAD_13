@@ -1,18 +1,10 @@
-// Classic trick. Protects against multiple imports
-#ifndef PHYSICSLIST_HH
-#define PHYSICSLIST_HH
+#ifndef PHYSICSLIST_H
+#define PHYSICSLIST_H
 
 //Physics Lists
 #include "G4VModularPhysicsList.hh"
-#include "G4EmStandardPhysics.hh"
-#include "G4EmStandardPhysics_option4.hh"
-#include "Config.hh"
-#include "G4DecayPhysics.hh"
-#include "G4HadronElasticPhysics.hh"
-#include "G4HadronPhysicsFTFP_BERT.hh"
-#include "G4StoppingPhysics.hh"
-#include "G4IonPhysics.hh"
-#include "G4SystemOfUnits.hh"
+
+class SimFlags;
 
 
 // Class inherits/extends the public class G4VModularPhysicsList to gain its methods
@@ -21,13 +13,12 @@ class PhysicsList : public G4VModularPhysicsList
 {
 public:
     // Constructor - called when object is created: PhysicsList::PhysicsList()
-    PhysicsList(SimFlags* flags);
+    explicit PhysicsList(const SimFlags* flags);
     // Destructor - called when object goes out of scope
-    ~PhysicsList();
-    virtual void SetCuts();
-    
+    ~PhysicsList() override = default;
+    void SetCuts() override;
 private:
-    SimFlags* fFlag;
+    const SimFlags* m_flag{};
 };
 // File processed only once per compilation
 

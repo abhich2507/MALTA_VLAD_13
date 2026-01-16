@@ -1,11 +1,10 @@
-#ifndef SUBMISSIONTESTS_HH
-#define SUBMISSIONTESTS_HH
+#ifndef SUBMISSIONTESTS_H
+#define SUBMISSIONTESTS_H
 
 
-#include "Config.hh"
-#include <iostream>
-#pragma once
 
-void submissionTest(SimFlags& flags);
+class SimFlags;
+
+void submissionTest(const SimFlags& flags);
 
 #endif

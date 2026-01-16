@@ -1,12 +1,12 @@
-#ifndef CUSTOMRUN_HH
-#define CUSTOMRUN_HH
+#ifndef CUSTOMRUN_H
+#define CUSTOMRUN_H
 
 #include "G4Run.hh"
 
 class CustomRun: public G4Run
 {
 public:
-    CustomRun(G4int id)
+    explicit CustomRun(G4int id)
     {
         SetRunID(id);
     }

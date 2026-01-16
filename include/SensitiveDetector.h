@@ -1,54 +1,47 @@
-#ifndef SENSITIVEDETECTOR_HH
-#define SENSITIVEDETECTOR_HH
+#ifndef SENSITIVEDETECTOR_H
+#define SENSITIVEDETECTOR_H
 
 #include "G4VSensitiveDetector.hh"
-#include "G4RunManager.hh"
-#include "G4AnalysisManager.hh"
-#include "G4SystemOfUnits.hh"
-#include "G4UnitsTable.hh"
-#include "G4OpticalPhoton.hh"
-#include "DetectorConstruction.hh"
-#include "EventAction.hh"
-#include "G4Poisson.hh"
-#include "Config.hh"
-// Thread Safety
-#include <mutex>
-#include "CLHEP/Random/RandFlat.h"
-#include <cmath>
-#include "CorrectionData2D.hh" // Access EffMap2D
+#include <map>
+#include <utility>
+#include <array>
+#include <string>
+#include <fstream>
+#include <cstdint>
+#include "G4ThreeVector.hh"
+#include "G4Types.hh"
+
+class SimFlags;
 
 class SensitiveDetector: public G4VSensitiveDetector
 {
 public:
     // G4String = Detector Name
-    SensitiveDetector(G4String, SimFlags* flags);
-    ~SensitiveDetector();
+    SensitiveDetector(const G4String& name, const SimFlags* flags);
+    ~SensitiveDetector() override;
     //Getter
-    const std::map<std::pair<int, int>, int>& GetChannelHitMap() const { return channelHitMap; }
-    G4double GetEfficiencyCorrectionXY(const G4ThreeVector& InPixPosition);
-    std::pair<std::array<double, 4>, uint8_t>  GetEfficiencyAnalytical(const G4ThreeVector& InPixPosition);
-    G4double GetTimingOffset(G4double amplitude);
+    const std::map<std::pair<int, int>, int>& getChannelHitMap() const { return m_channelHitMap; }
+    G4double getEfficiencyCorrectionXY(const G4ThreeVector& inPixPosition);
+    std::pair<std::array<double, 4>, uint8_t>  getEfficiencyAnalytical(const G4ThreeVector& inPixPosition) const;
+    //G4double getTimingOffset(G4double amplitude) const;
 
 private:
-    SimFlags* fFlag;
-    G4double fTotalEnergyDeposited;
-    std::map<std::pair<int, int>, G4double> pixelLastHitTime;
-    std::map<std::pair<int, int>, int> pixelHitCount;
-    std::map<std::pair<int, int>, int> fPixelHitMap;
+    const SimFlags* m_flag{};
+    G4double m_totalEnergyDeposited{};
+    std::map<std::pair<int, int>, G4double> m_pixelLastHitTime;
+    std::map<std::pair<int, int>, int> m_pixelHitCount;
+    std::map<std::pair<int, int>, int> m_pixelHitMap;
     //std::vector<std::vector<int>> channelHitMap;
-    std::map<std::pair<int, int>, int> channelHitMap;
-    std::ofstream hitDataFile;
-    std::map<G4int, G4double> fTrackLengths;
-    std::string fOutputPath;
-
+    std::map<std::pair<int, int>, int> m_channelHitMap;
+    std::ofstream m_hitDataFile{};
+    std::map<G4int, G4double> m_trackLengths;
+    std::string m_outputPath{};
 
     // G4HCofThisEvent - generate hit collections for analysis and reconstruction within gent4 or add electronic noise?
-    virtual void Initialize(G4HCofThisEvent *) override;
-    virtual void EndOfEvent(G4HCofThisEvent *) override;
+    void Initialize(G4HCofThisEvent *) override;
+    void EndOfEvent(G4HCofThisEvent *) override;
     // Main function that handles whatever happens during the time when the particle is inside this detector. also gives acces to the volumes
-    virtual G4bool ProcessHits(G4Step *, G4TouchableHistory *);
+    G4bool ProcessHits(G4Step *, G4TouchableHistory *) override;
 };
-
-
 
 #endif

@@ -1,32 +1,18 @@
-#ifndef EVENTACTION_HH
-#define EVENTACTION_HH
-
+#ifndef EVENTACTION_H
+#define EVENTACTION_H
 
 #include "G4UserEventAction.hh"
-#include "globals.hh"
-#include "G4AutoLock.hh"
-#include "G4Event.hh"
-#include "G4PrimaryVertex.hh"
-#include "G4AnalysisManager.hh"
-#include "G4Run.hh"
-#include "G4RunManager.hh"
-#include <chrono>
+
+class G4Event;
 
 class EventAction : public G4UserEventAction
 {
 public:
-    EventAction();
-    ~EventAction();
+    EventAction()  = default;
+    ~EventAction() override = default;
+    void EndOfEventAction(const G4Event*) override;
 
-    virtual void BeginOfEventAction(const G4Event*);
-    virtual void EndOfEventAction(const G4Event*);
 private:
-    
 };
-
-
-
-
-
 
 #endif

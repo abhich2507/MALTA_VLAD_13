@@ -1,6 +1,7 @@
-#include "SubmissionTests.hh"
-
-void submissionTest(SimFlags& flags)
+#include "SubmissionTests.h"
+#include "Config.h"
+#include <iostream>
+void submissionTest(const SimFlags& flags)
 {
     int submitCpus = GetRequestCpusFromSubmitFile("/home/vlad/Documents/Simu/Geant4/DECAL_REPO/build/job.submit");
     if (submitCpus != -1 && submitCpus != flags.numThreadsNAF) 
