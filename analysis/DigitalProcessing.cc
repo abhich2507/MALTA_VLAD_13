@@ -8,7 +8,7 @@ void DigitalProcessing(double inputThreshold, int runNumber, std::string saveNam
 {
     auto start = std::chrono::high_resolution_clock::now();
     // Set all the analysis flags for the digital processing
-    auto analysisFlags = new SimFlags;
+    auto analysisFlags = new SimFlags{};
     const char* configPath = std::getenv("ANALYSIS_CONFIG");
     LoadAnalysisFlagsFromFile(configPath, *analysisFlags);
 
@@ -58,13 +58,6 @@ void DigitalProcessing(double inputThreshold, int runNumber, std::string saveNam
     chainPixel->SetBranchAddress("PixY", &pixY);
     chainPixel->SetBranchAddress("hitTime", &timeWalkHit); // TODO change var name
     chainPixel->SetBranchAddress("hitEnergy", &corrEnergy); // TODO change var name
-
-    // Old format. DEPRECATED. Will be deleted on 01.03.2026
-    /*
-    chainPixel->SetBranchAddress("timeWalkHit", &timeWalkHit); // TODO change var name
-    chainPixel->SetBranchAddress("Energy", &corrEnergy); // TODO change var name
-    */
-
     Long64_t nRawEntries = chainPixel->GetEntries();
 
     // Avoid O(n^2) nested loops via extra map 
@@ -99,14 +92,17 @@ void DigitalProcessing(double inputThreshold, int runNumber, std::string saveNam
     // 32 columns, the width smaller than 5% each time, but the mean changes 3-5%.
 
     // This is an example data input for data sim threshold dispersion validation
-    std::vector<double> vThrMeanData = {959.2, 1004.8, 986.9, 1003.7, 1030.1, 1037.2, 1002.7, 983.7, 938.2, 952.7, 976.5, 943.4, 960.7, 930.8, 884.3, 875.2};
+    // Thr 967
+    //std::vector<double> vThrMeanData = {959.2, 1004.8, 986.9, 1003.7, 1030.1, 1037.2, 1002.7, 983.7, 938.2, 952.7, 976.5, 943.4, 960.7, 930.8, 884.3, 875.2};
+    // Thr 200
+    std::vector<double> vThrMeanData = {228.594,220.652,223.642,236.398,230.506,242.855,235.05,228.462,233.891,226.979,218.171,214.329,223.578,207.099,209.558,210.827};
     for (int i = 0; i< pixXNum/groupRepetition; i++)
     {
         static std::mt19937 gen(std::random_device{}());
         std::normal_distribution<> dist(1.0, relativeThresholdSmearingMean);
-        double thresholdMean = inputThreshold * dist(gen);
+        //double thresholdMean = inputThreshold * dist(gen);
         //std::cout << thresholdMean << std::endl;
-        //double thresholdMean = vThrMeanData[i];
+        double thresholdMean = vThrMeanData[i];
         for (int x = 0; x < pixXNum; x++)
         {
             for (int y = 0; y < pixYNum; y++)
