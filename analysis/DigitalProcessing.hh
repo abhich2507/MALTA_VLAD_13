@@ -181,11 +181,11 @@ std::vector< std::pair<std::pair<int,int>, int> > decodedDigitalWord(__uint128_t
         std::cout << "field_sizes: " << groupSize << " ; " << groupLeng << " ; " << parityLeng << " ; " << dColLeng << std::endl;
 
         std::cout << "-------------------------------" << std::endl;
-        std::cout << "Input word: " << std::bitset<77>(word) << std::endl;
-        std::cout << "Decoded Pixel word: " << std::bitset<64>(maltaPixel) << std::endl;
+        std::cout << "Input word: " << std::bitset<30>(word) << std::endl;
+        std::cout << "Decoded Pixel word: " << std::bitset<16>(maltaPixel) << std::endl;
         std::cout << "Decoded Group: " << std::bitset<5>(maltaGroup) << std::endl; 
         std::cout << "Decoded Parity: " << std::bitset<1>(maltaParity) << std::endl;
-        std::cout << "Decoded DColumn: " << std::bitset<6>(maltaDColumn) << std::endl;
+        std::cout << "Decoded DColumn: " << std::bitset<8>(maltaDColumn) << std::endl;
     }
     
     int nHits = 0;
@@ -224,13 +224,13 @@ void digitalTest(std::vector<std::pair<int,int>> hits)
     for(auto& hit: hits)
     {
         std::cout << "Input Hits: X: " << hit.first << "; Y: " << hit.second << std::endl; 
-        __uint128_t word = encodeWord(hit.first, hit.second, 8, 8, 5, 1, 6, false);
-        std::cout << "Encoded word: " << std::bitset<77>(word) << std::endl;
+        __uint128_t word = encodeWord(hit.first, hit.second, 8, 2, 5, 1, 6, false);
+        std::cout << "Encoded word: " << std::bitset<30>(word) << std::endl;
         mergedWord |= word;
     }
-    std::cout << "Merged word:  " << std::bitset<77>(mergedWord) << std::endl;
+    std::cout << "Merged word:  " << std::bitset<30>(mergedWord) << std::endl;
 
-    std::vector< std::pair<std::pair<int,int>, int> > pixPos = decodedDigitalWord(mergedWord, 64, 8, 8, 5, 1, 6);
+    std::vector< std::pair<std::pair<int,int>, int> > pixPos = decodedDigitalWord(mergedWord, 16, 8, 2, 5, 1, 6);
     for (const auto& pos : pixPos) 
     {
         int reconstructedPixX = pos.first.first;
