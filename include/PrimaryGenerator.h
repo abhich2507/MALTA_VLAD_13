@@ -16,9 +16,9 @@ public:
     void GeneratePrimaries(G4Event* event) override;
     
 private:
-    G4ThreeVector GetRandomPointOnCircle(G4double radius, const G4ThreeVector center);
-    G4ThreeVector GetRandomPointOnRectangle(G4double height, G4double thickness, const G4ThreeVector center);
-    G4double GetRandomPointInLine( G4double xMin, G4double xMax);
+    G4ThreeVector GetRandomPointOnCircle(G4float radius, const G4ThreeVector center);
+    G4ThreeVector GetRandomPointOnRectangle(G4float height, G4float thickness, const G4ThreeVector center);
+    G4float GetRandomPointInLine( G4float xMin, G4float xMax);
     const SimFlags* m_flag{};
     G4ParticleGun* m_particleGun{};
     G4int m_eventCounter{0};

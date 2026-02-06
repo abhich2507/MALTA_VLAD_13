@@ -13,6 +13,7 @@ RunAction::RunAction(const SimFlags* flags) : m_flag(flags)
     G4AnalysisManager *analysisManager = G4AnalysisManager::Instance();
 
     // Scattering Angle Ntuple
+    /*
     analysisManager->CreateNtuple("ScatAngle", "Scatering Angle");
     analysisManager->CreateNtupleIColumn("iEvent");
     // Create Double position columns
@@ -22,9 +23,10 @@ RunAction::RunAction(const SimFlags* flags) : m_flag(flags)
     analysisManager->CreateNtupleDColumn("ScateringAngle");
     analysisManager->CreateNtupleDColumn("MomentumVal");
     analysisManager->FinishNtuple(0);
+    */
 
-    analysisManager->CreateH1("ScatteringAngle", "Scattering Angle", 100, 0., 180.0);
-    analysisManager->CreateH1("MomentumDistribution", "Momentum Distribution", 100, 0., 190.0 *GeV);
+    //analysisManager->CreateH1("ScatteringAngle", "Scattering Angle", 100, 0., 180.0);
+    //analysisManager->CreateH1("MomentumDistribution", "Momentum Distribution", 100, 0., 190.0 *GeV);
 
     analysisManager->CreateNtuple("RawPixelHits", "Raw Pixel Hits");
     analysisManager->CreateNtupleIColumn("iEvent");
@@ -32,20 +34,20 @@ RunAction::RunAction(const SimFlags* flags) : m_flag(flags)
     analysisManager->CreateNtupleIColumn("iHit");
     analysisManager->CreateNtupleIColumn("PixX");
     analysisManager->CreateNtupleIColumn("PixY");
-    analysisManager->CreateNtupleDColumn("hitTime");
-    analysisManager->CreateNtupleDColumn("hitEnergy");
+    analysisManager->CreateNtupleFColumn("hitTime");
+    analysisManager->CreateNtupleFColumn("hitEnergy");
     analysisManager->FinishNtuple(1);
 
     // MONTE CARLO Truth
     analysisManager->CreateNtuple("TruthVertex", "Monte Carlo Truth Vertex Position");
     // Create Integer Event # column
     analysisManager->CreateNtupleIColumn("iEvent");
-    analysisManager->CreateNtupleDColumn("trueVertexX");
-    analysisManager->CreateNtupleDColumn("trueVertexY");
-    analysisManager->CreateNtupleDColumn("trueVertexZ");
+    analysisManager->CreateNtupleFColumn("trueVertexX");
+    analysisManager->CreateNtupleFColumn("trueVertexY");
+    analysisManager->CreateNtupleFColumn("trueVertexZ");
     // Create Integer Global time column = time that starts when each event begins. Local time = time when the particle is created
-    analysisManager->CreateNtupleDColumn("trueGlobalTime");
-    analysisManager->CreateNtupleDColumn("trueEnergy");
+    analysisManager->CreateNtupleFColumn("trueGlobalTime");
+    //analysisManager->CreateNtupleFColumn("trueEnergy");
     analysisManager->FinishNtuple(2);
 }
 

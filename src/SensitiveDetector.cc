@@ -51,16 +51,17 @@ G4bool SensitiveDetector::ProcessHits(G4Step *aStep, G4TouchableHistory *)
     // Implementation of all analysis info to be stored in nTuple
     // PreStep point includes all info of the first interaction within one step. Post step includes the last interaction of that particle.
     G4StepPoint *preStepPoint = aStep->GetPreStepPoint();
-    G4double energy = aStep->GetTotalEnergyDeposit();
-    G4double fglobalTime = preStepPoint->GetGlobalTime();
+    G4float energy = aStep->GetTotalEnergyDeposit();
+    G4int trackID = aStep->GetTrack()->GetTrackID();
+    G4float fglobalTime = preStepPoint->GetGlobalTime();
     G4ThreeVector posVertex = aStep->GetTrack()->GetVertexPosition();
     // Position is currently defined as the preStepPoint position. 
     G4ThreeVector posPixel = preStepPoint->GetPosition();
-    double pixelSize = m_flag->pixelSize *mm;
-    double detX = m_flag->detectorSizeX *cm;
-    double detY = m_flag->detectorSizeY *cm;
-    double detXOffset = m_flag->detectorXOffset *cm;
-    double detYOffset = m_flag->detectorYOffset *cm;
+    const float pixelSize = m_flag->pixelSize *mm;
+    const float detX = m_flag->detectorSizeX *cm;
+    const float detY = m_flag->detectorSizeY *cm;
+    const float detXOffset = m_flag->detectorXOffset *cm;
+    const float detYOffset = m_flag->detectorYOffset *cm;
 
     const std::array<std::array<std::array<int, 2>, 4>, 4> deltaTable = 
     {{
@@ -71,7 +72,7 @@ G4bool SensitiveDetector::ProcessHits(G4Step *aStep, G4TouchableHistory *)
         // flag = 0b10
         {{{-1,  0}, {0,  0}, {-1, 1}, {0, 1}}},
         // flag = 0b11
-        {{{ 0,  0}, {0,  1}, { 0,-1}, {1, 1}}}
+        {{{ 0,  0}, {0,  1}, { 1, 0}, {1, 1}}}  // 0, -1 -> 1, 0 
     }};
 
     G4String planeName = preStepPoint->GetTouchableHandle()->GetVolume()->GetName();
@@ -121,7 +122,7 @@ G4bool SensitiveDetector::ProcessHits(G4Step *aStep, G4TouchableHistory *)
     int pixX = static_cast<int>((posPixel.x() - detXOffset + detX / 2) / pixelSize);
     int pixY = static_cast<int>((posPixel.y() - detYOffset + detY / 2) / pixelSize);
     // Handle edge cases: The filtering of out of bound pixels is graciously done in the DigitalProcessing via threshold mapping, 
-    // This block however, also correctly endowes charge sharing to the right side of the pixel edge.
+    // This block however, also correctly endowes charge sharing to the correct side of the pixel edge.
     
     if(pixX == 0 && ((quadrantFlag & 0x1) == 0 ))
     {
@@ -170,8 +171,8 @@ G4bool SensitiveDetector::ProcessHits(G4Step *aStep, G4TouchableHistory *)
     
     for(std::array<std::array<int, 2>, 4>::size_type i = 0; i<4; i++)
     {
-        pixelCluster[i][0] +=deltas[i][0] ;
-        pixelCluster[i][1] +=deltas[i][1] ;
+        pixelCluster[i][0] +=deltas[i][0];
+        pixelCluster[i][1] +=deltas[i][1];
     }
 
     if (m_flag->verboseSD)
@@ -185,7 +186,15 @@ G4bool SensitiveDetector::ProcessHits(G4Step *aStep, G4TouchableHistory *)
                                             << pixelCluster[3][0] << "," << pixelCluster[3][1] << "  " << G4endl ;
     }
 
-    double epsilon = 3.66; // electron-hole pair creaton energy = (3.66 +- 0.03) eV
+    const float epsilon = 3.66; // electron-hole pair creaton energy = (3.66 +- 0.03) eV
+    // Call event action eDep function for adding up energy and timing derivation
+    auto eventAction = static_cast<EventAction*>(G4EventManager::GetEventManager()->GetUserEventAction());
+    // Hardcoded disable all other planes
+    std::array<float,4> effAnCopy = effAn; // forces evaluation
+    for(std::array<std::array<int, 2>, 4>::size_type i = 0; i<4; i++)
+    {
+        if (planeID == 0) eventAction->addEdep(eventID, trackID, effAnCopy[i] * energy *1000000/epsilon, fglobalTime *ns, InPixPos, planeID, pixelCluster[i][0], pixelCluster[i][1]);
+    }
     // fill the 4 efficiencies and timing into a tree. 
     // Apply a minimal threshold here already of 50 e-? edep in MeV --> if (edep*10^6/epsilon > 50) // threshold in e- // edep in MeV
     // take care if hit is at boundary of sensor (minimal or maximal pix number.)
@@ -193,7 +202,8 @@ G4bool SensitiveDetector::ProcessHits(G4Step *aStep, G4TouchableHistory *)
 
     // This line ensures that the compiler evaluates all effAn at the same time. If you dont do this float point fluctuations might appear
     // This is most probably due to multithreading even though I cant prove it.
-    std::array<double,4> effAnCopy = effAn; // forces evaluation
+    // Logic moved to EventAction.cc
+    /* 
     int iHit = 0;
     for(std::array<std::array<int, 2>, 4>::size_type i = 0; i<4; i++)
     {
@@ -208,7 +218,7 @@ G4bool SensitiveDetector::ProcessHits(G4Step *aStep, G4TouchableHistory *)
         analysisManager->AddNtupleRow(1); 
         iHit++;
     }
-
+    */
     return true;
 }
 
@@ -217,7 +227,7 @@ G4bool SensitiveDetector::ProcessHits(G4Step *aStep, G4TouchableHistory *)
 // x is coordinate in range [0, pitch]. Hence, pixel is centered around pitch/2.
 // error-fct that parameterize edge of pixel are at x = 0 and x = pitch
 // sigma is gaussian standard deviation
-G4double smoothStep(G4double x, G4double pitch, G4double sigma) {
+G4float smoothStep(G4float x, G4float pitch, G4float sigma) {
     return 0.5 * (std::erf((x) / sigma) - std::erf((x - pitch) / sigma));
 }
 
@@ -225,11 +235,11 @@ G4double smoothStep(G4double x, G4double pitch, G4double sigma) {
 // obtain a scalar efficiency based on the XY positions within a pixel.
 // binsize in unit um
 // per definition the some of all 4 efficiencies = 1.0
-std::pair<std::array<double, 4>, uint8_t>  SensitiveDetector::getEfficiencyAnalytical(const G4ThreeVector& InPixPosition) const {
+std::pair<std::array<float, 4>, uint8_t>  SensitiveDetector::getEfficiencyAnalytical(const G4ThreeVector& InPixPosition) const {
 
-    double pitch = m_flag->pixelSize *1000; // convert from mm to um (default 36.4 um)
-    double sigmaX = m_flag->CCModelSigmaX; // in um (default 4.3 um)
-    double sigmaY = m_flag->CCModelSigmaY; // in um (default 4.3 um)
+    const float pitch = m_flag->pixelSize *1000; // convert from mm to um (default 36.4 um)
+    const float sigmaX = m_flag->CCModelSigmaX; // in um (default 4.3 um)
+    const float sigmaY = m_flag->CCModelSigmaY; // in um (default 4.3 um)
 
     // contribution to 4 neighboring pixels
     // 00 is bottom left    (low X,     low Y)
@@ -237,11 +247,11 @@ std::pair<std::array<double, 4>, uint8_t>  SensitiveDetector::getEfficiencyAnaly
     // 10 is top left       (large X,   low Y)
     // 11 is top right      (large X,   large Y)
 
-    G4double xx = InPixPosition.x() / um; // in unit um with origin at bottom left corner (from 0 to 36.4)
-    G4double yy = InPixPosition.y() / um;
+    G4float xx = InPixPosition.x() / um; // in unit um with origin at bottom left corner (from 0 to 36.4)
+    G4float yy = InPixPosition.y() / um;
 
     // center InPixPos around center
-    G4double eff_X0, eff_Y0, eff_X1, eff_Y1;
+    G4float eff_X0, eff_Y0, eff_X1, eff_Y1;
     // method to output the quadrant position of the hit
     uint8_t quadrantFlag = 0;
 
@@ -265,7 +275,7 @@ std::pair<std::array<double, 4>, uint8_t>  SensitiveDetector::getEfficiencyAnaly
         eff_Y1 = smoothStep(yy - pitch, pitch, sigmaY); // nearest neighbor is above
     }
     
-    G4double eff00, eff01, eff10, eff11; 
+    G4float eff00, eff01, eff10, eff11; 
     
     eff00 = eff_X0 * eff_Y0; // bottom left
     eff01 = eff_X0 * eff_Y1; // bottom right

@@ -15,6 +15,7 @@ SteppingAction::SteppingAction(const SimFlags* flags): m_flag(flags)
 void SteppingAction::UserSteppingAction(const G4Step* aStep)
 {
     // Look only at protons
+    /*
     const G4Track* aTrack = aStep->GetTrack();
     if(aTrack->GetDefinition() == G4Proton::Definition()) 
     {
@@ -74,4 +75,5 @@ void SteppingAction::UserSteppingAction(const G4Step* aStep)
             entryPositions.erase(posIt);
         }
     }
+    */
 }

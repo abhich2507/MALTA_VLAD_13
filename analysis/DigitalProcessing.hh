@@ -224,13 +224,13 @@ void digitalTest(std::vector<std::pair<int,int>> hits)
     for(auto& hit: hits)
     {
         std::cout << "Input Hits: X: " << hit.first << "; Y: " << hit.second << std::endl; 
-        __uint128_t word = encodeWord(hit.first, hit.second, 8, 2, 5, 1, 6, false);
+        __uint128_t word = encodeWord(hit.first, hit.second, 8, 2, 5, 1, 8, false);
         std::cout << "Encoded word: " << std::bitset<30>(word) << std::endl;
         mergedWord |= word;
     }
     std::cout << "Merged word:  " << std::bitset<30>(mergedWord) << std::endl;
 
-    std::vector< std::pair<std::pair<int,int>, int> > pixPos = decodedDigitalWord(mergedWord, 16, 8, 2, 5, 1, 6);
+    std::vector< std::pair<std::pair<int,int>, int> > pixPos = decodedDigitalWord(mergedWord, 16, 8, 2, 5, 1, 8);
     for (const auto& pos : pixPos) 
     {
         int reconstructedPixX = pos.first.first;

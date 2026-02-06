@@ -1,9 +1,12 @@
 #include "EventAction.h"
+#include "G4SDManager.hh"
+#include "SensitiveDetector.h"
 #include "globals.hh"
 #include "G4AutoLock.hh"
 #include "G4Event.hh"
 #include "G4Run.hh"
 #include "G4RunManager.hh"
+#include "G4AnalysisManager.hh"
 #include <chrono>
 #include <iostream>
 #include <iomanip>
@@ -19,8 +22,53 @@ namespace
     bool gStartTimeInitialized = false;
 }
 
+void EventAction::BeginOfEventAction(const G4Event*)
+{
+    m_trackEdep.clear();
+}
+
+void EventAction::addEdep(G4int eventID, G4int trackID, G4float energy, G4float timing, G4ThreeVector inPixPos, G4int planeID, G4int pixX, G4int pixY)
+{
+    auto key = std::make_tuple(planeID, pixX, pixY);
+    auto &entry = m_trackEdep[key];
+    G4float beforeEnergy = entry.edep;
+    entry.edep += energy;
+    if (beforeEnergy < 50 && entry.edep>=50) entry.time = timing;
+    entry.eventNum = eventID;
+    entry.position = inPixPos;
+    entry.planeNum = planeID;
+    entry.X = pixX;
+    entry.Y = pixY;
+
+}
+
 void EventAction::EndOfEventAction(const G4Event*) 
 {
+    G4AnalysisManager *analysisManager = G4AnalysisManager::Instance();
+    // Loop over all tracks (includes all seondaries)
+    for (const auto& [key, entry]: m_trackEdep)
+    {
+        int iHit = 0;
+        if(entry.edep >= 50)
+        {
+            analysisManager->FillNtupleIColumn(0, 0, entry.eventNum);
+            analysisManager->FillNtupleIColumn(0, 1, entry.planeNum);
+            analysisManager->FillNtupleIColumn(0, 2, iHit);
+            analysisManager->FillNtupleIColumn(0, 3, entry.X);
+            analysisManager->FillNtupleIColumn(0, 4, entry.Y);
+            // This branch will be modified. Before it as encoding the timewalk of each hit. Now it stores the hit time of a particle.
+            analysisManager->FillNtupleFColumn(0, 5, entry.time);
+            analysisManager->FillNtupleFColumn(0, 6, entry.edep);
+            analysisManager->AddNtupleRow(0); 
+            iHit++;
+            //std::cout << "Saving entry: " << "eventID: " << entry.eventNum << "; X: " << pixelCluster[i][0] << "; Y:" << pixelCluster[i][1] << "; time: " << entry.time << "; energy: " << effAnCopy[i] * entry.edep <<  std::endl;
+        }
+        
+        
+    }
+
+
+
     
     // Implementation of a rudimentary progress bar. Added thread safety
     G4AutoLock lock(&g4CounterMutex);
@@ -70,4 +118,5 @@ void EventAction::EndOfEventAction(const G4Event*)
         if (eventID == totalEvents)
             std::cout << std::endl;
     }
+    
 }
