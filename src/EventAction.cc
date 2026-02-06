@@ -27,7 +27,7 @@ void EventAction::BeginOfEventAction(const G4Event*)
     m_trackEdep.clear();
 }
 
-void EventAction::addEdep(G4int eventID, G4int trackID, G4float energy, G4float timing, G4ThreeVector inPixPos, G4int planeID, G4int pixX, G4int pixY)
+void EventAction::addEdep(G4int eventID, G4int trackID, G4float energy, G4float timing, G4int planeID, G4int pixX, G4int pixY)
 {
     auto key = std::make_tuple(planeID, pixX, pixY);
     auto &entry = m_trackEdep[key];
@@ -35,7 +35,6 @@ void EventAction::addEdep(G4int eventID, G4int trackID, G4float energy, G4float 
     entry.edep += energy;
     if (beforeEnergy < 50 && entry.edep>=50) entry.time = timing;
     entry.eventNum = eventID;
-    entry.position = inPixPos;
     entry.planeNum = planeID;
     entry.X = pixX;
     entry.Y = pixY;
