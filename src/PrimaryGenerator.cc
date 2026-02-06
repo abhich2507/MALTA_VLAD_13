@@ -18,7 +18,7 @@ PrimaryGenerator::PrimaryGenerator(const SimFlags* flags) : m_flag(flags), m_par
     // Set primary particle energy if a constant value is passed. If not, an energy method is used below
     if(!m_flag->particleEnergy.empty() && m_flag->particleEnergy.find_first_not_of("0123456789") == std::string::npos)
     {
-        G4double particleEnergy = std::stod(m_flag->particleEnergy) * GeV;
+        G4float particleEnergy = std::stod(m_flag->particleEnergy) * GeV;
         m_particleGun->SetParticleEnergy(particleEnergy);  //1.4608 * MeV K-40   0.661 * MeV Cs-137
     }
     else
@@ -44,34 +44,34 @@ PrimaryGenerator::~PrimaryGenerator()
     delete m_particleGun;
 }
 // circular beam modeling
-G4ThreeVector PrimaryGenerator::GetRandomPointOnCircle(G4double radius, const G4ThreeVector center)
+G4ThreeVector PrimaryGenerator::GetRandomPointOnCircle(G4float radius, const G4ThreeVector center)
 {
-    G4double r = std::sqrt(G4UniformRand()) * radius;
+    G4float r = std::sqrt(G4UniformRand()) * radius;
 
     // Uniform angle
-    G4double phi = 2 * CLHEP::pi * G4UniformRand();
+    G4float phi = 2 * CLHEP::pi * G4UniformRand();
     // Coordinates in XY plane
-    G4double x = r * std::cos(phi);
-    G4double y = r * std::sin(phi);
-    G4double z = 0.0;
+    G4float x = r * std::cos(phi);
+    G4float y = r * std::sin(phi);
+    G4float z = 0.0;
 
     return center + G4ThreeVector(x, y, z);
     
 }
 
-G4ThreeVector PrimaryGenerator::GetRandomPointOnRectangle(G4double height, G4double thickness, const G4ThreeVector center)
+G4ThreeVector PrimaryGenerator::GetRandomPointOnRectangle(G4float height, G4float thickness, const G4ThreeVector center)
 {
-    G4double halfHeight = height / 2.0;
-    G4double halfThickness = thickness / 2.0;
+    G4float halfHeight = height / 2.0;
+    G4float halfThickness = thickness / 2.0;
 
-    G4double x = center.x() + (2.0 * G4UniformRand() - 1.0) * halfThickness;
-    G4double y = center.y() + (2.0 * G4UniformRand() - 1.0) * halfHeight;
-    G4double z = center.z();
+    G4float x = center.x() + (2.0 * G4UniformRand() - 1.0) * halfThickness;
+    G4float y = center.y() + (2.0 * G4UniformRand() - 1.0) * halfHeight;
+    G4float z = center.z();
 
     return G4ThreeVector(x, y, z);
 }
 
-G4double PrimaryGenerator::GetRandomPointInLine( G4double xMin, G4double xMax)
+G4float PrimaryGenerator::GetRandomPointInLine( G4float xMin, G4float xMax)
 {
     return xMin + (xMax - xMin) * G4UniformRand();
 }
@@ -84,16 +84,16 @@ void PrimaryGenerator::GeneratePrimaries(G4Event *oneEvent)
 
         G4AnalysisManager *analysisManager = G4AnalysisManager::Instance();
         // Particle Direction (momentum)
-        G4double px = m_flag->particleMomentumX;
-        G4double py = m_flag->particleMomentumY;
-        G4double pz = m_flag->particleMomentumZ;
+        G4float px = m_flag->particleMomentumX;
+        G4float py = m_flag->particleMomentumY;
+        G4float pz = m_flag->particleMomentumZ;
         G4ThreeVector mom(px,py,pz);
         m_particleGun->SetParticleMomentumDirection(mom);
 
-        double beamWidth = m_flag->sourceRadius *mm;
-        G4double x = m_flag->beamXOffset *cm;
-        G4double y = m_flag->beamYOffset *cm;
-        G4double z = m_flag->beamZOffset *cm;
+        float beamWidth = m_flag->sourceRadius *mm;
+        G4float x = m_flag->beamXOffset *cm;
+        G4float y = m_flag->beamYOffset *cm;
+        G4float z = m_flag->beamZOffset *cm;
         G4ThreeVector pos;
         // Particle circular beam simulation
         if(m_flag->beamGeometry == "pencil")
@@ -102,10 +102,10 @@ void PrimaryGenerator::GeneratePrimaries(G4Event *oneEvent)
         }
         else if (m_flag->beamGeometry == "gaussian")
         {
-            G4double sigma = m_flag->gausSmearing *cm;
-            G4double xGauss = G4RandGauss::shoot(x, sigma);
-            G4double yGauss = G4RandGauss::shoot(y, sigma);
-            //G4double zGauss = G4RandGauss::shoot(z, sigma);
+            G4float sigma = m_flag->gausSmearing *cm;
+            G4float xGauss = G4RandGauss::shoot(x, sigma);
+            G4float yGauss = G4RandGauss::shoot(y, sigma);
+            //G4float zGauss = G4RandGauss::shoot(z, sigma);
             pos = G4ThreeVector(xGauss, yGauss, z);
 
         }
@@ -139,18 +139,18 @@ void PrimaryGenerator::GeneratePrimaries(G4Event *oneEvent)
         m_particleGun->SetParticlePosition(pos);
 
         G4int evtID = oneEvent->GetEventID();
-        double offSet =  m_flag->intraSpillOffset;
-        double particleTime = evtID * m_flag->beamVeto *ns + offSet *ns;
+        float offSet =  m_flag->intraSpillOffset;
+        float particleTime = evtID * m_flag->beamVeto *ns + offSet *ns;
         m_particleGun->SetParticleTime(particleTime); // This is the only thread safe way to do this. Multithreading messes up life as always
 
         // Save Vertex Info
-        analysisManager->FillNtupleIColumn(2, 0, evtID);
-        analysisManager->FillNtupleDColumn(2, 1, pos[0]);
-        analysisManager->FillNtupleDColumn(2, 2, pos[1]);
-        analysisManager->FillNtupleDColumn(2, 3, pos[2]);
-        analysisManager->FillNtupleDColumn(2, 4, particleTime);
-        analysisManager->FillNtupleDColumn(2, 5, std::stod(m_flag->particleEnergy));
-        analysisManager->AddNtupleRow(2); 
+        analysisManager->FillNtupleIColumn(1, 0, evtID);
+        analysisManager->FillNtupleFColumn(1, 1, pos[0]);
+        analysisManager->FillNtupleFColumn(1, 2, pos[1]);
+        analysisManager->FillNtupleFColumn(1, 3, pos[2]);
+        analysisManager->FillNtupleFColumn(1, 4, particleTime);
+        //analysisManager->FillNtupleFColumn(1, 5, std::stod(m_flag->particleEnergy));
+        analysisManager->AddNtupleRow(1); 
 
         // Create Vertex
         m_particleGun->GeneratePrimaryVertex(oneEvent);

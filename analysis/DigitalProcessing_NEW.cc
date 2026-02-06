@@ -4,7 +4,7 @@
 
 // TODO: We are in dire need of value checks for all user inputs.
 
-void DigitalProcessing(double inputThreshold, int runNumber, std::string saveName, bool proteusFlag)
+void DigitalProcessing_NEW(double inputThreshold, int runNumber, std::string saveName, bool proteusFlag)
 {
     auto start = std::chrono::high_resolution_clock::now();
     // Set all the analysis flags for the digital processing
@@ -49,22 +49,16 @@ void DigitalProcessing(double inputThreshold, int runNumber, std::string saveNam
     {
         chainPixel->Add(Form("%soutput0_t%d.root", inputPath.c_str() , t));
     }
-    float corrEnergy_float, timeWalkHit_float;
+    double corrEnergy, timeWalkHit;
     int rawEventID, planeID, iHit, pixX, pixY;
     chainPixel->SetBranchAddress("iEvent", &rawEventID);
     chainPixel->SetBranchAddress("iPlane", &planeID);
     chainPixel->SetBranchAddress("iHit", &iHit);
     chainPixel->SetBranchAddress("PixX", &pixX);
     chainPixel->SetBranchAddress("PixY", &pixY);
-    chainPixel->SetBranchAddress("hitTime", &timeWalkHit_float); // TODO change var name
-    chainPixel->SetBranchAddress("hitEnergy", &corrEnergy_float); // TODO change var name
+    chainPixel->SetBranchAddress("hitTime", &timeWalkHit); // TODO change var name
+    chainPixel->SetBranchAddress("hitEnergy", &corrEnergy); // TODO change var name
     Long64_t nRawEntries = chainPixel->GetEntries();
-    // Cast to double for legacy compatibility
-
-
-
-
-    
 
     // Avoid O(n^2) nested loops via extra map 
     std::map<std::pair<int,std::pair<int, int>>, double> enMap; 
@@ -76,7 +70,7 @@ void DigitalProcessing(double inputThreshold, int runNumber, std::string saveNam
 
     // charge loss coefficient
     double chLoss = analysisFlags->chLoss;
-    corrEnergy_float *=static_cast<double>(chLoss);
+    corrEnergy *=chLoss;
 
     // Threshold smearing. Philosophy: randomly assign a fixed smearing per pixel and keep it. 
     //This should simulate the fabrication differences leading to pixel threshold changes.
@@ -136,9 +130,6 @@ void DigitalProcessing(double inputThreshold, int runNumber, std::string saveNam
         for (Long64_t j = 0; j < nRawEntries; j++)
         {
             chainPixel->GetEntry(j);
-            double corrEnergy = static_cast<double>(corrEnergy_float);
-            double timeWalkHit = static_cast<double>(timeWalkHit_float);
-            //std::cout <<  "Float: " << corrEnergy_float << "; Double: " << corrEnergy << std::endl;
             if (planeID != i) continue;
             enMap[{rawEventID, {pixX, pixY}}] += corrEnergy;
             timeMap[{rawEventID, {pixX, pixY}}].push_back(timeWalkHit);
@@ -315,5 +306,3 @@ void DigitalProcessing(double inputThreshold, int runNumber, std::string saveNam
     std::chrono::duration<double, std::milli> elapsed = end - start;
     std::cout << "############################# Digital Processing stopped after " << elapsed.count() << "ms" << std::endl;
 }
-
-

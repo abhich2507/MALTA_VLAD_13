@@ -34,13 +34,13 @@ void Tracking(double threshold, int runNumber, std::string saveName)
         trackChain->Add(Form("%soutput0_t%d.root", inputPath.c_str() , t));
     }
 
-    double vertexX, vertexY, vertexZ, globalTime;
+    float vertexX_float, vertexY_float, vertexZ_float, globalTime_float;
 
     // Connect branches
-    trackChain->SetBranchAddress("trueVertexX", &vertexX);
-    trackChain->SetBranchAddress("trueVertexY", &vertexY);
-    trackChain->SetBranchAddress("trueVertexZ", &vertexZ);
-    trackChain->SetBranchAddress("trueGlobalTime", &globalTime);
+    trackChain->SetBranchAddress("trueVertexX", &vertexX_float);
+    trackChain->SetBranchAddress("trueVertexY", &vertexY_float);
+    trackChain->SetBranchAddress("trueVertexZ", &vertexZ_float);
+    trackChain->SetBranchAddress("trueGlobalTime", &globalTime_float);
 
     // Old format. DEPRECATED. Will be deleted on 01.03.2026
     /*
@@ -58,6 +58,11 @@ void Tracking(double threshold, int runNumber, std::string saveName)
     for (Long64_t i = 0; i < nTrackEntries; i++) 
     {
         trackChain->GetEntry(i);
+
+        double vertexX = static_cast<double>(vertexX_float);
+        double vertexY = static_cast<double>(vertexY_float);
+        double vertexZ = static_cast<double>(vertexZ_float);
+        double globalTime = static_cast<double>(globalTime_float);
         TrackEntry tr;
         tr.x = vertexX;
         tr.y = vertexY;

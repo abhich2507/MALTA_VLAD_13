@@ -22,7 +22,7 @@ public:
     //Getter
     const std::map<std::pair<int, int>, int>& getChannelHitMap() const { return m_channelHitMap; }
     G4double getEfficiencyCorrectionXY(const G4ThreeVector& inPixPosition);
-    std::pair<std::array<double, 4>, uint8_t>  getEfficiencyAnalytical(const G4ThreeVector& inPixPosition) const;
+    std::pair<std::array<float, 4>, uint8_t>  getEfficiencyAnalytical(const G4ThreeVector& inPixPosition) const;
     //G4double getTimingOffset(G4double amplitude) const;
 
 private:

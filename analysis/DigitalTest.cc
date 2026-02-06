@@ -10,7 +10,7 @@ void DigitalTest()
 {
     gStyle->SetCanvasPreferGL(kTRUE);
     gROOT->SetStyle("ATLAS");
-    std::vector<std::pair<int,int>> hits = {{511,511}, {511,511}};
+    std::vector<std::pair<int,int>> hits = {{2,25}, {4,25}};
     digitalTest(hits);
 
     // Test the global position translation of pixel coordinates.
