@@ -36,7 +36,7 @@ RunAction::RunAction(const SimFlags* flags) : m_flag(flags)
     analysisManager->CreateNtupleIColumn("PixY");
     analysisManager->CreateNtupleFColumn("hitTime");
     analysisManager->CreateNtupleFColumn("hitEnergy");
-    analysisManager->FinishNtuple(1);
+    analysisManager->FinishNtuple(0);
 
     // MONTE CARLO Truth
     analysisManager->CreateNtuple("TruthVertex", "Monte Carlo Truth Vertex Position");
@@ -48,7 +48,7 @@ RunAction::RunAction(const SimFlags* flags) : m_flag(flags)
     // Create Integer Global time column = time that starts when each event begins. Local time = time when the particle is created
     analysisManager->CreateNtupleFColumn("trueGlobalTime");
     //analysisManager->CreateNtupleFColumn("trueEnergy");
-    analysisManager->FinishNtuple(2);
+    analysisManager->FinishNtuple(1);
 }
 
 void RunAction::BeginOfRunAction(const G4Run *run)
