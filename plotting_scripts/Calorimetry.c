@@ -10,122 +10,213 @@ void Calorimetry()
 
     gStyle->SetCanvasPreferGL(kTRUE);
     gROOT->SetStyle("ATLAS");
-
+    /*
     std::vector<int> runNumbers= {83,84,85,86,87,88,89,90,91,92};
-    //std::vector<std::string> runFiles = { "wordSpacingScan0ns", "wordSpacingScan0.5ns", "wordSpacingScan1ns","wordSpacingScan1.6ns"};
-    //std::vector<std::string> labels = {"0ns merging", "0.5ns merging", "1ns merging", "1.6ns merging"};
 
-    std::vector<std::string> runFiles = { "CaloNoMerg", "CaloYesMerg", "8x8Merging"};//, "RO300ns", "RO500ns", "RO1000ns"};
-    std::vector<std::string> labels = { "0ns merging", "1.6ns merging", "1.6ns merging 8x8 group"};//, "RO300ns", "RO500ns", "RO1000ns"};
+    //std::vector<std::string> runFiles = { "CaloNoMerg", "CaloYesMerg", "RO2x161.6nsWin", "RO2x321.6nsWin", "8x8Merging"};//, "RO300ns", "RO500ns", "RO1000ns"};
+    //std::vector<std::string> labels = { "No Merging", "2 #times 8   pixel group", "2 #times 16 pixel group", "2 #times 32 pixel group", "8 #times 8   pixel group"};//, "RO300ns", "RO500ns", "RO1000ns"};
+    //std::vector<int> vcolor = {kBlack, kRed, kBlue, kMagenta +2, kOrange -3};
+    //std::vector<int> vmarkerStyle = {20, 21, 22, 23, 47};
+
+    //std::vector<std::string> runFiles = { "CaloNoMerg", "RO2x80.5nsWin", "RO2x81nsWin","CaloYesMerg"};
+    //std::vector<std::string> labels = {"No Merging", "0.5 ns merging", "1.0 ns merging", "1.6 ns merging"};
+    //std::vector<int> vcolor = {kBlack, kAzure -3, kTeal +2, kOrange +7};
+    //std::vector<int> vmarkerStyle = {20, 21, 22, 23};
+
+    //std::vector<std::string> runFiles = {"CaloNoMerg", "CaloYesMerg", "RO8x80.5nsWin"};
+    //std::vector<std::string> labels = {"0 ns merging", "1.6 ns merging", "RO 8x8 0.5 ns merging"};
+
+    std::vector<std::string> runFiles = { "RO8x80.5nsWin", "CaloNoMerg"};
+    //std::vector<std::string> labels = {"Optimized design 200 e#lower[-2.2]{#scale[0.6]{- }}", "Optimized design 1000 e#lower[-2.2]{#scale[0.6]{- }}", "No Merging 200 e#lower[-2.2]{#scale[0.6]{- }}", "No Merging 1000 e#lower[-2.2]{#scale[0.6]{- }}"};
+    std::vector<std::string> labels = {"#splitline{8 #times 8 pixel group}{0.5 ns merging 200 e#lower[-2.2]{#scale[0.6]{- }}}","","#splitline{8 #times 8 pixel group}{0.5 ns merging 1000 e#lower[-2.2]{#scale[0.6]{- }}}",""};
+    std::vector<int> vcolor = {kOrange +7, kOrange +7, kAzure -3, kAzure -3 };
+    std::vector<int> vmarkerStyle = {20, 21, 22, 23};
+    std::vector<int> thrVector = {200,1000};
+    //std::vector<int> thrVector = {200};
     std::vector<double> venergy = {5,10,15,20,25,30,35,50,75,100};
     std::vector<double> venergyErr(runNumbers.size(), 0.0);
+    //std::vector<int> markers = {20,22,23,21};
 
     //std::vector<std::string> labels = {"Perfect matching", "Real matching", "Slow matching"};
+    */
+    std::vector<int> runNumbers= {93,94,95,96,97,98,99,100,101};
+    std::vector<std::string> runFiles = { "FIFOideal", "FIFO100W1F", "FIFO500W1F", "FIFO500W0.001F", "FIFO500W0.01F"};//FIFO100w50nsf
+    std::vector<std::string> labels = {"Maxwidth+1ns", "100width+1ns", "500width+1ns", "500width+1ps", "500width+10ps"};
+    std::vector<int> vcolor = {kBlack, kRed, kGreen, kBlue, kMagenta};
+    std::vector<int> vmarkerStyle = {20, 21, 22, 20, 21};
+    std::vector<int> thrVector = {200};
+    std::vector<double> venergy = {5,10,15,20,25,30,50,200,400};
+    std::vector<double> venergyErr(runNumbers.size(), 0.0);
+
     TCanvas *c1 = new TCanvas("c1","numSecondaries",800,800);
     //c1->SetRightMargin(0.15);
     c1->SetLeftMargin(0.17);
     c1->SetTopMargin(0.10);
     //c1->SetBottomMargin(0.12);
     c1->cd();
-    TLegend *leg1 = new TLegend(0.55,0.2,0.83,0.5);
+    //TLegend *leg1 = new TLegend(0.2,0.6,0.5,0.85);
+    TLegend *leg1 = new TLegend(0.2,0.66,0.5,0.88);
+    //TLegend *leg1 = new TLegend(0.4,0.17,0.8,0.33);
     leg1->SetTextSize(0.04);
     leg1->SetBorderSize(0);
 
-    TLatex *t = new TLatex();
-    t->SetTextSize(0.049);
-    t->SetNDC();
-    t->DrawLatex(0.25, 0.92, "#bf{MALTA2 Simulation}, 30#mum EPI");
     
 
     int colorIndex = 0; // ROOT color index (kBlue=4, kRed=2, kGreen=3, etc.)
 
-    for (const std::string &tag : runFiles) 
+    for (const int thr : thrVector)
     {
-        std::vector<double> vmean;
-        std::vector<double> vmeanErr;
-        for (const auto &runNumber : runNumbers)
+
+        for (const std::string &tag : runFiles) 
         {
-            std::cout << tag << "; " << runNumber << std::endl;            
-            
-            std::string summaryPath = Form("Results/local_%04d/%s/CalorimetryThr200.root", runNumber, tag.c_str());
-            std::cout << "Opening: " << summaryPath << std::endl;
-
-            TFile *summaryFile = TFile::Open(summaryPath.c_str(), "READ");
-            if (!summaryFile || summaryFile->IsZombie()) {
-                std::cerr << "Could not open file: " << summaryPath << std::endl;
-                return;
-            }
-
-            TTree *summaryTree = (TTree*) summaryFile->Get("CaloHits");
-            if (!summaryTree) {
-                std::cerr << "No summaryTree in file: " << summaryPath << std::endl;
-                return;
-            }
-
-            Long64_t nSummaryEntries = summaryTree->GetEntries();
-            int numSecondaries;
-            std::vector<int> histoSecondaries;
-            histoSecondaries.reserve(nSummaryEntries);
-            summaryTree->SetBranchAddress("numSecondaries", &numSecondaries);
-            for (Long64_t i = 0; i < nSummaryEntries; i++)
+            std::vector<double> vmean;
+            std::vector<double> vmeanErr;
+            for (const auto &runNumber : runNumbers)
             {
-                summaryTree->GetEntry(i);
-                histoSecondaries.push_back(numSecondaries);
+                std::cout << tag << "; " << runNumber << std::endl;            
+                
+                std::string summaryPath = Form("Results/local_%04d/%s/CalorimetryThr%i.root", runNumber, tag.c_str(), thr);
+                std::cout << "Opening: " << summaryPath << std::endl;
+
+                TFile *summaryFile = TFile::Open(summaryPath.c_str(), "READ");
+                if (!summaryFile || summaryFile->IsZombie()) {
+                    std::cerr << "Could not open file: " << summaryPath << std::endl;
+                    return;
+                }
+
+                TTree *summaryTree = (TTree*) summaryFile->Get("CaloHits");
+                if (!summaryTree) {
+                    std::cerr << "No summaryTree in file: " << summaryPath << std::endl;
+                    return;
+                }
+
+                Long64_t nSummaryEntries = summaryTree->GetEntries();
+                int numSecondaries, numClusters;
+                std::vector<int> histoSecondaries;
+                histoSecondaries.reserve(nSummaryEntries);
+                std::vector<int> histoClusters;
+                histoClusters.reserve(nSummaryEntries);
+                summaryTree->SetBranchAddress("numSecondaries", &numSecondaries);
+                summaryTree->SetBranchAddress("numClusters", &numClusters);
+                for (Long64_t i = 0; i < nSummaryEntries; i++)
+                {
+                    summaryTree->GetEntry(i);
+                    histoSecondaries.push_back(numSecondaries);
+                    histoClusters.push_back(numClusters);
+                    //TODO: No smart way to plot both cluster and secondaries yet
+                }
+
+                double min = *std::min_element(histoSecondaries.begin(), histoSecondaries.end());
+                double max = *std::max_element(histoSecondaries.begin(), histoSecondaries.end());
+
+                TH1D *hSecondaries = new TH1D("hSecondaries",";Hits per Event;Counts", 50, min, max);
+
+                for (double val : histoSecondaries) 
+                {
+                    hSecondaries->Fill(val);
+                }
+
+                //TCanvas *c = new TCanvas(Form("c_%s_%d", tag.c_str(), runNumber), Form("c_%s_%d", tag.c_str(), runNumber), 800, 600);
+                TCanvas *c = new TCanvas("c", "c", 800, 600);
+                TF1 *gaus = new TF1("gaus", "gaus", min, max);
+                hSecondaries->Fit(gaus, "R");   
+
+                double mean     = gaus->GetParameter(1);
+                double sigma    = gaus->GetParameter(2);
+                double meanErr  = gaus->GetParError(1);
+                double sigmaErr = gaus->GetParError(2);
+
+                std::cout << "Gaussian mean  = " << mean  << " ± " << meanErr  << std::endl;
+                std::cout << "Gaussian sigma = " << sigma << " ± " << sigmaErr << std::endl;
+
+                vmean.push_back(mean);
+                vmeanErr.push_back(meanErr);
+                
+                hSecondaries->Draw();
+                gaus->Draw("same");
             }
+            colorIndex++;
+            c1->cd();
 
-            double min = *std::min_element(histoSecondaries.begin(), histoSecondaries.end());
-            double max = *std::max_element(histoSecondaries.begin(), histoSecondaries.end());
-
-            TH1D *hSecondaries = new TH1D("hSecondaries",";Hits per Event;Counts", 50, min, max);
-
-            for (double val : histoSecondaries) 
+            TGraphErrors *gSecondaries = new TGraphErrors(runNumbers.size(), venergy.data(), vmean.data(), venergyErr.data(), vmeanErr.data());
+            if (colorIndex == 1) gSecondaries->Draw("APL");
+            /*
+            if (colorIndex == 2 || colorIndex == 4) 
             {
-                hSecondaries->Fill(val);
+                double x0 = 0;
+                double y0 = 0;
+                double x6 = 35;
+                double y6 = 350;
+                gSecondaries->GetPoint(0, x0, y0);
+                gSecondaries->GetPoint(6, x6, y6);
+
+                // Define linear function
+                TF1* fLine = new TF1("fLine", "[0] + [1]*x", x0, x6);
+
+                // Fit only in this range
+                //gSecondaries->Fit(fLine, "R");
+                double xmax = 110;   // or whatever higher x you want
+                fLine->SetRange(0, xmax);
+                fLine->SetLineStyle(2);
+                fLine->SetLineColor(vcolor[colorIndex -1]);
+                fLine->Draw("same");
             }
+            */
+            /*
+            else if (colorIndex == 2)
+            {
+                gSecondaries->Draw("PL SAME");
+                double x0 = 0;
+                double y0 = 0;
+                double x6 = 35;
+                double y6 = 350;
+                gSecondaries->GetPoint(0, x0, y0);
+                gSecondaries->GetPoint(6, x6, y6);
+                // Define second fit only for multi threshold plot. Otherwise this should be turned off
+                TF1* fLine2 = new TF1("fLine2", "[0] + [1]*x", x0, x6);
 
-            //TCanvas *c = new TCanvas(Form("c_%s_%d", tag.c_str(), runNumber), Form("c_%s_%d", tag.c_str(), runNumber), 800, 600);
-            TCanvas *c = new TCanvas("c", "c", 800, 600);
-            TF1 *gaus = new TF1("gaus", "gaus", min, max);
-            hSecondaries->Fit(gaus, "R");   
+                // Fit only in this range
+                fLine2->SetLineColor(kRed);
+                gSecondaries->Fit(fLine2, "R");
+                double xmax = 110;   // or whatever higher x you want
+                fLine2->SetRange(0, xmax);
+                fLine2->SetLineStyle(2);
+                fLine2->Draw("same");
 
-            double mean     = gaus->GetParameter(1);
-            double sigma    = gaus->GetParameter(2);
-            double meanErr  = gaus->GetParError(1);
-            double sigmaErr = gaus->GetParError(2);
+            }
+            */
 
-            std::cout << "Gaussian mean  = " << mean  << " ± " << meanErr  << std::endl;
-            std::cout << "Gaussian sigma = " << sigma << " ± " << sigmaErr << std::endl;
 
-            vmean.push_back(mean);
-            vmeanErr.push_back(meanErr);
+            //else if (colorIndex == 3) gSecondaries->Draw("PL SAME");   
+            else if (colorIndex >1) gSecondaries->Draw("PL SAME");  
+            gSecondaries->SetMinimum(0);
+            gSecondaries->SetLineColor(vcolor[colorIndex - 1]);
+            gSecondaries->SetTitle("Efficiency vs Threshold;Primary energy [GeV];Hits per Event");
+            gSecondaries->SetMarkerStyle(vmarkerStyle[colorIndex - 1]);
+            if (colorIndex == 4) gSecondaries->SetMarkerSize(2.8);
+            else gSecondaries->SetMarkerSize(2.);
+            gSecondaries->SetLineWidth(3.);
+            gSecondaries->SetMarkerColor(vcolor[colorIndex - 1]);
             
-            hSecondaries->Draw();
-            gaus->Draw("same");
+            //if (colorIndex == 1 || colorIndex == 3) leg1->AddEntry(gSecondaries, labels[colorIndex-1].c_str(), "lp");
+            leg1->AddEntry(gSecondaries, labels[colorIndex-1].c_str(), "lp");
         }
-        colorIndex++;
-        c1->cd();
-
-        TGraphErrors *gSecondaries = new TGraphErrors(runNumbers.size(), venergy.data(), vmean.data(), venergyErr.data(), vmeanErr.data());
-        if (colorIndex == 1) gSecondaries->Draw("APL");
-        else gSecondaries->Draw("PL SAME");   
-        gSecondaries->SetLineColor(colorIndex);
-        gSecondaries->SetTitle("Efficiency vs Threshold;Primary energy [GeV];Hits per Event");
-        gSecondaries->SetMarkerStyle(21);
-        gSecondaries->SetMarkerSize(2.);
-        gSecondaries->SetLineWidth(2.5);
-        gSecondaries->SetMarkerColor(colorIndex);
-        leg1->AddEntry(gSecondaries, labels[colorIndex-1].c_str(), "lp");
     }
-
     
 
     
 
 
     // Draw legends
-    //c1->cd(); 
+    c1->cd(); 
+    TLatex *t = new TLatex();
+    t->SetTextSize(0.049);
+    t->SetNDC();
+    t->DrawLatex(0.25, 0.92, "#bf{MALTA2 Simulation}, 30#mum EPI");
+
+
     leg1->Draw();
-    //c1->SaveAs("PublicPlots/EffThr_MergingTime.pdf");
+    c1->SaveAs("PublicPlots/CaloOptimalvsThreshold.pdf");
     //c1->SaveAs("PublicPlots/EffThr_MergingTime.C");
 
 }
