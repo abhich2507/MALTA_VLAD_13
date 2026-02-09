@@ -192,7 +192,6 @@ std::vector< std::pair<std::pair<int,int>, int> > decodedDigitalWord(__uint128_t
     for (int hit :hitInGroup)
     {
         nHits ++;
-        // TODO: Source of errors when the bit sizes change. Revisit for further implementation
         /*
         int x_half = (hit >= groupSizeX) ? 1 : 0;
         int pixX = maltaDColumn *groupSizeY + x_half;
@@ -240,6 +239,50 @@ void digitalTest(std::vector<std::pair<int,int>> hits)
     }
 }
 
+    
+    std::map<std::pair<int,int>, double> generateThrMap(double inputThreshold, int pixXNum, int pixYNum, 
+                                                        int groupRepetition, double relativeThresholdSmearingCol, 
+                                                        double relativeThresholdSmearingMean, std::string directoryPath, 
+                                                        std::string runPath, std::string saveName)
+    {
+        // This is an example data input for data sim threshold dispersion validation
+        // Thr 967
+        //std::vector<double> vThrMeanData = {959.2, 1004.8, 986.9, 1003.7, 1030.1, 1037.2, 1002.7, 983.7, 938.2, 952.7, 976.5, 943.4, 960.7, 930.8, 884.3, 875.2};
+        // Thr 200
+        std::vector<double> vThrMeanData = {228.594,220.652,223.642,236.398,230.506,242.855,235.05,228.462,233.891,226.979,218.171,214.329,223.578,207.099,209.558,210.827};
+
+        // Save the threshold 
+        TH1D *h1DThreshold =  new TH1D("h1DUTThreshold", "h1DThreshold", 100, inputThreshold - inputThreshold / 2,inputThreshold + inputThreshold / 2);
+        TH2D *h2DThreshold    = new TH2D("h2DUTThreshold", "h2DUTThreshold", 512, 0, 512, 512, 0, 512);
+        std::map<std::pair<int,int>, double> thresholdMap;
+        for (int i = 0; i< pixXNum/groupRepetition; i++)
+        {
+            static std::mt19937 gen(std::random_device{}());
+            std::normal_distribution<> dist(1.0, relativeThresholdSmearingMean);
+            double thresholdMean = inputThreshold * dist(gen);
+            //std::cout << thresholdMean << std::endl;
+            //thresholdMean = vThrMeanData[i];
+            for (int x = 0; x < pixXNum; x++)
+            {
+                for (int y = 0; y < pixYNum; y++)
+                {
+                    if (x / groupRepetition == i)
+                    {
+                        static std::mt19937 gen(std::random_device{}());
+                        std::normal_distribution<> dist(1.0, relativeThresholdSmearingCol);
+                        double thresholdCol = thresholdMean * dist(gen);
+                        thresholdMap[{x,y}] = thresholdCol;
+                        h1DThreshold->Fill(thresholdCol);
+                        h2DThreshold->Fill(x, y, thresholdCol);
+                    }
+                }
+            }
+        }
+        savePlot(directoryPath, runPath, inputThreshold, saveName, h1DThreshold, "h1DThreshold");
+        savePlot(directoryPath, runPath, inputThreshold, saveName, h2DThreshold, "h2DThreshold");
+
+        return thresholdMap;
+    }
 
 
 

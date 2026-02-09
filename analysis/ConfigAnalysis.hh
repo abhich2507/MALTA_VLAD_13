@@ -39,11 +39,13 @@ struct SimFlags
     bool verboseTracking = false;
     bool verboseClustering = false;
     bool verboseAnalysis = false;
-
     double trackOffsetX = 0.;
     double trackOffsetY = 0.;
-
     double veto = 0.;
+
+    double fifoFrequency = 0.;
+    double fifoSize = 0.;
+
 };
 
 void LoadAnalysisFlagsFromFile(const std::string& filename, SimFlags& flags)
@@ -94,7 +96,8 @@ void LoadAnalysisFlagsFromFile(const std::string& filename, SimFlags& flags)
         else if (key == "trackOffsetX") flags.trackOffsetX = std::stod(value);
         else if (key == "trackOffsetY") flags.trackOffsetY = std::stod(value);
         else if (key == "veto") flags.veto = std::stod(value);
-
+        else if (key == "fifoFrequency") flags.fifoFrequency = std::stod(value);
+        else if (key == "fifoSize") flags.fifoSize = std::stod(value);
         //std::cout << "Loaded flag: " << key << " = " << value << std::endl;
     }
 }

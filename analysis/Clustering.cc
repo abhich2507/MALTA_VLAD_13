@@ -44,14 +44,14 @@ void Clustering(double threshold, int runNumber, std::string saveName = "default
     double reconstructedTime;
     int trackID, pixX, pixY, nHits;
 
-    trackedTree->SetBranchAddress("reconstructedVertexX", &vertexX);
-    trackedTree->SetBranchAddress("reconstructedVertexY", &vertexY);
-    trackedTree->SetBranchAddress("reconstructedGlobalTime", &globalTrigger);
+    trackedTree->SetBranchAddress("vertexX", &vertexX);
+    trackedTree->SetBranchAddress("vertexY", &vertexY);
+    trackedTree->SetBranchAddress("vertexTime", &globalTrigger);
     trackedTree->SetBranchAddress("trackID", &trackID);
-    trackedTree->SetBranchAddress("PixX", &pixX);  
-    trackedTree->SetBranchAddress("PixY", &pixY);  
-    trackedTree->SetBranchAddress("nHits", &nHits);
-    trackedTree->SetBranchAddress("reconstructedLocalTime", &reconstructedTime);
+    trackedTree->SetBranchAddress("DUTPixX", &pixX);  
+    trackedTree->SetBranchAddress("DUTPixY", &pixY);  
+    trackedTree->SetBranchAddress("DUTnHits", &nHits);
+    trackedTree->SetBranchAddress("DUTLocalTime", &reconstructedTime);
 
 
     TFile *outfile = new TFile((inputPath + "analysisThr" + std::to_string(int(threshold)) + ".root").c_str(), "RECREATE");

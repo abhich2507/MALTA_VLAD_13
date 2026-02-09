@@ -10,11 +10,12 @@ parser.add_argument("-s", "--save"        , help="Save name"       , type = str 
 parser.add_argument("-d", "--digitize"    , help="Digitize the raw data"                , action="store_true")
 parser.add_argument("-t", "--tracking"    , help="Track matching"                       , action="store_true")
 parser.add_argument("-c", "--clustering"  , help="Cluster the hits"                     , action="store_true")
-parser.add_argument("-C", "--calorimetry"  , help="Calorimetry analysis"                , action="store_true")
+parser.add_argument("-C", "--calorimetry" , help="Calorimetry analysis"                 , action="store_true")
+parser.add_argument("-f", "--fifo"        , help="FIFO Processing"                      , action="store_true")
 parser.add_argument("-a", "--analysis"    , help="Analyze and generate plots"           , action="store_true")
 parser.add_argument("-p", "--proteus"     , help="Create to Proteus Merged file"        , action="store_true")
 parser.add_argument("-thr", "--threshold" , help="Threshold list"  , type= str          , required = False)
-parser.add_argument("-i", "--input"        , help="Input configuration .cfg", type = str , required = True)
+parser.add_argument("-i", "--input"       , help="Input configuration .cfg", type = str , required = True)
 args=parser.parse_args()
 
 runNumber  = args.run
@@ -47,10 +48,15 @@ if not args.proteus:
             command = f"root -l -b -q 'analysis/Analysis.cc({thr},{runNumber},\"{saveName}\")'"
             subprocess.run(command, shell=True, check=True)
 
+
+        if args.fifo:
+            command = f"root -l -b -q 'analysis/FIFOProcessing.cc({thr},{runNumber},\"{saveName}\")'"
+            subprocess.run(command, shell=True, check=True)
+
+
         if args.calorimetry:
             command = f"root -l -b -q 'analysis/Calorimetry.cc({thr},{runNumber},\"{saveName}\")'"
             subprocess.run(command, shell=True, check=True)
-
 else:
     command = f"root -l -b -q 'analysis/DigitalProcessing.cc(2000,{runNumber},\"{saveName}\", true)'"
     subprocess.run(command, shell=True, check=True)

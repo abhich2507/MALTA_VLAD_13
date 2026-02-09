@@ -115,34 +115,34 @@ void Tracking(double threshold, int runNumber, std::string saveName)
     TTree *trackedTree = new TTree("TrackedHits", "Tracked Hits");
 
     // Variables for branches
-    double reconstructedVertexX, reconstructedVertexY, reconstructedGlobalTime, reconstructedLocalTime;
-    int pixX, pixY, trackID, nHits;
+    double vertexX, vertexY, vertexTime, DUTLocalTime;
+    int DUTPixX, DUTPixY, trackID, DUTnHits;
 
     // Create branches
     trackedTree->Branch("trackID", &trackID, "trackID/I");
-    trackedTree->Branch("reconstructedVertexX", &reconstructedVertexX, "reconstructedVertexX/D");
-    trackedTree->Branch("reconstructedVertexY", &reconstructedVertexY, "reconstructedVertexY/D");
-    trackedTree->Branch("reconstructedGlobalTime", &reconstructedGlobalTime, "reconstructedGlobalTime/D");
-    trackedTree->Branch("PixX", &pixX, "PixX/I");
-    trackedTree->Branch("PixY", &pixY, "PixY/I");
-    trackedTree->Branch("nHits", &nHits, "nHits/I");
-    trackedTree->Branch("reconstructedLocalTime", &reconstructedLocalTime, "reconstructedLocalTime/D");
+    trackedTree->Branch("vertexX", &vertexX, "vertexX/D");
+    trackedTree->Branch("vertexY", &vertexY, "vertexY/D");
+    trackedTree->Branch("vertexTime", &vertexTime, "vertexTime/D");
+    trackedTree->Branch("DUTPixX", &DUTPixX, "DUTPixX/I");
+    trackedTree->Branch("DUTPixY", &DUTPixY, "DUTPixY/I");
+    trackedTree->Branch("DUTnHits", &DUTnHits, "DUTnHits/I");
+    trackedTree->Branch("DUTLocalTime", &DUTLocalTime, "DUTLocalTime/D");
 
 
     // Save monitoring plots + save hits in vectors to avoid further repeated ROOT calls
-    std::vector<double> recoPixX, recoPixY, recoTiming;
-    recoPixX.resize(nReconstructedEntries);
-    recoPixY.resize(nReconstructedEntries);
-    recoTiming.resize(nReconstructedEntries);
+    std::vector<double> vDUTPixX, vDUTPixY, vDUTLocalTiming;
+    vDUTPixX.resize(nReconstructedEntries);
+    vDUTPixY.resize(nReconstructedEntries);
+    vDUTLocalTiming.resize(nReconstructedEntries);
     TH2D *h2DUTHits    = new TH2D("h2DUTHits", "h2DUTHits", 512, 0, 512, 512, 0, 512);
     for (int i = 0; i<nReconstructedEntries; i++)
     {
         reconstructedTree->GetEntry(i);
         h2DUTHits->Fill(reconstructedPixX, reconstructedPixY, 1);
 
-        recoPixX[i] = reconstructedPixX;
-        recoPixY[i] = reconstructedPixY;
-        recoTiming[i] = reconstructedTiming;
+        vDUTPixX[i] = reconstructedPixX;
+        vDUTPixY[i] = reconstructedPixY;
+        vDUTLocalTiming[i] = reconstructedTiming;
         //std::cout << "i: " << i << " ;reconstructedX" <<reconstructedPixX << " ;reconstructedY: " << reconstructedPixY << std::endl;
     }
     
@@ -165,40 +165,40 @@ void Tracking(double threshold, int runNumber, std::string saveName)
         if(verbose) std::cout << "Track Entry: " << i << "; VertexX: " << sx << "; VertexY: " << sy << "; VertexZ: " << sz << "; GlobalTime: " << st << std::endl;
         // Now find matching reconstructed hits
         trackID = i;
-        reconstructedVertexX = sx;
-        reconstructedVertexY = sy;
-        reconstructedGlobalTime = st;
+        vertexX = sx;
+        vertexY = sy;
+        vertexTime = st;
         // First we set up the sliding window
         while (detIdx < nReconstructedEntries) 
         {
-            if (recoTiming[detIdx] >= st) break;
+            if (vDUTLocalTiming[detIdx] >= st) break;
             detIdx++;
         }
         // now check all hits in [t, t+Δt]
         Long64_t j = detIdx;
         foundHit = false;
-        nHits = 0;
+        DUTnHits = 0;
         while (j < nReconstructedEntries) 
         {
-            if (recoTiming[j] >= st + matchWindow) break; // left the window
-            pixX = recoPixX[j];
-            pixY = recoPixY[j];
+            if (vDUTLocalTiming[j] >= st + matchWindow) break; // left the window
+            DUTPixX = vDUTPixX[j];
+            DUTPixY = vDUTPixY[j];
             
-            reconstructedLocalTime = recoTiming[j] - st;
+            DUTLocalTime = vDUTLocalTiming[j] - st;
 
             // Now do position cut
-            std::pair<double, double> pixelGlobalPosition = PixelPositionReconstruction(pixX, pixY, cfg);
+            std::pair<double, double> pixelGlobalPosition = PixelPositionReconstruction(DUTPixX, DUTPixY, cfg);
 
-            h1ResidualX->Fill(pixelGlobalPosition.first  - reconstructedVertexX);
-            h1ResidualY->Fill(pixelGlobalPosition.second - reconstructedVertexY);
-            if(verbose) std::cout << "(?) Candidate found at Pixel (" << pixX << ", " << pixY << ") with Global Position (" << pixelGlobalPosition.first << ", " << pixelGlobalPosition.second << ")" << "; Timing:" << reconstructedLocalTime << std::endl;               
+            h1ResidualX->Fill(pixelGlobalPosition.first  - vertexX);
+            h1ResidualY->Fill(pixelGlobalPosition.second - vertexY);
+            if(verbose) std::cout << "(?) Candidate found at Pixel (" << DUTPixX << ", " << DUTPixY << ") with Global Position (" << pixelGlobalPosition.first << ", " << pixelGlobalPosition.second << ")" << "; Timing:" << DUTLocalTime << std::endl;               
 
             //if ( ( pixelGlobalPosition.first >= reconstructedVertexX - dCut / 1000. && pixelGlobalPosition.first <= reconstructedVertexX + dCut / 1000. ) 
             //&&  ( pixelGlobalPosition.second >= reconstructedVertexY - dCut / 1000. && pixelGlobalPosition.second <= reconstructedVertexY + dCut / 1000. ))
-            if(std::abs(pixelGlobalPosition.first - reconstructedVertexX) <= dCut / 1000 && std::abs(pixelGlobalPosition.second - reconstructedVertexY) <= dCut / 1000)
+            if(std::abs(pixelGlobalPosition.first - vertexX) <= dCut / 1000 && std::abs(pixelGlobalPosition.second - vertexY) <= dCut / 1000)
             {
-                if(verbose) std::cout << "(!) Matched hit at Pixel (" << pixX << ", " << pixY << ") with Global Position (" << pixelGlobalPosition.first << ", " << pixelGlobalPosition.second << ")" << "; Timing:" << reconstructedLocalTime << std::endl;
-                nHits++;
+                if(verbose) std::cout << "(!) Matched hit at Pixel (" << DUTPixX << ", " << DUTPixY << ") with Global Position (" << pixelGlobalPosition.first << ", " << pixelGlobalPosition.second << ")" << "; Timing:" << DUTLocalTime << std::endl;
+                DUTnHits++;
                 trackedTree->Fill();   // <-- one Fill per matching hit
                 foundHit = true;
             }
@@ -207,9 +207,9 @@ void Tracking(double threshold, int runNumber, std::string saveName)
         if (!foundHit) 
         {
             // no hit matched: fill with sentinel values
-            pixX = -1;
-            pixY = -1;
-            reconstructedLocalTime = -1;
+            DUTPixX = -1;
+            DUTPixY = -1;
+            DUTLocalTime = -1;
 
             trackedTree->Fill();   // <-- one Fill per track with no hit
         } 
