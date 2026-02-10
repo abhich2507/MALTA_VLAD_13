@@ -47,19 +47,16 @@ void EventAction::EndOfEventAction(const G4Event*)
     // Loop over all tracks (includes all seondaries)
     for (const auto& [key, entry]: m_trackEdep)
     {
-        int iHit = 0;
         if(entry.edep >= 50)
         {
             analysisManager->FillNtupleIColumn(0, 0, entry.eventNum);
             analysisManager->FillNtupleIColumn(0, 1, entry.planeNum);
-            analysisManager->FillNtupleIColumn(0, 2, iHit);
-            analysisManager->FillNtupleIColumn(0, 3, entry.X);
-            analysisManager->FillNtupleIColumn(0, 4, entry.Y);
+            analysisManager->FillNtupleIColumn(0, 2, entry.X);
+            analysisManager->FillNtupleIColumn(0, 3, entry.Y);
             // This branch will be modified. Before it as encoding the timewalk of each hit. Now it stores the hit time of a particle.
-            analysisManager->FillNtupleFColumn(0, 5, entry.time);
-            analysisManager->FillNtupleFColumn(0, 6, entry.edep);
+            analysisManager->FillNtupleFColumn(0, 4, entry.time);
+            analysisManager->FillNtupleFColumn(0, 5, entry.edep);
             analysisManager->AddNtupleRow(0); 
-            iHit++;
             //std::cout << "Saving entry: " << "eventID: " << entry.eventNum << "; X: " << pixelCluster[i][0] << "; Y:" << pixelCluster[i][1] << "; time: " << entry.time << "; energy: " << effAnCopy[i] * entry.edep <<  std::endl;
         }
         

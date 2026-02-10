@@ -204,17 +204,15 @@ G4bool SensitiveDetector::ProcessHits(G4Step *aStep, G4TouchableHistory *)
     // This is most probably due to multithreading even though I cant prove it.
     // Logic moved to EventAction.cc
     /* 
-    int iHit = 0;
     for(std::array<std::array<int, 2>, 4>::size_type i = 0; i<4; i++)
     {
         analysisManager->FillNtupleIColumn(1, 0, eventID);
         analysisManager->FillNtupleIColumn(1, 1, planeID);
-        analysisManager->FillNtupleIColumn(1, 2, iHit);
-        analysisManager->FillNtupleIColumn(1, 3, pixelCluster[i][0]);
-        analysisManager->FillNtupleIColumn(1, 4, pixelCluster[i][1]);
+        analysisManager->FillNtupleIColumn(1, 2, pixelCluster[i][0]);
+        analysisManager->FillNtupleIColumn(1, 3, pixelCluster[i][1]);
         // This branch will be modified. Before it as encoding the timewalk of each hit. Now it stores the hit time of a particle.
-        analysisManager->FillNtupleDColumn(1, 5, fglobalTime *ns);
-        analysisManager->FillNtupleDColumn(1, 6, effAnCopy[i] * energy *1000000/epsilon);
+        analysisManager->FillNtupleDColumn(1, 4, fglobalTime *ns);
+        analysisManager->FillNtupleDColumn(1, 5, effAnCopy[i] * energy *1000000/epsilon);
         analysisManager->AddNtupleRow(1); 
         iHit++;
     }

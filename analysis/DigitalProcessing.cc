@@ -50,10 +50,9 @@ void DigitalProcessing(double inputThreshold, int runNumber, std::string saveNam
         chainPixel->Add(Form("%soutput0_t%d.root", inputPath.c_str() , t));
     }
     float corrEnergy_float, timeWalkHit_float;
-    int rawEventID, planeID, iHit, pixX, pixY;
+    int rawEventID, planeID, pixX, pixY;
     chainPixel->SetBranchAddress("iEvent", &rawEventID);
     chainPixel->SetBranchAddress("iPlane", &planeID);
-    chainPixel->SetBranchAddress("iHit", &iHit);
     chainPixel->SetBranchAddress("PixX", &pixX);
     chainPixel->SetBranchAddress("PixY", &pixY);
     chainPixel->SetBranchAddress("hitTime", &timeWalkHit_float); // TODO change var name

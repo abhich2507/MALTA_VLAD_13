@@ -50,10 +50,9 @@ void DigitalProcessing_NEW(double inputThreshold, int runNumber, std::string sav
         chainPixel->Add(Form("%soutput0_t%d.root", inputPath.c_str() , t));
     }
     double corrEnergy, timeWalkHit;
-    int rawEventID, planeID, iHit, pixX, pixY;
+    int rawEventID, planeID, pixX, pixY;
     chainPixel->SetBranchAddress("iEvent", &rawEventID);
     chainPixel->SetBranchAddress("iPlane", &planeID);
-    chainPixel->SetBranchAddress("iHit", &iHit);
     chainPixel->SetBranchAddress("PixX", &pixX);
     chainPixel->SetBranchAddress("PixY", &pixY);
     chainPixel->SetBranchAddress("hitTime", &timeWalkHit); // TODO change var name
