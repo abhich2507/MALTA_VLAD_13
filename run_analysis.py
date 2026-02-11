@@ -8,6 +8,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument("-r", "--run"         , help="Run number"      , type=int           , required =True)
 parser.add_argument("-s", "--save"        , help="Save name"       , type = str         , required = True)
 parser.add_argument("-d", "--digitize"    , help="Digitize the raw data"                , action="store_true")
+parser.add_argument("-dmp", "--digitizemultiplane"    , help="Digitize the raw data of multiple planes", action="store_true")
 parser.add_argument("-t", "--tracking"    , help="Track matching"                       , action="store_true")
 parser.add_argument("-c", "--clustering"  , help="Cluster the hits"                     , action="store_true")
 parser.add_argument("-C", "--calorimetry" , help="Calorimetry analysis"                 , action="store_true")
@@ -34,6 +35,10 @@ if not args.proteus:
     for thr in thresholds:
         if args.digitize:
             command = f"root -l -b -q 'analysis/DigitalProcessing.cc({thr},{runNumber},\"{saveName}\", false)'"
+            subprocess.run(command, shell=True, check=True)
+        
+        if args.digitizemultiplane:
+            command = f"root -l -b -q 'analysis/DigitalProcessing_multiPlane.cc({thr},{runNumber},\"{saveName}\", false)'"
             subprocess.run(command, shell=True, check=True)
 
         if args.tracking:

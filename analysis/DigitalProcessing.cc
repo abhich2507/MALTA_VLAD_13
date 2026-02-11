@@ -91,6 +91,10 @@ void DigitalProcessing(double inputThreshold, int runNumber, std::string saveNam
     TH2D *h2MissMerged    = new TH2D("h2MissMerged", "h2MissMerged", 512, 0, 512, 512, 0, 512);
     // Generate threshold map
     auto thresholdMap = generateThrMap(inputThreshold, pixXNum, pixYNum, groupRepetition, relativeThresholdSmearingCol, relativeThresholdSmearingMean, directoryPath, runPath, saveName);
+    
+
+    
+    
     // Iterate over each plane if needed
     for (int i = 0; i< nPlanes; i++)
     {
