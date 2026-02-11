@@ -4,7 +4,7 @@
 
 // TODO: We are in dire need of value checks for all user inputs.
 
-void DigitalProcessing(double inputThreshold, int runNumber, std::string saveName, bool proteusFlag)
+void DigitalProcessing_multiPlane(double inputThreshold, int runNumber, std::string saveName, bool proteusFlag)
 {
     auto start = std::chrono::high_resolution_clock::now();
     // Set all the analysis flags for the digital processing
@@ -42,41 +42,13 @@ void DigitalProcessing(double inputThreshold, int runNumber, std::string saveNam
     std::string runPath = Form("local_%04d/", runNumber);
 
     std::cout << "############################# Digital Processing started for:" << std::endl;
-    std::cout << inputPath << std::endl;
-    // Extract raw data
-    TChain *chainPixel = new TChain("RawPixelHits");
-    for (int t = 0; t <= numThreads - 1; ++t) 
-    {
-        chainPixel->Add(Form("%soutput0_t%d.root", inputPath.c_str() , t));
-    }
-    float corrEnergy_float, timeWalkHit_float;
-    int rawEventID, planeID, pixX, pixY;
-    chainPixel->SetBranchAddress("iEvent", &rawEventID);
-    chainPixel->SetBranchAddress("iPlane", &planeID);
-    chainPixel->SetBranchAddress("PixX", &pixX);
-    chainPixel->SetBranchAddress("PixY", &pixY);
-    chainPixel->SetBranchAddress("hitTime", &timeWalkHit_float); // TODO change var name
-    chainPixel->SetBranchAddress("hitEnergy", &corrEnergy_float); // TODO change var name
-    Long64_t nRawEntries = chainPixel->GetEntries();
-    // Cast to double for legacy compatibility
-
-
-
-
-    
+    std::cout << inputPath << std::endl;    
 
     // Avoid O(n^2) nested loops via extra map 
     std::map<std::pair<int,std::pair<int, int>>, double> enMap; 
     std::map<std::pair<int,std::pair<int,int>>, std::vector<double>> timeMap;
     int eventIDHolder =0;
-    int nPlanes = 1;
-    // Save a single threshold value for the tracking planes. Value chosen: 2000. Should be standard for all runs
-    if (inputThreshold == 2000) nPlanes = 7;
-
-    // charge loss coefficient
-    double chLoss = analysisFlags->chLoss;
-    corrEnergy_float *=static_cast<double>(chLoss);
-
+    int nPlanes = analysisFlags->nPlanes;
     // Threshold smearing. Philosophy: randomly assign a fixed smearing per pixel and keep it. 
     //This should simulate the fabrication differences leading to pixel threshold changes.
     double relativeThresholdSmearingMean = analysisFlags->meanSmearing;
@@ -91,19 +63,37 @@ void DigitalProcessing(double inputThreshold, int runNumber, std::string saveNam
     // Generate threshold map
     auto thresholdMap = generateThrMap(inputThreshold, pixXNum, pixYNum, groupRepetition, relativeThresholdSmearingCol, relativeThresholdSmearingMean, directoryPath, runPath, saveName);
     
+    //first I need the infrastructure to save them in a root tree.
+    mkdir((inputPath + saveName).c_str(), 0777);   
+    TFile *outfile = new TFile((inputPath + saveName + "/ReconstructedHitsThr" + std::to_string(int(inputThreshold)) + ".root").c_str(), "RECREATE");
+    // Create a TTree
+    TTree *recontructedTree = new TTree("ReconstructedHits", "Reconstructed Hits");
 
+    auto multiPlanes = CaloPreProcessing(inputThreshold, runNumber, saveName); 
     
-    
+    float corrEnergy_float, timeWalkHit_float;
+    int rawEventID, planeID, iHit, pixX, pixY, nRawEntries;
     // Iterate over each plane if needed
     for (int i = 0; i< nPlanes; i++)
     {
         enMap.clear();
         timeMap.clear();
+        
+        TTree* plane = multiPlanes[i];
+        plane->SetBranchAddress("iEvent", &rawEventID);
+        plane->SetBranchAddress("iPlane", &planeID);
+        plane->SetBranchAddress("iHit", &iHit);
+        plane->SetBranchAddress("PixX", &pixX);
+        plane->SetBranchAddress("PixY", &pixY);
+        plane->SetBranchAddress("hitTime", &timeWalkHit_float);
+        plane->SetBranchAddress("hitEnergy", &corrEnergy_float);
+        nRawEntries = plane->GetEntries();
+
         // Sum up all hits in an event per pixel. This assumes all energy is collected instantly and 
         // timing cuts will be made only based on time walk and particle travel time.
         for (Long64_t j = 0; j < nRawEntries; j++)
         {
-            chainPixel->GetEntry(j);
+            plane->GetEntry(j);
             double corrEnergy = static_cast<double>(corrEnergy_float);
             double timeWalkHit = static_cast<double>(timeWalkHit_float);
             //std::cout <<  "Float: " << corrEnergy_float << "; Double: " << corrEnergy << std::endl;
@@ -245,16 +235,11 @@ void DigitalProcessing(double inputThreshold, int runNumber, std::string saveNam
         savePlot(directoryPath, runPath, inputThreshold, saveName, h2MissMerged, "h2MissMerged");
 
         // Now I have merged words. Next step is decoding them back to position and time
-        // However, first I need the infrastructure to save them in a root tree.
-        mkdir((inputPath + saveName).c_str(), 0777);
-        TFile *outfile = new TFile((inputPath + saveName + "/Plane" + std::to_string(i) + "ReconstructedHitsThr" + std::to_string(int(inputThreshold)) + ".root").c_str(), "RECREATE");
-
-        // Create a TTree
-        TTree *recontructedTree = new TTree("ReconstructedHits", "Reconstructed Hits");
         // Variables for branches
         int reconstructedPixX, reconstructedPixY, nHits;
         double reconstructedTiming;
         // Create branches
+        recontructedTree->Branch("planeID", &planeID, "planeID/I");
         recontructedTree->Branch("PixX", &reconstructedPixX, "PixX/I");
         recontructedTree->Branch("PixY", &reconstructedPixY, "PixY/I");
         recontructedTree->Branch("timing", &reconstructedTiming, "timing/D");
@@ -274,10 +259,11 @@ void DigitalProcessing(double inputThreshold, int runNumber, std::string saveNam
                 recontructedTree->Fill();
             }
         }
-        recontructedTree->Write();
-        outfile->Close();
         std::cout << "Finishing up analyzing Plane" << i << std::endl;
     }
+    outfile->cd();
+    recontructedTree->Write();
+    outfile->Close();
 
     auto end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double, std::milli> elapsed = end - start;

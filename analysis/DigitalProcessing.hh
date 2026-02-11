@@ -12,6 +12,7 @@
 #include <random>
 #include "ConfigAnalysis.hh"
 #include "Tracking.hh"
+#include "CaloPreProcessing.hh"
 
 
 void set_style() {
