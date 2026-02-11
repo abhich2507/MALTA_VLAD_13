@@ -10,7 +10,7 @@
 #include <chrono>
 #include "DigitalProcessing.hh"
 
-void MALTAClustering(double threshold = 100, int runNumber = 2, std::string saveName = "Test");
+void GenericClustering(double threshold = 200, int runNumber = 102, std::string saveName = "Test");
 
 struct hitCandidate
 {

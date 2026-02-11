@@ -10,9 +10,9 @@ Experimental Clustering in order to mimic exactly the MALTA testbeam analysis
 */
 
 
-bool verbose = true;
+bool verbose = false;
 
-void MALTAClustering(double threshold = 200, int runNumber = 2, std::string saveName = "Test")
+void GenericClustering(double threshold = 200, int runNumber = 102, std::string saveName = "Test")
 {
     std::string localPath = getVarFromConfig();
     std::string inputPath = localPath +  Form("Results/local_%04d/", runNumber);
@@ -52,13 +52,16 @@ void MALTAClustering(double threshold = 200, int runNumber = 2, std::string save
 
     for (size_t i = 1; i < allHits.size(); i++)
     {
-        // Time difference between djacent events
+        // Time difference between adjacent events
         double dt = allHits[i].timing - allHits[i - 1].timing;
 
-        if (dt <= matchWindow) {
+        if (dt <= matchWindow) 
+        {
             // within window → same cluster
             vcurrentCluster.push_back(allHits[i]);
-        } else {
+        } 
+        else 
+        {
             // new cluster
             vallClusters.push_back(vcurrentCluster);
             vcurrentCluster.clear();
@@ -66,9 +69,10 @@ void MALTAClustering(double threshold = 200, int runNumber = 2, std::string save
         }
     }
     // At this point I have a vector of all cluster candidates. However they are not yet corrected for invalid clusters
-
+    int numClusters{};
     for (auto& clusterCandidate: vallClusters)
     {
+        numClusters++;
         // We need to put the hits in the cluster in a set for the next look-up
         std::set<std::pair<int, int>> clusterHits;
         for (const auto& hit: clusterCandidate)
@@ -129,6 +133,7 @@ void MALTAClustering(double threshold = 200, int runNumber = 2, std::string save
         }
 
     }
+    std::cout<< "I am giving you " << numClusters << " clusters" << std::endl;
 
     // Save to file
     TFile *outfile = new TFile((inputSubPath + "LocalClusteredHitsThr" + std::to_string(int(threshold)) + ".root").c_str(), "RECREATE");
