@@ -7,6 +7,7 @@
 void DigitalProcessing_multiPlane(double inputThreshold, int runNumber, std::string saveName, bool proteusFlag)
 {
     auto start = std::chrono::high_resolution_clock::now();
+    TH1::AddDirectory(kFALSE);
     // Set all the analysis flags for the digital processing
     auto analysisFlags = new SimFlags{};
     const char* configPath = std::getenv("ANALYSIS_CONFIG");
@@ -41,7 +42,7 @@ void DigitalProcessing_multiPlane(double inputThreshold, int runNumber, std::str
     std::string directoryPath = localPath + "Plots/";
     std::string runPath = Form("local_%04d/", runNumber);
 
-    std::cout << "############################# Digital Processing started for:" << std::endl;
+    std::cout << "############################# Digital Processing MultiPlane started for:" << std::endl;
     std::cout << inputPath << std::endl;    
 
     // Avoid O(n^2) nested loops via extra map 
@@ -59,20 +60,34 @@ void DigitalProcessing_multiPlane(double inputThreshold, int runNumber, std::str
     int pixYNum = 512;
     int groupRepetition = 32;
 
-    TH2D *h2MissMerged    = new TH2D("h2MissMerged", "h2MissMerged", 512, 0, 512, 512, 0, 512);
+    //TH2D *h2MissMerged    = new TH2D("h2MissMerged", "h2MissMerged", 512, 0, 512, 512, 0, 512);
     // Generate threshold map
     auto thresholdMap = generateThrMap(inputThreshold, pixXNum, pixYNum, groupRepetition, relativeThresholdSmearingCol, relativeThresholdSmearingMean, directoryPath, runPath, saveName);
     
     //first I need the infrastructure to save them in a root tree.
+    gROOT->cd();
+    auto multiPlanes = CaloPreProcessing(inputThreshold, runNumber, saveName); 
     mkdir((inputPath + saveName).c_str(), 0777);   
     TFile *outfile = new TFile((inputPath + saveName + "/ReconstructedHitsThr" + std::to_string(int(inputThreshold)) + ".root").c_str(), "RECREATE");
+    outfile->cd();
     // Create a TTree
     TTree *recontructedTree = new TTree("ReconstructedHits", "Reconstructed Hits");
+    recontructedTree->SetDirectory(nullptr);
+    // Variables for branches
+    int reconstructedPixX, reconstructedPixY, nHits;
+    double reconstructedTiming;
 
-    auto multiPlanes = CaloPreProcessing(inputThreshold, runNumber, saveName); 
-    
     float corrEnergy_float, timeWalkHit_float;
     int rawEventID, planeID, iHit, pixX, pixY, nRawEntries;
+    // Create branches
+    recontructedTree->Branch("planeID", &planeID, "planeID/I");
+    recontructedTree->Branch("PixX", &reconstructedPixX, "PixX/I");
+    recontructedTree->Branch("PixY", &reconstructedPixY, "PixY/I");
+    recontructedTree->Branch("timing", &reconstructedTiming, "timing/D");
+    recontructedTree->Branch("NHits", &nHits, "NHits/I");
+
+    
+    
     // Iterate over each plane if needed
     for (int i = 0; i< nPlanes; i++)
     {
@@ -97,7 +112,6 @@ void DigitalProcessing_multiPlane(double inputThreshold, int runNumber, std::str
             double corrEnergy = static_cast<double>(corrEnergy_float);
             double timeWalkHit = static_cast<double>(timeWalkHit_float);
             //std::cout <<  "Float: " << corrEnergy_float << "; Double: " << corrEnergy << std::endl;
-            if (planeID != i) continue;
             enMap[{rawEventID, {pixX, pixY}}] += corrEnergy;
             timeMap[{rawEventID, {pixX, pixY}}].push_back(timeWalkHit);
             eventIDHolder = rawEventID;
@@ -216,7 +230,7 @@ void DigitalProcessing_multiPlane(double inputThreshold, int runNumber, std::str
                         {
                             int reconstructedPixX = pos.first.first;
                             int reconstructedPixY = pos.first.second;
-                            h2MissMerged->Fill(reconstructedPixX, reconstructedPixY, 1);
+                            //h2MissMerged->Fill(reconstructedPixX, reconstructedPixY, 1);
                         }
                     }
                 }
@@ -232,18 +246,9 @@ void DigitalProcessing_multiPlane(double inputThreshold, int runNumber, std::str
             mergedWord = 0;
             leadingTime.clear();
         }
-        savePlot(directoryPath, runPath, inputThreshold, saveName, h2MissMerged, "h2MissMerged");
+        //savePlot(directoryPath, runPath, inputThreshold, saveName, h2MissMerged, "h2MissMerged");
 
         // Now I have merged words. Next step is decoding them back to position and time
-        // Variables for branches
-        int reconstructedPixX, reconstructedPixY, nHits;
-        double reconstructedTiming;
-        // Create branches
-        recontructedTree->Branch("planeID", &planeID, "planeID/I");
-        recontructedTree->Branch("PixX", &reconstructedPixX, "PixX/I");
-        recontructedTree->Branch("PixY", &reconstructedPixY, "PixY/I");
-        recontructedTree->Branch("timing", &reconstructedTiming, "timing/D");
-        recontructedTree->Branch("NHits", &nHits, "NHits/I");
 
         for (auto [word, timing] : mergedWords) 
         {
@@ -255,6 +260,7 @@ void DigitalProcessing_multiPlane(double inputThreshold, int runNumber, std::str
                 reconstructedTiming = timing; // + 100 adds a constant 100 ns delay in order to replicate the TB data 
                 reconstructedPixX = pos.first.first;
                 reconstructedPixY = pos.first.second;
+                planeID = i;
                 nHits = pos.second;
                 recontructedTree->Fill();
             }
@@ -262,12 +268,12 @@ void DigitalProcessing_multiPlane(double inputThreshold, int runNumber, std::str
         std::cout << "Finishing up analyzing Plane" << i << std::endl;
     }
     outfile->cd();
-    recontructedTree->Write();
+    recontructedTree->Write("", TObject::kOverwrite);
     outfile->Close();
 
     auto end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double, std::milli> elapsed = end - start;
-    std::cout << "############################# Digital Processing stopped after " << elapsed.count() << "ms" << std::endl;
+    std::cout << "############################# Digital Processing MultiPlane stopped after " << elapsed.count() << "ms" << std::endl;
 }
 
 
