@@ -43,6 +43,7 @@ std::vector<TTree*> CaloPreProcessing(double inputThreshold, int runNumber, std:
         TTree* treeSplit = chainPixel->CopyTree(Form("iPlane==%d", p));
         treeSplit->SetName(Form("Plane%dHits", p));
         forest[p] = treeSplit;
+        treeSplit->SetDirectory(nullptr);
     }
     return forest;
 
