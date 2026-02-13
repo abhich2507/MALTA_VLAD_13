@@ -15,7 +15,7 @@ bool verbose = false;
 void GenericClustering(double threshold = 200, int runNumber = 102, std::string saveName = "Test")
 {
     std::string localPath = getVarFromConfig();
-    std::string inputPath = localPath +  Form("Results/local_%04d/", runNumber);
+    std::string inputPath = localPath +  Form("Results/local_%04d/", runNumber); // still hardcoded because: Is analysis.flags reachable here?
     std::string inputSubPath = localPath +  Form("Results/local_%04d/", runNumber) + saveName + "/";
     std::string directoryPath = localPath + "Plots/";
     std::string runPath = Form("local_%04d/", runNumber);

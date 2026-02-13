@@ -21,10 +21,10 @@ std::vector<TTree*> CaloPreProcessing(double inputThreshold, int runNumber, std:
     auto analysisFlags = new SimFlags{};
     const char* configPath = std::getenv("ANALYSIS_CONFIG");
     LoadAnalysisFlagsFromFile(configPath, *analysisFlags);
-    std::string localPath = "./";
-    std::string inputPath = localPath +  Form("Results/local_%04d/", runNumber);
+    std::string localPath = analysisFlags->localPath;
+    std::string inputPath = analysisFlags->inputPath+Form("_%04d/", runNumber);
     std::string directoryPath = localPath + "Plots/";
-    std::string runPath = Form("local_%04d/", runNumber);
+    //std::string runPath = Form("local_%04d/", runNumber);
 
     std::cout << "############################# Calo PreProcessing started for:" << std::endl;
     std::cout << inputPath << std::endl;
@@ -37,9 +37,10 @@ std::vector<TTree*> CaloPreProcessing(double inputThreshold, int runNumber, std:
 
     // Extract raw data
     TChain *chainPixel = new TChain("RawPixelHits");
+    std::string fileName = analysisFlags->fileName;
     for (int t = 0; t <= numThreads - 1; ++t) 
     {
-        chainPixel->Add(Form("%soutput0_t%d.root", inputPath.c_str() , t));
+        chainPixel->Add(Form("%s%s_t%d.root", inputPath.c_str(), fileName.c_str(), t));
     }
     std::vector<TTree*> forest{};
     forest.resize(nPlanes);

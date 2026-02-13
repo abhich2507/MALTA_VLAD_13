@@ -5,23 +5,25 @@ void Tracking(double threshold, int runNumber, std::string saveName)
 {
 
     auto start = std::chrono::high_resolution_clock::now();
+    // Set all the analysis flags for the digital processing
+    auto analysisFlags = new SimFlags;
+    const char* configPath = std::getenv("ANALYSIS_CONFIG");
+    LoadAnalysisFlagsFromFile(configPath, *analysisFlags);
     ////////// Function can be used for custom analysis paths
     //std::string localPath = getVarFromConfig();
     //////////////////////////////////////////////////////////
-    std::string localPath = "./";
-    std::string inputPath = localPath +  Form("Results/local_%04d/", runNumber);
-    std::string inputSubPath = localPath +  Form("Results/local_%04d/", runNumber) + saveName + "/";
+    std::string localPath = analysisFlags->localPath;
+    std::string inputPath = analysisFlags->inputPath+Form("_%04d/", runNumber);
+    std::string inputSubPath = analysisFlags->inputPath+Form("_%04d/", runNumber) + saveName + "/";
     std::string directoryPath = localPath + "Plots/";
     std::string runPath = Form("local_%04d/", runNumber);
 
-    DetectorConfig cfg = LoadConfig(localPath + Form("Results/local_%04d/flags.cfg", runNumber));
+    DetectorConfig cfg = LoadConfig(inputPath + "flags.cfg");
 
     std::cout << "############################# Tracking started for:" << std::endl;
     std::cout << inputPath << std::endl;
 
-    auto analysisFlags = new SimFlags;
-    const char* configPath = std::getenv("ANALYSIS_CONFIG");
-    LoadAnalysisFlagsFromFile(configPath, *analysisFlags);
+
     bool verbose = analysisFlags->verboseTracking;
 
     double dCut = analysisFlags->distCut;

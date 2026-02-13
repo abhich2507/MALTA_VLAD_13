@@ -30,8 +30,8 @@ void FIFOProcessing(double inputThreshold, int runNumber, std::string saveName)
     int pixYNum = 512;
     int groupRepetition = 32;
 
-    std::string localPath = "./";
-    std::string inputPath = localPath +  Form("Results/local_%04d/", runNumber);
+    std::string localPath = analysisFlags->localPath;
+    std::string inputPath = analysisFlags->inputPath+Form("_%04d/", runNumber);
     std::string directoryPath = localPath + "Plots/";
     std::string runPath = Form("local_%04d/", runNumber);
 

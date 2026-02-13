@@ -21,20 +21,21 @@ bool hasHitAt(const std::vector<Hit>& cluster, int x, int y)
 void Clustering(double threshold, int runNumber, std::string saveName = "default")
 {
     auto start = std::chrono::high_resolution_clock::now();
+    // Set all the analysis flags for the digital processing
+    auto analysisFlags = new SimFlags;
+    const char* configPath = std::getenv("ANALYSIS_CONFIG");
+    LoadAnalysisFlagsFromFile(configPath, *analysisFlags);
     ////////// Function can be used for custom analysis paths
     //std::string localPath = getVarFromConfig();
     //////////////////////////////////////////////////////////
-    std::string localPath = "./";
-    std::string inputPath = localPath +  Form("Results/local_%04d/", runNumber) + saveName + "/";
+    std::string localPath = analysisFlags->localPath;
+    std::string inputPath = analysisFlags->inputPath+Form("_%04d/", runNumber) + saveName + "/";
     
     std::cout << "############################# Clustering started for:" << std::endl;
     std::cout << inputPath << std::endl;
 
     TFile *trackedFile = TFile::Open((inputPath + "LocalTrackedHitsThr" + std::to_string(int(threshold)) + ".root").c_str(), "READ");
     
-    auto analysisFlags = new SimFlags;
-    const char* configPath = std::getenv("ANALYSIS_CONFIG");
-    LoadAnalysisFlagsFromFile(configPath, *analysisFlags);
     bool verbose = analysisFlags->verboseClustering;
 
     // Get tree
