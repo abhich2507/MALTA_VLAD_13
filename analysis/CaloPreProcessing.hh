@@ -29,7 +29,12 @@ std::vector<TTree*> CaloPreProcessing(double inputThreshold, int runNumber, std:
     std::cout << "############################# Calo PreProcessing started for:" << std::endl;
     std::cout << inputPath << std::endl;
     int numThreads = analysisFlags->numThreads; 
-    int nPlanes = analysisFlags->nPlanes;
+
+    int nPlanes_100 = analysisFlags->nPlanes_100;
+    int nPlanes_10 = analysisFlags->nPlanes_10;
+    int nPlanes_1 = analysisFlags->nPlanes_1;
+    int nPlanes = nPlanes_100*nPlanes_10*nPlanes_1; // total number of planes
+
     // Extract raw data
     TChain *chainPixel = new TChain("RawPixelHits");
     for (int t = 0; t <= numThreads - 1; ++t) 
@@ -38,7 +43,17 @@ std::vector<TTree*> CaloPreProcessing(double inputThreshold, int runNumber, std:
     }
     std::vector<TTree*> forest{};
     forest.resize(nPlanes);
-    for (int p=0; p<nPlanes; p++)
+
+    std::vector<int> planes;
+    for (int iz = 0; iz < nPlanes_100; ++iz) {
+        for (int iy = 0; iy < nPlanes_10; ++iy) {
+            for (int ix = 0; ix < nPlanes_1; ++ix) {
+                planes.push_back(iz*100 + iy*10 + ix); // decoded position (works for up to 10 planes in each dimension)
+            }
+        }
+    }
+
+    for (int p : planes)
     {
         TTree* treeSplit = chainPixel->CopyTree(Form("iPlane==%d", p));
         treeSplit->SetName(Form("Plane%dHits", p));

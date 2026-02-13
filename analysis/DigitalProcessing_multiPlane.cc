@@ -49,7 +49,12 @@ void DigitalProcessing_multiPlane(double inputThreshold, int runNumber, std::str
     std::map<std::pair<int,std::pair<int, int>>, double> enMap; 
     std::map<std::pair<int,std::pair<int,int>>, std::vector<double>> timeMap;
     int eventIDHolder =0;
-    int nPlanes = analysisFlags->nPlanes;
+    int nPlanes_100 = analysisFlags->nPlanes_100;
+    int nPlanes_10 = analysisFlags->nPlanes_10;
+    int nPlanes_1 = analysisFlags->nPlanes_1;
+    int nPlanes = nPlanes_100*nPlanes_10*nPlanes_1;
+    
+    //int nPlanes = analysisFlags->nPlanes;
     // Threshold smearing. Philosophy: randomly assign a fixed smearing per pixel and keep it. 
     //This should simulate the fabrication differences leading to pixel threshold changes.
     double relativeThresholdSmearingMean = analysisFlags->meanSmearing;
@@ -78,7 +83,7 @@ void DigitalProcessing_multiPlane(double inputThreshold, int runNumber, std::str
     double reconstructedTiming;
 
     float corrEnergy_float, timeWalkHit_float;
-    int rawEventID, planeID, iHit, pixX, pixY, nRawEntries;
+    int rawEventID, planeID, pixX, pixY, nRawEntries;
     // Create branches
     recontructedTree->Branch("planeID", &planeID, "planeID/I");
     recontructedTree->Branch("PixX", &reconstructedPixX, "PixX/I");
@@ -86,10 +91,20 @@ void DigitalProcessing_multiPlane(double inputThreshold, int runNumber, std::str
     recontructedTree->Branch("timing", &reconstructedTiming, "timing/D");
     recontructedTree->Branch("NHits", &nHits, "NHits/I");
 
-    
+    // define planeIDs to analyze:
+
+    std::vector<int> planes;
+    for (int iz = 0; iz < nPlanes_100; ++iz) {
+        for (int iy = 0; iy < nPlanes_10; ++iy) {
+            for (int ix = 0; ix < nPlanes_1; ++ix) {
+                planes.push_back(iz*100 + iy*10 + ix); // decoded position (works for up to 10 planes in each dimension)
+                cout << "Plane added: " << iz*100 + iy*10 + ix << endl;
+            }
+        }
+    }
     
     // Iterate over each plane if needed
-    for (int i = 0; i< nPlanes; i++)
+    for (int i : planes)
     {
         enMap.clear();
         timeMap.clear();
@@ -97,7 +112,6 @@ void DigitalProcessing_multiPlane(double inputThreshold, int runNumber, std::str
         TTree* plane = multiPlanes[i];
         plane->SetBranchAddress("iEvent", &rawEventID);
         plane->SetBranchAddress("iPlane", &planeID);
-        plane->SetBranchAddress("iHit", &iHit);
         plane->SetBranchAddress("PixX", &pixX);
         plane->SetBranchAddress("PixY", &pixY);
         plane->SetBranchAddress("hitTime", &timeWalkHit_float);
