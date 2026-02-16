@@ -133,16 +133,7 @@ This class inherits the GEANT4 class G4UserRunAction and gives access to run lev
 
 In the class constructor the following Ntuples are defined:
 
-1. "ScatAngle" Ntuple ID 0 is populated in SteppingAction::UserSteppingAction. This Ntuple is not yet maintained and might be deprecated. It has the following columns:
-    - "iEvent" stores the EventID
-    - "fX" stores the X coordinate of a GEANT4 event: preStepPoint->GetPosition()[0]
-    - "fY" stores the Y coordinate of a GEANT4 event: preStepPoint->GetPosition()[1]
-    - "fZ" stores the Z coordinate of a GEANT4 event: preStepPoint->GetPosition()[2]
-    - "ScateringAngle" stores the angle between the G4ThreeVector momenta predefined as entering/ exiting hardcoded volumes. Needs to be generalized for more functionality. Value converted to angle from radian
-    - "MomentumVal" stores the magnitude of the G4ThreeVector momentum emerging from the defined volume.
-    Ntuple used for the scattering angle and the emerging momentum for particles traveling through a predefined volume/ several volumes. It is used for measuring the expected beam deflection by different materials.
-
-2. "RawPixelHits" Ntuple ID 1 is populated in SensitiveDetector::ProcessHits. It has the following columns:
+1. "RawPixelHits" Ntuple ID 1 is populated in SensitiveDetector::ProcessHits. It has the following columns:
     - "iEvent" stores the Event ID from G4RunManager::GetRunManager()->GetCurrentEvent()->GetEventID()
     - "iPlane" stores the Plane ID
         Example:
@@ -150,24 +141,18 @@ In the class constructor the following Ntuples are defined:
         {
             planeID = 0;
         }
-    - "iHit" stores the Hit ID. A hit is defined as an ionization step in the sensor 
     - "PixX" stores the X coordinate of the hit from: pixelCluster[i][0]
     - "PiXY" stores the Y coordinate of the hit from: pixelCluster[i][1]
     - "hitTime" stores the global timing from: preStepPoint->GetGlobalTime()
     - "hitEnergy" stores the energy deposit of the GEANT4 hit defined from: GetEfficiencyAnalytical(InPixPos)* energy*100000/3.66
     Ntuple used for storing the raw Silicon hits
 
-3. "TruthVertex" Ntuple ID 2 is populated in PrimaryGenerator::GeneratePrimaries. It has the following columns:
+2. "TruthVertex" Ntuple ID 2 is populated in PrimaryGenerator::GeneratePrimaries. It has the following columns:
     - "iEvent" stores the Event ID from oneEvent->GetEventID()
-    - "truthVertexX" store X coordinate of the primary vertex from G4ThreeVector(x, y, z)
-    - "truthVertexY" store Y coordinate of the primary vertex from G4ThreeVector(x, y, z)
-    - "truthVertexZ" store Z coordinate of the primary vertex from G4ThreeVector(x, y, z)
+    - "trueVertexX" store X coordinate of the primary vertex from G4ThreeVector(x, y, z)
+    - "trueVertexY" store Y coordinate of the primary vertex from G4ThreeVector(x, y, z)
+    - "trueVertexZ" store Z coordinate of the primary vertex from G4ThreeVector(x, y, z)
     - "trueGlobalTime" stores the global time stamp derived from the event ID via evtID * fFlag->beamVeto *ns + offSet *ns
-    - "trueEnergy" stores the true energy of the primary particle defined by the particleEnergy flag
-
-4. "ScatteringAngle" H1 ID 0 is populated in SteppingAction::UserSteppingAction. Contains the same information as the "ScatAngle" Ntuple. 
-
-5. "MomentumDistribution" H1 ID 0 is populated in SteppingAction::UserSteppingAction. Contains the same information as the "ScatAngle" Ntuple.
 
 The class additionally handles the IO calls for opening and closing the output root files in the BeginofAction() and EndofAction() methods respectively.
 
@@ -182,7 +167,7 @@ Each energy deposit is scaled by a charge collection efficiency that depends on 
 The `SensitiveDetector::GetTimingOffset()` method calculates the timewalk based on amplitude and threshold. The parameterization was measured at a threshold of 150e-. Consequently, this threshold is used for reference. The timewalk for other thresholds is obtained by scaling the x-axis (charge-axis) accordingly. This is based on the assumption that the waveform of an n-times larger signal is the same at an n-times larger threshold. In data this is only valid if the front-end gain is changed through a different bias current. The same assumption can be phrased as: The gain scales with 1/threshold. This scaling is chosen because at the same gain setting (fixed front-end) only a limited threshold range can be covered. For example at "normal" gain a range of 200-700 e- can be covered. Larger threshold ranges can only be reached by lowering the gain. The threshold scaling is illustrated in [plotting_scripts/plot_timewalk_curves.py](plotting_scripts/plot_timewalk_curves.py)
 
 ## SteppingAction
-This class inherits the GEANT4 G4UserSteppingAction class and implements GEANT4 actions at the step level. It populates the "ScatAngle" Ntuple and "ScatteringAngle" and "MomentumDistribution" histograms.
+This class inherits the GEANT4 G4UserSteppingAction class and implements GEANT4 actions at the step level.
 
 ## SubmissionTests
 Implementation of tests to run before Condor Job submission. 

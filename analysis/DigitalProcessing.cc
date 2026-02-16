@@ -36,8 +36,9 @@ void DigitalProcessing(double inputThreshold, int runNumber, std::string saveNam
     ////////// Function can be used for custom analysis paths
     //std::string localPath = getVarFromConfig();
     //////////////////////////////////////////////////////////
-    std::string localPath = "./";
-    std::string inputPath = localPath +  Form("Results/local_%04d/", runNumber);
+    std::string localPath = analysisFlags->localPath;
+    std::string inputPath = analysisFlags->inputPath+Form("_%04d/", runNumber);
+
     std::string directoryPath = localPath + "Plots/";
     std::string runPath = Form("local_%04d/", runNumber);
 
@@ -45,15 +46,15 @@ void DigitalProcessing(double inputThreshold, int runNumber, std::string saveNam
     std::cout << inputPath << std::endl;
     // Extract raw data
     TChain *chainPixel = new TChain("RawPixelHits");
+    std::string fileName = analysisFlags->fileName;
     for (int t = 0; t <= numThreads - 1; ++t) 
     {
-        chainPixel->Add(Form("%soutput0_t%d.root", inputPath.c_str() , t));
+        chainPixel->Add(Form("%s%s_t%d.root", inputPath.c_str(), fileName.c_str(), t));
     }
     float corrEnergy_float, timeWalkHit_float;
-    int rawEventID, planeID, iHit, pixX, pixY;
+    int rawEventID, planeID, pixX, pixY;
     chainPixel->SetBranchAddress("iEvent", &rawEventID);
     chainPixel->SetBranchAddress("iPlane", &planeID);
-    chainPixel->SetBranchAddress("iHit", &iHit);
     chainPixel->SetBranchAddress("PixX", &pixX);
     chainPixel->SetBranchAddress("PixY", &pixY);
     chainPixel->SetBranchAddress("hitTime", &timeWalkHit_float); // TODO change var name
