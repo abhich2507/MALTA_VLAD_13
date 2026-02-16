@@ -26,6 +26,7 @@ void FIFOProcessing(double inputThreshold, int runNumber, std::string saveName)
     double wordSpacing = analysisFlags->wordSpacing;
     double relativeThresholdSmearingMean = analysisFlags->meanSmearing;
     double relativeThresholdSmearingCol = analysisFlags->colSmearing;
+    int fifoMultiplicity = analysisFlags->fifoMultiplicity;
     int pixXNum = 512;
     int pixYNum = 512;
     int groupRepetition = 32;
@@ -124,18 +125,22 @@ void FIFOProcessing(double inputThreshold, int runNumber, std::string saveName)
 
         double t0 = sortedTimings.begin()->second;
 
-        double timing = 0;
-        double prevTiming = 0;
-        double timeFIFO = 0;
+        //double timing = 0;
+        //double prevTiming = 0;
+        //double timeFIFO = 0;
         double FIFOFrequency = analysisFlags->fifoFrequency; //ns
         int    fifoSize = analysisFlags->fifoSize; // 1215752192 max int
-        int fifoFill = 0;
+        std::vector<int> vfifoFill(fifoMultiplicity, 0);
+        //std::vector<double> vtiming(512, 0);
+        std::vector<double> vprevTiming(fifoMultiplicity, 0);
+        std::vector<double> vtimeFIFO(fifoMultiplicity,0);
+
         for (const auto& entry : sortedTimings) 
         {
             int eventID = entry.first.first;
             int pixX   = entry.first.second.first;
             int pixY   = entry.first.second.second;
-
+            double timing = entry.second; 
             auto itThr = thresholdMap.find({pixX, pixY});
             if (itThr == thresholdMap.end()) 
             {
@@ -149,33 +154,37 @@ void FIFOProcessing(double inputThreshold, int runNumber, std::string saveName)
         
             if (cenergy < threshold) continue;
 
-            prevTiming = timing;
-            timing = entry.second;
+            int lane = pixX%fifoMultiplicity;
+
+            
+            double prevTiming = vprevTiming[lane];
             
             __uint128_t word = encodeWord(pixX, pixY, groupSizeX, groupSizeY, groupLeng, parityLeng, dColLeng, verbose);
             double timeDiff = timing - prevTiming;
-            timeFIFO += timeDiff;
-
-            //std::cout << "timing: " << timing << "; prevTiming: " << prevTiming << "; timeDiff: " << timeDiff << "; timeFIFO: "<< timeFIFO << "; div: " << timeFIFO / FIFOFrequency  << timeFIFO;
-
-            if(timeFIFO / FIFOFrequency > 1)
+            vtimeFIFO[lane] += timeDiff;
+            if(verbose)std::cout << "timing: " << timing << "; prevTiming: " << prevTiming << "; timeDiff: " << timeDiff << "; timeFIFO: "<< vtimeFIFO[lane] << "; div: " << vtimeFIFO[lane] / FIFOFrequency  << "; vtimeFIFO: " << vtimeFIFO[lane];
+            
+            int& fifoFill = vfifoFill[lane];
+            int nRead = floor(vtimeFIFO[lane] / FIFOFrequency);
+            if(nRead >= 1)
             {
                  
-                for(int k = 0; k < static_cast<int>(timeFIFO / FIFOFrequency); k++) 
+                for(int k = 0; k < nRead; k++) 
                 {
                     if (fifoFill) fifoFill--;
                 }
-                timeFIFO = 0;
+                vtimeFIFO[lane] -= nRead * FIFOFrequency;
             }
+
+            if(verbose)std::cout << "; subt: " << vtimeFIFO[lane] <<"; lane: " << lane <<" fifoFill: " << fifoFill << std::endl;
             if(fifoFill < fifoSize)
             {
                 fifo.push_back({word, timing});
                 fifoFill++;
             }
 
-            //std::cout <<" fifoFill: " << fifoFill << std::endl;
 
-            
+            vprevTiming[lane] = timing;
             
             
             

@@ -193,7 +193,7 @@ G4bool SensitiveDetector::ProcessHits(G4Step *aStep, G4TouchableHistory *)
     std::array<float,4> effAnCopy = effAn; // forces evaluation
     for(std::array<std::array<int, 2>, 4>::size_type i = 0; i<4; i++)
     {
-        eventAction->addEdep(eventID, trackID, effAnCopy[i] * energy *1000000/epsilon, fglobalTime *ns, planeID, pixelCluster[i][0], pixelCluster[i][1]);
+        eventAction->addEdep(eventID, effAnCopy[i] * energy *1000000/epsilon, fglobalTime *ns, planeID, pixelCluster[i][0], pixelCluster[i][1]);
     }
     // fill the 4 efficiencies and timing into a tree. 
     // Apply a minimal threshold here already of 50 e-? edep in MeV --> if (edep*10^6/epsilon > 50) // threshold in e- // edep in MeV
