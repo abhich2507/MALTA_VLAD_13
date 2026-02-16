@@ -27,7 +27,7 @@ void EventAction::BeginOfEventAction(const G4Event*)
     m_trackEdep.clear();
 }
 
-void EventAction::addEdep(G4int eventID, G4int trackID, G4float energy, G4float timing, G4int planeID, G4int pixX, G4int pixY)
+void EventAction::addEdep(G4int eventID, G4float energy, G4float timing, G4int planeID, G4int pixX, G4int pixY)
 {
     auto key = std::make_tuple(planeID, pixX, pixY);
     auto &entry = m_trackEdep[key];

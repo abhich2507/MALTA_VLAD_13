@@ -41,7 +41,7 @@ void Calorimetry(float threshold, int runNumber, std::string saveName)
 
     DetectorConfig cfg = LoadConfig(inputPath + "flags.cfg");
 
-    std::cout << "############################# Tracking started for:" << std::endl;
+    std::cout << "############################# Calorimetry started for:" << std::endl;
     std::cout << inputPath << std::endl;
 
     bool verbose = analysisFlags->verboseTracking;

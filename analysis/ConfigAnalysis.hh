@@ -45,6 +45,10 @@ struct SimFlags
 
     double fifoFrequency = 0.;
     double fifoSize = 0.;
+<<<<<<< HEAD
+    int fifoMultiplicity = 0;
+    int nPlanes = 0;
+=======
     //int nPlanes = 0;
     int nPlanes_100 = 0;
     int nPlanes_10 = 0;
@@ -52,6 +56,7 @@ struct SimFlags
     std::string localPath = "";
     std::string inputPath = "";
     std::string fileName = "";
+>>>>>>> 0767f57c39ef8b97cc1140db69ae8cd9f268b35a
 
 };
 
@@ -105,6 +110,7 @@ void LoadAnalysisFlagsFromFile(const std::string& filename, SimFlags& flags)
         else if (key == "veto") flags.veto = std::stod(value);
         else if (key == "fifoFrequency") flags.fifoFrequency = std::stod(value);
         else if (key == "fifoSize") flags.fifoSize = std::stod(value);
+        else if (key == "fifoMultiplicity") flags.fifoMultiplicity = std::stoi(value);
         //else if (key == "nPlanes") flags.nPlanes = std::stoi(value);
         else if (key == "nPlanes_100") flags.nPlanes_100 = std::stoi(value);
         else if (key == "nPlanes_10") flags.nPlanes_10 = std::stoi(value);
@@ -112,7 +118,6 @@ void LoadAnalysisFlagsFromFile(const std::string& filename, SimFlags& flags)
         else if (key == "localPath") flags.localPath = value;
         else if (key == "inputPath") flags.inputPath = value;
         else if (key == "fileName") flags.fileName = value;
-
         //std::cout << "Loaded flag: " << key << " = " << value << std::endl;
     }
 }
