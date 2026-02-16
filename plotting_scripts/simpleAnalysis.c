@@ -160,9 +160,8 @@ void simpleAnalysis(std::string inputPath, std::string outROOTname, double resul
         //chainPixel->Add(Form("%soutput0_t0.root", inputPath.c_str()));
     }
     double corrEnergy, timeWalkHit;
-    int rawEventID, iHit, pixX, pixY, iPlane;
+    int rawEventID, pixX, pixY, iPlane;
     chainPixel->SetBranchAddress("iEvent", &rawEventID);
-    chainPixel->SetBranchAddress("iHit", &iHit);
     chainPixel->SetBranchAddress("PixX", &pixX);
     chainPixel->SetBranchAddress("PixY", &pixY);
     if (oldtree){

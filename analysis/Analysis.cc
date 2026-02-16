@@ -25,8 +25,8 @@ void Analysis(double threshold, int runNumber = 91, std::string saveName = "defa
     ////////// Function can be used for custom analysis paths
     //std::string localPath = getVarFromConfig();
     //////////////////////////////////////////////////////////
-    std::string localPath = "./";
-    std::string inputPath = localPath +  Form("Results/local_%04d/", runNumber) + saveName + "/";
+    std::string localPath = analysisFlags->localPath;
+    std::string inputPath = analysisFlags->inputPath+Form("_%04d/", runNumber)+ saveName + "/";
     // Quick hack for fast reanalysis:
     //std::string inputPath = localPath +  Form("Results/local_%04d/", runNumber) + "Final/";
 
@@ -42,7 +42,6 @@ void Analysis(double threshold, int runNumber = 91, std::string saveName = "defa
     double pixelSizeX = 0.0364 , pixelSizeY = 0.0364; // in mm
 
     TFile *analysisFile = TFile::Open((inputPath + "analysisThr" + std::to_string(int(threshold)) + ".root").c_str(), "READ");
-
 
     // Get tree
     TTree *analysisTree = (TTree*) analysisFile->Get("analyzedHits");
