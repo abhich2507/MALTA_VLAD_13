@@ -83,11 +83,11 @@ void Clustering(double threshold, int runNumber, std::string saveName = "default
     double currentX, currentY;
     int entry = 0;
     
-    for (int i = 0; i < nTrackedEntries; i++)
+    for (int i = 0; i <= nTrackedEntries; i++)
     {
-        trackedTree->GetEntry(i);
+        if (i < nTrackedEntries) trackedTree->GetEntry(i); // don't get new entry for last call that does processing only
         //trackVertixes.push_back(std::make_pair(vertexX, vertexY));      
-        if(trackID == entry) 
+        if(trackID == entry && i < nTrackedEntries) 
         {
             //clusterCandidate.insert(std::make_pair(pixX, pixY));
             //clusterTiming.push_back(reconstructedTime);
@@ -157,6 +157,7 @@ void Clustering(double threshold, int runNumber, std::string saveName = "default
             if(verbose)std::cout << "Saving to tree: " << " X = " << analysisVertexX << " ;Y = " << analysisVertexY << " ;clSize = " <<  clSize << " ;timing = " << timing << std::endl;
 
             analysisTree->Fill();
+            if (i == nTrackedEntries) break; // no need to store last event again after processing it
             // Reset and dont forget this event
             cluster.clear();
             cluster.push_back({pixX, pixY, reconstructedTime});

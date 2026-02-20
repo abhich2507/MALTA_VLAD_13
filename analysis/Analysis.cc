@@ -67,8 +67,8 @@ void Analysis(double threshold, int runNumber = 91, std::string saveName = "defa
     TH2D *h2MissMergedInPixel= new TH2D("h2MissMergedInPixel", "h2MissMergedInPixel", nX, 0, 0, nY, numPixlesX, numPixlesY);
 
     // Projections
-    TH1D *h1PASSInPixelXProj = new TH1D("h1PASSInPixelXProj", "h1PASSInPixelXProj", nX, 0, numPixlesX*36.4);
-    TH1D *h1PASSInPixelYProj = new TH1D("h1PASSInPixelYProj", "h1PASSInPixelYProj", nY, 0, numPixlesY*36.4);
+    TH1D *h1PASSInPixelXProj = new TH1D("h1PASSInPixelXProj", "h1PASSInPixelXProj", nX, 0, numPixlesX*pixelSizeX*1000);
+    TH1D *h1PASSInPixelYProj = new TH1D("h1PASSInPixelYProj", "h1PASSInPixelYProj", nY, 0, numPixlesY*pixelSizeY*1000);
 
     Long64_t nAnalyzedEntries = analysisTree->GetEntries();
     std::cout << nAnalyzedEntries << std::endl;
@@ -90,7 +90,7 @@ void Analysis(double threshold, int runNumber = 91, std::string saveName = "defa
         if(analysisFlags->trkUnc == true)
         {
             foldedX = fmod(fX + trackOffsetX + rng.Gaus(0., trackunc_X), numPixlesX*pixelSizeX) * 1000;  //- 50 + 18.6368 /2
-            foldedY = fmod(fY + trackOffsetY + rng.Gaus(0., trackunc_Y), numPixlesY*pixelSizeX) * 1000;  //- 50 + 18.6368 /2
+            foldedY = fmod(fY + trackOffsetY + rng.Gaus(0., trackunc_Y), numPixlesY*pixelSizeY) * 1000;  //- 50 + 18.6368 /2
         } 
         else
         {        
