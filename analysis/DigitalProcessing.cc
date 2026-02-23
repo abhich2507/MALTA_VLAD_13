@@ -51,7 +51,7 @@ void DigitalProcessing(double inputThreshold, int runNumber, std::string saveNam
     {
         chainPixel->Add(Form("%s%s_t%d.root", inputPath.c_str(), fileName.c_str(), t));
     }
-    float corrEnergy_float, timeWalkHit_float;
+    float corrEnergy_float, timeWalkHit_float; //MUST TODO Change me back to float
     int rawEventID, planeID, pixX, pixY;
     chainPixel->SetBranchAddress("iEvent", &rawEventID);
     chainPixel->SetBranchAddress("iPlane", &planeID);
@@ -145,7 +145,7 @@ void DigitalProcessing(double inputThreshold, int runNumber, std::string saveNam
             if(it == timeMap.end()) continue;
             // Row correction also of 7ns/ 512 rows + global GEANT4 timestamp
             //if(verbose) std::cout << "Event ID: " << eventID << "; pixX: " << pixX << ";pixY: " << pixY << "; corrEnergy: " << cenergy << "; timewalk: "<< timing << std::endl;
-            timing += *std::max_element(it->second.begin(), it->second.end()) + pixX * 0.0125; 
+            timing += *std::max_element(it->second.begin(), it->second.end()) + pixY * 0.0125; 
 
             sortedTimings.emplace_back(entry.first,timing);
         }
