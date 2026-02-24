@@ -10,8 +10,8 @@ void Calorimetry()
 
     gStyle->SetCanvasPreferGL(kTRUE);
     gROOT->SetStyle("ATLAS");
-    /*
-    std::vector<int> runNumbers= {83,84,85,86,87,88,89,90,91,92};
+    
+   // std::vector<int> runNumbers= {83,84,85,86,87,88,89};//,90,91,92};
 
     //std::vector<std::string> runFiles = { "CaloNoMerg", "CaloYesMerg", "RO2x161.6nsWin", "RO2x321.6nsWin", "8x8Merging"};//, "RO300ns", "RO500ns", "RO1000ns"};
     //std::vector<std::string> labels = { "No Merging", "2 #times 8   pixel group", "2 #times 16 pixel group", "2 #times 32 pixel group", "8 #times 8   pixel group"};//, "RO300ns", "RO500ns", "RO1000ns"};
@@ -26,28 +26,41 @@ void Calorimetry()
     //std::vector<std::string> runFiles = {"CaloNoMerg", "CaloYesMerg", "RO8x80.5nsWin"};
     //std::vector<std::string> labels = {"0 ns merging", "1.6 ns merging", "RO 8x8 0.5 ns merging"};
 
-    std::vector<std::string> runFiles = { "RO8x80.5nsWin", "CaloNoMerg"};
+    //std::vector<std::string> runFiles = { "RO8x80.5nsWin", "CaloNoMerg"};
+
     //std::vector<std::string> labels = {"Optimized design 200 e#lower[-2.2]{#scale[0.6]{- }}", "Optimized design 1000 e#lower[-2.2]{#scale[0.6]{- }}", "No Merging 200 e#lower[-2.2]{#scale[0.6]{- }}", "No Merging 1000 e#lower[-2.2]{#scale[0.6]{- }}"};
-    std::vector<std::string> labels = {"#splitline{8 #times 8 pixel group}{0.5 ns merging 200 e#lower[-2.2]{#scale[0.6]{- }}}","","#splitline{8 #times 8 pixel group}{0.5 ns merging 1000 e#lower[-2.2]{#scale[0.6]{- }}}",""};
-    std::vector<int> vcolor = {kOrange +7, kOrange +7, kAzure -3, kAzure -3 };
-    std::vector<int> vmarkerStyle = {20, 21, 22, 23};
-    std::vector<int> thrVector = {200,1000};
+    //std::vector<std::string> labels = {"#splitline{8 #times 8 pixel group}{0.5 ns merging 200 e#lower[-2.2]{#scale[0.6]{- }}}","","#splitline{8 #times 8 pixel group}{0.5 ns merging 1000 e#lower[-2.2]{#scale[0.6]{- }}}",""};
+    
+    
+    //std::vector<std::string> runFiles = { "CaloNoMerg", "CaloYesMerg", "RO16x41.6nsWin", "RO2x321.6nsWin", "8x8Merging"};
+    //std::vector<std::string> labels = { "No Merging", "2 #times 8   pixel group", "4 #times 16 pixel group", "2 #times 32 pixel group", "8 #times 8   pixel group"};
+    
+    //std::vector<int> vcolor = {kOrange +7, kOrange +7, kAzure -3, kAzure -3 };
+    //std::vector<int> vmarkerStyle = {20, 21, 22, 23};
+    //std::vector<int> thrVector = {200,1000};
     //std::vector<int> thrVector = {200};
-    std::vector<double> venergy = {5,10,15,20,25,30,35,50,75,100};
-    std::vector<double> venergyErr(runNumbers.size(), 0.0);
+    //std::vector<double> venergy = {5,10,15,20,25,30,35};//,50,75,100};
+    //std::vector<double> venergyErr(runNumbers.size(), 0.0);
     //std::vector<int> markers = {20,22,23,21};
 
     //std::vector<std::string> labels = {"Perfect matching", "Real matching", "Slow matching"};
-    */
-    std::vector<int> runNumbers= {93,94,95,96,97,98,99,100,101};
-    std::vector<std::string> runFiles = { "FIFOideal", "FIFO100W1F", "FIFO500W1F", "FIFO500W0.001F", "FIFO500W0.01F"};//FIFO100w50nsf
-    std::vector<std::string> labels = {"Maxwidth+1ns", "100width+1ns", "500width+1ns", "500width+1ps", "500width+10ps"};
-    std::vector<int> vcolor = {kBlack, kRed, kGreen, kBlue, kMagenta};
-    std::vector<int> vmarkerStyle = {20, 21, 22, 20, 21};
+    
+
+    
+    //std::vector<int> runNumbers= {93,94,95,96,97,98,99};
+    std::vector<int> runNumbers= {100,101,102,103,104,105,106};
+    //std::vector<std::string> runFiles = { "FIFOideal", "FIFO100W1F", "FIFO500W1F", "FIFO500W0.001F", "FIFO500W0.01F"};//FIFO100w50nsf
     std::vector<int> thrVector = {200};
+
+    //std::vector<std::string> runFiles = { "NominalFIFOx1"};//, "FIFOideal", "NominalFIFOx16", "NominalFIFOx32", "NominalFIFOx64"};
+    //std::vector<std::string> labels = {"IDEAL", "1 FIFO", "16 FIFO", "32 FIFO", "64 FIFO"};
+    std::vector<std::string> runFiles = {"TestFullFIFO", "FullFIFO_SRAMD400", "FullFIFO_FIFOf0.9"};
+    std::vector<std::string> labels = {"FIFO", "SRAM D=400", "FIFOf0.9"};
+    std::vector<int> vcolor = {kBlack, kRed, kGreen, kBlue, kMagenta};
+    std::vector<int> vmarkerStyle = {20, 21, 22, 20, 21, 22};
     std::vector<double> venergy = {5,10,15,20,25,30,50,200,400};
     std::vector<double> venergyErr(runNumbers.size(), 0.0);
-
+    
     TCanvas *c1 = new TCanvas("c1","numSecondaries",800,800);
     //c1->SetRightMargin(0.15);
     c1->SetLeftMargin(0.17);
@@ -190,6 +203,7 @@ void Calorimetry()
             //else if (colorIndex == 3) gSecondaries->Draw("PL SAME");   
             else if (colorIndex >1) gSecondaries->Draw("PL SAME");  
             gSecondaries->SetMinimum(0);
+            gSecondaries->SetMaximum(300);
             gSecondaries->SetLineColor(vcolor[colorIndex - 1]);
             gSecondaries->SetTitle("Efficiency vs Threshold;Primary energy [GeV];Hits per Event");
             gSecondaries->SetMarkerStyle(vmarkerStyle[colorIndex - 1]);

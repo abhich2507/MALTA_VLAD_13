@@ -32,13 +32,13 @@ void MALTATracking(double threshold, int runNumber, std::string saveName)
         trackChain->Add(Form("%soutput0_t%d.root", inputPath.c_str() , t));
     }
 
-    double vertexX, vertexY, vertexZ, globalTime;
+    float vertexX_f, vertexY_f, vertexZ_f, globalTime_f;
 
     // Connect branches
-    trackChain->SetBranchAddress("trueVertexX", &vertexX);
-    trackChain->SetBranchAddress("trueVertexY", &vertexY);
-    trackChain->SetBranchAddress("trueVertexZ", &vertexZ);
-    trackChain->SetBranchAddress("trueGlobalTime", &globalTime);
+    trackChain->SetBranchAddress("trueVertexX", &vertexX_f);
+    trackChain->SetBranchAddress("trueVertexY", &vertexY_f);
+    trackChain->SetBranchAddress("trueVertexZ", &vertexZ_f);
+    trackChain->SetBranchAddress("trueGlobalTime", &globalTime_f);
 
     Long64_t nTrackEntries = trackChain->GetEntries();
     //std::cout << "Number of track entries: " << nTrackEntries << std::endl;
@@ -47,6 +47,10 @@ void MALTATracking(double threshold, int runNumber, std::string saveName)
     for (Long64_t i = 0; i < nTrackEntries; i++) 
     {
         trackChain->GetEntry(i);
+        double vertexX = static_cast<double>(vertexX_f);
+        double vertexY = static_cast<double>(vertexY_f);
+        double vertexZ = static_cast<double>(vertexZ_f);
+        double globalTime = static_cast<double>(globalTime_f);
         TrackEntry tr;
         tr.x = vertexX;
         tr.y = vertexY;
