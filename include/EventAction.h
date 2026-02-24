@@ -27,7 +27,7 @@ public:
     ~EventAction() override = default;
     void BeginOfEventAction(const G4Event*) override;
     void EndOfEventAction(const G4Event*) override;
-    void addEdep(G4int eventID, G4int trackID, G4float energy, G4float timing, G4int planeID, G4int pixX, G4int pixY);
+    void addEdep(G4int eventID, G4float energy, G4float timing, G4int planeID, G4int pixX, G4int pixY);
 
 private:
     // trackID, {edep, timing} map

@@ -113,48 +113,51 @@ G4bool SensitiveDetector::ProcessHits(G4Step *aStep, G4TouchableHistory *)
             planeID = -1;
         }
     }
-    // get modulus for InPixel location.
-    G4ThreeVector InPixPos = G4ThreeVector(std::fmod(posPixel[0],pixelSize), std::fmod(posPixel[1],pixelSize), posPixel[2]); // result in mm
-    //double efficiency = GetEfficiencyCorrectionXY(InPixPos);
-    //G4double edep_corr = efficiency * energy;    
+
+    // obtain local coordinates and shift origin to bottom left corner of Pixel(0,0)
+    G4double localX = posPixel.x() - detXOffset + detX / 2;
+    G4double localY = posPixel.y() - detYOffset + detY / 2;
+    
+    // get modulus for InPixel location. 
+    // This obtains the inpixel-position starting from (0,0) at low X and Y coordinates. It does not depend on the global position of the detector.
+    G4ThreeVector InPixPos = G4ThreeVector(std::fmod(localX,pixelSize), std::fmod(localY,pixelSize), posPixel[2]); // result in mm 
+
     auto [effAn, quadrantFlag] = getEfficiencyAnalytical(InPixPos);
 
-    int pixX = static_cast<int>((posPixel.x() - detXOffset + detX / 2) / pixelSize);
-    int pixY = static_cast<int>((posPixel.y() - detYOffset + detY / 2) / pixelSize);
+    int pixX = static_cast<int>(localX / pixelSize);
+    int pixY = static_cast<int>(localY / pixelSize);
     // Handle edge cases: The filtering of out of bound pixels is graciously done in the DigitalProcessing via threshold mapping, 
     // This block however, also correctly endowes charge sharing to the correct side of the pixel edge.
     
     if(pixX == 0 && ((quadrantFlag & 0x1) == 0 ))
     {
-        effAn[1]+=effAn[0];
+        //effAn[1]+=effAn[0];
         effAn[0] = 0;
-        effAn[3]+=effAn[2];
+        //effAn[3]+=effAn[2];
         effAn[2] = 0;
-
     }
 
     if(pixX == 511 && (quadrantFlag & 0x1) )
     {
-        effAn[0]+=effAn[1];
+        //effAn[0]+=effAn[1];
         effAn[1] = 0;
-        effAn[2]+=effAn[3];
+        //effAn[2]+=effAn[3];
         effAn[3] = 0;
     }
 
     if(pixY == 0 && ( (quadrantFlag & (1 << 1)) == 0) )
     {
-        effAn[2]+=effAn[0];
+        //effAn[2]+=effAn[0];
         effAn[0] = 0;
-        effAn[3]+=effAn[1];
+        //effAn[3]+=effAn[1];
         effAn[1] = 0;
-
     }
 
     if(pixY == 511 && (quadrantFlag & (1 << 1)) )
     {
-        effAn[0]+=effAn[2];
+        //effAn[0]+=effAn[2];
         effAn[2] = 0;
-        effAn[1]+=effAn[3];
+        //effAn[1]+=effAn[3];
         effAn[3] = 0;
     }
     
