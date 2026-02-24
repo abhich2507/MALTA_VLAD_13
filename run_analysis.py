@@ -36,7 +36,11 @@ if not args.proteus:
         if args.digitize:
             command = f"root -l -b -q 'analysis/DigitalProcessing.cc({thr},{runNumber},\"{saveName}\", false)'"
             subprocess.run(command, shell=True, check=True)
-        
+ 
+        if args.fifo:
+            command = f"root -l -b -q 'analysis/PRIOFIFOFullDigitalProcessing.cc({thr},{runNumber},\"{saveName}\")'"
+            subprocess.run(command, shell=True, check=True)
+                   
         if args.digitizemultiplane:
             command = f"root -l -b -q 'analysis/DigitalProcessing_multiPlane.cc({thr},{runNumber},\"{saveName}\", false)'"
             subprocess.run(command, shell=True, check=True)
@@ -53,10 +57,6 @@ if not args.proteus:
             command = f"root -l -b -q 'analysis/Analysis.cc({thr},{runNumber},\"{saveName}\")'"
             subprocess.run(command, shell=True, check=True)
 
-
-        if args.fifo:
-            command = f"root -l -b -q 'analysis/FIFOProcessing.cc({thr},{runNumber},\"{saveName}\")'"
-            subprocess.run(command, shell=True, check=True)
 
 
         if args.calorimetry:
