@@ -42,13 +42,17 @@ struct SimFlags
     double trackOffsetX = 0.;
     double trackOffsetY = 0.;
     double veto = 0.;
+    double slowcontrolDelay = 0.;
+    double busMergingThreshold = 0.;
+    double SRAMFrequency = 0.;
+    int sramDepth = 0;
+    double FIFOFrequency = 0.;
+    int FIFOSize = 0;
+
 
     double fifoFrequency = 0.;
     double fifoSize = 0.;
-<<<<<<< HEAD
     int fifoMultiplicity = 0;
-    int nPlanes = 0;
-=======
     //int nPlanes = 0;
     int nPlanes_100 = 0;
     int nPlanes_10 = 0;
@@ -56,8 +60,6 @@ struct SimFlags
     std::string localPath = "";
     std::string inputPath = "";
     std::string fileName = "";
->>>>>>> 0767f57c39ef8b97cc1140db69ae8cd9f268b35a
-
 };
 
 void LoadAnalysisFlagsFromFile(const std::string& filename, SimFlags& flags)
@@ -118,6 +120,12 @@ void LoadAnalysisFlagsFromFile(const std::string& filename, SimFlags& flags)
         else if (key == "localPath") flags.localPath = value;
         else if (key == "inputPath") flags.inputPath = value;
         else if (key == "fileName") flags.fileName = value;
-        //std::cout << "Loaded flag: " << key << " = " << value << std::endl;
+        else if (key == "slowcontrolDelay") flags.slowcontrolDelay = std::stod(value);
+        else if (key == "busMergingThreshold") flags.busMergingThreshold = std::stod(value);
+        else if (key == "SRAMFrequency") flags.SRAMFrequency = std::stod(value);
+        else if (key == "sramDepth") flags.sramDepth = std::stoi(value);
+        else if (key == "FIFOFrequency") flags.FIFOFrequency = std::stod(value);
+        else if (key == "FIFOSize") flags.fifoSize = std::stoi(value);
+        //std::cout << "Loaded flag: " << key << " = " << value << std::endl;   
     }
 }
