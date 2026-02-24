@@ -60,6 +60,9 @@ struct SimFlags
     std::string localPath = "";
     std::string inputPath = "";
     std::string fileName = "";
+    std::string MCTrueTree = "TruthVertex";
+    std::string geometry = "";
+
 };
 
 void LoadAnalysisFlagsFromFile(const std::string& filename, SimFlags& flags)
@@ -113,13 +116,14 @@ void LoadAnalysisFlagsFromFile(const std::string& filename, SimFlags& flags)
         else if (key == "fifoFrequency") flags.fifoFrequency = std::stod(value);
         else if (key == "fifoSize") flags.fifoSize = std::stod(value);
         else if (key == "fifoMultiplicity") flags.fifoMultiplicity = std::stoi(value);
-        //else if (key == "nPlanes") flags.nPlanes = std::stoi(value);
         else if (key == "nPlanes_100") flags.nPlanes_100 = std::stoi(value);
         else if (key == "nPlanes_10") flags.nPlanes_10 = std::stoi(value);
         else if (key == "nPlanes_1") flags.nPlanes_1 = std::stoi(value);
         else if (key == "localPath") flags.localPath = value;
         else if (key == "inputPath") flags.inputPath = value;
         else if (key == "fileName") flags.fileName = value;
+        else if (key == "MCTrueTree") flags.MCTrueTree = value;
+        else if (key == "geometry") flags.geometry = value;
         else if (key == "slowcontrolDelay") flags.slowcontrolDelay = std::stod(value);
         else if (key == "busMergingThreshold") flags.busMergingThreshold = std::stod(value);
         else if (key == "SRAMFrequency") flags.SRAMFrequency = std::stod(value);

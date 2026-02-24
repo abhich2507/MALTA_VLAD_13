@@ -29,11 +29,12 @@ void Tracking(double threshold, int runNumber, std::string saveName)
     double dCut = analysisFlags->distCut;
     double matchWindow = analysisFlags->timeCut;
 
-    TChain *trackChain = new TChain("TruthVertex");
-
+    std::string MCTrueTreeName = analysisFlags->MCTrueTree;
+    TChain *trackChain = new TChain(MCTrueTreeName.c_str());
+    std::string fileName = analysisFlags->fileName;
     for (int t = 0; t <= analysisFlags->numThreads - 1; ++t) 
     {
-        trackChain->Add(Form("%soutput0_t%d.root", inputPath.c_str() , t));
+        trackChain->Add(Form("%s%s_t%d.root", inputPath.c_str(), fileName.c_str(), t));
     }
 
     float vertexX_float, vertexY_float, vertexZ_float, globalTime_float;
