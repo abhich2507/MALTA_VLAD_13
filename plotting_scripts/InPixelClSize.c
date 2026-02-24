@@ -73,7 +73,8 @@ double GetTimeDiff(TH2D *h2D)
 void InPixelClSize()
 {
     // Simulation in-pixel plots
-    std::string path = "Plots/local_0011/Final/histos.root";
+    //std::string path = "Plots/local_0011/Final/histos.root";
+    std::string path = "Plots/local_0108/TrkUncNo/histos.root";
     //std::string path = "Plots/local_0011/offsetX-0.52Y+0.53mu/histos.root";
 
     TFile *simuThresholdFile = TFile::Open(path.c_str(), "READ");
@@ -399,7 +400,7 @@ void InPixelClSize()
         TString label;
         label.Form("%s%.1f", (v < 0 ? "- " : ""), fabs(v));
 
-        h2TimingInPixel->GetZaxis()->ChangeLabel(i, -1,-1,-1,-1,-1, label);
+        //h2TimingInPixel->GetZaxis()->ChangeLabel(i, -1,-1,-1,-1,-1, label);
     }
 
     gPad->Update();

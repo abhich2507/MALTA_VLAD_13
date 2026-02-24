@@ -29,7 +29,7 @@ double Get2DMean(TH2D *h2D)
 void InPixelPlots()
 {
     // Simulation in-pixel plots
-    std::string path = "Plots/local_0011/Final/histos.root";
+    std::string path = "Plots/local_0108/DataTiming200/histos.root";
     //std::string path = "Plots/local_0011/offsetX-0.52Y+0.53mu/histos.root";
 
     TFile *simuThresholdFile = TFile::Open(path.c_str(), "READ");
@@ -37,7 +37,7 @@ void InPixelPlots()
         std::cerr << "Could not open file: " << path << std::endl;
         return;
     }
-    TDirectory *dir = (TDirectory*)simuThresholdFile->Get("Thr1250");
+    TDirectory *dir = (TDirectory*)simuThresholdFile->Get("Thr200");
     TH2D *h2PASSInPixel   = (TH2D*) dir->Get("h2PASSInPixel");
     TH2D *h2ClSizeInPixel = (TH2D*) dir->Get("h2ClSizeInPixel");
     TH2D *h2TimingInPixel = (TH2D*) dir->Get("h2TimingInPixel");
@@ -59,10 +59,10 @@ void InPixelPlots()
 
     // Data in-pixel plots
     //// 200 el thr
-    //path = "plotting_scripts/root_input/Eff_Clsize_W5R23__IDB120_ITHR015_SUB06.0_PWELL06.root";
+    path = "plotting_scripts/root_input/Eff_Clsize_W5R23__IDB120_ITHR015_SUB06.0_PWELL06.root";
 
     /// 1250 el thr
-    path = "plotting_scripts/root_input/W5R23_IBIAS05_rootdatafiles/Eff_Clsize_W5R23__IDB100_ITHR066_SUB06_IBIAS05_PWELL06.root";
+    //path = "plotting_scripts/root_input/W5R23_IBIAS05_rootdatafiles/Eff_Clsize_W5R23__IDB100_ITHR066_SUB06_IBIAS05_PWELL06.root";
 
     TFile *dataThresholdFile = TFile::Open(path.c_str(), "READ");
     if (!dataThresholdFile || dataThresholdFile->IsZombie()) {
@@ -71,17 +71,17 @@ void InPixelPlots()
     }
     TH2D *h2dataPASSInPixel   = (TH2D*) dataThresholdFile->Get("TOT_Eff");
     TH2D *h2dataClSizeInPixel = (TH2D*) dataThresholdFile->Get("TOT_ClSize");
-    //TH2D *h2dataTimingInPixel = (TH2D*) dataThresholdFile->Get("TOT_ClTime");
+    TH2D *h2dataTimingInPixel = (TH2D*) dataThresholdFile->Get("TOT_ClTime");
     double dataClSizeMean = Get2DMean(h2dataClSizeInPixel);
     double dataEffMean = Get2DMean(h2dataPASSInPixel);
-    //double dataTimeMean = Get2DMean(h2dataTimingInPixel);
-    //double dataTimeMin = h2dataTimingInPixel->GetMinimum();
+    double dataTimeMean = Get2DMean(h2dataTimingInPixel);
+    double dataTimeMin = h2dataTimingInPixel->GetMinimum();
     //std::cout << "Simu mean time: " << simuTimeMean << "; Data mean time: " << dataTimeMean << std::endl;
     std::cout << "Simu mean cl size: " << simuClSizeMean << "; Data mean cl size: " << dataClSizeMean << std::endl;
     std::cout << "Simu mean eff: " << simuEffMean << "; Data mean eff: " << dataEffMean << std::endl;
     //std::cout << "Simu time min: " << simuTimeMin << "; Data time min: " << dataTimeMin << std::endl;
 
-    /*
+    
     for (int i = 1; i <= h2dataTimingInPixel->GetNbinsX(); ++i) 
     {
         for (int j = 1; j <= h2dataTimingInPixel->GetNbinsY(); ++j) 
@@ -90,15 +90,15 @@ void InPixelPlots()
             h2dataTimingInPixel->SetBinContent(i, j, old_content - dataTimeMean);
         }
     }
-    */
+    
     gStyle->SetCanvasPreferGL(kTRUE);
     gROOT->SetStyle("ATLAS");
 
 
     h2TimingInPixel->GetZaxis()->SetTitle("Cl time - <Cl time> [ns]");
-    //h2TimingInPixel->SetMinimum(-2);
-    //h2TimingInPixel->SetMaximum(3);
-    //h2dataTimingInPixel->GetZaxis()->SetTitle("Cl time - <Cl time> [ns]");
+    h2TimingInPixel->SetMinimum(-2);
+    h2TimingInPixel->SetMaximum(3);
+    h2dataTimingInPixel->GetZaxis()->SetTitle("Cl time - <Cl time> [ns]");
 
     h2PASSInPixel->SetMinimum(50);
     h2PASSInPixel->SetMaximum(100);
@@ -248,7 +248,7 @@ void InPixelPlots()
     c5->cd();
     h2dataClSizeInPixel->Draw("COLZ");
     c6->cd();
-    //h2dataTimingInPixel->Draw("COLZ");
+    h2dataTimingInPixel->Draw("COLZ");
     c7->cd();
     h2dataClSizeInPixelResidual_rebinned->Draw("COLZ");
     c8->cd();

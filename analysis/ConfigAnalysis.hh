@@ -42,10 +42,18 @@ struct SimFlags
     double trackOffsetX = 0.;
     double trackOffsetY = 0.;
     double veto = 0.;
+    double slowcontrolDelay = 0.;
+    double busMergingThreshold = 0.;
+    double SRAMFrequency = 0.;
+    int sramDepth = 0;
+    double FIFOFrequency = 0.;
+    int FIFOSize = 0;
+
 
     double fifoFrequency = 0.;
     double fifoSize = 0.;
     int fifoMultiplicity = 0;
+    //int nPlanes = 0;
     int nPlanes_100 = 0;
     int nPlanes_10 = 0;
     int nPlanes_1 = 0;
@@ -116,6 +124,12 @@ void LoadAnalysisFlagsFromFile(const std::string& filename, SimFlags& flags)
         else if (key == "fileName") flags.fileName = value;
         else if (key == "MCTrueTree") flags.MCTrueTree = value;
         else if (key == "geometry") flags.geometry = value;
-        //std::cout << "Loaded flag: " << key << " = " << value << std::endl;
+        else if (key == "slowcontrolDelay") flags.slowcontrolDelay = std::stod(value);
+        else if (key == "busMergingThreshold") flags.busMergingThreshold = std::stod(value);
+        else if (key == "SRAMFrequency") flags.SRAMFrequency = std::stod(value);
+        else if (key == "sramDepth") flags.sramDepth = std::stoi(value);
+        else if (key == "FIFOFrequency") flags.FIFOFrequency = std::stod(value);
+        else if (key == "FIFOSize") flags.fifoSize = std::stoi(value);
+        //std::cout << "Loaded flag: " << key << " = " << value << std::endl;   
     }
 }
