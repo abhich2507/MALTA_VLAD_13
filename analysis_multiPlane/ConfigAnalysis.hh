@@ -1,0 +1,129 @@
+#pragma once
+#include <string>
+#include <array>
+#include <vector>
+#include <filesystem>
+#include <sstream>
+#include <iomanip>
+#include <fstream>
+#include <algorithm>
+#include <thread>
+#include <chrono>
+#include <iostream>
+
+
+
+struct SimFlags
+{
+    double T = 0.;
+    double Tdiv = 0.;
+    double TrefThr = 0.;
+    double x0 = 0.;
+    double n = 0.;
+    double t0 = 0.;
+    int groupSize = 0;
+    int groupSizeX = 0;
+    int groupSizeY = 0;
+    int groupLeng = 0;
+    int parityLeng = 0;
+    int dColLeng = 0;
+    int numThreads = 0;
+    double chLoss = 0.;
+    double meanSmearing = 0.;
+    double colSmearing = 0.;
+    double wordSpacing = 0.;
+    double distCut = 0.;
+    double timeCut = 0.;
+    bool trkUnc = false;
+    bool verboseDigital = false;
+    bool verboseTracking = false;
+    bool verboseClustering = false;
+    bool verboseAnalysis = false;
+    double trackOffsetX = 0.;
+    double trackOffsetY = 0.;
+    double veto = 0.;
+
+    double fifoFrequency = 0.;
+    double fifoSize = 0.;
+    int fifoMultiplicity = 0;
+    int nPlanes_100 = 0;
+    int nPlanes_10 = 0;
+    int nPlanes_1 = 0;
+    std::string localPath = "";
+    std::string inputPath = "";
+    std::string fileName = "";
+    std::string MCTrueTree = "TruthVertex";
+    std::string geometry = "";
+    double Analysis_XCenter = 0.;
+    double Analysis_YCenter = 0.;
+    double Analysis_XWidth = 0.;
+    double Analysis_YWidth = 0.;
+
+};
+
+void LoadAnalysisFlagsFromFile(const std::string& filename, SimFlags& flags)
+{
+    std::cout << "Loading flags from file: " << filename << std::endl;
+    std::ifstream infile(filename);
+    if (!infile.is_open()) 
+    {
+        std::cerr << "Error: could not open file " << filename << std::endl;
+        return;
+    }
+
+
+    std::string line;
+    while (std::getline(infile, line)) {
+        // Remove whitespace
+        line.erase(std::remove_if(line.begin(), line.end(), ::isspace), line.end());
+        if (line.empty() || line[0] == '#') continue; // skip comments/empty lines
+        auto pos = line.find('=');
+        if (pos == std::string::npos) continue;
+        std::string key = line.substr(0, pos);
+        std::string value = line.substr(pos + 1);
+
+        if (key == "T") flags.T = std::stod(value);
+        else if (key == "Tdiv") flags.Tdiv = std::stod(value);
+        else if (key == "TrefThr") flags.TrefThr = std::stod(value);
+        else if (key == "x0") flags.x0 = std::stod(value);
+        else if (key == "n") flags.n = std::stod(value);
+        else if (key == "t0") flags.t0 = std::stod(value);
+        else if (key == "groupSize") flags.groupSize = std::stoi(value);
+        else if (key == "groupSizeX") flags.groupSizeX = std::stoi(value);
+        else if (key == "groupSizeY") flags.groupSizeY = std::stoi(value);
+        else if (key == "groupLeng") flags.groupLeng = std::stoi(value);
+        else if (key == "parityLeng") flags.parityLeng = std::stoi(value);
+        else if (key == "dColLeng") flags.dColLeng = std::stoi(value);
+        else if (key == "numThreads") flags.numThreads = std::stoi(value);
+        else if (key == "chLoss") flags.chLoss = std::stod(value);
+        else if (key == "meanSmearing") flags.meanSmearing = std::stod(value);
+        else if (key == "colSmearing") flags.colSmearing = std::stod(value);
+        else if (key == "wordSpacing") flags.wordSpacing = std::stod(value);
+        else if (key == "distCut") flags.distCut = std::stod(value);
+        else if (key == "timeCut") flags.timeCut = std::stod(value);
+        else if (key == "trkUnc") flags.trkUnc   = (value == "true");
+        else if (key == "verboseDigital") flags.verboseDigital = (value == "true");
+        else if (key == "verboseTracking") flags.verboseTracking = (value == "true");
+        else if (key == "verboseClustering") flags.verboseClustering = (value == "true");
+        else if (key == "verboseAnalysis") flags.verboseAnalysis = (value == "true");
+        else if (key == "trackOffsetX") flags.trackOffsetX = std::stod(value);
+        else if (key == "trackOffsetY") flags.trackOffsetY = std::stod(value);
+        else if (key == "veto") flags.veto = std::stod(value);
+        else if (key == "fifoFrequency") flags.fifoFrequency = std::stod(value);
+        else if (key == "fifoSize") flags.fifoSize = std::stod(value);
+        else if (key == "fifoMultiplicity") flags.fifoMultiplicity = std::stoi(value);
+        else if (key == "nPlanes_100") flags.nPlanes_100 = std::stoi(value);
+        else if (key == "nPlanes_10") flags.nPlanes_10 = std::stoi(value);
+        else if (key == "nPlanes_1") flags.nPlanes_1 = std::stoi(value);
+        else if (key == "localPath") flags.localPath = value;
+        else if (key == "inputPath") flags.inputPath = value;
+        else if (key == "fileName") flags.fileName = value;
+        else if (key == "MCTrueTree") flags.MCTrueTree = value;
+        else if (key == "geometry") flags.geometry = value;
+        else if (key == "Analysis_XCenter") flags.Analysis_XCenter = std::stod(value);
+        else if (key == "Analysis_YCenter") flags.Analysis_YCenter = std::stod(value);
+        else if (key == "Analysis_XWidth") flags.Analysis_XWidth = std::stod(value);
+        else if (key == "Analysis_YWidth") flags.Analysis_YWidth = std::stod(value);
+        //std::cout << "Loaded flag: " << key << " = " << value << std::endl;
+    }
+}
