@@ -18,10 +18,12 @@ private:
     G4LogicalVolume* m_logicSensor{};
     G4LogicalVolume* m_logicPlane1{};
     G4LogicalVolume* m_logicPlane2{};
-    G4LogicalVolume* m_logicPlane3{};
+    G4LogicalVolume* m_logicPlane3{}; 
     G4LogicalVolume* m_logicPlane4{};
     G4LogicalVolume* m_logicPlane5{};
     G4LogicalVolume* m_logicPlane6{};
+    // The gdml import sensitive Volumes
+    std::vector<G4LogicalVolume*> sensitiveLVs;
     // Method constructs any sensitive detector or additional field
     void ConstructSDandField() override;
 };

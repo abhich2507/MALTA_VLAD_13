@@ -144,7 +144,6 @@ int main (int argc, char** argv)
     // Calls a static method GetUIpointer() from the G4UImanager class without instantiation
     // This allows for using commands such as run/beamOn or vis/open/OGL
     G4UImanager *UImanager = G4UImanager::GetUIpointer(); 
-
     // Import visualization macro vis.mac. Added logic to account for run.mac large stat runs
     if(flags->macroFileLocal.find("vis") != std::string::npos)
     {   

@@ -28,6 +28,8 @@
 #include "G4OpticalSurface.hh"
 #include "G4LogicalBorderSurface.hh"
 #include "G4LogicalSkinSurface.hh"
+#include "G4GDMLParser.hh"
+#include "G4LogicalVolumeStore.hh"
 #include <cassert>
 
 
@@ -41,6 +43,63 @@ DetectorConstruction::DetectorConstruction(const SimFlags* flags) : m_flag(flags
 G4VPhysicalVolume *DetectorConstruction::Construct()
 {
     assert(m_flag != nullptr);
+
+    if (m_flag->gdmlBool)
+    {
+        G4GDMLParser parser;
+        parser.Read(m_flag->gdmlStr, false);
+
+        G4VPhysicalVolume* world = parser.GetWorldVolume();
+        if (!world)
+        {
+            G4cerr << "GDML world volume is null!" << G4endl;
+            return nullptr;  // abort
+        }
+        auto worldSolid = world->GetLogicalVolume()->GetSolid();
+        G4cout << "World volume name: " << world->GetName()
+            << ", cubic volume: " << worldSolid->GetCubicVolume() << G4endl;
+        // Optionally assign a default visualization to all volumes
+        auto lvStore = G4LogicalVolumeStore::GetInstance();
+        for (auto lv : *lvStore)
+        {
+            auto volumeName = lv->GetName();
+            auto volumeMaterial = lv->GetMaterial()->GetName();
+            G4cout << "Volume name: " << volumeName << " Volume material: " << volumeMaterial << G4endl;
+            if (!lv->GetVisAttributes())
+            {
+                double el1,el2,el3,el4;
+                if(volumeMaterial == "Aluminium") el1 = 1.; el2 = 1.; el3 = 1.; el4 = 0.2;
+                if(volumeMaterial == "Silicon")   
+                {
+                    el1 = 1.; el2 = 1.; el3 = 0.; el4 = 0.5;
+                    sensitiveLVs.push_back(lv);
+                }
+                if(volumeMaterial == "Copper")    el1 = 1.; el2 = 0.; el3 = 0.; el4 = 0.1;
+                if(volumeMaterial == "Tungsten")  el1 = 0.; el2 = 1.; el3 = 0.; el4 = 0.2;
+                if(volumeMaterial == "Kapton")    el1 = 1.; el2 = 0.65; el3 = 0.; el4 = 0.2;
+                if(volumeMaterial == "GSO")       
+                {
+                    el1 = 0.; el2 = 0.; el3 = 1.; el4 = 0.3;
+                    sensitiveLVs.push_back(lv);
+                }
+                if(volumeMaterial == "Gten")      el1 = 0.68; el2 = 0.85; el3 = 0.9; el4 = 0.1;
+                if(volumeMaterial == "Air")       el1 = 0.; el2 = 0.; el3 = 0.545; el4 = 0.5;
+                if(volumeMaterial == "Acrylic")   el1 = 1.; el2 = 1.; el3 = 1.; el4 = 0.1;
+                
+                
+                auto visAtt = new G4VisAttributes(G4Colour(el1,el2,el3,el4));
+                visAtt->SetForceSolid(true);
+                lv->SetVisAttributes(visAtt);
+            }
+        }
+        
+
+        // Keep a member pointer so your GUI code can reference it
+    
+        return world;
+    }
+
+
     // Volume overlap check needed to ensure correct physics simulation
     const G4bool checkOverlaps {true};
     // Instantiate NIST material manager
@@ -275,11 +334,11 @@ G4VPhysicalVolume *DetectorConstruction::Construct()
 
 void DetectorConstruction::ConstructSDandField()
 {
-    if(m_flag->preDefinedGeometryFlag == "MALTA")
+    SensitiveDetector *sensDet = new SensitiveDetector("SensitiveDetector", m_flag);
+    G4SDManager::GetSDMpointer()->AddNewDetector(sensDet);
+    if(m_flag->preDefinedGeometryFlag == "MALTA" && m_flag->gdmlBool == false)
     {
-        SensitiveDetector *sensDet = new SensitiveDetector("SensitiveDetector", m_flag);
         // Ensure that methods initialize at end of event
-        G4SDManager::GetSDMpointer()->AddNewDetector(sensDet);
         m_logicSensor->SetSensitiveDetector(sensDet);
         m_logicPlane1->SetSensitiveDetector(sensDet);
         m_logicPlane2->SetSensitiveDetector(sensDet);
@@ -287,5 +346,15 @@ void DetectorConstruction::ConstructSDandField()
         m_logicPlane4->SetSensitiveDetector(sensDet);
         m_logicPlane5->SetSensitiveDetector(sensDet);
         m_logicPlane6->SetSensitiveDetector(sensDet);
+    }
+
+    if (m_flag->gdmlBool == true)
+    {
+        for (auto lv : sensitiveLVs) 
+        {
+            lv->SetSensitiveDetector(sensDet);
+            G4cout << "Assigned sensitive detector to " << lv->GetName() << " Which if you didn't already know as you might should it is a material made out of: " << lv->GetMaterial()->GetName()<< G4endl;
+        }
+
     }
 }

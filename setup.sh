@@ -18,6 +18,9 @@ export CLHEP_DIR=/cvmfs/sft.cern.ch/lcg/releases/clhep/2.4.6.4-2ef70/x86_64-el9-
 export XercesC_LIBRARY=/cvmfs/sft.cern.ch/lcg/releases/XercesC/3.2.4-9e637/x86_64-el9-gcc11-opt/lib/libxerces-c.so
 export XercesC_INCLUDE_DIR=/cvmfs/sft.cern.ch/lcg/releases/XercesC/3.2.4-9e637/x86_64-el9-gcc11-opt/include
 
+#Qt6 
+#export CMAKE_PREFIX_PATH=/cvmfs/sft.cern.ch/lcg/releases/qt6/6.5.1-4d39c/x86_64-el9-gcc11-opt/lib/cmake
+
 # Qt5
 export CMAKE_PREFIX_PATH=/cvmfs/sft.cern.ch/lcg/releases/qt5/5.15.9-50dd0/x86_64-el9-gcc11-opt/lib/cmake
 
