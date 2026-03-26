@@ -94,10 +94,24 @@ void DigitalProcessing(double inputThreshold, int runNumber, std::string saveNam
     auto thresholdMap = generateThrMap(inputThreshold, pixXNum, pixYNum, groupRepetition, relativeThresholdSmearingCol, relativeThresholdSmearingMean, directoryPath, runPath, saveName);
     
 
-    
+    // Create a TTree
+    TTree *mergedTree = new TTree("MergedHits", "Merged Hits");
+    // Variables for branches
+    int planeMerging, deltaX, deltaY;
+    bool groupMerging, parityMerging, dcMerging, passMerging, displacedMerging, hitLossMerging;
+    // Create branches
+    mergedTree->Branch("planeMerging", &planeMerging, "planeMerging/I");
+    mergedTree->Branch("deltaX", &deltaX, "deltaX/I");
+    mergedTree->Branch("deltaY", &deltaY, "deltaY/I");
+    mergedTree->Branch("groupMerging", &groupMerging);
+    mergedTree->Branch("dcMerging", &dcMerging);
+    mergedTree->Branch("parityMerging", &parityMerging);
+    mergedTree->Branch("passMerging", &passMerging);
+    mergedTree->Branch("displacedMerging", &displacedMerging);
+    mergedTree->Branch("hitLossMerging", &hitLossMerging);
     
     // Iterate over each plane if needed
-    for (int i = 0; i< nPlanes; i++)
+    for (int planeI = 0; planeI< nPlanes; planeI++)
     {
         enMap.clear();
         timeMap.clear();
@@ -109,7 +123,7 @@ void DigitalProcessing(double inputThreshold, int runNumber, std::string saveNam
             double corrEnergy = static_cast<double>(corrEnergy_float);
             double timeWalkHit = static_cast<double>(timeWalkHit_float);
             //std::cout <<  "Float: " << corrEnergy_float << "; Double: " << corrEnergy << std::endl;
-            if (planeID != i) continue;
+            if (planeID != planeI) continue;
             enMap[{rawEventID, {pixX, pixY}}] += corrEnergy;
             timeMap[{rawEventID, {pixX, pixY}}].push_back(timeWalkHit);
             eventIDHolder = rawEventID;
@@ -208,8 +222,10 @@ void DigitalProcessing(double inputThreshold, int runNumber, std::string saveNam
         {
             // This was not initialized before leading to weird first word
             __uint128_t mergedWord = 0; 
-            std::vector<double> leadingTime;
+            std::vector<double> leadingTime{};
             int aux = 0;
+            int count = 0;
+            //if(digitizedWords[i].size()>=2) std::cout << "New Word" << std::endl;
             for (auto [word, timing] : digitizedWords[i])
             {
                 if(verbose)std::cout << "Word: " << std::bitset<30>(word) << std::endl;
@@ -218,18 +234,72 @@ void DigitalProcessing(double inputThreshold, int runNumber, std::string saveNam
                 aux++;
 
                 // A merging has taken place. Debug information on merging.
-                if (aux == 2)
+                if (aux >= 2)
                 {   
                     // Check if the 14 least significant bits are the same. If not than a mismerging happened
                     if ( (mergedWord & 0x3FFF) != (word & 0x3FFF) )
                     {
                         std::vector< std::pair<std::pair<int,int>, int> > pixelPositions = decodedDigitalWord(mergedWord, groupSize, groupSizeX, groupSizeY, groupLeng, parityLeng, dColLeng);
+                        int hits = 0;
+                        deltaX = ((mergedWord & 0xFF) - (word & 0xFF)) * groupSizeY;
+                        deltaY = (((mergedWord >> (1 + 8)) & 0x1F) - ((word >> (1 + 8)) & 0x1F)) *groupSizeX *2 + (((mergedWord >> 8) & 0x1) - ((word >> 8) & 0x1)) *groupSizeX;
+
+                        planeMerging = planeI;
+                        if ( (mergedWord & 0xFF) != (word & 0xFF) )
+                        {
+                            dcMerging = 1;
+                        }
+                        else
+                        {
+                            dcMerging = 0;
+                        }
+                
+                        if ( ((mergedWord >> 8) & 0x1) != ((word >> 8) & 0x1) )
+                        {
+                            parityMerging = 1;
+                        }
+                        else
+                        {
+                            parityMerging = 0;
+                        }
+
+                        if ( ((mergedWord >> (1 + 8)) & 0x1F) != ((word >> (1 + 8)) & 0x1F) )
+                        {
+                            int n1 = (mergedWord >> (1 + 8)) & 0x1F;
+                            int n2 = (word >> (1 + 8)) & 0x1F;
+                            //std::cout << "bitwise: " << std::bitset<5>(n1) << "num: " << n1 << "bitwise: " << std::bitset<5>(n2) << "num: " << n2 << std::endl;
+
+                            groupMerging = 1;
+                        }
+                        else
+                        {
+                            groupMerging = 0;
+                        }
+                        if (aux != count + pixelPositions.size())
+                        {
+                            hitLossMerging = 1;
+                            displacedMerging = 0;
+                            // Make sure to not double count hit loss merging within multi 
+                            count++;
+                        }
+                        else
+                        {
+                            hitLossMerging = 0;
+                            displacedMerging = 1;
+                        }
+                        mergedTree->Fill();
+
+                        //std::cout << "Merged Word: " << std::bitset<30>(mergedWord) << " Word: " << std::bitset<30>(word) << " DX=" << deltaX << " DY=" << deltaY << " DCM=" 
+                        //          << dcMerging << " PM: " << parityMerging << " GM: " << groupMerging << " HL: " << hitLossMerging << " DP: " << displacedMerging << " hits=" << hits << " aux: " << aux <<" numW: " << digitizedWords[i].size() << std::endl; 
+                        hits++;
+
                         for (const auto& pos : pixelPositions) 
                         {
                             int reconstructedPixX = pos.first.first;
                             int reconstructedPixY = pos.first.second;
                             h2MissMerged->Fill(reconstructedPixX, reconstructedPixY, 1);
                         }
+                        
                     }
                 }
             }
@@ -249,7 +319,7 @@ void DigitalProcessing(double inputThreshold, int runNumber, std::string saveNam
         // Now I have merged words. Next step is decoding them back to position and time
         // However, first I need the infrastructure to save them in a root tree.
         mkdir((inputPath + saveName).c_str(), 0777);
-        TFile *outfile = new TFile((inputPath + saveName + "/Plane" + std::to_string(i) + "ReconstructedHitsThr" + std::to_string(int(inputThreshold)) + ".root").c_str(), "RECREATE");
+        TFile *outfile = new TFile((inputPath + saveName + "/Plane" + std::to_string(planeI) + "ReconstructedHitsThr" + std::to_string(int(inputThreshold)) + ".root").c_str(), "RECREATE");
 
         // Create a TTree
         TTree *recontructedTree = new TTree("ReconstructedHits", "Reconstructed Hits");
@@ -277,8 +347,9 @@ void DigitalProcessing(double inputThreshold, int runNumber, std::string saveNam
             }
         }
         recontructedTree->Write();
+        mergedTree->Write();
         outfile->Close();
-        std::cout << "Finishing up analyzing Plane" << i << std::endl;
+        std::cout << "Finishing up analyzing Plane" << planeI << std::endl;
     }
 
     auto end = std::chrono::high_resolution_clock::now();

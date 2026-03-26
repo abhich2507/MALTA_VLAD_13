@@ -45,6 +45,8 @@ struct SimFlags
     int numThreadsLocal = 1;
     int numThreadsNAF =1;
     std::string runMode = "";
+    bool gdmlBool = false;
+    std::string gdmlStr = "";
     bool verbosePL = false;
     bool verbosePG = false;
     bool verboseSD = false;

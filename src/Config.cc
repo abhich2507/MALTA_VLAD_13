@@ -141,6 +141,8 @@ void LoadSimFlagsFromFile(const std::string& filename, SimFlags& flags)
         else if (key == "numThreadsLocal") flags.numThreadsLocal = std::stoi(value);
         else if (key == "numThreadsNAF") flags.numThreadsNAF = std::stoi(value);
         else if (key == "runMode") flags.runMode = value;
+        else if (key == "gdmlBool") flags.gdmlBool = (value == "true");
+        else if (key == "gdmlStr") flags.gdmlStr = value;
         else if (key == "verbosePL") flags.verbosePL = (value == "true");
         else if (key == "verbosePG") flags.verbosePG = (value == "true");
         else if (key == "verboseSD") flags.verboseSD = (value == "true");
