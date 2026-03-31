@@ -18,7 +18,7 @@ std::vector<TTree*> CaloPreProcessing(double inputThreshold, int runNumber, std:
 {
     auto start = std::chrono::high_resolution_clock::now();
     // Set all the analysis flags for the digital processing
-    auto analysisFlags = new SimFlags{};
+    auto analysisFlags = new AnaFlags{};
     const char* configPath = std::getenv("ANALYSIS_CONFIG");
     LoadAnalysisFlagsFromFile(configPath, *analysisFlags);
     std::string localPath = analysisFlags->localPath;
@@ -66,20 +66,24 @@ std::vector<TTree*> CaloPreProcessing(double inputThreshold, int runNumber, std:
     for (int iz = 0; iz < nPlanes_100; ++iz) {
         for (int iy = 0; iy < nPlanes_10; ++iy) {
             for (int ix = 0; ix < nPlanes_1; ++ix) {
-                planes.push_back(iz*100 + iy*10 + ix); // decoded position (works for up to 10 planes in each dimension)
+                planes.push_back(iz*10000 + iy*100 + ix); // decoded position (works for up to 100 planes in each dimension)
             }
         }
     }
-
+    std::vector<int> modules{};
+    for (int i = 0; i< analysisFlags->modules; i++)
+    {
+        modules.push_back(i);
+    }
     //std::vector<TTree*> forest(planes.size());
     std::vector<TTree*> forest;
-    forest.resize(planes.size());
+    forest.resize(modules.size());
     
-    for (size_t i = 0; i < planes.size(); i++)
+    for (size_t i = 0; i < modules.size(); i++)
     {
-        int p = planes[i];
-        TTree* treeSplit = chainPixel->CopyTree(Form("iPlane==%d", p));
-        treeSplit->SetName(Form("Plane%dHits", p));
+        int m = modules[i];
+        TTree* treeSplit = chainPixel->CopyTree(Form("iModule==%d", m));
+        treeSplit->SetName(Form("Module%dHits", m));
         forest[i] = treeSplit;
         treeSplit->SetDirectory(nullptr);
     }

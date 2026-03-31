@@ -303,6 +303,10 @@ Root macro that takes as input E-TCT data as analog waveforms. Outputs pixel cha
 # Config files. configs/
 The user is encouraged to create their own configuration file as desired. The simulation (e.g. flags.cfg) and analysis (e.g. analysis_flags.cfg) flags can be easily passed via the argument line. If a foreign local installation of the package is desired, additional path configuration might be needed. The default ALMA9 path configuration is implemented via config.sh. Customized examples of local path sourcing can be seen in the config_vlad.sh and config_lucian.sh. A manual pointing towards the GEANT4, ROOT and any other non intialized libraries is needed for other local implementations. The passing of the correct config file is explained in the run_files section. 
 
+## geometry file
+
+Module/ large scale detector building from simple MALTA sensors can be done using the simulation flag preDefinedGeometry = MULTIMALTA. Additionally, a path to a .csv file needs to be provided in the geofile field. The geometry files reside in configs/geometry/. Each MALTA plane needs to be configured in terms of indices (x, y, z), offset from the origin (xoff, yoff, zoff) and rotation (xrot, yrot, zrot), additionally MALTA planes should be organized in terms of the module index (mod). Planes with the same modle index are digitized together, allowing for inter-chip merging. An example of 4 adjacent MALTA modules is given in example_geo.csv. The chosen file path for the simulation needs to also be imported in the analysis config file. Additionally, the analysis config needs to implement the accurate plane distribution via the nplanes_100 (# of planes in z), nplanes_10 (# of planes in y), nplanes_1 (# of planes in x) and modules (number of distinct modules) fields.
+
 ## analysis_flags
 
 Time walk calibration scaling default values:

@@ -20,7 +20,7 @@ void Clustering_multiPlane(double threshold, int runNumber, std::string saveName
 {
     auto start = std::chrono::high_resolution_clock::now();
     // Set all the analysis flags for the digital processing
-    auto analysisFlags = new SimFlags;
+    auto analysisFlags = new AnaFlags;
     const char* configPath = std::getenv("ANALYSIS_CONFIG");
     LoadAnalysisFlagsFromFile(configPath, *analysisFlags);
     ////////// Function can be used for custom analysis paths
@@ -37,10 +37,32 @@ void Clustering_multiPlane(double threshold, int runNumber, std::string saveName
     bool verbose = analysisFlags->verboseClustering;
 
     TFile *outfile = new TFile((inputPath + "analysisThr" + std::to_string(int(threshold)) + ".root").c_str(), "RECREATE");
-    
+    std::string cfgPath = analysisFlags->inputPath+Form("_%04d/", runNumber);
+    DetectorConfig cfg = LoadConfig(cfgPath + "flags.cfg"); // todo: does this need to be generalized?
     // Get trackedtree for each PlaneZ and store analysisTree for each PlaneZ to outfile
+    //int nPlanes_100 = analysisFlags->nPlanes_100;
+
     int nPlanes_100 = analysisFlags->nPlanes_100;
-    for (int planeZ = 0; planeZ<nPlanes_100; planeZ++){
+    int nPlanes_10 = analysisFlags->nPlanes_10;
+    int nPlanes_1 = analysisFlags->nPlanes_1;
+    int nPlanes = nPlanes_100*nPlanes_10*nPlanes_1;
+    std::vector<int> planes;
+    cout << "Adding Planes to analysis: ";
+    for (int iz = 0; iz < nPlanes_100; ++iz) 
+    {
+        for (int iy = 0; iy < nPlanes_10; ++iy) 
+        {
+            for (int ix = 0; ix < nPlanes_1; ++ix) 
+            {
+                planes.push_back(iz*10000 + iy*100 + ix); // decoded position (works for up to 10 planes in each dimension)
+                std::cout << iz*10000 + iy*100 + ix << ", " ;
+            }
+        }
+    }
+
+
+    for (int planeZ = 0; planeZ<nPlanes_100; planeZ++)
+    {
         std::cout << "Clustering PlaneZ: " << planeZ << std::endl;
         
         // Get TTree for each planeZ
@@ -48,8 +70,8 @@ void Clustering_multiPlane(double threshold, int runNumber, std::string saveName
 
         double vertexX, vertexY, globalTrigger;
         double reconstructedTime;
-        int trackID, pixX, pixY, nHits;
-
+        int trackID, pixX, pixY, nHits, planeID;
+        trackedTree->SetBranchAddress("planeID", &planeID);
         trackedTree->SetBranchAddress("vertexX", &vertexX);
         trackedTree->SetBranchAddress("vertexY", &vertexY);
         trackedTree->SetBranchAddress("vertexTime", &globalTrigger);
@@ -64,9 +86,10 @@ void Clustering_multiPlane(double threshold, int runNumber, std::string saveName
 
         // Variables for branches
         double analysisVertexX, analysisVertexY, timing;
-        int analysisClSize;
+        int analysisClSize, clPlaneID;
 
         // Create branches
+        analysisTree->Branch("planeID", &clPlaneID, "planeID/I");
         analysisTree->Branch("analysisVertexX", &analysisVertexX, "analysisVertexX/D");
         analysisTree->Branch("analysisVertexY", &analysisVertexY, "analysisVertexY/D");
         analysisTree->Branch("clSize", &analysisClSize, "clSize/I");
@@ -87,6 +110,9 @@ void Clustering_multiPlane(double threshold, int runNumber, std::string saveName
         for (int i = 0; i <= nTrackedEntries; i++)
         {
             if (i<nTrackedEntries) trackedTree->GetEntry(i); // last iteration has no new entry
+            double COM_x{};
+            double COM_y{};
+            std::vector<std::pair<int,int>> validHits{};
 
             //trackVertixes.push_back(std::make_pair(vertexX, vertexY));      
             if(trackID == entry && i < nTrackedEntries) // this assumes that trackIDs are sorted. (which they should be)
@@ -146,11 +172,35 @@ void Clustering_multiPlane(double threshold, int runNumber, std::string saveName
                     {
                         ++clSize;
                         ++it;
+                        Vec3 pixelPosition = PixelPositionReconstruction(xPos, yPos, cfg);
+                        COM_x += pixelPosition.x;
+                        COM_y += pixelPosition.y;
                     }
                 }
-                analysisVertexX = currentX;
-                analysisVertexY = currentY;                
+                // TODO: Center of mass not MONTE CARLO in the future or maybe multiple with flags
+                if(analysisFlags->clPos == "MC")
+                {
+                    analysisVertexX = currentX;
+                    analysisVertexY = currentY;       
+                }
+                else if(analysisFlags->clPos == "COM")
+                // Center of Mass
+                {
+                    if(COM_x > 0 && COM_y > 0)
+                    {
+                        analysisVertexX = COM_x / clSize;
+                        analysisVertexY = COM_y / clSize;
+                    }
+                    else
+                    {
+                        analysisVertexX = currentX;
+                        analysisVertexY = currentY;    
+                    }
+                }        
+                
+                //std::cout << "MC_X: " << currentX << "; MC_Y: " << currentY << "; COM_X: " << analysisVertexX << "; COM_Y: " << analysisVertexY << std::endl; 
                 analysisClSize = clSize;
+                clPlaneID = planeID;
                 timing = std::min_element(cluster.begin(), cluster.end(), [](const Hit& a, const Hit& b)
                 {
                     return a.t < b.t;
@@ -162,6 +212,7 @@ void Clustering_multiPlane(double threshold, int runNumber, std::string saveName
                 if (i == nTrackedEntries) break; // no need to store last event again after processing it
                 // Reset and dont forget this event
                 cluster.clear();
+                validHits.clear();
                 cluster.push_back({pixX, pixY, reconstructedTime});
                 currentX = vertexX;
                 currentY = vertexY;

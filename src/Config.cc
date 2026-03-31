@@ -11,7 +11,6 @@
 #include "G4UnitsTable.hh"
 #include "G4SystemOfUnits.hh"
 
-
 void DumpConfigToFile(const std::string& filename) 
 {
     // Copy the config file used as input (from SIMU_CONFIG) to 'filename'
@@ -103,6 +102,7 @@ void LoadSimFlagsFromFile(const std::string& filename, SimFlags& flags)
         std::string value = line.substr(pos + 1);
 
         if (key == "preDefinedGeometryFlag") flags.preDefinedGeometryFlag = value;
+        else if (key == "geoFile") flags.geoFile = value;
         else if (key == "detectorXOffset") flags.detectorXOffset = std::stof(value);
         else if (key == "detectorYOffset") flags.detectorYOffset = std::stof(value);
         else if (key == "detectorZOffset") flags.detectorZOffset = std::stof(value);
@@ -119,6 +119,8 @@ void LoadSimFlagsFromFile(const std::string& filename, SimFlags& flags)
         else if (key == "beamYOffset") flags.beamYOffset = std::stof(value);
         else if (key == "beamZOffset") flags.beamZOffset = std::stof(value);
         else if (key == "sourceRadius") flags.sourceRadius = std::stof(value);
+        else if (key == "sourceRadiusX") flags.sourceRadiusX = std::stof(value);
+        else if (key == "sourceRadiusY") flags.sourceRadiusY = std::stof(value);
         else if (key == "particleCount") flags.particleCount = std::stoi(value);
         else if (key == "numEvents") flags.numEvents = std::stoi(value);
         else if (key == "intraSpillOffset") flags.intraSpillOffset = std::stof(value);
@@ -150,6 +152,46 @@ void LoadSimFlagsFromFile(const std::string& filename, SimFlags& flags)
 
         std::cout << "Loaded flag: " << key << " = " << value << std::endl;
     }
+}
+
+std::vector<Module> LoadModules(const std::string& filename)
+{
+    std::ifstream file("../configs/geometry/" + filename);
+    std::vector<Module> modules;
+
+    if (!file) {
+        throw std::runtime_error("Cannot open config file");
+    }
+
+    std::string line;
+
+    // skip header
+    std::getline(file, line);
+
+    while (std::getline(file, line))
+    {
+        if (line.empty()) continue;
+
+        std::stringstream ss(line);
+        std::string value;
+        Module m;
+
+        // read comma-separated values
+        std::getline(ss, value, ','); m.x    = std::stoi(value);
+        std::getline(ss, value, ','); m.y    = std::stoi(value);
+        std::getline(ss, value, ','); m.z    = std::stoi(value);
+        std::getline(ss, value, ','); m.xoff = std::stod(value);
+        std::getline(ss, value, ','); m.yoff = std::stod(value);
+        std::getline(ss, value, ','); m.zoff = std::stod(value);
+        std::getline(ss, value, ','); m.xrot = std::stod(value);
+        std::getline(ss, value, ','); m.yrot = std::stod(value);
+        std::getline(ss, value, ','); m.zrot = std::stod(value);
+        std::getline(ss, value, ','); m.modID   = std::stoi(value);  // "mod" column
+
+        modules.push_back(m);
+    }
+
+    return modules;
 }
 
 int GetRequestCpusFromSubmitFile(const std::string& submitFilePath) {

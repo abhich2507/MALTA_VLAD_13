@@ -13,7 +13,7 @@
 
 
 
-struct SimFlags
+struct AnaFlags
 {
     double T = 0.;
     double Tdiv = 0.;
@@ -35,6 +35,7 @@ struct SimFlags
     double distCut = 0.;
     double timeCut = 0.;
     bool trkUnc = false;
+    std::string clPos = "";
     bool verboseDigital = false;
     bool verboseTracking = false;
     bool verboseClustering = false;
@@ -49,6 +50,8 @@ struct SimFlags
     int nPlanes_100 = 0;
     int nPlanes_10 = 0;
     int nPlanes_1 = 0;
+    int modules = 0;
+    std::string geoFile = "";
     std::string localPath = "";
     std::string inputPath = "";
     std::string fileName = "";
@@ -61,7 +64,7 @@ struct SimFlags
 
 };
 
-void LoadAnalysisFlagsFromFile(const std::string& filename, SimFlags& flags)
+void LoadAnalysisFlagsFromFile(const std::string& filename, AnaFlags& flags)
 {
     std::cout << "Loading flags from file: " << filename << std::endl;
     std::ifstream infile(filename);
@@ -102,6 +105,7 @@ void LoadAnalysisFlagsFromFile(const std::string& filename, SimFlags& flags)
         else if (key == "distCut") flags.distCut = std::stod(value);
         else if (key == "timeCut") flags.timeCut = std::stod(value);
         else if (key == "trkUnc") flags.trkUnc   = (value == "true");
+        else if (key == "clPos") flags.clPos     = value;
         else if (key == "verboseDigital") flags.verboseDigital = (value == "true");
         else if (key == "verboseTracking") flags.verboseTracking = (value == "true");
         else if (key == "verboseClustering") flags.verboseClustering = (value == "true");
@@ -115,6 +119,8 @@ void LoadAnalysisFlagsFromFile(const std::string& filename, SimFlags& flags)
         else if (key == "nPlanes_100") flags.nPlanes_100 = std::stoi(value);
         else if (key == "nPlanes_10") flags.nPlanes_10 = std::stoi(value);
         else if (key == "nPlanes_1") flags.nPlanes_1 = std::stoi(value);
+        else if (key == "modules") flags.modules = std::stoi(value);
+        else if (key == "geoFile") flags.geoFile = value;
         else if (key == "localPath") flags.localPath = value;
         else if (key == "inputPath") flags.inputPath = value;
         else if (key == "fileName") flags.fileName = value;

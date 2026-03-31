@@ -9,7 +9,7 @@ void DigitalProcessing_multiPlane(double inputThreshold, int runNumber, std::str
     auto start = std::chrono::high_resolution_clock::now();
     TH1::AddDirectory(kFALSE);
     // Set all the analysis flags for the digital processing
-    auto analysisFlags = new SimFlags{};
+    auto analysisFlags = new AnaFlags{};
     const char* configPath = std::getenv("ANALYSIS_CONFIG");
     LoadAnalysisFlagsFromFile(configPath, *analysisFlags);
 
@@ -46,8 +46,10 @@ void DigitalProcessing_multiPlane(double inputThreshold, int runNumber, std::str
     std::cout << inputPath << std::endl;    
 
     // Avoid O(n^2) nested loops via extra map 
-    std::map<std::pair<int,std::pair<int, int>>, double> enMap; 
-    std::map<std::pair<int,std::pair<int,int>>, std::vector<double>> timeMap;
+    //std::map<std::pair<int,std::pair<int,std::pair<int, int>>>, double> enMap; 
+    //std::map<std::pair<int,std::pair<int,std::pair<int, int>>>, std::vector<double>> timeMap;
+    std::map<HitKey, double> enMap;
+    std::map<HitKey, std::vector<double>> timeMap; 
     int eventIDHolder =0;
     int nPlanes_100 = analysisFlags->nPlanes_100;
     int nPlanes_10 = analysisFlags->nPlanes_10;
@@ -83,7 +85,7 @@ void DigitalProcessing_multiPlane(double inputThreshold, int runNumber, std::str
     double reconstructedTiming;
 
     float corrEnergy_float, timeWalkHit_float;
-    int rawEventID, planeID, pixX, pixY, nRawEntries;
+    int rawEventID, planeID, pixX, pixY, nRawEntries, planeNum;
     // Create branches
     recontructedTree->Branch("planeID", &planeID, "planeID/I");
     recontructedTree->Branch("PixX", &reconstructedPixX, "PixX/I");
@@ -98,32 +100,39 @@ void DigitalProcessing_multiPlane(double inputThreshold, int runNumber, std::str
     for (int iz = 0; iz < nPlanes_100; ++iz) {
         for (int iy = 0; iy < nPlanes_10; ++iy) {
             for (int ix = 0; ix < nPlanes_1; ++ix) {
-                planes.push_back(iz*100 + iy*10 + ix); // decoded position (works for up to 10 planes in each dimension)
-                cout << iz*100 + iy*10 + ix << ", " ;
+                planes.push_back(iz*10000 + iy*100 + ix); // decoded position (works for up to 10 planes in each dimension)
+                cout << iz*10000 + iy*100 + ix << ", " ;
             }
         }
     }
-    cout << endl;
 
-    // Iterate over each plane if needed
-    for (size_t p = 0; p < planes.size(); p++)
+    std::vector<int> modules{};
+    for (int i = 0; i< analysisFlags->modules; i++)
+    {
+        modules.push_back(i);
+    }
+
+    // Iterate over each plane
+    for (size_t m = 0; m < modules.size(); m++)
     {
         enMap.clear();
         timeMap.clear();
         
-        TTree* plane = multiPlanes[p];
+        TTree* plane = multiPlanes[m];
         plane->SetBranchAddress("iEvent", &rawEventID);
-        plane->SetBranchAddress("iPlane", &planeID);
+        plane->SetBranchAddress("iPlane", &planeNum);
         plane->SetBranchAddress("PixX", &pixX);
         plane->SetBranchAddress("PixY", &pixY);
         plane->SetBranchAddress("hitTime", &timeWalkHit_float);
         plane->SetBranchAddress("hitEnergy", &corrEnergy_float);
         nRawEntries = plane->GetEntries();
 
-        planeID = planes[p]; // get planeID
+        
+        
+        //planeNum = modules[m]; // get planeID
 
         if (nRawEntries ==0) {
-            std::cout << "Plane " << planeID << " has no entries in TTree. Skip it!" << std::endl;
+            std::cout << "Plane " << planeNum << " has no entries in TTree. Skip it!" << std::endl;
             continue; // skip empty planes because it would cause errors below.
         }
 
@@ -132,11 +141,16 @@ void DigitalProcessing_multiPlane(double inputThreshold, int runNumber, std::str
         for (Long64_t j = 0; j < nRawEntries; j++)
         {
             plane->GetEntry(j);
+            //std::cout << planeNum << std::endl;
+            //std::cout << "iEvent: " << rawEventID << "; iPlane: " << planeNum << "; pixX: " << pixX << std::endl;
             double corrEnergy = static_cast<double>(corrEnergy_float);
             double timeWalkHit = static_cast<double>(timeWalkHit_float);
             //std::cout <<  "Float: " << corrEnergy_float << "; Double: " << corrEnergy << std::endl;
-            enMap[{rawEventID, {pixX, pixY}}] += corrEnergy;
-            timeMap[{rawEventID, {pixX, pixY}}].push_back(timeWalkHit);
+            HitKey key{planeNum, rawEventID, pixX, pixY};
+            //enMap[{planeNum,{rawEventID, {pixX, pixY}}}] += corrEnergy;
+            //timeMap[{planeNum,{rawEventID, {pixX, pixY}}}].push_back(timeWalkHit);
+            enMap[key] += corrEnergy;
+            timeMap[key].push_back(timeWalkHit);
             eventIDHolder = rawEventID;
         }
         // Now I have energy and time maps of events in the pixel matrix
@@ -145,16 +159,21 @@ void DigitalProcessing_multiPlane(double inputThreshold, int runNumber, std::str
         __uint128_t maltaParity;
         __uint128_t maltaDelay;
         __uint128_t maltaDColumn;
-        std::vector<std::vector<std::pair<__uint128_t, double>>> digitizedWords;
-        std::vector<std::pair<__uint128_t, double>> merger;
+        std::vector<std::vector<std::pair<std::pair<__uint128_t, double>, int>>> digitizedWords;
+        std::vector<std::pair<std::pair<__uint128_t, double>, int>> merger;
         // Sort all words based on the timing. 
-        std::vector<std::pair<std::pair<int,std::pair<int,int>>, double>> sortedTimings;
+        //std::vector<std::pair<std::pair<int,std::pair<int,int>>, double>> sortedTimings;
+        std::vector<std::pair<HitKey, double>> sortedTimings;
         for (const auto& entry : enMap) 
         {
-            int eventID = entry.first.first;
-            int pixX = entry.first.second.first;
-            int pixY = entry.first.second.second;
-
+            //int eventID = entry.first.first;
+            //int pixX = entry.first.second.first;
+            //int pixY = entry.first.second.second;
+            const HitKey& key = entry.first;
+            int eventID = key.event;
+            int pixX = key.x;
+            int pixY = key.y;
+            int planeN = key.plane;
             auto itThr = thresholdMap.find({pixX, pixY});
             if (itThr == thresholdMap.end()) continue;
 
@@ -164,11 +183,12 @@ void DigitalProcessing_multiPlane(double inputThreshold, int runNumber, std::str
 
             if(pixX < 0 || pixX > 511 || pixY < 0 || pixY > 511) std::cout << "Warning! Out of bounds pixels! pixX: " << pixX << "; pixY: " << pixY << std::endl; 
         
-            auto it = timeMap.find({eventID, {pixX, pixY}});
+            //auto it = timeMap.find({eventID, {pixX, pixY}});
+            auto it = timeMap.find(key);
             if(it == timeMap.end()) continue;
             // Row correction also of 7ns/ 512 rows + global GEANT4 timestamp
             //if(verbose) std::cout << "Event ID: " << eventID << "; pixX: " << pixX << ";pixY: " << pixY << "; corrEnergy: " << cenergy << "; timewalk: "<< timing << std::endl;
-            timing += *std::max_element(it->second.begin(), it->second.end()) + pixY * 0.0125; 
+            timing += *std::max_element(it->second.begin(), it->second.end()) + pixY * 0.0125 + (4 - (planeN %100)%4) * 8; 
 
             sortedTimings.emplace_back(entry.first,timing);
         }
@@ -179,15 +199,22 @@ void DigitalProcessing_multiPlane(double inputThreshold, int runNumber, std::str
         // However, for very high rate beams the eventIDs could not be retained anymore.
 
         if (sortedTimings.empty()) {
-            std::cerr << "Plane " << planes[p] << " has no valid hits after sorting. This should not happen." << std::endl;
+            std::cerr << "Module " << planes[m] << " has no valid hits after sorting. This should not happen." << std::endl;
             //continue;
         }
         double t0 = sortedTimings.begin()->second;
+        int planeN{};
         for (const auto& entry : sortedTimings) 
         {
-            int eventID = entry.first.first;
-            int pixX   = entry.first.second.first;
-            int pixY   = entry.first.second.second;
+            //int eventID = entry.first.first;
+            //int pixX   = entry.first.second.first;
+            //int pixY   = entry.first.second.second;
+
+            const HitKey& key = entry.first;
+            int eventID = key.event;
+            int pixX = key.x;
+            int pixY = key.y;
+            planeN = key.plane;
 
             auto itThr = thresholdMap.find({pixX, pixY});
             if (itThr == thresholdMap.end()) 
@@ -199,7 +226,8 @@ void DigitalProcessing_multiPlane(double inputThreshold, int runNumber, std::str
             double threshold = itThr->second;
 
             double timing = entry.second;
-            auto it = enMap.find({eventID, {pixX, pixY}});
+            //auto it = enMap.find({eventID, {pixX, pixY}});
+            auto it = enMap.find(key);
             double cenergy = it->second;
         
             if (cenergy < threshold) continue;
@@ -214,7 +242,7 @@ void DigitalProcessing_multiPlane(double inputThreshold, int runNumber, std::str
             if (timing >= t0 && timing < t0 + wordSpacing)
             {
                 if(verbose)std::cout << "Merging into current word bucket with timing." << timing << std::endl;
-                merger.push_back(std::make_pair(word, timing));
+                merger.push_back(std::make_pair(std::make_pair(word, timing), planeN));
             }
             else
             {
@@ -222,22 +250,27 @@ void DigitalProcessing_multiPlane(double inputThreshold, int runNumber, std::str
                 digitizedWords.push_back(merger);
                 if(verbose)std::cout << "Word Size = " << merger.size() << std::endl; 
                 merger.clear();
-                merger.push_back(std::make_pair(word, timing)); 
+                merger.push_back(std::make_pair(std::make_pair(word, timing), planeN)); 
             }
         }
         // Also push the very last merged word.
         if (!merger.empty()) digitizedWords.push_back(merger);
         // Now I have my words in their correct time buckets. Next is the merging logic.
 
-        std::vector<std::pair<__uint128_t, double>> mergedWords;
+        std::vector<std::pair<std::pair<__uint128_t, double>, std::vector<int>>> mergedWords;
         for (int i =0; i< digitizedWords.size(); i++)
         {
             // This was not initialized before leading to weird first word
             __uint128_t mergedWord = 0; 
             std::vector<double> leadingTime;
+            std::vector<int> planeVec;
             int aux = 0;
-            for (auto [word, timing] : digitizedWords[i])
+            for (const auto& pos : digitizedWords[i])
             {
+                int word = pos.first.first;
+                double timing = pos.first.second;
+                int planeN = pos.second;
+                planeVec.push_back(planeN);
                 if(verbose)std::cout << "Word: " << std::bitset<30>(word) << std::endl;
                 mergedWord |= word;
                 leadingTime.push_back(timing);
@@ -259,11 +292,11 @@ void DigitalProcessing_multiPlane(double inputThreshold, int runNumber, std::str
                     }
                 }
             }
-
+            //int planeN = digitizedWords[i].second;
             
             // Save the merged word and the fastest hit time
             if (digitizedWords[i].size() == 0) continue; // Skip empty vectors
-            mergedWords.push_back({mergedWord, *std::max_element(leadingTime.begin(), leadingTime.end())});
+            mergedWords.push_back({{mergedWord, *std::max_element(leadingTime.begin(), leadingTime.end())}, planeVec});
             if (verbose) std::cout << "##############" << std::endl << "Merged word: " << std::bitset<30>(mergedWord) << std::endl;
             // TODO: Timing should be given via a clock. Find from Carlos the frequency.
             // Reset fot next iteration
@@ -274,21 +307,25 @@ void DigitalProcessing_multiPlane(double inputThreshold, int runNumber, std::str
 
         // Now I have merged words. Next step is decoding them back to position and time
 
-        for (auto [word, timing] : mergedWords) 
+        for (auto& entry: mergedWords) 
         {
+            std::vector<int> planeN = entry.second;
+            auto& [word, timing] = entry.first;
             std::vector< std::pair<std::pair<int,int>, int> > pixelPositions = decodedDigitalWord(word, groupSize, groupSizeX, groupSizeY, groupLeng, parityLeng, dColLeng);
-
+            int i = 0;
             for (const auto& pos : pixelPositions) 
             {
                 if(verbose) std::cout << "Decoded pixel position: (" << pos.first.first << ", " << pos.first.second << ")" << "; Timing: "<< std::setprecision(8) << timing << std::endl;
                 reconstructedTiming = timing; // + 100 adds a constant 100 ns delay in order to replicate the TB data 
                 reconstructedPixX = pos.first.first;
                 reconstructedPixY = pos.first.second;
+                planeID = planeN[i];
                 nHits = pos.second;
                 recontructedTree->Fill();
+                i++;
             }
         }
-        std::cout << "Finishing up analyzing Plane" << planeID << std::endl;
+        std::cout << "Finishing up analyzing Plane" << planeN << std::endl;
     }
     outfile->cd();
     recontructedTree->Write("", TObject::kOverwrite);

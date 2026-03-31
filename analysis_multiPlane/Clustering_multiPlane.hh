@@ -5,6 +5,7 @@
 #include <TFile.h>
 #include <chrono>
 #include "DigitalProcessing.hh"
+#include "Tracking_multiPlane.hh"
 
 // Main clustering function
 void Clustering_multiPlane(int runNumber, std::string saveName = "default");

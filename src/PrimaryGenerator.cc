@@ -64,8 +64,8 @@ G4ThreeVector PrimaryGenerator::GetRandomPointOnRectangle(G4float height, G4floa
     G4float halfHeight = height / 2.0;
     G4float halfThickness = thickness / 2.0;
 
-    G4float x = center.x() + (2.0 * G4UniformRand() - 1.0) * halfThickness;
-    G4float y = center.y() + (2.0 * G4UniformRand() - 1.0) * halfHeight;
+    G4float y = center.x() + (2.0 * G4UniformRand() - 1.0) * halfThickness;
+    G4float x = center.y() + (2.0 * G4UniformRand() - 1.0) * halfHeight;
     G4float z = center.z();
 
     return G4ThreeVector(x, y, z);
@@ -91,6 +91,8 @@ void PrimaryGenerator::GeneratePrimaries(G4Event *oneEvent)
         m_particleGun->SetParticleMomentumDirection(mom);
 
         float beamWidth = m_flag->sourceRadius *mm;
+        float beamWidthX = m_flag->sourceRadiusX *mm;
+        float beamWidthY = m_flag->sourceRadiusY *mm;
         G4float x = m_flag->beamXOffset *cm;
         G4float y = m_flag->beamYOffset *cm;
         G4float z = m_flag->beamZOffset *cm;
@@ -115,7 +117,7 @@ void PrimaryGenerator::GeneratePrimaries(G4Event *oneEvent)
         }
         else if(m_flag->beamGeometry == "rectangle")
         {
-            pos = GetRandomPointOnRectangle(beamWidth, beamWidth, G4ThreeVector(x, y, z));
+            pos = GetRandomPointOnRectangle(beamWidthX, beamWidthY, G4ThreeVector(x, y, z));
         }
         else if (m_flag->beamGeometry == "granularBeam")
         {

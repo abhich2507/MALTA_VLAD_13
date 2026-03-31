@@ -15,6 +15,7 @@ struct m_trackEdepTime
   G4float edep = 0.;
   G4float time = 0.;
   G4int planeNum = -1;
+  G4int moduleNum = -1;
   G4int X = -1;
   G4int Y = -1;
   G4int eventNum = -1;
@@ -27,7 +28,7 @@ public:
     ~EventAction() override = default;
     void BeginOfEventAction(const G4Event*) override;
     void EndOfEventAction(const G4Event*) override;
-    void addEdep(G4int eventID, G4float energy, G4float timing, G4int planeID, G4int pixX, G4int pixY);
+    void addEdep(G4int eventID, G4float energy, G4float timing, G4int planeID, G4int moduleID, G4int pixX, G4int pixY);
 
 private:
     // trackID, {edep, timing} map

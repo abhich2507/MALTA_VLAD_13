@@ -17,7 +17,7 @@ double getEffErr(int Npassed, int Nall) {
 void Analysis_multiPlane(double threshold, int runNumber = 91, std::string saveName = "default")
 {
     auto start = std::chrono::high_resolution_clock::now();
-    auto analysisFlags = new SimFlags;
+    auto analysisFlags = new AnaFlags;
     const char* configPath = std::getenv("ANALYSIS_CONFIG");
     LoadAnalysisFlagsFromFile(configPath, *analysisFlags);
     // TODO: Implement verbose. Should print out the correct creation of histgrams for example.
@@ -48,6 +48,8 @@ void Analysis_multiPlane(double threshold, int runNumber = 91, std::string saveN
 
     // Get analysistree for each PlaneZ
     int nPlanes_100 = analysisFlags->nPlanes_100;
+    DetectorConfig cfg = LoadConfig(inputPath + "flags.cfg");
+    auto geoMaps = LoadGeometry(analysisFlags->geoFile, cfg);
     for (int planeZ = 0; planeZ<nPlanes_100; planeZ++){
         std::cout << "Analysis PlaneZ: " << planeZ << std::endl;
         
@@ -55,7 +57,8 @@ void Analysis_multiPlane(double threshold, int runNumber = 91, std::string saveN
         TTree *analysisTree = (TTree*) analysisFile->Get(Form("analyzedHits_planeZ%d",planeZ));
 
         double fX, fY, timing;
-        int clSize;
+        int clSize, planeID;
+        analysisTree->SetBranchAddress("planeID", &planeID);
         analysisTree->SetBranchAddress("analysisVertexX", &fX);
         analysisTree->SetBranchAddress("analysisVertexY", &fY);
         analysisTree->SetBranchAddress("clSize", &clSize);  
@@ -70,6 +73,8 @@ void Analysis_multiPlane(double threshold, int runNumber = 91, std::string saveN
         double highX = Xcent + Xwidth/2.; 
         double lowY  = Ycent - Ywidth/2.; 
         double highY = Ycent + Ywidth/2.; 
+
+        std::cout << "lowx: " << lowX << "; highx: " << highX << std::endl;
 
         TH2D *h2ALL    = new TH2D(Form("h2ALL_planeZ%d",planeZ), Form("h2ALL_planeZ%d",planeZ), 100, lowX, highX, 100, lowY, highY); // todo: generalize boundaries:
         TH2D *h2PASS   = new TH2D(Form("h2PASS_planeZ%d",planeZ), Form("h2PASS_planeZ%d",planeZ), 100, lowX, highX, 100, lowY, highY);
@@ -88,15 +93,18 @@ void Analysis_multiPlane(double threshold, int runNumber = 91, std::string saveN
 
         Long64_t nAnalyzedEntries = analysisTree->GetEntries();
         std::cout << nAnalyzedEntries << std::endl;
+        // Lucian code version
+        //std::pair<double, double> addPosition = GetSpecificPlaneOffset(planeZ*100, geometry); // offset only depends on nPlanes_100. // it shifts every second plane.
+        //double trackOffsetX = analysisFlags->trackOffsetX - addPosition.first;
+        //double trackOffsetY = analysisFlags->trackOffsetY - addPosition.second;
 
-        std::pair<double, double> addPosition = GetSpecificPlaneOffset(planeZ*100, geometry); // offset only depends on nPlanes_100. // it shifts every second plane.
-        double trackOffsetX = analysisFlags->trackOffsetX - addPosition.first;
-        double trackOffsetY = analysisFlags->trackOffsetY - addPosition.second;
 
         // Fill the histograms with events
         for (int i =0; i< nAnalyzedEntries; i++)
         {
             analysisTree->GetEntry(i);
+            double trackOffsetX = analysisFlags->trackOffsetX + geoMaps[planeID].x *10;
+            double trackOffsetY = analysisFlags->trackOffsetY + geoMaps[planeID].y *10;
             //std::cout << "clSize: " << clSize << std::endl;
             h2ALL   ->Fill(fX, fY, 1);
             h2PASS  ->Fill(fX, fY, clSize > 0 ? 1 : 0);

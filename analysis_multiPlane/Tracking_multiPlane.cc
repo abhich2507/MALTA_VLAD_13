@@ -6,7 +6,7 @@ void Tracking_multiPlane(double threshold, int runNumber, std::string saveName)
 
     auto start = std::chrono::high_resolution_clock::now();
     // Set all the analysis flags for the digital processing
-    auto analysisFlags = new SimFlags;
+    auto analysisFlags = new AnaFlags;
     const char* configPath = std::getenv("ANALYSIS_CONFIG");
     LoadAnalysisFlagsFromFile(configPath, *analysisFlags);
     ////////// Function can be used for custom analysis paths
@@ -108,17 +108,20 @@ void Tracking_multiPlane(double threshold, int runNumber, std::string saveName)
     TFile *outfile = new TFile((inputSubPath + "LocalTrackedHitsThr" + std::to_string(int(threshold)) + ".root").c_str(), "RECREATE");
 
     int nPlanes_100 = analysisFlags->nPlanes_100;
-    for (int planeZ = 0; planeZ<nPlanes_100; planeZ++){
+    for (int planeZ = 0; planeZ<nPlanes_100; planeZ++)
+    //TODO: Not very efficient O(N^2)
+    {
         std::cout << "Tracking PlaneZ: " << planeZ << std::endl;
         
         // Create a TTree for each planeZ
         TTree *trackedTree = new TTree(Form("TrackedHits_planeZ%d",planeZ), Form("Tracked Hits in PlaneZ %d",planeZ));
 
         // Variables for branches
-        double vertexX, vertexY, vertexTime, DUTLocalTime;
-        int DUTPixX, DUTPixY, trackID, DUTnHits;
+        double vertexX, vertexY, vertexZ, vertexTime, DUTLocalTime;
+        int DUTPixX, DUTPixY, trackID, DUTnHits, planeData;
 
         // Create branches
+        trackedTree->Branch("planeID", &planeData, "planeID/I");
         trackedTree->Branch("trackID", &trackID, "trackID/I");
         trackedTree->Branch("vertexX", &vertexX, "vertexX/D");
         trackedTree->Branch("vertexY", &vertexY, "vertexY/D");
@@ -145,8 +148,9 @@ void Tracking_multiPlane(double threshold, int runNumber, std::string saveName)
         for (int i = 0; i < nReconstructedEntries; i++)
         {
             reconstructedTree->GetEntry(i);
+            //std::cout << "planeID: " << planeID << "; val: " << planeID%1000000/10000 << "; planeZ: " << planeZ << std::endl;
 
-            if (planeID%1000/100!= planeZ) // only store explicit z - layer
+            if (planeID%1000000/10000!= planeZ) // only store explicit z - layer
                 continue;
 
             hits.push_back({ reconstructedTiming,
@@ -173,7 +177,7 @@ void Tracking_multiPlane(double threshold, int runNumber, std::string saveName)
         Long64_t detIdx = 0; // pointer in detector tree
         Long64_t nHits = hits.size();
         bool foundHit;
-        
+        auto geoMaps = LoadGeometry(analysisFlags->geoFile, cfg);
         for (int i =0; i< nTrackEntries; i++)
         {
             sortedTracks->GetEntry(i);
@@ -183,6 +187,7 @@ void Tracking_multiPlane(double threshold, int runNumber, std::string saveName)
             trackID = i;
             vertexX = sx;
             vertexY = sy;
+            vertexZ = sz;
             vertexTime = st;
             // First we set up the sliding window
             while (detIdx < nHits && hits[detIdx].vDUTLocalTiming < st) // take first MALTA hit that is at least the vertexTime
@@ -194,31 +199,77 @@ void Tracking_multiPlane(double threshold, int runNumber, std::string saveName)
             Long64_t j = detIdx;
             foundHit = false;
             DUTnHits = 0;
-            while (j < nHits && hits[j].vDUTLocalTiming < st + matchWindow) // check whether inside windo
+            while (j < nHits && hits[j].vDUTLocalTiming < st + matchWindow) // check whether inside window
             {
 
                 DUTPixX = hits[j].vDUTPixX;
                 DUTPixY = hits[j].vDUTPixY;
                 // correct pixel coordinates by planeID: // this assumes there is no gap between sensors
-                DUTPixX += hits[j].vDUTplaneID%10*512; // shift by 512 per X_planeID = nPlanes_1
-                DUTPixY += (hits[j].vDUTplaneID%100/10)*512; // shift by 512 per Y_planeID = nPlanes_10
+                // Assumption no longer correct. TODO 
+
+                
+                int filePlane = hits[j].vDUTplaneID;
+
+                //std::cout << "filePlane: " << filePlane  << " hits[j].vDUTPixX: " << hits[j].vDUTPixX 
+                //<< " OffsetX: " << geoMaps[filePlane].x<< "OffsetY: " << geoMaps[filePlane].y<< "OffsetZ: " << geoMaps[filePlane].z << std::endl;
+                //std::cout << "filePlane: " << filePlane << std::endl;
+
+
+                //DUTPixX += hits[j].vDUTplaneID%10*512; // shift by 512 per X_planeID = nPlanes_1
+                //DUTPixY += (hits[j].vDUTplaneID%100/10)*512; // shift by 512 per Y_planeID = nPlanes_10
+
+
+
                 DUTLocalTime = hits[j].vDUTLocalTiming - st;
 
                 // Now do position cut
-                std::pair<double, double> pixelGlobalPosition = PixelPositionReconstruction(DUTPixX, DUTPixY, cfg);
-                std::pair<double, double> addPosition = GetSpecificPlaneOffset(hits[j].vDUTplaneID, geometry);
-                pixelGlobalPosition.first += addPosition.first;
-                pixelGlobalPosition.second += addPosition.second;
+                Vec3 pixelPosition = PixelPositionReconstruction(DUTPixX, DUTPixY, cfg);
 
-                h1ResidualX->Fill(pixelGlobalPosition.first - vertexX);
-                h1ResidualY->Fill(pixelGlobalPosition.second - vertexY);
-                if(verbose) std::cout << "(?) Candidate found at Pixel (" << DUTPixX << ", " << DUTPixY << ") with Global Position (" << pixelGlobalPosition.first << ", " << pixelGlobalPosition.second << ")" << "; Timing difference: " << DUTLocalTime << std::endl;               
+                Vec3 vertex = {vertexX, vertexY, vertexZ};
+                //std::cout << vertexX << " ; " << vertexY << " ; " << vertexZ << std::endl;
+                Vec3 trackPlaneIntercept = IntersectTrackPlane(vertex, cfg, geoMaps[filePlane]);
 
+                //std::cout << "vx: " <<  vertex.x << "; vy: " << vertex.y << "; vz: " << vertex.z << "; trx: " << trackPlaneIntercept.x 
+                //          << "; try: " << trackPlaneIntercept.y << "; trz: " << trackPlaneIntercept.z << std::endl;
+
+
+                //std::pair<double, double> addPosition = GetSpecificPlaneOffset(hits[j].vDUTplaneID, geometry);
+                //pixelGlobalPosition.first += addPosition.first;
+                //pixelGlobalPosition.second += addPosition.second;
+
+                //std::cout << "plane: " << filePlane << " x1: " << pixelGlobalPosition.first << " x2: " << pixelGlobalPosition.first + geoMaps[filePlane].x *10 << std::endl;
+                // Add corrections to plane position
+                auto rotTransPixelPositions = ApplyGeometry3D(pixelPosition, geoMaps[filePlane]);
+                //Vec3 trackLocal = ApplyInverseGeometry3D(trackPlaneIntercept, geoMaps[filePlane]);
+
+                double rx = pixelPosition.x - trackPlaneIntercept.x;
+                double ry = pixelPosition.y - trackPlaneIntercept.y;
+
+                //std::cout << "x1: " << pixelGlobalPosition.x << "; y1: " << pixelGlobalPosition.y << "; x2: " << rotTransPixelPositions.x << "; y2: " << rotTransPixelPositions.y << std::endl;
+
+                //std::cout << "rx: " << rx << "; ry: " << ry << std::endl;
+
+                //pixelGlobalPosition.x += geoMaps[filePlane].x *10;
+                //pixelGlobalPosition.y += geoMaps[filePlane].y *10;
+                //std::cout << "xR: " << geoMaps[filePlane].xrot << "; yR: " << geoMaps[filePlane].yrot << std::endl;
+                
+                planeData = filePlane;
+
+                //h1ResidualX->Fill(rotTransPixelPositions.x - vertexX);
+                //h1ResidualY->Fill(rotTransPixelPositions.y - vertexY);
+                h1ResidualX->Fill(rx);
+                h1ResidualY->Fill(ry);
+                //if (true) std::cout << "Vertex X: " << trackPlaneIntercept.x << " VertexY: " << trackPlaneIntercept.y << std::endl;
+                //if(true) std::cout << "(?) Candidate found in Plane: " << filePlane  << ", at Pixel (" << DUTPixX << ", " << DUTPixY << ") with Global Position (" << pixelPosition.x << ", " << pixelPosition.y << ")" << "; Timing difference: " << DUTLocalTime << std::endl;               
+                //if (true) std::cout << "Residual X: " << rx << " ; Residual Y: " << ry << "; rx^2+ry^2: " << rx*rx +ry*ry << "; dCut^2: " << (dCut/1000)*(dCut/1000) << std::endl;
                 //if ( ( pixelGlobalPosition.first >= reconstructedVertexX - dCut / 1000. && pixelGlobalPosition.first <= reconstructedVertexX + dCut / 1000. ) 
                 //&&  ( pixelGlobalPosition.second >= reconstructedVertexY - dCut / 1000. && pixelGlobalPosition.second <= reconstructedVertexY + dCut / 1000. ))
-                if(std::abs(pixelGlobalPosition.first - vertexX) <= dCut / 1000 && std::abs(pixelGlobalPosition.second - vertexY) <= dCut / 1000)
+                //if(std::abs(rotTransPixelPositions.x - vertexX) <= dCut / 1000 && std::abs(rotTransPixelPositions.y - vertexY) <= dCut / 1000)
+                // Change to radial cut instead of axis based.
+                if(rx*rx + ry*ry <= (dCut/1000)*(dCut/1000))
+                
                 {
-                    if(verbose) std::cout << "(!) Matched hit at Pixel (" << DUTPixX << ", " << DUTPixY << ") with Global Position (" << pixelGlobalPosition.first << ", " << pixelGlobalPosition.second << ")" << "; Timing difference: " << DUTLocalTime << std::endl;
+                    //if(true) std::cout << "(!) Matched hit at Pixel (" << DUTPixX << ", " << DUTPixY << ") with Global Position (" << pixelPosition.x << ", " << pixelPosition.y << ")" << "; Timing difference: " << DUTLocalTime << std::endl;
                     DUTnHits++;
                     trackedTree->Fill();   // <-- one Fill per matching hit
                     foundHit = true;
