@@ -45,6 +45,7 @@ void SensitiveDetector::EndOfEvent(G4HCofThisEvent *)
 
 G4bool SensitiveDetector::ProcessHits(G4Step *aStep, G4TouchableHistory *)
 {
+
     G4int eventID = G4RunManager::GetRunManager()->GetCurrentEvent()->GetEventID();
 
     G4AnalysisManager *analysisManager = G4AnalysisManager::Instance();
@@ -76,7 +77,8 @@ G4bool SensitiveDetector::ProcessHits(G4Step *aStep, G4TouchableHistory *)
     }};
 
     G4String planeName = preStepPoint->GetTouchableHandle()->GetVolume()->GetName();
-    int planeID;
+    int planeID, moduleID;
+    float xoff, yoff, zoff;
     if(m_flag->preDefinedGeometryFlag == "MALTA")
     {
         if(planeName == "physSensor") 
@@ -113,10 +115,16 @@ G4bool SensitiveDetector::ProcessHits(G4Step *aStep, G4TouchableHistory *)
             planeID = -1;
         }
     }
+    else if (m_flag->preDefinedGeometryFlag == "MULTIMALTA")
+    {
+        std::sscanf(planeName.c_str(), "plane_%6d_module_%2d_x_%f_y_%f_z_%f", &planeID, &moduleID, &xoff, &yoff, &zoff);
+        //std::cout << "planeID: " << planeID << "; moduleID: " << moduleID << std::endl;
+    }
+    
 
     // obtain local coordinates and shift origin to bottom left corner of Pixel(0,0)
-    G4double localX = posPixel.x() - detXOffset + detX / 2;
-    G4double localY = posPixel.y() - detYOffset + detY / 2;
+    G4double localX = posPixel.x() - xoff *10 + detX / 2;
+    G4double localY = posPixel.y() - yoff *10 + detY / 2;
     
     // get modulus for InPixel location. 
     // This obtains the inpixel-position starting from (0,0) at low X and Y coordinates. It does not depend on the global position of the detector.
@@ -126,6 +134,8 @@ G4bool SensitiveDetector::ProcessHits(G4Step *aStep, G4TouchableHistory *)
 
     int pixX = static_cast<int>(localX / pixelSize);
     int pixY = static_cast<int>(localY / pixelSize);
+
+    //std::cout << "planeName: " << planeName << "; planeID: " << planeID << "; x: " << pixX << "; y: " << pixY << std::endl;
     // Handle edge cases: The filtering of out of bound pixels is graciously done in the DigitalProcessing via threshold mapping, 
     // This block however, also correctly endowes charge sharing to the correct side of the pixel edge.
     
@@ -160,6 +170,7 @@ G4bool SensitiveDetector::ProcessHits(G4Step *aStep, G4TouchableHistory *)
         //effAn[1]+=effAn[3];
         effAn[3] = 0;
     }
+    
     
     if (pixX < 0 || pixX >= 512 || pixY < 0 || pixY >= 512)
         return false;
@@ -196,7 +207,7 @@ G4bool SensitiveDetector::ProcessHits(G4Step *aStep, G4TouchableHistory *)
     std::array<float,4> effAnCopy = effAn; // forces evaluation
     for(std::array<std::array<int, 2>, 4>::size_type i = 0; i<4; i++)
     {
-        eventAction->addEdep(eventID, effAnCopy[i] * energy *1000000/epsilon, fglobalTime *ns, planeID, pixelCluster[i][0], pixelCluster[i][1]);
+        eventAction->addEdep(eventID, effAnCopy[i] * energy *1000000/epsilon, fglobalTime *ns, planeID, moduleID, pixelCluster[i][0], pixelCluster[i][1]);
     }
     // fill the 4 efficiencies and timing into a tree. 
     // Apply a minimal threshold here already of 50 e-? edep in MeV --> if (edep*10^6/epsilon > 50) // threshold in e- // edep in MeV

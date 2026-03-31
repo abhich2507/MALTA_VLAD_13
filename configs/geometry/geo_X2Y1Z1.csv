@@ -1,0 +1,3 @@
+x[#], y[#], z[#], xoff[cm], yoff[cm], zoff[cm], xrot[deg], yrot[deg], zrot[deg], mod[#]
+0,  0,  0,  0,  0,  0,  0,   0,   0,   0
+1,  0,  0,  1.86369,  0,  0,  0,   0,   0,   0

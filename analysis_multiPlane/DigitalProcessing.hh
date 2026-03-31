@@ -15,13 +15,27 @@
 #include "CaloPreProcessing.hh"
 
 
-void set_style() {
+void set_style() 
+{
     gStyle->SetOptStat(0);
     gStyle->SetPalette(112);
     gStyle->SetNumberContours(255);
     // gStyle->SetPalette(1); // old default rainbow palette, optional
     gROOT->SetBatch(kTRUE);
 }
+
+struct HitKey
+{
+    int plane;
+    int event;
+    int x;
+    int y;
+    
+    bool operator<(const HitKey& other) const {
+        return std::tie(plane, event, x, y) <
+               std::tie(other.plane, other.event, other.x, other.y);
+    }
+};
 
 // Save diagnostic plots
 inline void savePlot (std::string directoryPath, std::string runPath, double threshold, std::string saveName, TH1* hist, std::string histName)

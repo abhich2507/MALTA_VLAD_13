@@ -27,7 +27,7 @@ void EventAction::BeginOfEventAction(const G4Event*)
     m_trackEdep.clear();
 }
 
-void EventAction::addEdep(G4int eventID, G4float energy, G4float timing, G4int planeID, G4int pixX, G4int pixY)
+void EventAction::addEdep(G4int eventID, G4float energy, G4float timing, G4int planeID, G4int moduleID, G4int pixX, G4int pixY)
 {
     auto key = std::make_tuple(planeID, pixX, pixY);
     auto &entry = m_trackEdep[key];
@@ -36,6 +36,7 @@ void EventAction::addEdep(G4int eventID, G4float energy, G4float timing, G4int p
     if (beforeEnergy < 50 && entry.edep>=50) entry.time = timing;
     entry.eventNum = eventID;
     entry.planeNum = planeID;
+    entry.moduleNum = moduleID;
     entry.X = pixX;
     entry.Y = pixY;
 
@@ -51,11 +52,12 @@ void EventAction::EndOfEventAction(const G4Event*)
         {
             analysisManager->FillNtupleIColumn(0, 0, entry.eventNum);
             analysisManager->FillNtupleIColumn(0, 1, entry.planeNum);
-            analysisManager->FillNtupleIColumn(0, 2, entry.X);
-            analysisManager->FillNtupleIColumn(0, 3, entry.Y);
+            analysisManager->FillNtupleIColumn(0, 2, entry.moduleNum);
+            analysisManager->FillNtupleIColumn(0, 3, entry.X);
+            analysisManager->FillNtupleIColumn(0, 4, entry.Y);
             // This branch will be modified. Before it as encoding the timewalk of each hit. Now it stores the hit time of a particle.
-            analysisManager->FillNtupleFColumn(0, 4, entry.time);
-            analysisManager->FillNtupleFColumn(0, 5, entry.edep);
+            analysisManager->FillNtupleFColumn(0, 5, entry.time);
+            analysisManager->FillNtupleFColumn(0, 6, entry.edep);
             analysisManager->AddNtupleRow(0); 
             //std::cout << "Saving entry: " << "eventID: " << entry.eventNum << "; X: " << pixelCluster[i][0] << "; Y:" << pixelCluster[i][1] << "; time: " << entry.time << "; energy: " << effAnCopy[i] * entry.edep <<  std::endl;
         }

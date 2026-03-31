@@ -31,6 +31,7 @@ RunAction::RunAction(const SimFlags* flags) : m_flag(flags)
     analysisManager->CreateNtuple("RawPixelHits", "Raw Pixel Hits");
     analysisManager->CreateNtupleIColumn("iEvent");
     analysisManager->CreateNtupleIColumn("iPlane");
+    analysisManager->CreateNtupleIColumn("iModule");
     analysisManager->CreateNtupleIColumn("PixX");
     analysisManager->CreateNtupleIColumn("PixY");
     analysisManager->CreateNtupleFColumn("hitTime");

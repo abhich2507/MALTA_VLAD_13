@@ -153,13 +153,14 @@ G4VPhysicalVolume *DetectorConstruction::Construct()
     }
 
 
+    G4double maltaWidthX = m_flag->detectorSizeX *cm; 
+    G4double maltaWidthY = m_flag->detectorSizeY *cm; 
+    G4double maltaDepth  = m_flag->detectorDepth* um;
+
+    G4Box *solidMALTA = new G4Box ("MALTASensor", maltaWidthX/2, maltaWidthY/2, maltaDepth/2);
     // MALTA implementation monolithic sensor
     if(m_flag->preDefinedGeometryFlag == "MALTA")
     {
-        G4double maltaWidthX = m_flag->detectorSizeX *cm; 
-        G4double maltaWidthY = m_flag->detectorSizeY *cm; 
-        G4double maltaDepth  = m_flag->detectorDepth* um;
-
         if (std::abs(detectorXOffset) + maltaWidthX > xWorld /2 
          || std::abs(detectorYOffset) + maltaWidthY > yWorld /2 
          || std::abs(detectorZOffset) + maltaDepth > zWorld /2)
@@ -171,8 +172,6 @@ G4VPhysicalVolume *DetectorConstruction::Construct()
         // WARNING: Hardcoded values. This part of the simulation is not part of the core MALTA simulation
         // Repurpose as desired on own cost.
         DUTrotation->rotateY(60 * deg);
-
-        G4Box *solidMALTA = new G4Box ("MALTASensor", maltaWidthX/2, maltaWidthY/2, maltaDepth/2);
         m_logicSensor = new G4LogicalVolume (solidMALTA, detMat, "logicSensor");
         new G4PVPlacement(0, G4ThreeVector(detectorXOffset, detectorYOffset, detectorZOffset), m_logicSensor, "physSensor", logicalWorld, false, 0, true);
 
@@ -222,6 +221,35 @@ G4VPhysicalVolume *DetectorConstruction::Construct()
 
 
  
+    }
+    if(m_flag->preDefinedGeometryFlag == "MULTIMALTA")
+    {
+        m_logicMultiPlane = new G4LogicalVolume(solidMALTA, detMat, "logicPlane");
+        G4VisAttributes *planeVisAtt = new G4VisAttributes(G4Color(0., 0., 1., 0.5));
+        planeVisAtt->SetForceSolid(true);
+        m_logicMultiPlane->SetVisAttributes(planeVisAtt);
+        auto modules = LoadModules(m_flag->geoFile);
+        for (const auto& module: modules)
+        {
+            auto rotation = new G4RotationMatrix();
+            rotation->rotateX(module.xrot * deg);
+            rotation->rotateY(module.yrot * deg);
+            rotation->rotateZ(module.zrot * deg);
+
+            std::ostringstream ss;
+            ss << "plane_"  << std::setfill('0')
+            << std::setw(2) << module.z << std::setw(2) << module.y
+            << std::setw(2) << module.x << "_module_"
+            << std::setw(2) << module.modID
+            <<"_x_" << std::setw(2) << module.xoff 
+            <<"_y_" << std::setw(2) << module.yoff 
+            <<"_z_" << std::setw(2) << module.zoff;
+            
+            G4String planeName = ss.str();
+
+            new G4PVPlacement (rotation, G4ThreeVector(module.xoff *cm, module.yoff *cm, module.zoff *cm), m_logicMultiPlane, planeName, logicalWorld,
+                                false, 0, true);
+        }
     }
 
     else if(m_flag->preDefinedGeometryFlag == "PCB")
@@ -346,6 +374,10 @@ void DetectorConstruction::ConstructSDandField()
         m_logicPlane4->SetSensitiveDetector(sensDet);
         m_logicPlane5->SetSensitiveDetector(sensDet);
         m_logicPlane6->SetSensitiveDetector(sensDet);
+    }
+    else if (m_flag->preDefinedGeometryFlag == "MULTIMALTA" && m_flag->gdmlBool == false)
+    {
+        m_logicMultiPlane->SetSensitiveDetector(sensDet);
     }
 
     if (m_flag->gdmlBool == true)

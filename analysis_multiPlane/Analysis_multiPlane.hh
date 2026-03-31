@@ -8,6 +8,7 @@
 #include <sys/types.h>
 #include <chrono>
 #include "DigitalProcessing.hh"
+#include "Tracking_multiPlane.hh"
 // Computes efficiency in percent
 double getEff(int Npassed, int Nall);
 
