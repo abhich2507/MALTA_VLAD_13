@@ -48,17 +48,35 @@ void Calorimetry()
 
     
     //std::vector<int> runNumbers= {93,94,95,96,97,98,99};
-    std::vector<int> runNumbers= {100,101,102,103,104,105,106};
+    //std::vector<int> runNumbers= {100,101,102,103,104,105,106};
+    //std::vector<int> runNumbers= {100,101,102,103,104,105,106,121,122,123,124,125,126};
+    //std::vector<int> runNumbers= {121,122,123,124,125,126};
     //std::vector<std::string> runFiles = { "FIFOideal", "FIFO100W1F", "FIFO500W1F", "FIFO500W0.001F", "FIFO500W0.01F"};//FIFO100w50nsf
+    std::vector<int> runNumbers = {201};
     std::vector<int> thrVector = {200};
 
     //std::vector<std::string> runFiles = { "NominalFIFOx1"};//, "FIFOideal", "NominalFIFOx16", "NominalFIFOx32", "NominalFIFOx64"};
     //std::vector<std::string> labels = {"IDEAL", "1 FIFO", "16 FIFO", "32 FIFO", "64 FIFO"};
-    std::vector<std::string> runFiles = {"TestFullFIFO", "FullFIFO_SRAMD400", "FullFIFO_FIFOf0.9"};
-    std::vector<std::string> labels = {"FIFO", "SRAM D=400", "FIFOf0.9"};
+    //std::vector<std::string> runFiles = {"TestFullFIFO", "FullFIFO_SRAMD400", "FullFIFO_FIFOf0.9"};
+    //std::vector<std::string> labels = {"FIFO", "SRAM D=400", "FIFOf0.9"};
+
+    //std::vector<std::string> runFiles = {"RealFIFO", "RealFIFO_FIFOf3.125", "RealFIFO_FIFOf3.125_SRAMf3.125", "RealFIFO_FIFOf0.9_SRAMf0.9"};
+    //std::vector<std::string> labels = {"FIFO Frequency = 6.25 ns", "FIFO Frequency = 3.12 ns", "FIFO f = 3.12 ns, SRAM f = 3.12 ns ", "FIFO f = 0.9 ns, SRAM f = 0.9 ns "};
+    
+    //std::vector<std::string> runFiles = {"RealFIFO", "RealFIFO_FIFOs256_FIFOf12.5", "RealFIFO_FIFOs384_FIFOf18.7", "RealFIFO_FIFOs512_FIFOf25"};
+    //std::vector<std::string> labels = {"1x FIFO", "2x FIFO", "3x FIFO", "4x FIFO"};
+    //std::vector<std::string> runFiles = {"RealFIFO_FIFOs512_FIFOf25", "RealFIFO_FIFOs512_FIFOf25_bus0.01"};
+    //std::vector<std::string> labels = {"4x (FIFO=128w), bus thr = 0.1", "4x (FIFO=128w), bus thr = 0.01"};
+
+    std::vector<std::string> runFiles = {"HWCTest"};
+    std::vector<std::string> labels = {"HWCTest"};
+
+
     std::vector<int> vcolor = {kBlack, kRed, kGreen, kBlue, kMagenta};
     std::vector<int> vmarkerStyle = {20, 21, 22, 20, 21, 22};
-    std::vector<double> venergy = {5,10,15,20,25,30,50,200,400};
+    //std::vector<double> venergy = {5,10,15,20,25,30,50,200,400};
+    //std::vector<double> venergy = {75,100,125,150,200,300};
+    std::vector<double> venergy = {50};
     std::vector<double> venergyErr(runNumbers.size(), 0.0);
     
     TCanvas *c1 = new TCanvas("c1","numSecondaries",800,800);
@@ -203,7 +221,7 @@ void Calorimetry()
             //else if (colorIndex == 3) gSecondaries->Draw("PL SAME");   
             else if (colorIndex >1) gSecondaries->Draw("PL SAME");  
             gSecondaries->SetMinimum(0);
-            gSecondaries->SetMaximum(300);
+            gSecondaries->SetMaximum(800);
             gSecondaries->SetLineColor(vcolor[colorIndex - 1]);
             gSecondaries->SetTitle("Efficiency vs Threshold;Primary energy [GeV];Hits per Event");
             gSecondaries->SetMarkerStyle(vmarkerStyle[colorIndex - 1]);

@@ -79,6 +79,8 @@ G4bool SensitiveDetector::ProcessHits(G4Step *aStep, G4TouchableHistory *)
     G4String planeName = preStepPoint->GetTouchableHandle()->GetVolume()->GetName();
     int planeID, moduleID;
     float xoff, yoff, zoff;
+    G4double localX{};
+    G4double localY{};
     if(m_flag->preDefinedGeometryFlag == "MALTA")
     {
         if(planeName == "physSensor") 
@@ -114,20 +116,26 @@ G4bool SensitiveDetector::ProcessHits(G4Step *aStep, G4TouchableHistory *)
             G4cout << "Error: Unknown plane name " << planeName << G4endl;
             planeID = -1;
         }
+        
+        localX = posPixel.x() - detXOffset + detX / 2;
+        localY = posPixel.y() - detYOffset + detY / 2;
     }
     else if (m_flag->preDefinedGeometryFlag == "MULTIMALTA")
     {
         std::sscanf(planeName.c_str(), "plane_%6d_module_%2d_x_%f_y_%f_z_%f", &planeID, &moduleID, &xoff, &yoff, &zoff);
+        localX = posPixel.x() - xoff *10 + detX / 2;
+        localY = posPixel.y() - yoff *10 + detY / 2;
         //std::cout << "planeID: " << planeID << "; moduleID: " << moduleID << std::endl;
     }
     
 
     // obtain local coordinates and shift origin to bottom left corner of Pixel(0,0)
-    G4double localX = posPixel.x() - xoff *10 + detX / 2;
-    G4double localY = posPixel.y() - yoff *10 + detY / 2;
     
     // get modulus for InPixel location. 
     // This obtains the inpixel-position starting from (0,0) at low X and Y coordinates. It does not depend on the global position of the detector.
+
+    //G4ThreeVector InPixPos = G4ThreeVector(std::fmod(posPixel[0],pixelSize), std::fmod(posPixel[1],pixelSize), posPixel[2]);
+    // REVERT BACK
     G4ThreeVector InPixPos = G4ThreeVector(std::fmod(localX,pixelSize), std::fmod(localY,pixelSize), posPixel[2]); // result in mm 
 
     auto [effAn, quadrantFlag] = getEfficiencyAnalytical(InPixPos);

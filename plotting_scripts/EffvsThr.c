@@ -22,6 +22,10 @@ void EffvsThr()
 
     TGraph* effDataMerged = dataStruct.graphs;
     std::vector <double> dataThr = dataStruct.x;
+    for (auto& el: dataThr)
+    {
+        std::cout << el << std::endl;
+    }
     std::vector <double> dataEff = dataStruct.y;
     std::vector <double> dataThrErr = dataStruct.xErr;
     std::vector <double> dataEffErr = dataStruct.yErr;
@@ -74,7 +78,7 @@ void EffvsThr()
     effDataMerged->GetHistogram()->GetXaxis()->SetRangeUser(0, 2000);
     gPad->Modified();
     gPad->Update();
-    effDataMerged->SetTitle("Efficiency vs Threshold;;Tracking efficiency [%]");
+    effDataMerged->SetTitle("Efficiency vs Threshold;;Efficiency [%]");
     //effDataMerged->GetYaxis()->SetLabelOffset(0.01);
     effDataMerged->GetYaxis()->SetTitleOffset(1.1);
     effDataMerged->GetXaxis()->SetLabelSize(0);

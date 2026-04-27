@@ -13,6 +13,7 @@ parser.add_argument("-t", "--tracking"    , help="Track matching"               
 parser.add_argument("-c", "--clustering"  , help="Cluster the hits"                     , action="store_true")
 parser.add_argument("-C", "--calorimetry" , help="Calorimetry analysis"                 , action="store_true")
 parser.add_argument("-f", "--fifo"        , help="FIFO Processing"                      , action="store_true")
+parser.add_argument("-fHWC", "--fifoHWC"  , help="FIFO HWC Proc."                       , action="store_true")
 parser.add_argument("-a", "--analysis"    , help="Analyze and generate plots"           , action="store_true")
 parser.add_argument("-p", "--proteus"     , help="Create to Proteus Merged file"        , action="store_true")
 parser.add_argument("-thr", "--threshold" , help="Threshold list"  , type= str          , required = False)
@@ -39,6 +40,10 @@ if not args.proteus:
  
         if args.fifo:
             command = f"root -l -b -q 'analysis/PRIOFIFOFullDigitalProcessing.cc({thr},{runNumber},\"{saveName}\")'"
+            subprocess.run(command, shell=True, check=True)
+
+        if args.fifoHWC:
+            command = f"root -l -b -q 'analysis/PRIOFIFOHWCProcessing.cc({thr},{runNumber},\"{saveName}\")'"
             subprocess.run(command, shell=True, check=True)
                    
         if args.digitizemultiplane:

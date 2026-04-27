@@ -57,8 +57,10 @@ void Clustering_multiPlane(double threshold, int runNumber, std::string saveName
                 planes.push_back(iz*10000 + iy*100 + ix); // decoded position (works for up to 10 planes in each dimension)
                 std::cout << iz*10000 + iy*100 + ix << ", " ;
             }
+            
         }
     }
+    std::cout << std::endl;
 
 
     for (int planeZ = 0; planeZ<nPlanes_100; planeZ++)
@@ -85,7 +87,7 @@ void Clustering_multiPlane(double threshold, int runNumber, std::string saveName
         TTree *analysisTree = new TTree(Form("analyzedHits_planeZ%d",planeZ), Form("analyzedHits_planeZ%d",planeZ));
 
         // Variables for branches
-        double analysisVertexX, analysisVertexY, timing;
+        double analysisVertexX, analysisVertexY, timing, correctedTiming;
         int analysisClSize, clPlaneID;
 
         // Create branches
@@ -94,6 +96,7 @@ void Clustering_multiPlane(double threshold, int runNumber, std::string saveName
         analysisTree->Branch("analysisVertexY", &analysisVertexY, "analysisVertexY/D");
         analysisTree->Branch("clSize", &analysisClSize, "clSize/I");
         analysisTree->Branch("timing", &timing, "timing/D");
+        analysisTree->Branch("correctedTiming", &correctedTiming, "correctedTiming/D");
 
         Long64_t nTrackedEntries = trackedTree->GetEntries();
 
@@ -107,9 +110,20 @@ void Clustering_multiPlane(double threshold, int runNumber, std::string saveName
         double currentX, currentY;
         int entry = 0;
         
+        int currentPlaneID = -1;
+        int currentTrackID = -1;
+        int currentPixY = -1;
+
         for (int i = 0; i <= nTrackedEntries; i++)
         {
-            if (i<nTrackedEntries) trackedTree->GetEntry(i); // last iteration has no new entry
+            if (i<nTrackedEntries) 
+            {
+                trackedTree->GetEntry(i); // last iteration has no new entry
+                //clPlaneID = planeID;
+            }
+            //std::cout << "trackID: " << trackID << " ; planeID: " << planeID << std::endl;
+
+            
             double COM_x{};
             double COM_y{};
             std::vector<std::pair<int,int>> validHits{};
@@ -119,6 +133,8 @@ void Clustering_multiPlane(double threshold, int runNumber, std::string saveName
             {
                 //clusterCandidate.insert(std::make_pair(pixX, pixY));
                 //clusterTiming.push_back(reconstructedTime);
+
+                //std::cout << "+++BEFORE planeID: " << planeID << "; timing: " << reconstructedTime << std::endl;
                 cluster.push_back(Hit{pixX, pixY, reconstructedTime});
                 currentX = vertexX;
                 currentY = vertexY;
@@ -177,7 +193,6 @@ void Clustering_multiPlane(double threshold, int runNumber, std::string saveName
                         COM_y += pixelPosition.y;
                     }
                 }
-                // TODO: Center of mass not MONTE CARLO in the future or maybe multiple with flags
                 if(analysisFlags->clPos == "MC")
                 {
                     analysisVertexX = currentX;
@@ -200,27 +215,39 @@ void Clustering_multiPlane(double threshold, int runNumber, std::string saveName
                 
                 //std::cout << "MC_X: " << currentX << "; MC_Y: " << currentY << "; COM_X: " << analysisVertexX << "; COM_Y: " << analysisVertexY << std::endl; 
                 analysisClSize = clSize;
-                clPlaneID = planeID;
                 timing = std::min_element(cluster.begin(), cluster.end(), [](const Hit& a, const Hit& b)
                 {
                     return a.t < b.t;
                 })->t;
+                //std::cout << "AFTER: planeID: " << currentPlaneID << "; timing: " << timing << " Track ID: " << currentTrackID << std::endl;
+                for(const auto cl: cluster)
+                {
+                    //std::cout << cl.t << std::endl;
+                }
 
                 if(verbose)std::cout << "Saving to tree: " << " X = " << analysisVertexX << " ;Y = " << analysisVertexY << " ;clSize = " <<  clSize << " ;timing = " << timing << std::endl;
-
+                clPlaneID = currentPlaneID;
+                correctedTiming = timing - currentPixY * 0.0125; // Remove row correction
                 analysisTree->Fill();
                 if (i == nTrackedEntries) break; // no need to store last event again after processing it
                 // Reset and dont forget this event
                 cluster.clear();
                 validHits.clear();
                 cluster.push_back({pixX, pixY, reconstructedTime});
+
+                currentPlaneID = planeID;
+                currentTrackID = trackID;
+                currentPixY = pixY;
+                //std::cout << "BEFORE planeID: " << planeID << "; timing: " << reconstructedTime << std::endl;
                 currentX = vertexX;
                 currentY = vertexY;
             }
             if (verbose && nHits == 1) std::cout << "NEW TRACK: " << " trackID: " << trackID << " ;xPos: " << vertexX << " ;yPos: " << vertexY << " ;LocalTime: " << reconstructedTime << std::endl;
-        
+            
+
         }
         outfile->cd();
+
         analysisTree->Write();
     }
     outfile->Close();

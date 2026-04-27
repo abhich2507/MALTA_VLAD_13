@@ -28,7 +28,8 @@ double Get2DMean(TH2D *h2D)
 
 double GetTimeDiff(TH2D *h2D)
 {
-    double sum = 0;
+    double sum = 0.;
+    double err2 = 0.;
     int nbins = 0;
 
     //std::cout << h2D->GetNbinsX() << " ; " <<h2D->GetNbinsY() << std::endl;
@@ -40,17 +41,20 @@ double GetTimeDiff(TH2D *h2D)
             if (i>= 7 && i<=11 && j>= 7 && j<=11)
             {
                 sum += h2D->GetBinContent(i, j);
+                err2 += pow(h2D->GetBinError(i,j),2);
                 nbins++;
                 //std::cout <<sum << " " << nbins <<std::endl;
-
+                //std::cout << "Bin Content: " << h2D->GetBinContent(i, j) <<  "; Bin Error: " <<  h2D->GetBinError(i,j)  << std::endl;
                 
             }
         }   
     }
     double center =  sum / nbins ;
+    double centerErr = sqrt(err2) / nbins;
     std::cout << "Center: " << center << std::endl;
     nbins = 0;
     sum = 0;
+    err2 = 0;
     for (int i = 1; i <= h2D->GetNbinsX(); ++i) 
     {
         for (int j = 1; j <= h2D->GetNbinsY(); ++j) 
@@ -58,13 +62,17 @@ double GetTimeDiff(TH2D *h2D)
             if (i>= 15 && i<=18 && j>= 15 && j<=18)
             {
                 sum += h2D->GetBinContent(i, j);
+                err2 += pow(h2D->GetBinError(i,j),2);
                 nbins++;
                 //std::cout <<sum << " " << nbins <<std::endl;
             }
         }   
     }
     double corner =  sum / nbins ;
+    double cornerErr = sqrt(err2) / nbins;
+    double totalErr = sqrt (cornerErr*cornerErr + centerErr*centerErr);
     std::cout << "Corner: " << corner << std::endl;
+    std::cout << "CenterError: " << centerErr << "; CornerError: " << cornerErr << "; TotalError: " << totalErr << std::endl;
 
     return corner - center;
 
@@ -74,7 +82,8 @@ void InPixelClSize()
 {
     // Simulation in-pixel plots
     //std::string path = "Plots/local_0011/Final/histos.root";
-    std::string path = "Plots/local_0108/TrkUncNo/histos.root";
+    //std::string path = "Plots/local_0120/Final/histos.root";
+    std::string path = "Plots/local_0131/LowStat/histos.root";
     //std::string path = "Plots/local_0011/offsetX-0.52Y+0.53mu/histos.root";
 
     TFile *simuThresholdFile = TFile::Open(path.c_str(), "READ");
@@ -103,6 +112,8 @@ void InPixelClSize()
 
     double simuTimeDiff = GetTimeDiff(h2TimingInPixel);
 
+    std::cout <<"/////////////////////////////////////////////////////" << std::endl;
+    GetTimeDiff(h2PASSInPixel);
     // Data in-pixel plots
     //// 200 el thr
     path = "plotting_scripts/root_input/Eff_Clsize_W5R23__IDB120_ITHR015_SUB06.0_PWELL06.root";
@@ -118,6 +129,10 @@ void InPixelClSize()
     TH2D *h2dataPASSInPixel   = (TH2D*) dataThresholdFile->Get("TOT_Eff");
     TH2D *h2dataClSizeInPixel = (TH2D*) dataThresholdFile->Get("TOT_ClSize");
     TH2D *h2dataTimingInPixel = (TH2D*) dataThresholdFile->Get("TOT_ClTime");
+
+    std::cout <<"/////////////////////////////////////////////////////" << std::endl;
+    GetTimeDiff(h2dataPASSInPixel);
+
     double dataClSizeMean = Get2DMean(h2dataClSizeInPixel);
     double dataEffMean = Get2DMean(h2dataPASSInPixel);
     double dataTimeMean = Get2DMean(h2dataTimingInPixel);
@@ -149,9 +164,9 @@ void InPixelClSize()
     h2dataTimingInPixel->SetMinimum(-2.2);
     h2dataTimingInPixel->SetMaximum(3.5);
 
-    h2PASSInPixel->SetMinimum(80);
+    h2PASSInPixel->SetMinimum(90);
     h2PASSInPixel->SetMaximum(100);
-    h2dataPASSInPixel->SetMinimum(80);
+    h2dataPASSInPixel->SetMinimum(90);
     h2dataPASSInPixel->SetMaximum(100);
     h2ClSizeInPixel->SetMinimum(1);
     h2ClSizeInPixel->SetMaximum(2.4);
@@ -319,7 +334,7 @@ void InPixelClSize()
     TLatex *t1 = new TLatex();
     t1->SetTextSize(0.043);
     t1->SetNDC();
-    t1->DrawLatex(0.23, 0.78, Form("#splitline{#bf{MALTA2 Simulation}, 30#mum EPI}{             <Eff.> = %.2f %}", simuEffMean));
+    t1->DrawLatex(0.23, 0.78, Form("#splitline{#bf{MALTA2 Simulation}, 30#mum EPI}{       <Eff.> = %.2f #pm 0.01%}", simuEffMean));
 
     // Draw vertical line at xMid
     TLine *lineX1 = new TLine(xMid, yMin, xMid, yMax);
@@ -331,7 +346,7 @@ void InPixelClSize()
     lineY1->SetLineColor(kBlack);
     lineY1->SetLineWidth(3);
     lineY1->Draw("same");
-    h2PASSInPixel->GetZaxis()->SetTitle("Tracking Efficiency [%]");
+    h2PASSInPixel->GetZaxis()->SetTitle("Efficiency [%]");
     h2PASSInPixel->GetZaxis()->SetTitleOffset(1.6);
     h2PASSInPixel->GetXaxis()->SetTitleOffset(1.1);
 
@@ -352,7 +367,7 @@ void InPixelClSize()
     TLatex *t2 = new TLatex();
     t2->SetTextSize(0.043);
     t2->SetNDC();
-    t2->DrawLatex(0.23, 0.78, Form("#splitline{#bf{MALTA2 Simulation}, 30#mum EPI}{             <Cl. Size> = %.2f}", simuClSizeMean));
+    t2->DrawLatex(0.23, 0.78, Form("#splitline{#bf{MALTA2 Simulation}, 30#mum EPI}{       <Cl. Size> = %.2f #pm 0.01}", simuClSizeMean));
 
     // Draw vertical line at xMid
     TLine *lineX2 = new TLine(xMid, yMin, xMid, yMax);
@@ -374,7 +389,7 @@ void InPixelClSize()
     TLatex *t3 = new TLatex();
     t3->SetTextSize(0.043);
     t3->SetNDC();
-    t3->DrawLatex(0.23, 0.78, Form("#splitline{#bf{MALTA2 Simulation}, 30#mum EPI}{Center - Corner Timing = %.2f ns}", simuTimeDiff));
+    t3->DrawLatex(0.18, 0.78, Form("#splitline{#bf{      MALTA2 Simulation}, 30#mum EPI}{Center - Corner Timing = %.2f #pm 0.11ns}", simuTimeDiff));
     
     // Draw vertical line at xMid
     TLine *lineX3 = new TLine(xMid, yMin, xMid, yMax);
@@ -444,13 +459,13 @@ void InPixelClSize()
     box->SetLineColor(kRed);
     box->SetLineWidth(3);
     box->SetFillStyle(0); 
-    //box->Draw("same");
+    box->Draw("same");
 
     TBox *boxCorner = new TBox(31.9, 31.9, 41, 41);
     boxCorner->SetLineColor(kRed);
     boxCorner->SetLineWidth(3);
     boxCorner->SetFillStyle(0); 
-    //boxCorner->Draw("same");
+    boxCorner->Draw("same");
 
     TArrow *arrow = new TArrow(22.8, 22.8, 31.9, 31.9);
     arrow->SetLineColor(kRed);
@@ -465,7 +480,7 @@ void InPixelClSize()
     TLatex *t4 = new TLatex();
     t4->SetTextSize(0.043);
     t4->SetNDC();
-    t4->DrawLatex(0.29, 0.78, Form("#splitline{#bf{MALTA2 Data}, 30#mum EPI}{        <Eff.> = %.2f %}", dataEffMean));
+    t4->DrawLatex(0.29, 0.78, Form("#splitline{#bf{MALTA2 Data}, 30#mum EPI}{   <Eff.> = %.2f #pm 0.01%}", dataEffMean));
 
     // Draw vertical line at xMid
     TLine *lineX4 = new TLine(xMid, yMin, xMid, yMax);
@@ -477,7 +492,7 @@ void InPixelClSize()
     lineY4->SetLineColor(kBlack);
     lineY4->SetLineWidth(3);
     lineY4->Draw("same");
-    h2dataPASSInPixel->GetZaxis()->SetTitle("Tracking Efficiency [%]");
+    h2dataPASSInPixel->GetZaxis()->SetTitle("Efficiency [%]");
     h2dataPASSInPixel->GetZaxis()->SetTitleOffset(1.6);
     h2dataPASSInPixel->GetXaxis()->SetTitleOffset(1.1);
 
@@ -498,7 +513,7 @@ void InPixelClSize()
     TLatex *t5 = new TLatex();
     t5->SetTextSize(0.043);
     t5->SetNDC();
-    t5->DrawLatex(0.29, 0.78, Form("#splitline{#bf{MALTA2 Data}, 30#mum EPI}{       <Cl. Size> = %.2f}", dataClSizeMean));
+    t5->DrawLatex(0.29, 0.78, Form("#splitline{#bf{MALTA2 Data}, 30#mum EPI}{ <Cl. Size> = %.2f #pm 0.01}", dataClSizeMean));
 
     // Draw vertical line at xMid
     TLine *lineX5 = new TLine(xMid, yMin, xMid, yMax);
@@ -531,7 +546,7 @@ void InPixelClSize()
     TLatex *t6 = new TLatex();
     t6->SetTextSize(0.043);
     t6->SetNDC();
-    t6->DrawLatex(0.22, 0.78, Form("#splitline{     #bf{MALTA2 Data}, 30#mum EPI}{Center - Corner Timing = %.2f ns}", dataTimeDiff));
+    t6->DrawLatex(0.18, 0.78, Form("#splitline{       #bf{MALTA2 Data}, 30#mum EPI}{Center - Corner Timing = %.2f #pm 0.11ns}", dataTimeDiff));
 
     // Draw vertical line at xMid
     TLine *lineX6 = new TLine(xMid, yMin, xMid, yMax);
@@ -715,7 +730,7 @@ void InPixelClSize()
     fitInfoEff->SetTextSize(0.035);
     fitInfoEff->SetTextColor(2);
     fitInfoEff->SetNDC();
-    fitInfoEff->DrawLatex(0.27, 0.707, Form("#splitline{#mu= %.2f #pm %.2f %}{#sigma= %.2f #pm %.2f %}", mu1DEffResidual, muerr1DEffResidual , sigma1DEffResidual, sigmaerr1DEffResidual));
+    fitInfoEff->DrawLatex(0.27, 0.707, Form("#splitline{#mu= %.3f #pm %.2f %}{#sigma= %.2f #pm %.2f %}", mu1DEffResidual, muerr1DEffResidual , sigma1DEffResidual, sigmaerr1DEffResidual));
 
     c1->SaveAs("PublicPlots/Simu_2DEff.pdf");
     c1->SaveAs("PublicPlots/Simu_2DEff.C");

@@ -10,6 +10,7 @@
 #include "G4RadioactiveDecay.hh"
 #include "Config.h"
 #include "G4AnalysisManager.hh"
+#include "CLHEP/Random/RandPoisson.h"
 
 //Constructor
 PrimaryGenerator::PrimaryGenerator(const SimFlags* flags) : m_flag(flags), m_particleGun(new G4ParticleGun(1)), m_eventCounter(0)
@@ -21,12 +22,21 @@ PrimaryGenerator::PrimaryGenerator(const SimFlags* flags) : m_flag(flags), m_par
         G4float particleEnergy = std::stod(m_flag->particleEnergy) * GeV;
         m_particleGun->SetParticleEnergy(particleEnergy);  //1.4608 * MeV K-40   0.661 * MeV Cs-137
     }
+    else if(m_flag->particleEnergy == "log")
+    {
+        G4float E0 = std::stod(m_flag->particleEnergy) * GeV;
+        G4float particleEnergy = -E0 * std::log(G4UniformRand());
+    }
     else
     {
         throwError("PrimaryGenerator::PrimaryGenerator", "Sampling Failure", "Non-constant energy disrtibution selected but none is yet implemented.");                  
     }
-    
-    std::string particleType = m_flag->particleType;
+    G4String particleType{};
+    if (m_flag->particleType == "pionMix")
+    {
+        particleType = (G4UniformRand() < 0.5) ? "pi+" : "pi-";
+    }
+    else particleType = m_flag->particleType;
     
     G4ParticleTable *particleTable = G4ParticleTable::GetParticleTable();
     G4ParticleDefinition *particle = particleTable->FindParticle(particleType);
@@ -37,6 +47,9 @@ PrimaryGenerator::PrimaryGenerator(const SimFlags* flags) : m_flag(flags), m_par
     }
 
     m_particleGun->SetParticleDefinition(particle);
+
+    itkParticlePop = ImportITK(m_flag->itkInput, m_flag->itkLayer, m_flag->itkZ);
+
 }
 // Destructor
 PrimaryGenerator::~PrimaryGenerator()
@@ -56,7 +69,6 @@ G4ThreeVector PrimaryGenerator::GetRandomPointOnCircle(G4float radius, const G4T
     G4float z = 0.0;
 
     return center + G4ThreeVector(x, y, z);
-    
 }
 
 G4ThreeVector PrimaryGenerator::GetRandomPointOnRectangle(G4float height, G4float thickness, const G4ThreeVector center)
@@ -76,10 +88,61 @@ G4float PrimaryGenerator::GetRandomPointInLine( G4float xMin, G4float xMax)
     return xMin + (xMax - xMin) * G4UniformRand();
 }
 
+G4double PrimaryGenerator::ImportITK(G4String filename, int layer, double z)
+{
+
+    std::ifstream file("../ITK_Input/" + filename + ".csv");
+    //std::cout << "../ITK_Input/" + filename << std::endl;
+    G4double output;
+
+    if (!file) 
+    {
+        throw std::runtime_error("Cannot open ITK Input file!!!!!");
+    }
+
+    std::string line;
+
+    // skip header
+    std::getline(file, line);
+
+    while (std::getline(file, line))
+    {
+        if (line.empty()) continue;
+        std::stringstream ss(line);
+        std::string value;
+        G4double x,y;
+        G4int itkLayer;
+
+        // read comma-separated values
+        std::getline(ss, value, ','); x           = std::stod(value);
+        std::getline(ss, value, ','); y           = std::stod(value);
+        std::getline(ss, value, ','); itkLayer    = std::stoi(value);
+        if (itkLayer == layer && x >= z)
+        {
+            output = y;
+            break;
+        }
+    }
+
+    return output;
+}
+
+
 void PrimaryGenerator::GeneratePrimaries(G4Event *oneEvent)
 {
     if(m_flag->verbosePG) std::cout << "This event contains " << m_flag->particleCount << " particles with:" << std::endl;
-    for(G4int ev = 0; ev < m_flag->particleCount; ev++)
+    int particleNum{};
+    if(m_flag->itkEnable == true)
+    {
+        // itkParticlePop [part/ mm^2] * PileUp Scaling * Sensor Area [cm^2]. Is not yet scaled for multichip.
+        particleNum = CLHEP::RandPoisson::shoot(itkParticlePop * m_flag->pileUpScale * m_flag->detectorSizeX * m_flag->detectorSizeY * 100);
+        //std::cout << "itkPop: " << itkParticlePop <<  "; Mean: " << itkParticlePop * m_flag->detectorSizeX * m_flag->detectorSizeY * 100 << "; Poisson sample: " << particleNum << std::endl;
+    }
+    else
+    {
+        particleNum = m_flag->particleCount;
+    }
+    for(G4int ev = 0; ev < particleNum; ev++)
     {
 
         G4AnalysisManager *analysisManager = G4AnalysisManager::Instance();

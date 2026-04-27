@@ -29,7 +29,13 @@ void DigitalProcessing_multiPlane(double inputThreshold, int runNumber, std::str
     int dColLeng   = analysisFlags->dColLeng;
     int numThreads = analysisFlags->numThreads; 
     double wordSpacing = analysisFlags->wordSpacing;
+    double scintillatorJitter = analysisFlags->scintillatorJitter;
+    double samplingJitter = analysisFlags->samplingJitter;
 
+    std::random_device rd1;
+    std::mt19937 gen1(rd1());
+    std::random_device rd2;
+    std::mt19937 gen2(rd2());
     //std::cout << groupSize << " ; " << groupSizeX << " ; " << groupSizeY << " ; " << groupLeng << std::endl;
     
     // get local path
@@ -186,9 +192,12 @@ void DigitalProcessing_multiPlane(double inputThreshold, int runNumber, std::str
             //auto it = timeMap.find({eventID, {pixX, pixY}});
             auto it = timeMap.find(key);
             if(it == timeMap.end()) continue;
-            // Row correction also of 7ns/ 512 rows + global GEANT4 timestamp
-            //if(verbose) std::cout << "Event ID: " << eventID << "; pixX: " << pixX << ";pixY: " << pixY << "; corrEnergy: " << cenergy << "; timewalk: "<< timing << std::endl;
-            timing += *std::max_element(it->second.begin(), it->second.end()) + pixY * 0.0125 + (4 - (planeN %100)%4) * 8; 
+            // Row correction also of 7ns/ 512 rows + global GEANT4 timestamp + in-module chip id + front end jitter
+            if(verbose) std::cout << "Event ID: " << eventID << "; pixX: " << pixX << ";pixY: " << pixY << "; corrEnergy: " << cenergy << "; timewalk: "<< timing << std::endl;
+            std::normal_distribution<double> gauss(0.0, GetFrontEndJitter(cenergy));
+            //std::cout << GetFrontEndJitter(cenergy) << " ; " << std::abs(gauss(gen2)) << " ; " <<  cenergy << std::endl;
+            timing += *std::max_element(it->second.begin(), it->second.end()) + pixY * 0.0125 + (4 - (planeN %100)%4) * 8 + std::abs(gauss(gen2));
+            //timing +=  (4 - (planeN %100)%4) * 8; 
 
             sortedTimings.emplace_back(entry.first,timing);
         }
@@ -226,6 +235,7 @@ void DigitalProcessing_multiPlane(double inputThreshold, int runNumber, std::str
             double threshold = itThr->second;
 
             double timing = entry.second;
+
             //auto it = enMap.find({eventID, {pixX, pixY}});
             auto it = enMap.find(key);
             double cenergy = it->second;
@@ -262,8 +272,8 @@ void DigitalProcessing_multiPlane(double inputThreshold, int runNumber, std::str
         {
             // This was not initialized before leading to weird first word
             __uint128_t mergedWord = 0; 
-            std::vector<double> leadingTime;
-            std::vector<int> planeVec;
+            std::vector<double> leadingTime{};
+            std::vector<int> planeVec{};
             int aux = 0;
             for (const auto& pos : digitizedWords[i])
             {
@@ -271,6 +281,7 @@ void DigitalProcessing_multiPlane(double inputThreshold, int runNumber, std::str
                 double timing = pos.first.second;
                 int planeN = pos.second;
                 planeVec.push_back(planeN);
+                //std::cout << "PlaneID: " << planeN << "; timing: " << timing << std::endl;
                 if(verbose)std::cout << "Word: " << std::bitset<30>(word) << std::endl;
                 mergedWord |= word;
                 leadingTime.push_back(timing);
@@ -302,6 +313,7 @@ void DigitalProcessing_multiPlane(double inputThreshold, int runNumber, std::str
             // Reset fot next iteration
             mergedWord = 0;
             leadingTime.clear();
+            planeVec.clear();
         }
         //savePlot(directoryPath, runPath, inputThreshold, saveName, h2MissMerged, "h2MissMerged");
 
@@ -316,11 +328,18 @@ void DigitalProcessing_multiPlane(double inputThreshold, int runNumber, std::str
             for (const auto& pos : pixelPositions) 
             {
                 if(verbose) std::cout << "Decoded pixel position: (" << pos.first.first << ", " << pos.first.second << ")" << "; Timing: "<< std::setprecision(8) << timing << std::endl;
-                reconstructedTiming = timing; // + 100 adds a constant 100 ns delay in order to replicate the TB data 
+                ///// Add off-chip READOUT jitter
+                // Add in quadrature the un-correlated jitter
+                double totalJitter = std::sqrt(scintillatorJitter*scintillatorJitter + samplingJitter*samplingJitter);
+                
+                std::normal_distribution<double> gauss(0.0, totalJitter);
+                std::cout << gauss(gen1) << std::endl;
+                reconstructedTiming = timing + gauss(gen1); // + 100 adds a constant 100 ns delay in order to replicate the TB data 
                 reconstructedPixX = pos.first.first;
                 reconstructedPixY = pos.first.second;
                 planeID = planeN[i];
                 nHits = pos.second;
+                //if (timing < 50 )std::cout << "PlaneID: " << planeID << "; timing: " << timing << std::endl;
                 recontructedTree->Fill();
                 i++;
             }

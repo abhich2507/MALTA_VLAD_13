@@ -56,13 +56,14 @@ void Analysis_multiPlane(double threshold, int runNumber = 91, std::string saveN
         // Get TTree for each planeZ
         TTree *analysisTree = (TTree*) analysisFile->Get(Form("analyzedHits_planeZ%d",planeZ));
 
-        double fX, fY, timing;
+        double fX, fY, timing, correctedTiming;
         int clSize, planeID;
         analysisTree->SetBranchAddress("planeID", &planeID);
         analysisTree->SetBranchAddress("analysisVertexX", &fX);
         analysisTree->SetBranchAddress("analysisVertexY", &fY);
         analysisTree->SetBranchAddress("clSize", &clSize);  
         analysisTree->SetBranchAddress("timing", &timing); 
+        analysisTree->SetBranchAddress("correctedTiming", &correctedTiming); 
         // Full Matrix histograms
         // define as center of beam +- size of MALTAplanes in XY? todo?
         double Xcent = analysisFlags->Analysis_XCenter;
@@ -88,6 +89,8 @@ void Analysis_multiPlane(double threshold, int runNumber = 91, std::string saveN
         TH2D *h2MissMergedInPixel= new TH2D(Form("h2MissMergedInPixel_planeZ%d",planeZ), Form("h2MissMergedInPixel_planeZ%d",planeZ), nX, 0, 0, nY, numPixlesX, numPixlesY);
 
         // Projections
+        TH1D *h1Timing = new TH1D("h1Timing", "h1Timing", 200, 0, 60);
+        TH1D *h1CorrectedTiming = new TH1D("h1CorrectedTiming", "h1CorrectedTiming", 200, 0, 60);
         TH1D *h1PASSInPixelXProj = new TH1D(Form("h1PASSInPixelXProj_planeZ%d",planeZ), Form("h1PASSInPixelXProj_planeZ%d",planeZ), nX, 0, numPixlesX*pixelSizeX*1000);
         TH1D *h1PASSInPixelYProj = new TH1D(Form("h1PASSInPixelYProj_planeZ%d",planeZ), Form("h1PASSInPixelYProj_planeZ%d",planeZ), nY, 0, numPixlesY*pixelSizeY*1000);
 
@@ -144,6 +147,8 @@ void Analysis_multiPlane(double threshold, int runNumber = 91, std::string saveN
             h2PASSInPixel  ->Fill(foldedX, foldedY, clSize > 0 ? 1 : 0);
             h2ClSizeInPixel->Fill(foldedX, foldedY, clSize);
             h2TimingInPixel->Fill(foldedX, foldedY, timing);
+            h1Timing->Fill(timing);
+            h1CorrectedTiming->Fill(correctedTiming);
         }
 
         h2PASS  ->Divide(h2ALL);
@@ -184,6 +189,8 @@ void Analysis_multiPlane(double threshold, int runNumber = 91, std::string saveN
         savePlot(directoryPath, runPath, threshold, saveName, h2PASS, h2PASS->GetName());
         savePlot(directoryPath, runPath, threshold, saveName, h2ClSize, h2ClSize->GetName());
         savePlot(directoryPath, runPath, threshold, saveName, h2Timing, h2Timing->GetName());
+        savePlot(directoryPath, runPath, threshold, saveName, h1Timing, "h1Timing");
+        savePlot(directoryPath, runPath, threshold, saveName, h1CorrectedTiming, "h1CorrectedTiming");
         savePlot(directoryPath, runPath, threshold, saveName, h2PASSInPixel, h2PASSInPixel->GetName());
         savePlot(directoryPath, runPath, threshold, saveName, h2ClSizeInPixel, h2ClSizeInPixel->GetName());
         savePlot(directoryPath, runPath, threshold, saveName, h2TimingInPixel, h2TimingInPixel->GetName());

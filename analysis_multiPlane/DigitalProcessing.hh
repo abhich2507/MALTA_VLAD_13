@@ -100,6 +100,76 @@ double GetTimingOffset(double amplitude, double threshold, double T, double Tdiv
     return T / pow((amplitude * TrefThr/threshold) - x0, n) + t0;
 }
 
+
+double GetFrontEndJitter(double charge)
+{
+    /*
+    std::ifstream file("./configs/readout/FE_jitter_data.csv");
+    double output;
+
+    if (!file) 
+    {
+        throw std::runtime_error("Cannot open readout Input file!!!!!");
+    }
+
+    std::string line;
+
+    // skip header
+    std::getline(file, line);
+    std::vector<double> xData, yData;
+
+    while (std::getline(file, line))
+    {
+        if (line.empty()) continue;
+        std::stringstream ss(line);
+        std::string value;
+        double xQ,yt;
+
+        // read comma-separated values
+        std::getline(ss, value, ','); xQ           = std::stod(value);
+        std::getline(ss, value, ','); yt           = std::stod(value);
+        xData.push_back(xQ);
+        yData.push_back(yt);
+    }
+
+    TGraph* graph = new TGraph(xData.size(), xData.data(), yData.data());
+    graph->SetTitle("Fit;X;Y");
+    graph->SetMarkerStyle(20);
+    graph->SetMarkerColor(kBlue);
+    // Define exponential decay: f(x) = A1 * exp(-lambda1 * x) + A2 * exp(-lambda2 * x) + C
+    TF1* fitFunc = new TF1("fitFunc", "[0] * exp(-x /[1]) + [2] * exp(-x/[3]) + [4]", xData.front(), xData.back());
+    fitFunc->SetParNames("A1", "lambda1", "A2", "lambda2", "C");
+
+    // Set initial parameter guesses
+    fitFunc->SetParameter(0, 2.5);
+    fitFunc->SetParameter(1, 120);
+    fitFunc->SetParameter(2, 1.2);
+    fitFunc->SetParameter(3, 700);
+    fitFunc->SetParameter(4 , 0.2);
+
+    // Fit ("S" returns result, "R" uses function range)
+    TFitResultPtr fitResult = graph->Fit(fitFunc, "SR");
+
+    // Print results
+    
+    fitResult->Print("V");
+    std::cout << "A      = " << fitFunc->GetParameter(0) << " +/- "    << fitFunc->GetParError(0) << std::endl;
+    std::cout << "lambda = " << fitFunc->GetParameter(1) << " +/- "    << fitFunc->GetParError(1) << std::endl;
+    std::cout << "Chi2/NDF = " << fitResult->Chi2() / fitResult->Ndf() << std::endl;
+    // Draw
+    TCanvas* c1 = new TCanvas("c1", "Exponential Decay Fit", 800, 600);
+    graph->Draw("AP");
+    fitFunc->SetLineColor(kRed);
+    fitFunc->Draw("same");
+    c1->SaveAs("fit_result.png");
+    
+    return fitFunc->Eval(charge);
+    */
+   double out = 5.14 * std::exp(-charge/149.13) + 2264.86 * std::exp(-charge/15.05) + 0.2;
+   if (out < 0) out = 0;
+   return out;
+}
+
 // Returns positions of set bits in a 16-bit word
 std::vector<int> getSetBitPositions(__uint128_t maltaPixel, int groupSize)
 // Checks for all flipped bits in a 16-bit word and returns their positions in a vector
