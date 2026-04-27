@@ -28,6 +28,9 @@ void DigitalProcessing(double inputThreshold, int runNumber, std::string saveNam
     int dColLeng   = analysisFlags->dColLeng;
     int numThreads = analysisFlags->numThreads; 
     double wordSpacing = analysisFlags->wordSpacing;
+    double scintillatorJitter = analysisFlags->scintillatorJitter;
+    double samplingJitter = analysisFlags->samplingJitter;
+
 
     //std::cout << groupSize << " ; " << groupSizeX << " ; " << groupSizeY << " ; " << groupLeng << std::endl;
     
@@ -234,6 +237,8 @@ void DigitalProcessing(double inputThreshold, int runNumber, std::string saveNam
                 aux++;
 
                 // A merging has taken place. Debug information on merging.
+                // Particular for 2x8 
+                /*
                 if (aux >= 2)
                 {   
                     // Check if the 14 least significant bits are the same. If not than a mismerging happened
@@ -243,7 +248,8 @@ void DigitalProcessing(double inputThreshold, int runNumber, std::string saveNam
                         int hits = 0;
                         deltaX = ((mergedWord & 0xFF) - (word & 0xFF)) * groupSizeY;
                         deltaY = (((mergedWord >> (1 + 8)) & 0x1F) - ((word >> (1 + 8)) & 0x1F)) *groupSizeX *2 + (((mergedWord >> 8) & 0x1) - ((word >> 8) & 0x1)) *groupSizeX;
-
+                        //std::cout << "Merged: " << std::bitset<8>(mergedWord & 0xFF) << "; word: " << std::bitset<8>(word & 0xFF) << "; diff: " << std::bitset<8>((mergedWord & 0xFF) - (word & 0xFF)) << std::endl;
+                        //std::cout << "groupY: " << groupSizeY << "; deltaX: " << deltaX << "; groupX: " << groupSizeX << "; deltaY: " << deltaY << std::endl;
                         planeMerging = planeI;
                         if ( (mergedWord & 0xFF) != (word & 0xFF) )
                         {
@@ -302,6 +308,68 @@ void DigitalProcessing(double inputThreshold, int runNumber, std::string saveNam
                         
                     }
                 }
+                */
+               // Generalized version
+               if (aux >= 2)
+                {
+                    if ( (mergedWord & 0x3FFF) != (word & 0x3FFF) )
+                    {
+                        // Build masks generically from field lengths
+                        __uint128_t DCOLUMN_MASK = (__uint128_t(1) << dColLeng)   - 1;
+                        __uint128_t PARITY_MASK  = (__uint128_t(1) << parityLeng) - 1;
+                        __uint128_t GROUP_MASK   = (__uint128_t(1) << groupLeng)  - 1;
+                        __uint128_t LOWER_MASK   = (__uint128_t(1) << (dColLeng + parityLeng + groupLeng)) - 1;
+
+                        // Field shift offsets (matching encodeWord)
+                        int parityShift = dColLeng;
+                        int groupShift  = dColLeng + parityLeng;
+
+                        // Extract fields from merged and current word
+                        __uint128_t mergedDCol   = (mergedWord)              & DCOLUMN_MASK;
+                        __uint128_t mergedParity = (mergedWord >> parityShift) & PARITY_MASK;
+                        __uint128_t mergedGroup  = (mergedWord >> groupShift)  & GROUP_MASK;
+
+                        __uint128_t wordDCol     = (word)                    & DCOLUMN_MASK;
+                        __uint128_t wordParity   = (word >> parityShift)     & PARITY_MASK;
+                        __uint128_t wordGroup    = (word >> groupShift)      & GROUP_MASK;
+
+                        // Compute pixel-space deltas using the same formulas as decodeWord
+                        deltaX = (static_cast<int>(mergedDCol)   - static_cast<int>(wordDCol))   * groupSizeY;
+                        deltaY = (static_cast<int>(mergedGroup)  - static_cast<int>(wordGroup))  * groupSizeX * 2
+                            + (static_cast<int>(mergedParity) - static_cast<int>(wordParity)) * groupSizeX;
+                        
+                        //std::cout << "groupY: " << groupSizeY << "; deltaX: " << deltaX << "; groupX: " << groupSizeX << "; deltaY: " << deltaY << std::endl;
+                        
+                        planeMerging = planeI;
+
+                        dcMerging     = (mergedDCol   != wordDCol)   ? 1 : 0;
+                        parityMerging = (mergedParity != wordParity) ? 1 : 0;
+                        groupMerging  = (mergedGroup  != wordGroup)  ? 1 : 0;
+
+                        std::vector<std::pair<std::pair<int,int>, int>> pixelPositions = 
+                            decodedDigitalWord(mergedWord, groupSize, groupSizeX, groupSizeY, groupLeng, parityLeng, dColLeng);
+
+                        if (aux != count + static_cast<int>(pixelPositions.size()))
+                        {
+                            hitLossMerging    = 1;
+                            displacedMerging  = 0;
+                            count++;
+                        }
+                        else
+                        {
+                            hitLossMerging   = 0;
+                            displacedMerging = 1;
+                        }
+                        mergedTree->Fill();
+
+                        for (const auto& pos : pixelPositions)
+                        {
+                            int reconstructedPixX = pos.first.first;
+                            int reconstructedPixY = pos.first.second;
+                            h2MissMerged->Fill(reconstructedPixX, reconstructedPixY, 1);
+                        }
+                    }
+                }
             }
 
             
@@ -339,7 +407,10 @@ void DigitalProcessing(double inputThreshold, int runNumber, std::string saveNam
             for (const auto& pos : pixelPositions) 
             {
                 if(verbose) std::cout << "Decoded pixel position: (" << pos.first.first << ", " << pos.first.second << ")" << "; Timing: "<< std::setprecision(8) << timing << std::endl;
-                reconstructedTiming = timing; // + 100 adds a constant 100 ns delay in order to replicate the TB data 
+                ///// Add off-chip READOUT jitter
+                // Add in quadrature the un-correlated jitter
+                double totalJitter = std::sqrt(scintillatorJitter*scintillatorJitter + samplingJitter*samplingJitter);
+                reconstructedTiming = timing + totalJitter; // + 100 adds a constant 100 ns delay in order to replicate the TB data 
                 reconstructedPixX = pos.first.first;
                 reconstructedPixY = pos.first.second;
                 nHits = pos.second;

@@ -67,6 +67,7 @@ void Analysis(double threshold, int runNumber = 91, std::string saveName = "defa
     TH2D *h2MissMergedInPixel= new TH2D("h2MissMergedInPixel", "h2MissMergedInPixel", nX, 0, 0, nY, numPixlesX, numPixlesY);
 
     // Projections
+    TH1D *h1Timing = new TH1D("h1Timing", "h1Timing", 100, 0, 100);
     TH1D *h1PASSInPixelXProj = new TH1D("h1PASSInPixelXProj", "h1PASSInPixelXProj", nX, 0, numPixlesX*pixelSizeX*1000);
     TH1D *h1PASSInPixelYProj = new TH1D("h1PASSInPixelYProj", "h1PASSInPixelYProj", nY, 0, numPixlesY*pixelSizeY*1000);
 
@@ -85,6 +86,7 @@ void Analysis(double threshold, int runNumber = 91, std::string saveName = "defa
         h2PASS  ->Fill(fX, fY, clSize > 0 ? 1 : 0);
         h2ClSize->Fill(fX, fY, clSize);
         h2Timing->Fill(fX, fY, timing);
+        h1Timing->Fill(timing);
         double foldedX, foldedY;
         
         if(analysisFlags->trkUnc == true)
@@ -156,6 +158,7 @@ void Analysis(double threshold, int runNumber = 91, std::string saveName = "defa
     savePlot(directoryPath, runPath, threshold, saveName, h2PASS, "h2PASS");
     savePlot(directoryPath, runPath, threshold, saveName, h2ClSize, "h2ClSize");
     savePlot(directoryPath, runPath, threshold, saveName, h2Timing, "h2Timing");
+    savePlot(directoryPath, runPath, threshold, saveName, h1Timing, "h1Timing");
     savePlot(directoryPath, runPath, threshold, saveName, h2PASSInPixel, "h2PASSInPixel");
     savePlot(directoryPath, runPath, threshold, saveName, h2ClSizeInPixel, "h2ClSizeInPixel");
     savePlot(directoryPath, runPath, threshold, saveName, h2TimingInPixel, "h2TimingInPixel");

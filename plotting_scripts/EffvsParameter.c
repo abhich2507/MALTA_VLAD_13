@@ -5,20 +5,17 @@
 #include <cmath>
 #include "ROOTTHelperFunctions.h"
 
-void EffvsThr_Digital()
+void EffvsParameter()
 {
 
     gStyle->SetCanvasPreferGL(kTRUE);
     gROOT->SetStyle("ATLAS");
     //174 //112  // 70 // 181
     //std::vector<int> runNumbers= {171,172,173,174,175}; // Pix Barrel
-    //std::vector<int> runNumbers = {187,188,189,190}; // Strip Barrel
+    //std::vector<int> runNumbers = {176,177,178,179}; // Strip Barrel
     //std::vector<int> runNumbers = {180,181,182,183}; // Pix EndCap
-    //std::vector<int> runNumbers = {191,192}; // Strip Endcap
-    //std::vector<int> runNumbers = {186}; // Revised Pix Barrel
-
-    std::vector<int> runNumbers = {187};
-
+    //std::vector<int> runNumbers = {184,185}; // Strip Endcap
+    std::vector<int> runNumbers = {186,187,188, 189, 190}; // Revised Pix Barrel 
     //std::vector<std::string> runFiles = { "wordSpacingScan0ns", "wordSpacingScan0.5ns", "wordSpacingScan1ns","wordSpacingScan1.6ns"};
     //std::vector<std::string> labels = {"No Merging", "0.5 ns merging", "1.0 ns merging", "1.6 ns merging"};
     //std::vector<int> vcolor = {kBlack, kAzure -3, kTeal +2, kOrange +7};
@@ -65,21 +62,12 @@ void EffvsThr_Digital()
     //std::vector<std::string> runFiles = {"Nominal"};
     //std::vector<std::string> labels = {"ITK Pix Barrel Layer 0", "ITK Pix Barrel Layer 1", "ITK Pix Barrel Layer 2", "ITK Pix Barrel Layer 3", "ITK Pix Barrel Layer 4"};
     //std::vector<std::string> labels = {"ITK Pix EndCap Ring 0", "ITK Pix EndCap Ring 1", "ITK Pix EndCap Ring 2", "ITK Pix EndCap Ring 3"};
-    //std::vector<std::string> labels = {"ITK Strip Barrel Layer 0", "ITK Strip Barrel Layer 1", "ITK Strip Barrel Layer 2", "ITK Strip Barrel Layer 3"};
     //std::vector<std::string> labels = {"ITK Strip EndCap Disk 0", "ITK Strip EndCap Disk 1"};
-    //std::vector<std::string> runFiles = {"Nominal", "SRAMd2", "SRAMd1"};
-    //std::vector<std::string> labels = {"SRAM Depth 4", "SRAM Depth 2", "SRAM Depth 1"};
-    //std::vector<std::string> runFiles = {"Nominal", "FIFOs64", "FIFOs16", "FIFOs8", "FIFOs2"};
-    //std::vector<std::string> labels = {"FIFO Size 128", "FIFO Size 64", "FIFO Size 16", "FIFO Size 8", "FIFO Size 2"};
-    std::vector<std::string> runFiles = {"Nominal", "FIFOf12.5", "FIFOf25", "FIFOf50"};
-    std::vector<std::string> labels = {"FIFO frequency 160 MHz", "FIFO frequency 80 MHz", "FIFO frequency 40 MHz", "FIFO frequency 20 MHz"};
 
-    //std::vector<std::string> runFiles = {"Nominal", "FIFOf3.125", "FIFO1.5"};
+    std::vector<std::string> runFiles = {"Nominal", "FIFOf3.125", "FIFOf1.5"};
 
-    //std::vector<std::string> labels = {"Layer4 FIFO freq. = 6.5", "Layer4 FIFO freq. = 3.125", "Layer4 FIFO freq. = 1.5"};
-
-    //std::vector<std::string> runFiles = {"NEWRO2x8", "NEWRO8x2"};
-    //std::vector<std::string> labels = {"RO2x8","RO8x2"};
+    std::vector<std::string> labels = {"Pix Barrel Layer4", "Pix Barrel Layer3", "Pix Barrel Layer2", "Pix Barrel Layer1", "Pix Barrel Layer0"};
+    std::vector<double> parameters = {6.5, 3.125, 1.5};
 
 
     std::vector<int> vcolor = {kBlack, kMagenta +2, kRed, kAzure -3, kGreen +3};
@@ -88,8 +76,6 @@ void EffvsThr_Digital()
     //std::vector<std::string> labels = {"Perfect matching", "Real matching", "Slow matching"};
 
     TCanvas *c1 = new TCanvas("c1","Efficiency vs Threshold",800,800);
-    TCanvas *c2 = new TCanvas("c2","Error Rate vs Config",800,800);
-    TCanvas *c3 = new TCanvas("c3","Relative Inefficiency vs Config",800,800);
     //c1->SetRightMargin(0.15);
     c1->SetLeftMargin(0.17);
     c1->SetTopMargin(0.10);
@@ -101,15 +87,20 @@ void EffvsThr_Digital()
 
 
     int colorIndex = 1; // ROOT color index (kBlue=4, kRed=2, kGreen=3, etc.)
+    int globalCount = 1;
+    int runCount = 0;
     std::vector<double> verrRate{};
     std::vector<double> veta{};
     double normErrRate{}, normEta{};
 
-    for (const std::string &tag : runFiles) 
+    for (const auto &runNumber : runNumbers) 
     {
+        int count = 0;
+        std::vector<double> vEffAll, vEffErrAll, vThrNoErrAll;
 
-        for (const auto &runNumber : runNumbers)
+        for (const std::string &tag : runFiles)
         {
+            
             std::cout << tag << "; " << runNumber << std::endl;
 
             // Process Simulation data
@@ -125,7 +116,10 @@ void EffvsThr_Digital()
             vTiming = simValues.timing;
             TTree* sortedSummary = simValues.tree;
             int numValidEntries = simValues.num;
-            std::cout << numValidEntries << std::endl;
+            std::cout <<"numValidEntries: " << numValidEntries << std::endl;
+            vEffAll.push_back(vEff[0]);
+            vEffErrAll.push_back(vEffErr[0]);
+            vThrNoErrAll.push_back(vThrNoErr[0]);
             /*
             // Get the error rate directly from the histogramed data
             std::string path = Form("Plots/local_%04d/%s/histos.root", runNumber, tag.c_str());
@@ -147,88 +141,52 @@ void EffvsThr_Digital()
                 normErrRate = errRate;
                 normEta = vEff[5];
             }
-            std::cout << "LOOK HERE: " << vEff.size() << std::endl;
+            
             */
             // Graphs
-            TGraphErrors *gThrVSEff = new TGraphErrors(numValidEntries, vThr.data(), vEff.data(), vThrNoErr.data(), vEffErr.data());
-            
-            gThrVSEff->SetTitle(";Threshold [e#lower[-2.2]{#scale[0.6]{- }}];Efficiency [%]");
-            gThrVSEff->SetMarkerStyle(vmarkerStyle[colorIndex -1]);
-            gThrVSEff->SetMarkerSize(2.);
-            gThrVSEff->SetLineWidth(5);
-            gThrVSEff->SetMarkerColor(vcolor[colorIndex - 1]); //colorIndex
-            gThrVSEff->SetLineColor(vcolor[colorIndex - 1]);
-            gThrVSEff->GetXaxis()->SetTitleOffset(1.2);
-            gThrVSEff->GetYaxis()->SetTitleOffset(1.7);
-            
-            leg1->AddEntry(gThrVSEff, labels[colorIndex-1].c_str(), "lp");
-            // Draw on same canvases
-            //c1->cd();    
-            std::cout << colorIndex << std::endl;
-
-            c1->cd();
-            if (colorIndex == 1) 
-            {
-                gThrVSEff->Draw("AP"); // first one draws axes
-                gThrVSEff->SetMinimum(99.);  // or some min
-                gThrVSEff->SetMaximum(100.);  // or some max
-                //gThrVSEff->SetMinimum(80);  // or some min
-                //gThrVSEff->SetMaximum(100.1);  // or some max
-            }
-            else 
-            {
-                std::cout << "P SAME!"<< std::endl;
-                gThrVSEff->Draw("P SAME");
-                std::cout << "Passed drawing" << std::endl;
-            }
-
-            // Increase color for next file
-            colorIndex++;
         }
+        TGraphErrors *gThrVSEff = new TGraphErrors(3, parameters.data(), vEffAll.data(), vThrNoErrAll.data(), vEffErrAll.data());
+        
+        gThrVSEff->SetTitle(";FIFO Readout [ns];Efficiency [%]");
+        gThrVSEff->SetMarkerStyle(vmarkerStyle[colorIndex -1]);
+        gThrVSEff->SetMarkerSize(2.);
+        gThrVSEff->SetLineWidth(5);
+        gThrVSEff->SetMarkerColor(vcolor[colorIndex - 1]); //colorIndex
+        gThrVSEff->SetLineColor(vcolor[colorIndex - 1]);
+        gThrVSEff->GetXaxis()->SetTitleOffset(1.2);
+        gThrVSEff->GetYaxis()->SetTitleOffset(1.7);
+        gThrVSEff->GetXaxis()->SetLimits(0,10);
+        
+        
+        // Draw on same canvases
+        //c1->cd();    
+        std::cout << colorIndex << std::endl;
+
+        c1->cd();
+        if (globalCount == 1) 
+        {
+            gThrVSEff->Draw("AP"); // first one draws axes
+            gThrVSEff->SetMinimum(0);  // or some min
+            gThrVSEff->SetMaximum(100.);  // or some max
+            //gThrVSEff->SetMinimum(80);  // or some min
+            //gThrVSEff->SetMaximum(100.1);  // or some max
+        }
+        else 
+        {
+            std::cout << "P SAME!"<< std::endl;
+            gThrVSEff->Draw("P SAME");
+            std::cout << "Passed drawing" << std::endl;
+        }
+        if(count == 0) leg1->AddEntry(gThrVSEff, labels[runCount].c_str(), "lp");
+
+
+                   
+        // Increase color for next file
+        colorIndex++;
+        runCount++;
+        globalCount++;
+        count++;
     }
-    c2->cd();
-    std::vector<double> x;
-
-    for (size_t i = 0; i < verrRate.size(); ++i) 
-    {   
-        verrRate[i] /= normErrRate;
-        x.push_back(i);
-    }
-    TGraph* gErrRate = new TGraph (verrRate.size(), x.data(), verrRate.data());
-    gErrRate->Draw("APL");
-    gErrRate->GetXaxis()->Set(verrRate.size(), -0.5, verrRate.size()-0.5);
-    gErrRate->SetTitle(";Grouping; Relative Error Rate");
-
-    for (size_t i = 0; i < labels.size(); ++i)
-    {
-        gErrRate->GetXaxis()->SetBinLabel(i+1, labels[i].c_str());
-    }
-
-    gErrRate->GetXaxis()->LabelsOption("v");  // vertical labels
-    gPad->Modified();
-    gPad->Update();
-
-    c3->cd();
-    std::vector<double> x2;
-
-    for (size_t i = 0; i < veta.size(); ++i) 
-    {   
-        veta[i] /= normEta;
-        x2.push_back(i);
-    }
-    TGraph* gEta = new TGraph (veta.size(), x2.data(), veta.data());
-    gEta->Draw("APL");
-    gEta->GetXaxis()->Set(veta.size(), -0.5, veta.size()-0.5);
-    gEta->SetTitle(";Grouping; Relative Eff.");
-
-    for (size_t i = 0; i < labels.size(); ++i)
-    {
-        gEta->GetXaxis()->SetBinLabel(i+1, labels[i].c_str());
-    }
-
-    gEta->GetXaxis()->LabelsOption("v");  // vertical labels
-    gPad->Modified();
-    gPad->Update();
 
     // Draw legends
     c1->cd(); 

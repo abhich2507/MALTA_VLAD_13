@@ -18,9 +18,11 @@ public:
 private:
     G4ThreeVector GetRandomPointOnCircle(G4float radius, const G4ThreeVector center);
     G4ThreeVector GetRandomPointOnRectangle(G4float height, G4float thickness, const G4ThreeVector center);
+    G4double ImportITK(G4String filename, int layer, double z);
     G4float GetRandomPointInLine( G4float xMin, G4float xMax);
     const SimFlags* m_flag{};
     G4ParticleGun* m_particleGun{};
     G4int m_eventCounter{0};
+    G4double itkParticlePop{};
 };
 #endif

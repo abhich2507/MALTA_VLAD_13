@@ -109,10 +109,10 @@ GraphData get_mergedData(std::string branch)
     {
         double x, y;
         gHigh->GetPoint(i, x, y);
-        double yErr = gLow->GetErrorY(i);
+        double yErr = gHigh->GetErrorY(i);
         if (x >= 200 && x <= 720) 
         {
-            std::cout << "y: " << y << "; yErr" << yErr << std::endl;
+            std::cout <<"x: " << x << "; y: " << y << "; yErr" << yErr << std::endl;
             dataThr.push_back(x);
             dataThrErr.push_back(x *0.03);
             dataBranch.push_back(y);
@@ -204,6 +204,7 @@ Residuals compute_residuals(TTree *sortedSummary, GraphData values, std::string 
         //double r = data - sim;
         //double sigR = std::sqrt( std::pow(sigD / sim, 2) + std::pow(((data - sim) * sigS) / std::pow(sim, 2), 2));
         double sigR = std::sqrt (std::pow(sigD, 2) + std::pow(sigS,2)) * 100;
+        std::cout << dataThr[i] <<  "sigD: " << sigD << "; sigS: " << sigS << "; sigR: " << sigR << std::endl;
         
         residuals.push_back(r);
         uncResiduals.push_back(sigR);

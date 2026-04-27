@@ -1,4 +1,5 @@
 #include "DigitalProcessing.hh"
+#include <bit>
 
 // Raw data sorting hash
 struct PairHash 
@@ -11,7 +12,7 @@ struct PairHash
     }
 };
 
-void PRIOFIFOFullDigitalProcessing(double inputThreshold, int runNumber, std::string saveName)
+void PRIOFIFOHWCProcessing(double inputThreshold, int runNumber, std::string saveName)
 {
 
     auto start = std::chrono::high_resolution_clock::now();
@@ -40,6 +41,7 @@ void PRIOFIFOFullDigitalProcessing(double inputThreshold, int runNumber, std::st
     double relativeThresholdSmearingMean = analysisFlags->meanSmearing;
     double relativeThresholdSmearingCol = analysisFlags->colSmearing;
     int fifoMultiplicity = analysisFlags->fifoMultiplicity;
+    int sectorSize = 7; // TODO: Import via flag
     int pixXNum = 512;
     int pixYNum = 512;
     int groupRepetition = 32;
@@ -367,13 +369,14 @@ void PRIOFIFOFullDigitalProcessing(double inputThreshold, int runNumber, std::st
         elapsed = end5 - end4;
         std::cout << ".5. Bus merge: " << elapsed.count() << std::endl;
 
+
         // III. SYNC Memory. ROUND ROBIN Drain
-        // TODO: Check the implementation doesnt seem right.
 
         ////////////////////////////////////////////////////////
         /////////////////////////////////////////// .6. SYNC MEM
         ////////////////////////////////////////////////////////
         std::vector<int> memoryModule(512,0); 
+        std::vector<std::vector<std::pair<__uint128_t, double>>> memoryWordStore(512); 
         std:queue<int> occupiedBuses{};
         //std::vector<double> vprevTiming{512,0.};
         double prevGlobalTiming{0};
@@ -381,7 +384,9 @@ void PRIOFIFOFullDigitalProcessing(double inputThreshold, int runNumber, std::st
         double timeMEMSYNC{0.};
         std::vector<std::pair<__uint128_t, double>> wordsAfterSRAM{};
         //int fifo{0};
+        // nSectors needs to handle non even division of the matrix into sectors.
         int missedHitCount{};
+        int nSectors = (512 + (2 * sectorSize) - 1) / (2 * sectorSize);
         for (auto& [word,timing]: wordsAfterBus)
         {
             // This is not generalized for any bit size
@@ -396,44 +401,81 @@ void PRIOFIFOFullDigitalProcessing(double inputThreshold, int runNumber, std::st
             prevGlobalTiming = timing;
             //std::cout << std::bitset<30>(word) << std::endl;
             int nRead = floor(timeMEMSYNC / SRAMFrequency);
+            //std::cout << "nRead: " << nRead << std::endl;
             if(verbose) std::cout << nRead << std::endl;
             if(nRead >= 1)
             {
-                /*
-                for(int k = 0; k < nRead; k++) 
-                {
-                    //int currentBus{0};
-                    for (int currentBus = 0; currentBus < 512; currentBus++)
-                    {
-                        //std::cout <<currentBus << std::endl;
-                        
-                        if (memoryModule[currentBus] > 0)
-                        {
-                            //std::cout << currentBus << std::endl;
-                            memoryModule[currentBus]--;  // drain ONE word
-                            break;
-                        }
-                        //currentBus++;
-                    }
-                    //if (memoryModule[bus]) memoryModule[bus]--;
-                    //std::cout << timeMEMSYNC ;
-                    timeMEMSYNC -= SRAMFrequency;
-                    //std::cout << " " << timeMEMSYNC << std::endl;
-                }
-                */
+                
                 for (int k = 0; k < nRead; k++) 
                 {                
                     if (!occupiedBuses.empty())
                     {
-                        int drainBus = occupiedBuses.front();
-                        memoryModule[drainBus]--;
-                        if(verbose) std::cout << "Bus index " << drainBus << " drained after " <<  timeMEMSYNC << " seconds";
-                        if (memoryModule[drainBus] == 0)
-                            occupiedBuses.pop();  // only remove when fully empty
+                        uint64_t HWCWord{};
+                        //int firstBus = firstFilledSectorBus(memoryModule); 
+                        // Determine the first sector of buses to read based on the sector with the most non empty memory entries
+
+                        std::vector<int> filledBuses (nSectors, 0);
+
+                        for (int i = 0; i< 512; i++)
+                        {
+                            int sector = static_cast<int>(i / (2*sectorSize));
+                            // IMPORTANT: Here this implementation achieves prio readout of most filled sectors but not most filled buses. 
+                            // Could be unphysical and maybe also suboptimal for high load bus occupancy
+                            if (memoryModule[i] > 0) filledBuses[sector] ++;
+                            //if (memoryModule[i] > 0) filledBuses[sector] += memoryModule[i];
+                            //if (memoryModule[i] > 0) std::cout << "i: " << i << "; sector: " << sector << "; memMod: " << memoryModule[i] << "; sector Fill: " << filledBuses[sector] << std::endl;
+                        }
+                        //std::cout << "NREAD: " << nRead << std::endl;
+                        //std::cout << std::endl;
+                        // I found the sector to read out at this read cycle
+                        auto it = std::max_element(filledBuses.begin(), filledBuses.end());
+                        int maxSector = std::distance(filledBuses.begin(), it);
+
+                        
+                        // If there are no more words to read out in this read cycle STOP
+                        bool hasData = (*it > 0);
+                        int firstBus = maxSector * 2*sectorSize;
+                        // Improvise a timing value to remain consistent with the structure of the code.
+                        // This info should be normally ditched in this RO scheme
+                        if (hasData)
+                        {
+                            //std::cout << "maxSector: " << maxSector << "; it: " << *it << "; Filling: " << filledBuses[maxSector] << std::endl;
+                            double improvTiming{};
+                            // Read all busses in the sector
+                            //for (i = 0; i< 2*sectorSize; i++)
+                            // This for loop implementation addresses the edge case when the nPix % sectorSize!=0
+                            int start = maxSector * 2 * sectorSize;
+                            int end   = std::min(start + 2 * sectorSize, 512);
+                            for (int i = start; i < end; i++)
+                            {
+                                // Drain each bus
+                                if (memoryModule[i] > 0) memoryModule[i] --;
+                                // append the drained words to a single word for the next processing step
+                                if (!memoryWordStore[i].empty()) 
+                                {
+                                    uint8_t fourBit  = memoryWordStore[i].front().first & 0xF;
+                                    HWCWord = (HWCWord << 4) | fourBit;
+                                    //improvTiming = memoryWordStore[i].front().second;
+                                    improvTiming = std::max(improvTiming, memoryWordStore[i].front().second);
+                                    // Erase entry after appending it to the Word
+                                    memoryWordStore[i].erase(memoryWordStore[i].begin());
+                                }
+                                // If one bus is empty we append an empty bit word
+                                else HWCWord = (HWCWord << 4);
+
+                            }
+                            // Lastly append sector address
+                            uint8_t sixBit = maxSector & 0x3F;
+                            HWCWord = (HWCWord << 6) | sixBit;
+                            //std::cout << std::bitset<64>(HWCWord) << std::endl;
+                            // Now I have the multiplexed word with an arbitrary timing for the next step
+                            wordsAfterSRAM.push_back({HWCWord, improvTiming});
+                        }
                     }
+                    // Sync back the time flow
                     timeMEMSYNC -= SRAMFrequency;
 
-                    if(verbose) std::cout << ". Time remaining: " << timeMEMSYNC << " SRAMF: " << SRAMFrequency << std::endl;
+                    if (verbose) std::cout << ". Time remaining: " << timeMEMSYNC << " SRAMF: " << SRAMFrequency << std::endl;
                 }
             }
             //std::cout <<bus << std::endl;
@@ -441,17 +483,22 @@ void PRIOFIFOFullDigitalProcessing(double inputThreshold, int runNumber, std::st
             {
                 if (memoryModule[bus] == 0)
                     occupiedBuses.push(bus);  // track it only when it goes 0 -> 1
-                wordsAfterSRAM.push_back({word, timing});
+                //wordsAfterSRAM.push_back({word, timing});
+                int pixAddr = (word >> 14) & 0xFFFF;
+                int HWCWord = __builtin_popcount(pixAddr);
+                //std::cout << "word: " << std::bitset<30>(word) << "; pixAddr: " << std::bitset<16>(pixAddr) << "; Count: " << HWCWord << std::endl;
+                memoryWordStore[bus].push_back({HWCWord, timing});
                 memoryModule[bus]++;
+                //std::cout << "Bus: " << bus << "; memModule[bus]: " << memoryModule[bus] << std::endl;
                 if(verbose) std::cout << "Bus index " << bus << " populated. Population: " << memoryModule[bus] << std::endl; 
             }
             else
             {
                 missedHitCount++;
-                if(verbose) std::cout << "Missed hit!" << std::endl;
+                //std::cout << "Missed hit!" << std::endl;
             }
         }
-        std::cout << "Missed Hit Count: " << missedHitCount << std::endl;
+        std::cout << "Missed HIt count: " << missedHitCount << std::endl;
         std::sort(wordsAfterSRAM.begin(), wordsAfterSRAM.end(), [](auto &a, auto &b){return a.second < b.second;});
 
 
@@ -519,15 +566,14 @@ void PRIOFIFOFullDigitalProcessing(double inputThreshold, int runNumber, std::st
         recontructedTree->Branch("NHits", &nHits, "NHits/I");
         for (const auto &word: wordsAfterFIFO)
         {
-            std::vector< std::pair<std::pair<int,int>, int> > pixelPositions = decodedDigitalWord(word.first, groupSize, groupSizeX, groupSizeY, groupLeng, parityLeng, dColLeng);
-            for (const auto& pos : pixelPositions) 
-            {
-                reconstructedTiming = word.second;
-                reconstructedPixX = pos.first.first;
-                reconstructedPixY = pos.first.second;
-                nHits = pos.second;
-                recontructedTree->Fill();
-            }
+            //std::vector< std::pair<std::pair<int,int>, int> > pixelPositions = decodedDigitalWord(word.first, groupSize, groupSizeX, groupSizeY, groupLeng, parityLeng, dColLeng);
+            
+            reconstructedTiming = word.second;
+            reconstructedPixX =  word.first & 0x3F;
+            reconstructedPixY = -1; // Only strip X info
+            nHits = __builtin_popcount(word.first >> 6);
+            recontructedTree->Fill();
+            
         
         }
         recontructedTree->Write();

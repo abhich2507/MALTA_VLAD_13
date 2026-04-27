@@ -189,20 +189,21 @@ G4VPhysicalVolume *DetectorConstruction::Construct()
             }
         }
 
+        // Commented the front planes to remove scattering
         m_logicPlane1 = new G4LogicalVolume (solidMALTA, detMat, "logicPlane1");
-        new G4PVPlacement(0, G4ThreeVector(detectorXOffset, detectorYOffset, detectorZOffset + planeCorrections[0]*cm)
-                                                            , m_logicPlane1, "physPlane1", logicalWorld, false, 0, true);
-        m_logicPlane1->SetVisAttributes(pixelVisAtt);
+        //new G4PVPlacement(0, G4ThreeVector(detectorXOffset, detectorYOffset, detectorZOffset + planeCorrections[0]*cm)
+        //                                                    , m_logicPlane1, "physPlane1", logicalWorld, false, 0, true);
+        //m_logicPlane1->SetVisAttributes(pixelVisAtt);
 
         m_logicPlane2 = new G4LogicalVolume (solidMALTA, detMat, "logicPlane2");
-        new G4PVPlacement(0, G4ThreeVector(detectorXOffset, detectorYOffset, detectorZOffset + planeCorrections[1]*cm)
-                                                            , m_logicPlane2, "physPlane2", logicalWorld, false, 0, true);
-        m_logicPlane2->SetVisAttributes(pixelVisAtt);
+        //new G4PVPlacement(0, G4ThreeVector(detectorXOffset, detectorYOffset, detectorZOffset + planeCorrections[1]*cm)
+        //                                                    , m_logicPlane2, "physPlane2", logicalWorld, false, 0, true);
+        //m_logicPlane2->SetVisAttributes(pixelVisAtt);
 
         m_logicPlane3 = new G4LogicalVolume (solidMALTA, detMat, "logicPlane3");
-        new G4PVPlacement(0, G4ThreeVector(detectorXOffset, detectorYOffset, detectorZOffset + planeCorrections[2]*cm)
-                                                            , m_logicPlane3, "physPlane3", logicalWorld, false, 0, true);
-        m_logicPlane3->SetVisAttributes(pixelVisAtt);
+        //new G4PVPlacement(0, G4ThreeVector(detectorXOffset, detectorYOffset, detectorZOffset + planeCorrections[2]*cm)
+        //                                                    , m_logicPlane3, "physPlane3", logicalWorld, false, 0, true);
+        //m_logicPlane3->SetVisAttributes(pixelVisAtt);
 
         m_logicPlane4 = new G4LogicalVolume (solidMALTA, detMat, "logicPlane4");
         new G4PVPlacement(0, G4ThreeVector(detectorXOffset, detectorYOffset, detectorZOffset + planeCorrections[3]*cm)
@@ -222,7 +223,7 @@ G4VPhysicalVolume *DetectorConstruction::Construct()
 
  
     }
-    if(m_flag->preDefinedGeometryFlag == "MULTIMALTA")
+    else if(m_flag->preDefinedGeometryFlag == "MULTIMALTA")
     {
         m_logicMultiPlane = new G4LogicalVolume(solidMALTA, detMat, "logicPlane");
         G4VisAttributes *planeVisAtt = new G4VisAttributes(G4Color(0., 0., 1., 0.5));
@@ -379,8 +380,7 @@ void DetectorConstruction::ConstructSDandField()
     {
         m_logicMultiPlane->SetSensitiveDetector(sensDet);
     }
-
-    if (m_flag->gdmlBool == true)
+    else if (m_flag->gdmlBool == true)
     {
         for (auto lv : sensitiveLVs) 
         {

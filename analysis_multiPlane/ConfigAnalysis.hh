@@ -21,6 +21,8 @@ struct AnaFlags
     double x0 = 0.;
     double n = 0.;
     double t0 = 0.;
+    double scintillatorJitter = 0.;
+    double samplingJitter = 0.;
     int groupSize = 0;
     int groupSizeX = 0;
     int groupSizeY = 0;
@@ -91,6 +93,8 @@ void LoadAnalysisFlagsFromFile(const std::string& filename, AnaFlags& flags)
         else if (key == "x0") flags.x0 = std::stod(value);
         else if (key == "n") flags.n = std::stod(value);
         else if (key == "t0") flags.t0 = std::stod(value);
+        else if (key == "scintillatorJitter") flags.scintillatorJitter = std::stod(value);
+        else if (key == "samplingJitter") flags.samplingJitter = std::stod(value);   
         else if (key == "groupSize") flags.groupSize = std::stoi(value);
         else if (key == "groupSizeX") flags.groupSizeX = std::stoi(value);
         else if (key == "groupSizeY") flags.groupSizeY = std::stoi(value);

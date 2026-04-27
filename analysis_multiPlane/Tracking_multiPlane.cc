@@ -222,6 +222,8 @@ void Tracking_multiPlane(double threshold, int runNumber, std::string saveName)
 
                 DUTLocalTime = hits[j].vDUTLocalTiming - st;
 
+                //if(DUTLocalTime >40)std::cout << "planeID: " << filePlane << "; timing: " << DUTLocalTime << std::endl;
+
                 // Now do position cut
                 Vec3 pixelPosition = PixelPositionReconstruction(DUTPixX, DUTPixY, cfg);
 
@@ -241,9 +243,9 @@ void Tracking_multiPlane(double threshold, int runNumber, std::string saveName)
                 // Add corrections to plane position
                 auto rotTransPixelPositions = ApplyGeometry3D(pixelPosition, geoMaps[filePlane]);
                 //Vec3 trackLocal = ApplyInverseGeometry3D(trackPlaneIntercept, geoMaps[filePlane]);
-
-                double rx = pixelPosition.x - trackPlaneIntercept.x;
-                double ry = pixelPosition.y - trackPlaneIntercept.y;
+                // TODO: FEATURE FIX: rotTransPixelPositions will probably fail for rotations. study to be performed.
+                double rx = rotTransPixelPositions.x - trackPlaneIntercept.x;
+                double ry = rotTransPixelPositions.y - trackPlaneIntercept.y;
 
                 //std::cout << "x1: " << pixelGlobalPosition.x << "; y1: " << pixelGlobalPosition.y << "; x2: " << rotTransPixelPositions.x << "; y2: " << rotTransPixelPositions.y << std::endl;
 
@@ -259,9 +261,9 @@ void Tracking_multiPlane(double threshold, int runNumber, std::string saveName)
                 //h1ResidualY->Fill(rotTransPixelPositions.y - vertexY);
                 h1ResidualX->Fill(rx);
                 h1ResidualY->Fill(ry);
-                //if (true) std::cout << "Vertex X: " << trackPlaneIntercept.x << " VertexY: " << trackPlaneIntercept.y << std::endl;
-                //if(true) std::cout << "(?) Candidate found in Plane: " << filePlane  << ", at Pixel (" << DUTPixX << ", " << DUTPixY << ") with Global Position (" << pixelPosition.x << ", " << pixelPosition.y << ")" << "; Timing difference: " << DUTLocalTime << std::endl;               
-                //if (true) std::cout << "Residual X: " << rx << " ; Residual Y: " << ry << "; rx^2+ry^2: " << rx*rx +ry*ry << "; dCut^2: " << (dCut/1000)*(dCut/1000) << std::endl;
+                if(verbose) std::cout << "Vertex X: " << trackPlaneIntercept.x << " VertexY: " << trackPlaneIntercept.y << std::endl;
+                if(verbose) std::cout << "(?) Candidate found in Plane: " << filePlane  << ", at Pixel (" << DUTPixX << ", " << DUTPixY << ") with Global Position (" << pixelPosition.x << ", " << pixelPosition.y << ")" << "; Timing difference: " << DUTLocalTime << std::endl;               
+                if (verbose) std::cout << "Residual X: " << rx << " ; Residual Y: " << ry << "; rx^2+ry^2: " << rx*rx +ry*ry << "; dCut^2: " << (dCut/1000)*(dCut/1000) << std::endl;
                 //if ( ( pixelGlobalPosition.first >= reconstructedVertexX - dCut / 1000. && pixelGlobalPosition.first <= reconstructedVertexX + dCut / 1000. ) 
                 //&&  ( pixelGlobalPosition.second >= reconstructedVertexY - dCut / 1000. && pixelGlobalPosition.second <= reconstructedVertexY + dCut / 1000. ))
                 //if(std::abs(rotTransPixelPositions.x - vertexX) <= dCut / 1000 && std::abs(rotTransPixelPositions.y - vertexY) <= dCut / 1000)
@@ -269,7 +271,7 @@ void Tracking_multiPlane(double threshold, int runNumber, std::string saveName)
                 if(rx*rx + ry*ry <= (dCut/1000)*(dCut/1000))
                 
                 {
-                    //if(true) std::cout << "(!) Matched hit at Pixel (" << DUTPixX << ", " << DUTPixY << ") with Global Position (" << pixelPosition.x << ", " << pixelPosition.y << ")" << "; Timing difference: " << DUTLocalTime << std::endl;
+                    if(verbose) std::cout << "(!) Matched hit at Pixel (" << DUTPixX << ", " << DUTPixY << ") with Global Position (" << pixelPosition.x << ", " << pixelPosition.y << ")" << "; Timing difference: " << DUTLocalTime << std::endl;
                     DUTnHits++;
                     trackedTree->Fill();   // <-- one Fill per matching hit
                     foundHit = true;

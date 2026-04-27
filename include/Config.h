@@ -33,9 +33,15 @@ struct SimFlags
     float beamVeto = 0;
     std::string particleType = "";
     std::string particleEnergy = "";
+    std::string energyDistribution = "";
     float particleMomentumX = 0.;
     float particleMomentumY = 0.;
     float particleMomentumZ = 0.;
+    bool itkEnable = false;
+    double pileUpScale = 0.;
+    std::string itkInput = "";
+    int itkLayer = 0;
+    double itkZ = 0.;
     bool EMPhysics = true;
     bool hadronPhysics = true;
     bool dutTungstenAbsorberFlag = false;
