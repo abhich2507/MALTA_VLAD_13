@@ -102,6 +102,7 @@ void LoadSimFlagsFromFile(const std::string& filename, SimFlags& flags)
         std::string value = line.substr(pos + 1);
 
         if (key == "preDefinedGeometryFlag") flags.preDefinedGeometryFlag = value;
+        else if (key == "largeScaleFlag") flags.largeScaleFlag = value;
         else if (key == "geoFile") flags.geoFile = value;
         else if (key == "detectorXOffset") flags.detectorXOffset = std::stof(value);
         else if (key == "detectorYOffset") flags.detectorYOffset = std::stof(value);

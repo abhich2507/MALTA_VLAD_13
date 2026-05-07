@@ -50,10 +50,12 @@ struct SimFlags
     int sramDepth = 0;
     double FIFOFrequency = 0.;
     int FIFOSize = 0;
-
-
+    bool boolHWC = false;
+    int sectorSize = 0;
+    int wordSize = 0;
     double fifoFrequency = 0.;
     double fifoSize = 0.;
+    std::string prioAlgo = "";
     int fifoMultiplicity = 0;
     //int nPlanes = 0;
     int nPlanes_100 = 0;
@@ -119,6 +121,9 @@ void LoadAnalysisFlagsFromFile(const std::string& filename, SimFlags& flags)
         else if (key == "veto") flags.veto = std::stod(value);
         else if (key == "fifoFrequency") flags.fifoFrequency = std::stod(value);
         else if (key == "fifoSize") flags.fifoSize = std::stod(value);
+        else if (key == "boolHWC") flags.boolHWC   = (value == "true");
+        else if (key == "sectorSize") flags.sectorSize = std::stoi(value);
+        else if (key == "wordSize") flags.wordSize = std::stoi(value);
         else if (key == "fifoMultiplicity") flags.fifoMultiplicity = std::stoi(value);
         else if (key == "nPlanes_100") flags.nPlanes_100 = std::stoi(value);
         else if (key == "nPlanes_10") flags.nPlanes_10 = std::stoi(value);
@@ -134,6 +139,7 @@ void LoadAnalysisFlagsFromFile(const std::string& filename, SimFlags& flags)
         else if (key == "sramDepth") flags.sramDepth = std::stoi(value);
         else if (key == "FIFOFrequency") flags.FIFOFrequency = std::stod(value);
         else if (key == "FIFOSize") flags.fifoSize = std::stoi(value);
+        else if (key == "prioAlgo") flags.prioAlgo = value;
         //std::cout << "Loaded flag: " << key << " = " << value << std::endl;   
     }
 }

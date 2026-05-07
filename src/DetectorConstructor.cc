@@ -170,7 +170,7 @@ G4VPhysicalVolume *DetectorConstruction::Construct()
         
         auto DUTrotation = new G4RotationMatrix();
         // WARNING: Hardcoded values. This part of the simulation is not part of the core MALTA simulation
-        // Repurpose as desired on own cost.
+        // Repurpose as desired at own cost.
         DUTrotation->rotateY(60 * deg);
         m_logicSensor = new G4LogicalVolume (solidMALTA, detMat, "logicSensor");
         new G4PVPlacement(0, G4ThreeVector(detectorXOffset, detectorYOffset, detectorZOffset), m_logicSensor, "physSensor", logicalWorld, false, 0, true);
@@ -250,6 +250,22 @@ G4VPhysicalVolume *DetectorConstruction::Construct()
 
             new G4PVPlacement (rotation, G4ThreeVector(module.xoff *cm, module.yoff *cm, module.zoff *cm), m_logicMultiPlane, planeName, logicalWorld,
                                 false, 0, true);
+        }
+
+        if (m_flag->largeScaleFlag == "EPICAL")
+        {
+            G4Box *tungstenPlate = new G4Box("tungstenPlate", 1.86368 *cm / 2, 1.86368 *cm / 2, 3 *mm / 2);
+            G4LogicalVolume *logicalTungsten = new G4LogicalVolume(tungstenPlate, absorberMat, "logicalTungsten");
+            G4VisAttributes *tungstenVisAtt = new G4VisAttributes(G4Color(0.9, 0.4, 0.0, 0.6));
+            tungstenVisAtt->SetForceSolid(true);
+            logicalTungsten->SetVisAttributes(tungstenVisAtt);
+            new G4PVPlacement(0, G4ThreeVector(0 *cm, 0 *cm, 0 *cm), logicalTungsten, "physTungsten", logicalWorld, false, 0, checkOverlaps); 
+            new G4PVPlacement(0, G4ThreeVector(0 *cm, 0 *cm, 0.45582 *cm), logicalTungsten, "physTungsten", logicalWorld, false, 0, checkOverlaps); 
+            new G4PVPlacement(0, G4ThreeVector(0 *cm, 0 *cm, 0.91164 *cm), logicalTungsten, "physTungsten", logicalWorld, false, 0, checkOverlaps);
+            new G4PVPlacement(0, G4ThreeVector(0 *cm, 0 *cm, 1.36746 *cm), logicalTungsten, "physTungsten", logicalWorld, false, 0, checkOverlaps); 
+            new G4PVPlacement(0, G4ThreeVector(0 *cm, 0 *cm, 1.82328 *cm), logicalTungsten, "physTungsten", logicalWorld, false, 0, checkOverlaps); 
+            new G4PVPlacement(0, G4ThreeVector(0 *cm, 0 *cm, 2.2791 *cm), logicalTungsten, "physTungsten", logicalWorld, false, 0, checkOverlaps); 
+            new G4PVPlacement(0, G4ThreeVector(0 *cm, 0 *cm, 2.73492 *cm), logicalTungsten, "physTungsten", logicalWorld, false, 0, checkOverlaps); 
         }
     }
 

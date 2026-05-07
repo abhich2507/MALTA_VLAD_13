@@ -285,6 +285,33 @@ void digitalTest(std::vector<std::pair<int,int>> hits)
         return thresholdMap;
     }
 
+std::vector<uint32_t> CompressWords(std::vector<uint32_t> vals, int targetWidth)
+{
+    int bitWidth = 4;
+    while (vals.size() > 1 && bitWidth < targetWidth)
+    {
+        std::vector<uint32_t> next;
+
+        for (size_t i = 0; i < vals.size(); i += 2)
+        {
+            if (i + 1 < vals.size())
+                next.push_back(vals[i] + vals[i + 1]);
+            else
+                next.push_back(vals[i]);
+        }
+
+        vals = std::move(next);
+        bitWidth++;
+    }
+
+    return vals;
+}
+
+
+
+
+
+
 
 
 // Main digital processing function

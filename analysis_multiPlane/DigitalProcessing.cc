@@ -6,7 +6,6 @@
 
 void DigitalProcessing(double inputThreshold, int runNumber, std::string saveName, bool proteusFlag)
 {
-    GetFrontEndJitter;
     auto start = std::chrono::high_resolution_clock::now();
     // Set all the analysis flags for the digital processing
     auto analysisFlags = new SimFlags{};

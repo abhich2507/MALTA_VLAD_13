@@ -49,22 +49,22 @@ void ModuleTiming()
         if (planeID == 3) 
         {
             //std::cout << "Filled 0!" << std::endl;
-            h1Plane0->Fill(timing + 110);
+            h1Plane0->Fill(timing + 109.3);
         }
         else if (planeID == 2) 
         {
             //std::cout << "Filled 1!" << std::endl;
-            h1Plane1->Fill(timing + 110);
+            h1Plane1->Fill(timing + 109.3);
         }
         else if (planeID == 1) 
         {
             //std::cout << "Filled 2!" << std::endl;
-            h1Plane2->Fill(timing + 110);
+            h1Plane2->Fill(timing + 109.3);
         }
         else if (planeID == 0) 
         {
             //std::cout << "Filled 3!" << std::endl;
-            h1Plane3->Fill(timing + 110);
+            h1Plane3->Fill(timing + 109.3);
         }
     }
     /*
@@ -101,12 +101,18 @@ void ModuleTiming()
 
     hPlanes[0]->GetXaxis()->SetTitle("Hit Timing [ns]");
     hPlanes[0]->GetYaxis()->SetTitle("a.u.");
+    hPlanes[0]->GetXaxis()->SetTitleSize(0.044);
+    hPlanes[0]->GetXaxis()->SetTickSize(0.044);
+    hPlanes[0]->GetXaxis()->SetLabelSize(0.04);
+    hPlanes[0]->GetYaxis()->SetTitleSize(0.044);
+    hPlanes[0]->GetYaxis()->SetTickSize(0.044);
+    hPlanes[0]->GetYaxis()->SetLabelSize(0.04);
     hPlanes[0]->Draw("P");
     for (int i = 1; i < 4; i++)
         hPlanes[i]->Draw("P SAME");
 
     // Legend positioned in the top right like the image
-    TLegend *leg = new TLegend(0.58, 0.55, 0.88, 0.88);
+    TLegend *leg = new TLegend(0.58, 0.35, 0.88, 0.88);
     leg->SetBorderSize(0);      // no border
     leg->SetFillStyle(0);       // transparent background
     leg->SetTextSize(0.035);
@@ -130,10 +136,10 @@ void ModuleTiming()
 
         // Two-line legend entry matching the image style
         leg->AddEntry(hPlanes[i],
-            Form("Plane %d,  peak = %.1f ns", i, mu),
+            Form("#bf{Chip %d,  peak = %.0f ns}", i, mu),
             "PL");
         leg->AddEntry((TObject*)0,
-            Form("#sigma = %.1f ns", sigma),
+            Form("#bf{#sigma = %.1f ns}", sigma),
             "");
     }
 

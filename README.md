@@ -40,13 +40,55 @@ make
 cd build/
 source ../run_sim.sh local flag.cfg
 ```
-## Analysis Usage
+## Basic Analysis Usage
 ```bash
 cd malta_simulation/
 python run_analysis.py -r runNumber -i analysis_flags.cfg -thr thrValue -s saveName -d -t -c -a 
 ```
 
--d digitizer Flag -t Tracking flag -c Clustering flag -a Analysis flag
+Flag Utilization guide:
+| Flag   | Utility |
+|--------|-----|
+| -d  | MALTA2 Digital Processing |
+| -f  | MALTA3 Digital Processing |
+| -fHWC  | MALTA3 HWC Digital Processing|
+| -t  | Tracking |
+| -c  | Clustering |
+| -a  | Analysis |
+| -C  | Calorimetry analysis | 
+
+
+## Basic MultiPlane Analysis Usage
+```bash
+cd malta_simulation/
+python run_analysis_multiPlane.py -r runNumber -i analysis_flags.cfg -thr thrValue -s saveName -d -t -c -a 
+```
+
+All the analysis flags are the same as in the case of the single plane analysis, however the scripts used are in another folder analysis_multiPlane. This analysis can be used for single plane analysis, however this requires the use of a MutiPlane config inherited geometry in the GEANT4 simulation. As a consequence, legacy simulation folders should still be ran with the single plane analysis equivalent. 
+
+
+## Basic Multiplane config Usage
+
+A large scale detector can be implemented with the help of a .csv file found in /configs/geometry/. The user is instructed to use the example_geo.csv file as an example and build their own geometry. The file defines multiple MALTA2 detectors that can be arranged in different positions and angles relative to the GEANT4 origin.
+
+File layout:
+
+| Entry | Meaning|
+|-------|--------|
+|x[#]   | X Module ID (0-99)|
+|y[#]   | Y Module ID (0-99)|
+|z[#]   | Z Module ID (0-99)|
+|xoff[cm]| x offset|
+|yoff[cm]| y offset|
+|zoff[cm]| z offset|
+|xrot[deg]| x rotation|
+|yrot[deg]| y rotation|
+|zrot[deg]| z rotation|
+|mod[#]  | Module ID|
+
+Illegal positioning of MALTA2 detectors will be flagged by the GEANT4 checkOverlap function. 
+
+In order to use the desired geometry file the correct path needs to be passed in both the simulation and analysis flags files.
 
 # GEANT4 Simulation structure
 The GEANT4 simulation is structured based on the usual file format. The functionality of each class is described further below:
@@ -63,7 +105,7 @@ This class implements all the methods for importing and saving configurations an
     - GetRequestCpusFromSubmitFile() Used for checking the number of requested CPUs is comaptible with the number of GEANT4 threads for remote job submission
     - trowWarning() Formatted warning trowing
     - trowError() Formatted error trowing
-Detailed explanation of the simulation flag functionality is described in another subsection below. [TODO: Link?]
+Detailed explanation of the simulation flag functionality is described in another subsection below.
 
 ## CorrectionData2D
 The current simulation code does not use this function.
@@ -128,6 +170,8 @@ Currently, no energy distribution, beam straggling, beam spread or mixed particl
 
 The time structure of the beam can be customized with the help of the beamVeto flag.
 
+Additionally, a specific time structure of the particle gun can be implemented via the itkEnable flag. It aims to simulate the particle hit occupancy in the ATLAS detector, scaled to the size of the MALTA sensor. The simulation can switch between several layers and/or regions of the ATLAS detector via the flags: itkInput, itkLayer. The data input files are in the /ITK_Input directory. The ATLAS hit occupancy simulates a luminosity <mu> = 200. This factor can be scaled with the help of the pileUpScale flag. Additionally, the pseudorapidity region can be selected with the help of a flag.
+
 ## RunAction
 This class inherits the GEANT4 class G4UserRunAction and gives access to run level GEANT4 actions.
 
@@ -179,11 +223,11 @@ This class inherits the GEANT4 G4UserTrackingAction class and implements GEANT4 
 This directory provides all the tools for performing the tracking, clustering and analysis of the raw simulation files. All functions are written as root functions. At each analysis step a debugging/monitoring root file is created in the Results/ directory together with monitoring histograms in the Plots/ directory. 
 
 ## DigitalProcessing
-Provides the digital processing of the hits. The main steps of this analysis step are:
-1. Summ up all hits based on eventID and hit pixel coordinates. 
+Provides the MALTA2 digital processing of the hits. The main steps of this analysis step are:
+1. Summ up all hits based on eventID and hit pixel coordinates. The code was revised. While the suming logic is inherited in the code, the main suming step is performed in GEANT in order to reduce the data size.
 2. Create threshold dispersion map
 3. Apply threshold to all 4 or more hits associated to 1 event and discard all hits below threshold
-4. Compute the timing of the hit based on 3 effects: global time stamp, timeWalk calculated with GetTimingOffset() and rowPropagation calculated via 7ns/ 512 rows
+4. Compute the timing of the hit based on 3 effects: global time stamp, timeWalk calculated with GetTimingOffset() and rowPropagation calculated via 7ns/ 512 rows. Additionally, a multi-chip time offset of 8 ns is added when running in multiPlane mode.
 5. Encode the hits into digital words, following the MALTA bit description
 6. Sort all digital words into time buckets of programmable size
 7. Merge all words inside the same time bucket, applying a simple OR operation to them
@@ -198,6 +242,43 @@ The digital processing outputs the following data:
        NHits
     Plots/SaveName/histos.root/h1Dthreshold - 1D dsitribution of the threshold smearing
     Plots/SaveName/histos.root/h2Dthreshold - 2D dsitribution of the threshold smearing
+
+## PRIOFIFOFullDigitalProcessing
+Provides the MALTA3 digital processing of the hits. Just as in the case of the DigitalProcessing script, a minimal readout simulation is implemented, which aims only to recreate the mechanisms of digital word loss due to merging and pile-up. The main of steps of this analysis track are:
+
+1. Group level hit merging. Two or more hits will be merged in the same MALTA word if they fall into the same group in a time window defined by the user defined variable: slowcontrolDelay. Dominik Danheim's PhD thesis quotes a possible range between 0.5 - 2 ns in the current slow control DAC implementation. The merging of hits into a single word can be either beneficial or desturctive. Due to the hot encoding of the pixel address, each pixel position has a reserved position in the 16 bit word. If two hits in the same group position arrive, one of the hits will be lost. If two hits arrive in different positions, the merging will be constructive. Statistically, this effect is much more likely to be a constructive effect. A value smaller than 0.5 ns is not probable to be implemented, however a larger value could be accomodated into the design.
+
+Parameters: slowcontrolDelay
+
+2. Bus level merging. The MALTA matrix is divided into 512 buses that transmit the pixel data column-wise towards the periphery. Each double -collumn (DC) contains 2 busses. Neighboring pixel groups in a DC are divided into even or odd pixel groups and occupy a sepparate bus. Each read-out bus contains 21 lines (16 pixel address + 5 group ID). Every time a pixel group generated a VALID digital signal (given by the 16-OR logic of REF pulses in a group), a 21 bit word is propagated down the repsective column bus. The bus propagation is characterized by a characteristic time measured in the test beam: 7ns/512 rows. This equates to a row by row word propagation of 0.012 ns /row. The column propagation is facilitated by NAND gates and buffer circuits. If a bus is occupied by the word propagation at a specific row and another word gets pushed into the bus, the two words will be merged in the NAND gate. Due to the 0 bit propagation of the hot encoded pixel hits, this acts as an effective OR between the two words. This will most likely lead to an un-physical shift of hit coordinates or even loss of hit information. The merging threshold is defined by the default value of: 0.105. For most applications, this loss mechanism does not have a leading order effect. 
+
+Parameters: busMergingThreshold
+
+3. Synchronization Memory pile-up. Each column bus is drained into a memory circuit. The memory is divided into (default values) 2 width, 4 depth SRAM blocks. In order to cope with the word size (21b of position information + 17b of timing information) 19 SRAM blocks are implemented for each bus. The memory is further clocked by a maximum clock of 640 MHz frequency and drained into a FIFO. The memory draining is done one memory block per clock cycle. Due to the many to one connection between all the memory blocks of the entire array and the single FIFO, a priority algorithm needs to be implemented. The default priority encoder algorithm is Round Robin. An loss of information can occur at this stage if a memory block is full (by default 4 words) and another word arrives, without a reading clock cycle occuring (due to the hit timing). 
+
+Parameters: SRAMFrequency, SRAMDepth
+
+4. FIFO pile-up. The entire sensor contains a 128 word (64b each) width FIFO. The maximum read-out of this FIFO is defined by the maximum LpGBT read-out bandwidth of 10.4 Gb/s. This translates to a maximum word frequency of 160 MHz. Several FIFOs can be multiplexed still into a single read-out line. A maximum multiplexing of 6-7 FIFOs to one read-out line is possible. The multiplexing effectively increases the size of the FIFO but reduces proportionally the bandwith/ readout frequency per FIFO. The only mechanism through which the read-out frequency of a single FIFO can be increased could be the existance of several read-out lines off-chip. 
+
+Parameters: FIFOFrequency, FIFOSize
+
+## PRIOFIFOHWCProcessing
+Performs the digital processing of Raw MALTA hits. The design is based on a modified MALTA3 readout. It contains an additional circuit per readout bus in the chip periphery: Haming Weight Circuit (HWC). The design modification aims to improve the calorimetry counting performance at the detriment of position resolution. The readout aims to provide only X or Y strip information with a maximum resolution on the order of one double column.
+
+Steps 1, 2 and 4 inherited from hte PRIOFIFOFullDigitalProcessing script. Only the step 3 contains significant changes. All words arriving at the end of the column are treated in the following maner:
+
+The 21 bits corresponding to the pixel and group end of column information are condensed into a 4 bit word. This word contains only the number of high bits in the pixel address, effectively encoding the number of hits in a triggered group. The 4 bit word is stored into 2 SRAMS of dimensions: width 2 and depth 4. In order to form 64 bit words for the FIFO processing step, several words are read out in the same read cycle. For the simple case of 1 4 bit word per column a maximum of 14 words can fit in a single 64 output word. An additional 6bit of information is appended which encodes the sector ID for future position reconstruction. Additionally, 2 chip ID bits are reserved for future implementation. Assuming an ordered read-out from all SRAMs the readout order of the 4 bit sub-words determines the double column position. Futher word multiplexing can be performed by itteratively adding together neighboring multiplexed words. E.g. 4b + 4b = 5b word. This allows for further hit information condensation. In the case of 5bit words, a maximum of 11 double collumns can be encoded into a single 64 bit word. This multiplexing can be further extrapolated up to a bit size of 11 bits which can enode the number of hits in the entire matrix, at the cost of total loss of position resolution. In the simulation, the implementation can be customized by requesting both the desired sector size (which encodes the number of double collumn contained into a single 64 word) and the word size which needs to be set according to the limitation of the 64b AURORA word. User guideline for value choices is detailed below:
+
+|sectorSize | wordSize |
+|-----------|----------|
+|     7     |    4     |
+|    11     |    5     |
+|    18     |    6     |
+|    32     |    7     |
+|    56     |    8     |
+|    96     |    9     |
+|   160     |   10     |
+|   256     |   11     |
 
 ## Tracking
 Performs the matching between tracks reconstructed from MONTE CARLO truth information and reconstructed hits given spatial and timing cuts
@@ -234,6 +315,8 @@ The clustering outputs the following data:
        analysisVertexY
        clSize
        timing
+
+4. The cluster position can be saved via two methods, controlled by the clPos flag. If the flag is set as MC, then the Monte Carlo position of the hit assigned to the cluster is saved. If the flag is set as COM, the center of mass of the cluster is saved.
 
 ## Analysis
 Provides the final analysis step which computes the per bin efficiency, cluster size and timing. 
@@ -313,11 +396,14 @@ Time walk calibration scaling default values:
 
     -T = 390, Tdiv = 200, TrefThr = 150, x0 = 149.8, n = 0.65, t0 = 0
 
+Time jitter of the MALTA2 read-out default values:
+    -scintillatorJitter = 0.5, samplingJitter = 0.9
+
 MALTA2 digital encoding information default values:
 
     -groupSize = 16, groupLeng = 5, parityLeng = 1, dColLeng = 8
 
-MALTA2 meging time bucket size default value:
+MALTA2 merging time bucket size default value:
 
     -wordSpacing = 1.6
 
@@ -340,16 +426,56 @@ Tracking and clustering distance and time cut default values:
 Tracking uncertainty enable/disable default value:
 
     -trkUnc = true
+
+Cluster position information. Can be saved as either Monte Carlo Truth (MC) or the center of mass (COM)
+
+    -clPos = MC/COM
     
 Verbose flags for each analysis step default values:
 
     -verboseDigital = false, verboseTracking = false, verboseClustering = false, verboseAnalysis = false
 
+X and Y Track offset. Correct values are needed in order to sucesfully align the sensor and the particle beam in the tracking stage. Default values for a detector off-set of 5 cm: (50 - 18.6368/2 = -40.6816):
+
+    -trackOffsetX = -40.6816
+    -trackOffsetX = -40.6816   
+
+Beam veto value. It represents the fixed time between consecutive beam bunches from the GEANT4 particle gun. This value needs to match the value used in the GEANT4 simulation step. This flag is only used in the calorimetry analysis. Default value for calorimetry:
+
+    -veto = 10000
+
+MALTA3 readout parameters. The significance of these parameters is explained in a dedicated MALTA3 section above. Additionally, several flags are introduced in order to maintain the simulation compatibility with other tracks. The boolHWC flag should be used only in the case of the special Haming Weight Circuit simulation implementation. When turned on, it modifies the calorimetry hits per event computation compared to the usual calorimetry of the MALTA2 and MALTA3 FIFOProcessing scripts. The Sector Size and word size are flags native to the HWC analysis tracks. The Sector Size defines the number of double columns multiplexed into a single word, while the wordSize encodes the size of each multiplexed word. There is a strict relation between these 2 quantities: [sectorSize, wordSize] = [7,4],[11,5],[18,6],[32,7],[56,8],[96,9],[160,10],[256,11]. The prioAlgo represents the priority encoding algorithm used in the HWC track. Three different algorithms can be used: RoundRobin, MostFilled, MostFull.  Default values are:
+
+    -slowcontrolDelay = 0.5
+    -busMergingThreshold = 0.105
+    -SRAMFrequency = 1.5
+    -sramDepth = 4
+    -FIFOFrequency = 6.25
+    -FIFOSize = 128
+    -boolHWC = true
+    -sectorSize = 7
+    -wordSize = 4
+    -prioAlgo = RoundRobin / MOSTFULL / MOSTFILLED
+    
+Multi-plane simulation processing flag. It switches between two modes: MALTA2 and MALTA3. The only difference between the 2 is the module building of the two sensors. MALTA2 modules propagate hits in a daisy-chained form, leading to additional error sources. MALTA3 does not yet have a module strategy. In the simulation, it is assumed that no module-specific error sources exist.
+
+    -simProc = MALTA2 / MALTA3
+
+MultiPlane allignment files. These flags need to be correctly configured in the use case of the multiPlane geometry mode. This is the default use case for multiple Plane simulations. The nPlanes_100 flag encodes the number of planes in the z axis, nPlanes_10 in the y axis and nPlanes_1 in the x axis. The modules flag encodes the number of distinct modules. In the case of any MALTA3 analysis this should always be the same as the total number of planes. In the case of the MALTA2 planes, modules of up to size 4 can be built in the x axis. The input geometry file needs to reside in configs/geometry/. The path to the file is passed via the geoFile flag.
+
+    -nPlanes_100 = 1
+    -nPlanes_10 = 1
+    -nPlanes_1 = 1
+    -modules = 1
+    -geoFile = geo_X1Y1Z1.csv
+
 ## flags.cfg
 
-Geometry flag used for switching between the MALTA geometry implementation and the PCB geometry implementation
+Geometry flag used for switching between the MALTA geometry implementation, the PCB geometry implementation and the MULTIMALTA scalable implementation. The geoFile flag imports the position and orientation of all sensitive MALTA sensors. The largeScaleFlag is an additional flag that allows for the implementation of passive material in conjuction with the MULTIMALTA multiple planes implementation.
 
-    -preDefinedGeometryFlag = MALTA / PCB
+    -preDefinedGeometryFlag = MALTA / MALTASPS / PCB / MULTIMALTA
+    -largeScaleFlag = EPICAL
+    -geoFile = geo_EPICAL.csv
 
 Detector X,Y,Z offsets relative to the GEANT4 origin in [cm]. Default values:
 
@@ -371,17 +497,18 @@ World volume material. Accepted values are G4_GALACTIC (vacuum) and G4_AIR:
 
     -outsideMaterial = G4_Galactic / G4_AIR
 
-Particle source geometry. Available presets: pencil, circle, rectangle, granularBeam = 1 particle every 2 pixels in X (simulate out of group hits)
+Particle source geometry. Available presets: pencil, circle, rectangle, granularBeam = 1 particle every 2 pixels in X (simulate out of group hits). The gausSmearing flag works in conjunction with the gaussian beamGeometry and defines the X and Y symmetric sigma in cm.
 
-    -beamGeometry = pencil / circle / rectangle / granularBeam
+    -beamGeometry = pencil / circle / rectangle / granularBeam / gaussian
+    -gausSmearing = 0.1
 
 Beam offset in X, Y, Z default values [cm]:
 
     -beamXOffset = 5., beamYOffset = 5., beamZOffset = - 100.
 
-Beam size, assuming only symmetrical beam geometry implementation, default value [mm]:
+Beam size, assuming only symmetrical beam geometry implementation (sourceRadius flag) The circle beamGeometry uses this. Asymmetric implementation via the flags: soureRadiusX, sourceRadiusY. The rectangle geometry uses this. Default value [mm]:
 
-    -sourceRadius = 18.6368
+    -sourceRadius = 18.6368, -sourceRadiusX = 18.6368, -sourceRadiusY = 18.6368
 
 Spill size, or number of particles fired in a coincidence time window, default value:
 
@@ -399,21 +526,35 @@ Period of the beam, default value [ns]:
 
     -beamVeto = 1000
 
-Primary particle type, default:
+Primary particle type, default. Additionally a special implementation can be enabled with the flag: pionMix for an equal population of positive and negative pions.
 
     -particleType = proton
 
-Primary particle energy, default value [GeV]:
+Primary particle energy, default value [GeV]. EnergyDistribution currently implemented is log:
 
     -particleEnergy = 120
+    -energyDistribution = none
 
 Momentum of the primary particle, default values:
 
     -particleMomentumX = 0., particleMomentumY = 0., particleMomentumZ = 1.
 
+Primary generator ATLAS ITK Input. itkEnable flag enables or disables the ATLAS ITK particle population; pileUpScale sclaes up or down the luminosity content. The data is based of off <mu> = 200; the itkInput flag points towards the data input file residing in ITK_Input; the itkLayer flag selects the layer in the respective ITK subdetector; the itkZ flag selects the pseudorapidity region, based on the radial z coordinate.
+
+    -itkEnable = false
+    -pileUpScale = 1
+    -itkInput = pixBarrel_occ
+    -itkLayer = 0
+    -itkZ = 0
+
 Physics list flags. Enable/disable different physics processes, default values:
 
     -EMPhysics = true, hadronPhysics = true
+
+Simple single plane calorimetry. Should be used together with MALTA preDefinedGeometryFlag. The implementation can be switched on or off via the flag dutTungstenAbsorberFlag. The thickness of the absorber can be set via the flag absorberThickness.
+
+    -dutTungstenAbsorberFlag = false
+    -absorberThickness = 3.2
 
 Distance cut values for e-,e+ and photons, default value:
 

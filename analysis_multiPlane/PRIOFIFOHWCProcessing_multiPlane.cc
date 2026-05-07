@@ -1,9 +1,11 @@
 #include "DigitalProcessing.hh"
+#include "Tracking_multiPlane.hh"
 #include <bit>
 
-// Raw data sorting hash
+
 struct PairHash 
 {
+    // Raw data sorting hash
     size_t operator()(const std::pair<int, std::pair<int,int>>& k) const {
         size_t h = std::hash<int>{}(k.first);
         h ^= std::hash<int>{}(k.second.first)  + 0x9e3779b9 + (h<<6) + (h>>2);
@@ -12,14 +14,14 @@ struct PairHash
     }
 };
 
-void PRIOFIFOHWCProcessing(double inputThreshold, int runNumber, std::string saveName)
+void PRIOFIFOHWCProcessing_multiPlane(double inputThreshold, int runNumber, std::string saveName)
 {
 
     auto start = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double, std::milli> elapsed{};
     std::chrono::time_point<std::chrono::high_resolution_clock> end, end1, end2, end3, end4, end5, end6, end7, end8;
     // Set all the analysis flags for the digital processing
-    auto analysisFlags = new SimFlags{};
+    auto analysisFlags = new AnaFlags{};
     const char* configPath = std::getenv("ANALYSIS_CONFIG");
     LoadAnalysisFlagsFromFile(configPath, *analysisFlags);
 
@@ -47,103 +49,124 @@ void PRIOFIFOHWCProcessing(double inputThreshold, int runNumber, std::string sav
     int pixXNum = 512;
     int pixYNum = 512;
     int groupRepetition = 32;
+    int nPlanes_100 = analysisFlags->nPlanes_100;
+    int nPlanes_10 = analysisFlags->nPlanes_10;
+    int nPlanes_1 = analysisFlags->nPlanes_1;
+    int nPlanes = nPlanes_100*nPlanes_10*nPlanes_1;
 
     std::string localPath = analysisFlags->localPath;
     std::string inputPath = analysisFlags->inputPath + Form("_%04d/", runNumber);
     std::string directoryPath = localPath + "Plots/";
     std::string runPath = Form("local_%04d/", runNumber);
 
+    // Load geometry file
+    DetectorConfig cfg = LoadConfig(inputPath + "flags_MP_Calo.cfg"); // Needs generalization of flag input
+    auto geoMaps = LoadGeometry(analysisFlags->geoFile, cfg);
+
+
+    /////////////////////////////////////////////////////////
+    /////////////////////////////////////////// \(.(^).)/ Save Data
+    /////////////////////////////////////////////////////////
+    mkdir((inputPath + saveName).c_str(), 0777);
+    TFile *outfile = new TFile((inputPath + saveName + "/Plane0ReconstructedHitsThr" + std::to_string(int(inputThreshold)) + ".root").c_str(), "RECREATE");
+    outfile->cd();
+    // Create a TTree
+    TTree *recontructedTree = new TTree("ReconstructedHits", "Reconstructed Hits");
+    // Variables for branches
+    int reconstructedPixX, reconstructedPixY, nHits, planeVal;
+    double reconstructedTiming;
+    // Create branches
+    recontructedTree->Branch("planeID", &planeVal, "planeID/I");
+    recontructedTree->Branch("PixX", &reconstructedPixX, "PixX/I");
+    recontructedTree->Branch("PixY", &reconstructedPixY, "PixY/I");
+    recontructedTree->Branch("timing", &reconstructedTiming, "timing/D");
+    recontructedTree->Branch("NHits", &nHits, "NHits/I");
+    // Create a TTree
+    TTree *posTree = new TTree("PositionHits", "Position Hits");
+    int stripSaveX, stripSaveY;
+    double timingSave;
+    // Create branches
+    posTree->Branch("planeID", &planeVal, "planeID/I");
+    posTree->Branch("stripX",   &stripSaveX, "stripX/I");
+    posTree->Branch("stripY",   &stripSaveY, "stripY/I");
+    posTree->Branch("timing",  &timingSave, "timing/D");
+
+
     std::cout << "############################# FIFO Processing started for:" << std::endl;
     std::cout << inputPath << std::endl;
-    // Extract raw data
-    TChain *chainPixel = new TChain("RawPixelHits");
-    for (int t = 0; t <= numThreads - 1; ++t) 
-    {
-        chainPixel->Add(Form("%soutput0_t%d.root", inputPath.c_str() , t));
-    }
-    // Disable reading of all branches exceot for the ones needed.
-    chainPixel->SetBranchStatus("*", 0);
-    for (const char* b : {"iEvent","iPlane","PixX","PixY","hitTime","hitEnergy"})
-        chainPixel->SetBranchStatus(b, 1);
-    Long64_t nRawEntries = chainPixel->GetEntries();
 
-    
-    float corrEnergy_float, timeWalkHit_float;
-    int rawEventID, planeID, pixX, pixY;
-    /*
-    chainPixel->SetBranchAddress("iEvent", &rawEventID);
-    chainPixel->SetBranchAddress("iPlane", &planeID);
-    chainPixel->SetBranchAddress("PixX", &pixX);
-    chainPixel->SetBranchAddress("PixY", &pixY);
-    chainPixel->SetBranchAddress("hitTime", &timeWalkHit_float); // TODO change var name
-    chainPixel->SetBranchAddress("hitEnergy", &corrEnergy_float); // TODO change var name
-    */
-
-    TTreeReader reader(chainPixel);
-    TTreeReaderValue<int>   rvRawEventID(reader, "iEvent");
-    TTreeReaderValue<int>   rvPlaneID(reader, "iPlane");
-    TTreeReaderValue<int>   rvPixX   (reader, "PixX");
-    TTreeReaderValue<int>   rvPixY   (reader, "PixY");
-    TTreeReaderValue<float> rvTimeWalkHit_float   (reader, "hitTime");    
-    TTreeReaderValue<float> rvCorrEnergy_float (reader, "hitEnergy");
-
-    //std::cout << "GOT HERE!  " << std::endl;
     // Generate threshold map
     auto thresholdMap = generateThrMap(inputThreshold, pixXNum, pixYNum, groupRepetition, relativeThresholdSmearingCol, relativeThresholdSmearingMean, directoryPath, runPath, saveName);
 
-    // Avoid O(n^2) nested loops via extra map 
-    //std::map<std::pair<int,std::pair<int, int>>, double> enMap; 
-    //std::map<std::pair<int,std::pair<int,int>>, std::vector<double>> timeMap;
-    
+    // Avoid O(n^2) nested loops via extra maps     
     std::unordered_map<std::pair<int,std::pair<int,int>>, double, PairHash> enMap;
     std::unordered_map<std::pair<int,std::pair<int,int>>, std::vector<double>, PairHash> timeMap;
     std::unordered_map<std::pair<int,std::pair<int,int>>, double, PairHash> maxTimeMap;
 
     int eventIDHolder =0;
-    int nPlanes = 1;
-
     std::vector<std::pair<__uint128_t,double>> fifo{};
-    // Initialize reader and restart outside loop to avoid spurious segmentation
-    reader.Next();
-    reader.Restart(); // rewind to entry 0 for each plane
+    auto multiPlanes = CaloPreProcessing(inputThreshold, runNumber, saveName); 
+    //int nPlanes = static_cast<int>(multiPlanes.size());
 
+    std::vector<int> planes;
+    cout << "Adding Planes to analysis: ";
+    for (int iz = 0; iz < nPlanes_100; ++iz) {
+        for (int iy = 0; iy < nPlanes_10; ++iy) {
+            for (int ix = 0; ix < nPlanes_1; ++ix) {
+                planes.push_back(iz*10000 + iy*100 + ix); // decoded position (works for up to 10 planes in each dimension)
+                cout << iz*10000 + iy*100 + ix << ", " ;
+            }
+        }
+    }
+    std::cout << std::endl;
+    //std::cout << "nPlanes: " << nPlanes << std::endl;
     for (int i = 0; i< nPlanes; i++)
+    //for (const int & i : planes)
     {
-        // Restart reader for each plane
-        reader.Restart(); // rewind to entry 0 for each plane
         enMap.clear();
         timeMap.clear();
-        // Sum up all hits in an event per pixel. This assumes all energy is collected instantly and 
-        // timing cuts will be made only based on time walk and particle travel time.
-        //for (Long64_t j = 0; j < nRawEntries; j++)
-        //{
-        //    chainPixel->GetEntry(j);
+        maxTimeMap.clear();
+        planeVal = planes[i];
+
+        TTree* planTree = multiPlanes[i];
+        if (!planTree || planTree->GetEntries() == 0) {
+            std::cout << "Plane " << planes[i] << " is empty, skipping." << std::endl;
+            continue;
+        }
+
+        float corrEnergy_float, timeWalkHit_float;
+        int rawEventID, planeID, pixX, pixY;
+        planTree->SetBranchAddress("iEvent",     &rawEventID);
+        planTree->SetBranchAddress("iPlane",     &planeID);
+        planTree->SetBranchAddress("PixX",       &pixX);
+        planTree->SetBranchAddress("PixY",       &pixY);
+        planTree->SetBranchAddress("hitTime",    &timeWalkHit_float);
+        planTree->SetBranchAddress("hitEnergy",  &corrEnergy_float);
+        Long64_t nRawEntries = planTree->GetEntries();
+
+        std::cout << "nRawEntries: " << nRawEntries << std::endl;
+
+        // Extract plane offset values from input geometry file
+        Offset planeOffset = geoMaps[planes[i]];
+        double dutAxisRotation = planeOffset.zrot;
+        std::cout << "X: " << planeOffset.x << "; Y: " << planeOffset.y << "; Z: " << planeOffset.z 
+                  << "; xROT: " << planeOffset.xrot  << "; yROT: " << planeOffset.yrot  << "; zROT: " << planeOffset.zrot << std::endl;
+
+        
         ////////////////////////////////////////////////////////////
         /////////////////////////////////////////// .1. Raw IO calls
         ////////////////////////////////////////////////////////////
-
-        //std::cout << "nRawEntries: " << nRawEntries << std::endl;
-        while (reader.Next()) 
+        for (Long64_t j = 0; j < nRawEntries; j++)
         {
-            // Lazy convert to the previous var names
-            rawEventID = static_cast<int> (*rvRawEventID);
-            planeID = static_cast<int> (*rvPlaneID);
-            pixX = static_cast<int> (*rvPixX);
-            pixY = static_cast<int> (*rvPixY);
-            timeWalkHit_float = static_cast<float> (*rvTimeWalkHit_float);
-            corrEnergy_float = static_cast<float> (*rvCorrEnergy_float);
+            planTree->GetEntry(j);
 
-
-            double corrEnergy = static_cast<double>(corrEnergy_float);
+            double corrEnergy  = static_cast<double>(corrEnergy_float);
             double timeWalkHit = static_cast<double>(timeWalkHit_float);
-            //std::cout <<  "Float: " << corrEnergy_float << "; Double: " << corrEnergy << std::endl;
-            if (planeID != i) continue;
-            enMap[{rawEventID, {pixX, pixY}}] += corrEnergy;
+
+            enMap[{rawEventID, {pixX, pixY}}]  += corrEnergy;
             timeMap[{rawEventID, {pixX, pixY}}].push_back(timeWalkHit);
-            // Save the max timing to avoid further scanning
             auto& maxRef = maxTimeMap[{rawEventID, {pixX, pixY}}];
             if (timeWalkHit > maxRef) maxRef = timeWalkHit;
-            eventIDHolder = rawEventID;
         }
 
         end1 = std::chrono::high_resolution_clock::now();
@@ -197,9 +220,6 @@ void PRIOFIFOHWCProcessing(double inputThreshold, int runNumber, std::string sav
 
         double t0 = sortedTimings.begin()->second;
 
-        //double FIFOFrequency = analysisFlags->fifoFrequency; //ns
-        //int    fifoSize = analysisFlags->fifoSize; // 1215752192 max int
-        //std::vector<double> vtiming(512, 0);
         std::vector<std::pair<__uint128_t, double>> words{};
         std::vector<std::pair<__uint128_t, double>> groupMergedWords{};
         __uint128_t groupMerger{};
@@ -310,7 +330,6 @@ void PRIOFIFOHWCProcessing(double inputThreshold, int runNumber, std::string sav
                 
             }
             wordsAfterGroup.insert(wordsAfterGroup.end(), groupMerged.begin(), groupMerged.end());
-            //words.swap(groupMerged);
         }
         end4 = std::chrono::high_resolution_clock::now();
         elapsed = end4 - end3;
@@ -331,7 +350,6 @@ void PRIOFIFOHWCProcessing(double inputThreshold, int runNumber, std::string sav
             int doubleColumn = word& 0xFF;
             int parity = (word & ((__uint128_t)1 << 8)) != 0;
             //std::cout <<"DC: " << doubleColumn << "Parity: " << parity << std::endl;
-            //int bus = ( parity + 1) * doubleColumn;
             int bus = 2 * doubleColumn + parity;
             busWords[bus].push_back({word,timing});
         }
@@ -365,9 +383,7 @@ void PRIOFIFOHWCProcessing(double inputThreshold, int runNumber, std::string sav
             }
 
             wordsAfterBus.insert(wordsAfterBus.end(), busMerged.begin(), busMerged.end());
-            //words.swap(busMerged);
         }
-        //wordsAfterBus = words;
         std::sort(wordsAfterBus.begin(), wordsAfterBus.end(), [](auto &a, auto &b){return a.second < b.second;});
         
         end5 = std::chrono::high_resolution_clock::now();
@@ -383,17 +399,14 @@ void PRIOFIFOHWCProcessing(double inputThreshold, int runNumber, std::string sav
         std::vector<int> memoryModule(512,0); 
         std::vector<std::vector<std::pair<__uint128_t, double>>> memoryWordStore(512); 
         std::queue<int> occupiedSectors{};
-        //std::vector<double> vprevTiming{512,0.};
         double prevGlobalTiming{0};
-        //std::vector<double> vtimeSRAM{512,0};
         double timeMEMSYNC{0.};
         std::vector<std::pair<__uint128_t, double>> wordsAfterSRAM{};
-        //int fifo{0};
         // nSectors needs to handle non even division of the matrix into sectors.
         int missedHitCount{};
         int nSectors = (512 + (2 * sectorSize) - 1) / (2 * sectorSize);
 
-        std::vector<int> sectorOccupancy(nSectors);  // WARNING hardcoded for now 
+        std::vector<int> sectorOccupancy(nSectors);
         for (auto& [word,timing]: wordsAfterBus)
         {
             // This is not generalized for any bit size
@@ -401,9 +414,7 @@ void PRIOFIFOHWCProcessing(double inputThreshold, int runNumber, std::string sav
             int doubleColumn = word& 0xFF;
             int parity = (word & ((__uint128_t)1 << 8)) != 0;
             //std::cout <<"DC: " << doubleColumn << "Parity: " << parity << std::endl;
-            //int bus = ( parity + 1) * doubleColumn;
             int bus = 2 * doubleColumn + parity;
-            // Validated
             //std::cout << "bus: " << bus <<std::endl;
             double prevTiming = prevGlobalTiming;
             double timeDiff = timing - prevTiming;
@@ -417,18 +428,15 @@ void PRIOFIFOHWCProcessing(double inputThreshold, int runNumber, std::string sav
             if(verbose) std::cout << nRead << std::endl;
             if(nRead >= 1)
             {
-                // TODO: Implement SMART RO ALGO Switching
                 for (int k = 0; k < nRead; k++) 
                 {                
                     int sector{};
                     if (!occupiedSectors.empty())
                     {
                         __uint128_t HWCWord{};
-                        bool hasData = true;
 
                         if (prioAlgo == "RoundRobin") sector = occupiedSectors.front();
                         occupiedSectors.pop();
-                        //int firstBus = firstFilledSectorBus(memoryModule); 
                         // Determine the first sector of buses to read based on the sector with the most non empty memory entries
 
                         
@@ -450,107 +458,86 @@ void PRIOFIFOHWCProcessing(double inputThreshold, int runNumber, std::string sav
                             auto it = std::max_element(filledBuses.begin(), filledBuses.end());
                             sector = std::distance(filledBuses.begin(), it);
                         }
-                        
-                        // If there are no more words to read out in this read cycle STOP
-                        //bool hasData = (*it > 0);
-                        //int firstBus = maxSector * 2*sectorSize;
-
-                        
-                        
                         // Improvise a timing value to remain consistent with the structure of the code.
                         // This info should be normally ditched in this RO scheme
-                        if (hasData)
+                        double improvTiming{};
+                        // Read all busses in the sector
+                        // This for loop implementation addresses the edge case when the nPix % sectorSize!=0
+                        int start = sector * 2 * sectorSize;
+                        int end   = std::min(start + 2 * sectorSize, 512);
+                        //std::cout << "Sector Occ: " << sectorOccupancy[sector] << std::endl;
+                        int numValids{};
+                        std::vector<uint32_t> vreducedWords{};
+                        for (int i = start; i < end; i++)
                         {
-                            //if(maxSector == 9 && filledBuses[maxSector] == 56)
-                            //{
-                                //std::cout << "!!!!!!!!!!!!!!!!!!!!!" << std::endl;
-                                //std::cout << "maxSector: " << maxSector << "; it: " << *it << "; Filling: " << filledBuses[maxSector] << std::endl;
-                            //}
-                            double improvTiming{};
-                            // Read all busses in the sector
-                            //for (i = 0; i< 2*sectorSize; i++)
-                            // This for loop implementation addresses the edge case when the nPix % sectorSize!=0
-                            int start = sector * 2 * sectorSize;
-                            int end   = std::min(start + 2 * sectorSize, 512);
-                            //std::cout << "Sector Occ: " << sectorOccupancy[sector] << std::endl;
-                            int numValids{};
-                            std::vector<uint32_t> vreducedWords{};
-                            for (int i = start; i < end; i++)
+                            //std::cout << "i: " << i << "; B memoryModule[i]: " << memoryModule[i] << "; B memoryWordStore[i]: " << memoryWordStore[i].size();
+                            // Drain each bus
+                            // append the drained words to a single word for the next processing step
+                            if (memoryModule[i] > 0 && !memoryWordStore[i].empty()) 
                             {
-                                //std::cout << "i: " << i << "; B memoryModule[i]: " << memoryModule[i] << "; B memoryWordStore[i]: " << memoryWordStore[i].size();
-                                // Drain each bus
-                                // append the drained words to a single word for the next processing step
-                                if (memoryModule[i] > 0 && !memoryWordStore[i].empty()) 
-                                {
-                                    //std::cout << "HWCWord: " << std::bitset<4>(memoryWordStore[i].front().first)  << "; Try: " << std::bitset<10>(memoryWordStore[i].front().first ) << "; Cur: " << std::bitset<4>(memoryWordStore[i].front().first & 0xF) << std::endl;
-                                    uint32_t fourBit  = memoryWordStore[i].front().first & 0xF;
-                                    //HWCWord = (HWCWord << 4) | fourBit;
-                                    //improvTiming = memoryWordStore[i].front().second;
-                                    vreducedWords.push_back(fourBit);
-                                    improvTiming = std::max(improvTiming, memoryWordStore[i].front().second);
-                                    // Erase entry after appending it to the Word
-
-                                    //std::cout << "front: " << std::bitset<4>(memoryWordStore[i].front().first) << "; begin: " << std::bitset<4>((*memoryWordStore[i].begin()).first)<< std::endl;
-
-                                    memoryWordStore[i].erase(memoryWordStore[i].begin());
-                                    memoryModule[i] --;
-                                    sectorOccupancy[sector]--;
-                                    numValids++;
-                                }
-                                // If one bus is empty we append an empty bit word
-                                //else HWCWord = (HWCWord << 4); // This added realism has no impact but can induce errors
-                                else vreducedWords.push_back(0);
-                                
-                                //std::cout << "; A memoryModule[i]: " << memoryModule[i] << "; A memoryWordStore[i]: " << memoryWordStore[i].size() << std::endl;
+                                //std::cout << "HWCWord: " << std::bitset<4>(memoryWordStore[i].front().first)  << "; Try: " << std::bitset<10>(memoryWordStore[i].front().first ) << "; Cur: " << std::bitset<4>(memoryWordStore[i].front().first & 0xF) << std::endl;
+                                uint32_t fourBit  = memoryWordStore[i].front().first & 0xF;
+                                vreducedWords.push_back(fourBit);
+                                improvTiming = std::max(improvTiming, memoryWordStore[i].front().second);
+                                //std::cout << "front: " << std::bitset<4>(memoryWordStore[i].front().first) << "; begin: " << std::bitset<4>((*memoryWordStore[i].begin()).first)<< std::endl;
+                                // Erase entry after appending it to the Word
+                                memoryWordStore[i].erase(memoryWordStore[i].begin());
+                                memoryModule[i] --;
+                                sectorOccupancy[sector]--;
+                                numValids++;
                             }
-                            //std::cout << std::bitset<88>(HWCWord) << std::endl;
-                            //std::cout << " A Sector Occ: " << sectorOccupancy[sector] << std::endl;
-                            // Validated
-                            // Reinsert sector in queue if non empty
-                            if (sectorOccupancy[sector] > 0)
-                            {
-                                occupiedSectors.push(sector);
-                            }
-
-                            //std::cout << "---------------------------------------" << std::endl;
-                            auto vcompressedWords = CompressWords(vreducedWords, wordSize);
-                            for (const auto& compWord : vcompressedWords)
-                            {
-                                // Add all the words from the vector into a single word to mimic the actual HW. the mask is to ensure the word size
-                                // limit is respected
-                                HWCWord = (HWCWord << wordSize) | (compWord & ((1u << wordSize) - 1));
-
-                            }
-                            /*
-                            std::cout << "Reduced Words:";
+                            // If one bus is empty we append an empty bit word
+                            else vreducedWords.push_back(0);
                             
-                            for (const auto& el: vreducedWords)
-                            {
-                                std::cout << std::bitset<5>(el) << " ; ";
-                            }
-                            std::cout << std::endl;
-                            for (const auto& el: vcompressedWords)
-                            {
-                                std::cout << std::bitset<5>(el) << " ; ";
-                            }
-                            std::cout << std::endl;                            
-                            std::cout << "---------------------------------------" << std::endl;
-                            */
-                            //std::cout <<"HWCWord: " << std::bitset<64>(HWCWord) << std::endl;
-                            // Lastly append sector address
-                            uint8_t sixBit = sector & 0x3F;
-                            __uint128_t fullHWCWord = (HWCWord << 6) | sixBit;
-                            //if (numValids == 22)std::cout << std::bitset<64> (fullHWCWord) << std::endl;
-                            //std::cout << s << std::endl;
-                            // Now I have the multiplexed word with an arbitrary timing for the next step. I only push non zero words that escape the previous checks
-                            //std::cout << std::bitset<100>(HWCWord) << std::endl;
-                            //std::cout << "sector: " << sector << std::endl;
-                            if (HWCWord != 0) 
-                            {
-                                //std::cout << "PUSHED!" << std::endl;
-                                wordsAfterSRAM.push_back({fullHWCWord, improvTiming});
-                            }
+                            //std::cout << "; A memoryModule[i]: " << memoryModule[i] << "; A memoryWordStore[i]: " << memoryWordStore[i].size() << std::endl;
                         }
+                        //std::cout << std::bitset<88>(HWCWord) << std::endl;
+                        //std::cout << " A Sector Occ: " << sectorOccupancy[sector] << std::endl;
+                        // Reinsert sector in queue if non empty
+                        if (sectorOccupancy[sector] > 0)
+                        {
+                            occupiedSectors.push(sector);
+                        }
+
+                        //std::cout << "---------------------------------------" << std::endl;
+                        auto vcompressedWords = CompressWords(vreducedWords, wordSize);
+                        for (const auto& compWord : vcompressedWords)
+                        {
+                            // Add all the words from the vector into a single word to mimic the actual HW. the mask is to ensure the word size
+                            // limit is respected
+                            HWCWord = (HWCWord << wordSize) | (compWord & ((1u << wordSize) - 1));
+
+                        }
+                        /*
+                        std::cout << "Reduced Words:";
+                        
+                        for (const auto& el: vreducedWords)
+                        {
+                            std::cout << std::bitset<5>(el) << " ; ";
+                        }
+                        std::cout << std::endl;
+                        for (const auto& el: vcompressedWords)
+                        {
+                            std::cout << std::bitset<5>(el) << " ; ";
+                        }
+                        std::cout << std::endl;                            
+                        std::cout << "---------------------------------------" << std::endl;
+                        */
+                        //std::cout <<"HWCWord: " << std::bitset<64>(HWCWord) << std::endl;
+                        // Lastly append sector address
+                        uint8_t sixBit = sector & 0x3F;
+                        __uint128_t fullHWCWord = (HWCWord << 6) | sixBit;
+                        //if (numValids == 22)std::cout << std::bitset<128> (fullHWCWord) << std::endl;
+                        //std::cout << s << std::endl;
+                        // Now I have the multiplexed word with an arbitrary timing for the next step. I only push non zero words that escape the previous checks
+                        //std::cout << std::bitset<100>(HWCWord) << std::endl;
+                        //std::cout << "sector: " << sector << std::endl;
+                        if (HWCWord != 0) 
+                        {
+                            //std::cout << "PUSHED!" << std::endl;
+                            wordsAfterSRAM.push_back({fullHWCWord, improvTiming});
+                        }
+                    
                     }
                     // Sync back the time flow
                     timeMEMSYNC -= SRAMFrequency;
@@ -630,53 +617,26 @@ void PRIOFIFOHWCProcessing(double inputThreshold, int runNumber, std::string sav
         elapsed = end7 - end6;
         std::cout << ".7. PRIO FIFO: " << elapsed.count() << std::endl;
 
-        /////////////////////////////////////////////////////////
-        /////////////////////////////////////////// .8. Save Data
-        /////////////////////////////////////////////////////////
-        mkdir((inputPath + saveName).c_str(), 0777);
-        TFile *outfile = new TFile((inputPath + saveName + "/Plane" + std::to_string(i) + "ReconstructedHitsThr" + std::to_string(int(inputThreshold)) + ".root").c_str(), "RECREATE");
 
-        // Create a TTree
-        TTree *recontructedTree = new TTree("ReconstructedHits", "Reconstructed Hits");
-        // Variables for branches
-        int reconstructedPixX, reconstructedPixY, nHits;
-        double reconstructedTiming;
-        // Create branches
-        recontructedTree->Branch("PixX", &reconstructedPixX, "PixX/I");
-        recontructedTree->Branch("PixY", &reconstructedPixY, "PixY/I");
-        recontructedTree->Branch("timing", &reconstructedTiming, "timing/D");
-        recontructedTree->Branch("NHits", &nHits, "NHits/I");
-
-        // Create a TTree
-        TTree *posTree = new TTree("PositionHits", "Position Hits");
-        int stripSave;
-        double timingSave;
-        // Create branches
-        posTree->Branch("strip", &stripSave, "strip/I");
-        posTree->Branch("timing", &timingSave, "timing/D");
         for (const auto &word: wordsAfterFIFO)
         {
             //std::vector< std::pair<std::pair<int,int>, int> > pixelPositions = decodedDigitalWord(word.first, groupSize, groupSizeX, groupSizeY, groupLeng, parityLeng, dColLeng);
             nHits = 0;
             reconstructedTiming = word.second;
             // Sector position
-            reconstructedPixX =  (word.first & 0x3F) * sectorSize;
-            reconstructedPixY = -1; // Only strip X info
-            // Such a silly mistake. Its not the popcount its actually each 4b encode a number 
-            // TODO: Also attempt to extract X pos of each subgroup (This will be word size dependent)
-            // TODO: Double check that these are the rights bits to extract for the sector ID.
+            if (dutAxisRotation != 90)
+            {
+                reconstructedPixX =  (word.first & 0x3F) * sectorSize;
+                reconstructedPixY = -1; // Only strip X info
+            }
+            else
+            {
+                reconstructedPixX =  -1;
+                reconstructedPixY = (word.first & 0x3F) * sectorSize; // Only strip Y info
+            }
             __uint128_t x = word.first >> 6; 
             int wrongnHits = __builtin_popcountll(x);
             //std::cout << "Word: " << std::bitset<88>(x) << std::endl;
-            /*
-            while (x) 
-            {
-                //std::cout <<"x: " << std::bitset<60>(x) << std::endl;
-                nHits += (x & 0xF);  // extract lowest 4 bits
-                //std::cout << "nHits: " << nHits << std::endl;
-                x >>= 4;             // move to next nibble
-            }
-            */
             uint32_t mask = (1u << wordSize) - 1;
             int count = 0;
             while (x) 
@@ -685,9 +645,20 @@ void PRIOFIFOHWCProcessing(double inputThreshold, int runNumber, std::string sav
                 nHits += (x & mask);
                 x >>= wordSize;
 
-                stripSave = reconstructedPixX + count;
+                if (dutAxisRotation != 90)
+                {
+                    stripSaveX = reconstructedPixX + count;
+                    stripSaveY = -1;
+                }
+                else
+                {
+                    stripSaveX = -1;
+                    stripSaveY = reconstructedPixY + count;
+                }
                 timingSave = reconstructedTiming;
                 count++;
+
+                //std::cout << "stripSaveX: " << stripSaveX << " ; stripSaveY: " << stripSaveY << std::endl;
                 posTree->Fill();
             }
             //std::cout << "nHits: " << nHits << std::endl;
@@ -697,11 +668,12 @@ void PRIOFIFOHWCProcessing(double inputThreshold, int runNumber, std::string sav
             
         
         }
-        recontructedTree->Write();
-        posTree->Write();
-        outfile->Close();
         std::cout << "Finishing up analyzing Plane" << i << std::endl;
     }
+    outfile->cd();
+    recontructedTree->Write();
+    posTree->Write();
+    outfile->Close();
 
     end8 = std::chrono::high_resolution_clock::now();
     elapsed = end8 - end7;

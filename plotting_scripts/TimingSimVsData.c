@@ -36,17 +36,33 @@ void TimingSimVsData()
     }
     TH1D *h1HitDataTiming = (TH1D*) dataFile->Get("hit_time");
     TH1D *h1ClDataTiming = (TH1D*) dataFile->Get("cl_time");
+    h1HitDataTiming->Rebin(2);
     h1HitDataTiming->Scale(1.0 / h1HitDataTiming->Integral("width"));
     h1HitDataTiming->SetLineWidth(3);
     h1HitDataTiming->SetLineColor(kBlue);
     h1HitDataTiming->GetYaxis()->SetTitle("Normalized counts");
     h1HitDataTiming->GetXaxis()->SetRangeUser(118,180);   
 
+    h1HitDataTiming->GetXaxis()->SetTitleSize(0.044);
+    h1HitDataTiming->GetXaxis()->SetTickSize(0.044);
+    h1HitDataTiming->GetXaxis()->SetLabelSize(0.04);
+    h1HitDataTiming->GetYaxis()->SetTitleSize(0.044);
+    h1HitDataTiming->GetYaxis()->SetTickSize(0.044);
+    h1HitDataTiming->GetYaxis()->SetLabelSize(0.04);
+
     h1ClDataTiming->Scale(1.0 / h1ClDataTiming->Integral("width"));
     h1ClDataTiming->SetLineWidth(3);
     h1ClDataTiming->SetLineColor(kBlue);
     h1ClDataTiming->GetYaxis()->SetTitle("Normalized counts");
     h1ClDataTiming->GetXaxis()->SetRangeUser(110,150);   
+
+
+    h1ClDataTiming->GetXaxis()->SetTitleSize(0.044);
+    h1ClDataTiming->GetXaxis()->SetTickSize(0.044);
+    h1ClDataTiming->GetXaxis()->SetLabelSize(0.04);
+    h1ClDataTiming->GetYaxis()->SetTitleSize(0.044);
+    h1ClDataTiming->GetYaxis()->SetTickSize(0.044);
+    h1ClDataTiming->GetYaxis()->SetLabelSize(0.04);
 
     std::string simPath = "Plots/local_0195/Nominal/histos.root";
     std::cout << "Opening: " << simPath << std::endl;

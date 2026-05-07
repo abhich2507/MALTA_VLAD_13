@@ -78,14 +78,37 @@ std::vector<TTree*> CaloPreProcessing(double inputThreshold, int runNumber, std:
     //std::vector<TTree*> forest(planes.size());
     std::vector<TTree*> forest;
     forest.resize(modules.size());
-    
-    for (size_t i = 0; i < modules.size(); i++)
+
+    //std::cout << "modules.size(): " << modules.size() << std::endl;
+
+    if (analysisFlags->simProc == "MALTA2")
     {
-        int m = modules[i];
-        TTree* treeSplit = chainPixel->CopyTree(Form("iModule==%d", m));
-        treeSplit->SetName(Form("Module%dHits", m));
-        forest[i] = treeSplit;
-        treeSplit->SetDirectory(nullptr);
+        for (size_t i = 0; i < modules.size(); i++)
+        {
+            int m = modules[i];
+            TTree* treeSplit = chainPixel->CopyTree(Form("iModule==%d", m));
+
+            //Long64_t nRawEntries = treeSplit->GetEntries();
+            //std::cout << "nRawEntries: " << nRawEntries << std::endl;
+
+            treeSplit->SetName(Form("Module%dHits", m));
+            forest[i] = treeSplit;
+            treeSplit->SetDirectory(nullptr);
+        }
+    }
+    else
+    {
+        for (int i = 0; i < planes.size(); i++)
+        {
+            TTree* treeSplit = chainPixel->CopyTree(Form("iPlane==%d", planes[i]));
+
+            //Long64_t nRawEntries = treeSplit->GetEntries();
+            //std::cout << "nRawEntries: " << nRawEntries << std::endl;
+
+            treeSplit->SetName(Form("Plane%dHits", i));
+            forest[i] = treeSplit;
+            treeSplit->SetDirectory(nullptr);
+        }
     }
     return forest;
 
