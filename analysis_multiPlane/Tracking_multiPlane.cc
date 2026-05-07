@@ -19,7 +19,7 @@ void Tracking_multiPlane(double threshold, int runNumber, std::string saveName)
     std::string runPath = Form("local_%04d/", runNumber);
     std::string geometry = analysisFlags->geometry;
 
-    DetectorConfig cfg = LoadConfig(inputPath + "flags.cfg"); // todo: does this need to be generalized?
+    DetectorConfig cfg = LoadConfig(inputPath + "flags.cfg"); // todo: does this need to be generalized? YES
 
     std::cout << "############################# Tracking started for:" << std::endl;
     std::cout << inputPath << std::endl;

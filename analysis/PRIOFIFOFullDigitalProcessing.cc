@@ -519,6 +519,7 @@ void PRIOFIFOFullDigitalProcessing(double inputThreshold, int runNumber, std::st
         recontructedTree->Branch("NHits", &nHits, "NHits/I");
         for (const auto &word: wordsAfterFIFO)
         {
+            //std::cout << std::bitset<64>(word.first) << std::endl;
             std::vector< std::pair<std::pair<int,int>, int> > pixelPositions = decodedDigitalWord(word.first, groupSize, groupSizeX, groupSizeY, groupLeng, parityLeng, dColLeng);
             for (const auto& pos : pixelPositions) 
             {

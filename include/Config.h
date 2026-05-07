@@ -8,6 +8,7 @@ struct SimFlags
 {
     bool isBatch = false; // This is not read from the config file, but set in the main function
     std::string preDefinedGeometryFlag = "DEBUG";
+    std::string largeScaleFlag = "";
     std::string geoFile = "";
     float detectorXOffset = 0.;
     float detectorYOffset = 0.;

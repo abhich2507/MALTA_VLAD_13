@@ -56,11 +56,12 @@ void Calorimetry(float threshold, int runNumber, std::string saveName)
     // Get tree
     TTree *reconstructedTree = (TTree*) reconstructedFile->Get("ReconstructedHits");
 
-    int reconstructedPixX, reconstructedPixY;
+    int reconstructedPixX, reconstructedPixY, NHits;
     double reconstructedTiming_float;
     reconstructedTree->SetBranchAddress("PixX", &reconstructedPixX);
     reconstructedTree->SetBranchAddress("PixY", &reconstructedPixY);
     reconstructedTree->SetBranchAddress("timing", &reconstructedTiming_float);
+    reconstructedTree->SetBranchAddress("NHits", &NHits);
     Long64_t nReconstructedEntries = reconstructedTree->GetEntries();
 
     // Save to file
@@ -92,7 +93,11 @@ void Calorimetry(float threshold, int runNumber, std::string saveName)
         //std::cout << "pixX: " << pixX << " pixY: " << pixY << " timing: " << timing << std::endl;
         if (timing < timeWindow)
         {
-            numSecondaries++;
+            if(analysisFlags->boolHWC == true)
+            {
+                numSecondaries += NHits;
+            }
+            else numSecondaries++;
             pixelsToCluster.insert({pixX, pixY});
             
             
