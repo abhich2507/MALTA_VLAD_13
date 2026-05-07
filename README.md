@@ -90,6 +90,22 @@ Illegal positioning of MALTA2 detectors will be flagged by the GEANT4 checkOverl
 
 In order to use the desired geometry file the correct path needs to be passed in both the simulation and analysis flags files.
 
+## Basic Config files
+
+Several sample simulation and analysis config files have beer prepared for the user. 
+
+GEANT4 simulation config files:
+
+    -flags_SP.cfg simple single plane MALTA simulation
+    -flags_SP_ITK.cfg MALTA single plane simulation with an ITK hit occupancy based particle gun
+    -flags_SP_Calo.cfg MALTA single plane simulation of calorimetry. A single thick tungsten plate is considered
+    -flags_MP.cfg MALTA multi plane simulation
+    -flags_MP_Calo.cfg Large scale calorimeter detector simulation
+
+Analysis config files. In this case several modifications may need to be implemented to make them comaptible to the various GEANT4 simulation flags. 
+    -analysis_flags_SP.cfg MALTA single plane analysis. Should work out of the box with the flags_SP.cfg simulation flag
+    -analysis_flags_MP.cfg MALTA multi plane analysis. Should work out of the box with the flags_MP.cfg simulation flag
+
 # GEANT4 Simulation structure
 The GEANT4 simulation is structured based on the usual file format. The functionality of each class is described further below:
 
