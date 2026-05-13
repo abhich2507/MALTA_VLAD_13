@@ -158,6 +158,8 @@ void FIFOProcessing(double inputThreshold, int runNumber, std::string saveName)
 
             //std::cout << "timing: " << timing << "; prevTiming: " << prevTiming << "; timeDiff: " << timeDiff << "; timeFIFO: "<< timeFIFO << "; div: " << timeFIFO / FIFOFrequency  << timeFIFO;
 
+            if (pixX %2)
+            
             if(timeFIFO / FIFOFrequency > 1)
             {
                  

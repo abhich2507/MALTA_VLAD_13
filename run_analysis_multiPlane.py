@@ -14,48 +14,49 @@ parser.add_argument("-a", "--analysis"    , help="Analyze and generate plots"   
 parser.add_argument("-p", "--proteus"     , help="Create to Proteus Merged file"        , action="store_true")
 parser.add_argument("-thr", "--threshold" , help="Threshold list"  , type= str          , required = False)
 parser.add_argument("-i", "--input"       , help="Input configuration .cfg", type = str , required = True)
+parser.add_argument("--build", help="Path to build directory", type=str, default="build")
 args=parser.parse_args()
 
 #runNumber  = args.run
 runNumbers = args.run.split(",")
 runNumbers = [int(i) for i in runNumbers]
 saveName   = args.save
+build_dir  = args.build
 
 # Pass the path for the config input as env variable
 config_name = args.input
-os.environ["ANALYSIS_CONFIG"] = f"configs/{config_name}"
-command = f"echo $ANALYSIS_CONFIG"
-subprocess.run(command, shell = True)
+env = os.environ.copy()
+env["ANALYSIS_CONFIG"] = f"configs/{config_name}"
+print(f"ANALYSIS_CONFIG={env['ANALYSIS_CONFIG']}")
 
 if not args.proteus:
-    thresholds = args.threshold.split(",")
-    thresholds = [float(i) for i in thresholds]
+    thresholds = [float(t) for t in args.threshold.split(",")]
 
     for runNumber in runNumbers:
         for thr in thresholds:
             if args.digitize:
-                command = f"root -l -b -q 'analysis_multiPlane/DigitalProcessing_multiPlane.cc({thr},{runNumber},\"{saveName}\", false)'"
-                subprocess.run(command, shell=True, check=True)
+                command = [f"{build_dir}/run_DigitalProcessing", str(thr), str(runNumber), saveName, "0"]
+                subprocess.run(command, check=True, env=env)
 
             if args.fifoHWC:
-                command = f"root -l -b -q 'analysis_multiPlane/PRIOFIFOHWCProcessing_multiPlane.cc({thr},{runNumber},\"{saveName}\")'"
-                subprocess.run(command, shell=True, check=True)
+                command = [f"{build_dir}/run_PRIOFIFOHWCProcessing", str(thr), str(runNumber), saveName]
+                subprocess.run(command, check=True, env=env)
 
             if args.tracking:
-                command = f"root -l -b -q 'analysis_multiPlane/Tracking_multiPlane.cc({thr},{runNumber},\"{saveName}\")'"
-                subprocess.run(command, shell=True, check=True)
+                command = [f"{build_dir}/run_Tracking", str(thr), str(runNumber), saveName]
+                subprocess.run(command, check=True, env=env)
 
             if args.clustering:
-                command = f"root -l -b -q 'analysis_multiPlane/Clustering_multiPlane.cc({thr},{runNumber},\"{saveName}\")'"
-                subprocess.run(command, shell=True, check=True)
+                command = [f"{build_dir}/run_Clustering", str(thr), str(runNumber), saveName]
+                subprocess.run(command, check=True, env=env)
 
             if args.analysis:
-                command = f"root -l -b -q 'analysis_multiPlane/Analysis_multiPlane.cc({thr},{runNumber},\"{saveName}\")'"
-                subprocess.run(command, shell=True, check=True)
+                command = [f"{build_dir}/run_Analysis", str(thr), str(runNumber), saveName]
+                subprocess.run(command, check=True, env=env)
 
             if args.calorimetry:
-                command = f"root -l -b -q 'analysis_multiPlane/Calorimetry_multiPlane.cc({thr},{runNumber},\"{saveName}\")'"
-                subprocess.run(command, shell=True, check=True)
+                command = [f"{build_dir}/run_Calorimetry", str(thr), str(runNumber), saveName]
+                subprocess.run(command, check=True, env=env)
 
 savePath = f"Plots/local_{runNumber:04d}/{saveName}"
 command = f"cp configs/{config_name} {savePath}"
