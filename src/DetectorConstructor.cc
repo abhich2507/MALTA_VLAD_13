@@ -159,7 +159,7 @@ G4VPhysicalVolume *DetectorConstruction::Construct()
 
     G4Box *solidMALTA = new G4Box ("MALTASensor", maltaWidthX/2, maltaWidthY/2, maltaDepth/2);
     // MALTA implementation monolithic sensor
-    if(m_flag->preDefinedGeometryFlag == "MALTA")
+    if(m_flag->preDefinedGeometryFlag == "MALTASPS")
     {
         if (std::abs(detectorXOffset) + maltaWidthX > xWorld /2 
          || std::abs(detectorYOffset) + maltaWidthY > yWorld /2 
@@ -189,21 +189,21 @@ G4VPhysicalVolume *DetectorConstruction::Construct()
             }
         }
 
-        // Commented the front planes to remove scattering
+        
         m_logicPlane1 = new G4LogicalVolume (solidMALTA, detMat, "logicPlane1");
-        //new G4PVPlacement(0, G4ThreeVector(detectorXOffset, detectorYOffset, detectorZOffset + planeCorrections[0]*cm)
-        //                                                    , m_logicPlane1, "physPlane1", logicalWorld, false, 0, true);
-        //m_logicPlane1->SetVisAttributes(pixelVisAtt);
+        new G4PVPlacement(0, G4ThreeVector(detectorXOffset, detectorYOffset, detectorZOffset + planeCorrections[0]*cm)
+                                                            , m_logicPlane1, "physPlane1", logicalWorld, false, 0, true);
+        m_logicPlane1->SetVisAttributes(pixelVisAtt);
 
         m_logicPlane2 = new G4LogicalVolume (solidMALTA, detMat, "logicPlane2");
-        //new G4PVPlacement(0, G4ThreeVector(detectorXOffset, detectorYOffset, detectorZOffset + planeCorrections[1]*cm)
-        //                                                    , m_logicPlane2, "physPlane2", logicalWorld, false, 0, true);
-        //m_logicPlane2->SetVisAttributes(pixelVisAtt);
+        new G4PVPlacement(0, G4ThreeVector(detectorXOffset, detectorYOffset, detectorZOffset + planeCorrections[1]*cm)
+                                                            , m_logicPlane2, "physPlane2", logicalWorld, false, 0, true);
+        m_logicPlane2->SetVisAttributes(pixelVisAtt);
 
         m_logicPlane3 = new G4LogicalVolume (solidMALTA, detMat, "logicPlane3");
-        //new G4PVPlacement(0, G4ThreeVector(detectorXOffset, detectorYOffset, detectorZOffset + planeCorrections[2]*cm)
-        //                                                    , m_logicPlane3, "physPlane3", logicalWorld, false, 0, true);
-        //m_logicPlane3->SetVisAttributes(pixelVisAtt);
+        new G4PVPlacement(0, G4ThreeVector(detectorXOffset, detectorYOffset, detectorZOffset + planeCorrections[2]*cm)
+                                                            , m_logicPlane3, "physPlane3", logicalWorld, false, 0, true);
+        m_logicPlane3->SetVisAttributes(pixelVisAtt);
 
         m_logicPlane4 = new G4LogicalVolume (solidMALTA, detMat, "logicPlane4");
         new G4PVPlacement(0, G4ThreeVector(detectorXOffset, detectorYOffset, detectorZOffset + planeCorrections[3]*cm)
@@ -219,9 +219,31 @@ G4VPhysicalVolume *DetectorConstruction::Construct()
         new G4PVPlacement(0, G4ThreeVector(detectorXOffset, detectorYOffset, detectorZOffset + planeCorrections[5]*cm)
                                                             , m_logicPlane6, "physPlane6", logicalWorld, false, 0, true);
         m_logicPlane6->SetVisAttributes(pixelVisAtt);
+    }
+    else if(m_flag->preDefinedGeometryFlag == "MALTA")
+    {
+        if (std::abs(detectorXOffset) + maltaWidthX > xWorld /2 
+         || std::abs(detectorYOffset) + maltaWidthY > yWorld /2 
+         || std::abs(detectorZOffset) + maltaDepth > zWorld /2)
+        {
+            throwError("DetectorConstruct::Construct", "Invalid geometry", "DUT outside world");
+        }
+        m_logicSensor = new G4LogicalVolume (solidMALTA, detMat, "logicSensor");
+        new G4PVPlacement(0, G4ThreeVector(detectorXOffset, detectorYOffset, detectorZOffset), m_logicSensor, "physSensor", logicalWorld, false, 0, true);
 
+        G4VisAttributes *pixelVisAtt = new G4VisAttributes(G4Color(0., 0., 1., 0.5));
+        pixelVisAtt->SetForceSolid(true);
+        m_logicSensor->SetVisAttributes(pixelVisAtt);
 
- 
+        std::vector< G4double> planeCorrections = {-64.2, -56.2, -48.2, 29.8, 37.8, 45.8};
+
+        for (const double& corr : planeCorrections)
+        {
+            if (std::abs(corr) * cm + maltaDepth > zWorld /2)
+            {
+                throwError("DetectorConstruct::Construct", "Invalid geometry", "Tracking Plane outside world");
+            }
+        }
     }
     else if(m_flag->preDefinedGeometryFlag == "MULTIMALTA")
     {
@@ -381,7 +403,7 @@ void DetectorConstruction::ConstructSDandField()
 {
     SensitiveDetector *sensDet = new SensitiveDetector("SensitiveDetector", m_flag);
     G4SDManager::GetSDMpointer()->AddNewDetector(sensDet);
-    if(m_flag->preDefinedGeometryFlag == "MALTA" && m_flag->gdmlBool == false)
+    if(m_flag->preDefinedGeometryFlag == "MALTASPS" && m_flag->gdmlBool == false)
     {
         // Ensure that methods initialize at end of event
         m_logicSensor->SetSensitiveDetector(sensDet);
@@ -391,6 +413,10 @@ void DetectorConstruction::ConstructSDandField()
         m_logicPlane4->SetSensitiveDetector(sensDet);
         m_logicPlane5->SetSensitiveDetector(sensDet);
         m_logicPlane6->SetSensitiveDetector(sensDet);
+    }
+    else if(m_flag->preDefinedGeometryFlag == "MALTA" && m_flag->gdmlBool == false)
+    {
+        m_logicSensor->SetSensitiveDetector(sensDet);
     }
     else if (m_flag->preDefinedGeometryFlag == "MULTIMALTA" && m_flag->gdmlBool == false)
     {
