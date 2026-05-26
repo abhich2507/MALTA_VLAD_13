@@ -106,6 +106,17 @@ Analysis config files. In this case several modifications may need to be impleme
     -analysis_flags_SP.cfg MALTA single plane analysis. Should work out of the box with the flags_SP.cfg simulation flag
     -analysis_flags_MP.cfg MALTA multi plane analysis. Should work out of the box with the flags_MP.cfg simulation flag
 
+# Analysis examples
+
+## MALTA2Digitizer
+
+Usage: ./build/malta2Digitizer 
+
+Example of the MALTA2 digitizer (-d). A default threshold value of 200 e- is used. The config file used is hardcoded and points towards configs/analysis_flags_SP.cfg. The script requires sample hits to be provided at the run time of the script. In order to visualize the coordinate dependent merging, the energy and time needs to be kept the same between all hits. Due to the simulated analog jitter, the user time setting is not deterministic. A way to bypass this TBD. 
+
+
+![Usage example](img/MALTA2Digitizer_example.png)
+
 # GEANT4 Simulation structure
 The GEANT4 simulation is structured based on the usual file format. The functionality of each class is described further below:
 
