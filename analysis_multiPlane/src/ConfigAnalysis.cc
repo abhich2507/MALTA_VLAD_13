@@ -1,6 +1,9 @@
 #include "ConfigAnalysis.hh"
-
-
+#include <iostream>
+#include <algorithm>
+#include <cctype>
+#include <fstream>
+#include <string>
 
 
 void LoadAnalysisFlagsFromFile(const std::string& filename, AnaFlags& flags)
@@ -12,7 +15,6 @@ void LoadAnalysisFlagsFromFile(const std::string& filename, AnaFlags& flags)
         std::cerr << "Error: could not open file " << filename << std::endl;
         return;
     }
-
 
     std::string line;
     while (std::getline(infile, line)) {
@@ -85,7 +87,6 @@ void LoadAnalysisFlagsFromFile(const std::string& filename, AnaFlags& flags)
         else if (key == "Analysis_YCenter") flags.Analysis_YCenter = std::stod(value);
         else if (key == "Analysis_XWidth") flags.Analysis_XWidth = std::stod(value);
         else if (key == "Analysis_YWidth") flags.Analysis_YWidth = std::stod(value);
-        //std::cout << "Loaded flag: " << key << " = " << value << std::endl;
     }
 }
 

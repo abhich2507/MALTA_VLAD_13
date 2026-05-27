@@ -1,5 +1,4 @@
 #pragma once
-
 #include <cstddef>
 #include <utility>
 #include <functional>
@@ -15,13 +14,11 @@ struct PairHash
         return h;
     }
 };
-
 struct MALTA3Word
 {
     __uint128_t word;
     double time;
 };
-
 struct MatrixSection
 {
     __int128 unsigned group;
@@ -33,7 +30,6 @@ struct MatrixSection
         return bus < other.bus;
     }
 };
-
 struct SRAMState
 {
     std::vector<int> memoryModule;
@@ -50,14 +46,11 @@ struct SRAMState
         sectorOccupancy(nSectors, 0)
     {}
 };
-
 struct DrainResult
 {
     std::vector<uint32_t> reducedWords;
     double improvTiming;
     int numValids;
 };
-
-
 
 void PRIOFIFOHWCProcessing_multiPlane(double inputThreshold, int runNumber, std::string saveName);

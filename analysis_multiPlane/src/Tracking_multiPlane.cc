@@ -1,48 +1,35 @@
 #include "Tracking_multiPlane.hh"
-#include <TChain.h>
+#include "RootIO.hh"
+#include "TrackingUtils.hh"
 #include "Utils.hh"
-#include <bit>
-#include <queue>
-#include "TRandom3.h"
-#include "Utils.hh"
-#include <TTree.h>
-#include "Utils.hh"
-#include "TStyle.h"
-#include "TROOT.h"
-#include <TROOT.h>
-#include <TStyle.h>
-#include <TH1.h>
-#include <TH2.h>
-#include <TCanvas.h>
-#include <vector>
-#include <utility>
-#include <cstdint>
-#include <iostream>
-#include <ROOT/RNTuple.hxx>
-#include <TH3D.h>
-#include <TFile.h>
-#include <sys/stat.h>
-#include <sys/types.h>
 #include <chrono>
-#include <random>
-
+#include <iostream>
+#include <string>
 
 void Tracking_multiPlane(double threshold, int runNumber, std::string saveName)
 {
     auto start = std::chrono::high_resolution_clock::now();
-    std::cout << "############################# Tracking started for:" << std::endl;
+    std::cout << "############################# Tracking started!" << std::endl;
 
-    auto config = GetDigitalConfig();    
+    auto config = GetDigitalConfig();
+    std::cout << "GetDigitalConfig done!" << std::endl;
     auto tracks = GetVertex(config, runNumber);
+    std::cout << "GetVertex done!" << std::endl;
     auto outfile = CreateTrackedTree(threshold, runNumber, saveName, config);
+    std::cout << "CreateTrackedTree done!" << std::endl;
 
     for (int planeZ = 0; planeZ<config.nPlanes_100; planeZ++)
     {
         auto hits = GetTrackHits(config, threshold, runNumber, saveName, planeZ);
+        std::cout << "PlaneZ " << planeZ <<" GetTrackHits done!" << std::endl;
         auto [fullTrackInfo, residualInfo ] = MatchHits(tracks, hits, config, runNumber);
-        FillTrackedTree (fullTrackInfo, outfile, planeZ);
+        std::cout << "PlaneZ " << planeZ <<" MatchHits done!" << std::endl;
+        FillTrackedTree(fullTrackInfo, outfile, planeZ);
+        std::cout << "PlaneZ " << planeZ <<" FillTrackedTree done!" << std::endl;
         CloseFile(outfile);
+        std::cout << "PlaneZ " << planeZ <<" CloseFile done!" << std::endl;
         SaveResidualHisto(residualInfo, planeZ, threshold, runNumber, saveName, config);
+        std::cout << "PlaneZ " << planeZ <<" SaveResidualHisto done!" << std::endl;
     }
 
     auto end = std::chrono::high_resolution_clock::now(); 

@@ -7,6 +7,7 @@
 
 #include "DigitalProcessing_multiPlane.hh"
 #include "Utils.hh"
+#include "DigitalUtils.hh"
 
 namespace UI
 {
