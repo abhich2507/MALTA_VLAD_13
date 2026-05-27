@@ -1,6 +1,6 @@
 #include "PRIOFIFOHWCProcessing_multiPlane.hh"
-#include "CaloPreProcessing.hh"
 #include "ConfigAnalysis.hh"
+#include "CalorimetryUtils.hh"
 #include "DigitalProcessing_multiPlane.hh"
 #include "DigitalUtils.hh"
 #include "RootIO.hh"
