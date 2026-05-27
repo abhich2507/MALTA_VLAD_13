@@ -1,12 +1,8 @@
 #pragma once
-#include <iostream>
-#include <ROOT/RNTuple.hxx>
-#include <TH3D.h>
-#include <TFile.h>
-#include <chrono>
 #include "DigitalProcessing_multiPlane.hh"
 #include "Tracking_multiPlane.hh"
-
+#include <string>
+#include <vector>
 
 struct Hit
 {
@@ -14,15 +10,12 @@ struct Hit
     int y;
     double t;
 };
-
-
 struct Cluster
 {
     int clSize;
     double x;
     double y;
 };
-
 struct ClusterState
 {
     std::vector<Hit>  cluster;
@@ -32,7 +25,6 @@ struct ClusterState
     int               currentTrackID{-1};
     int               currentPixY{-1};
 };
-
 struct ClusteredHit
 {
     int planeID;
@@ -43,6 +35,4 @@ struct ClusteredHit
     double corrTiming;
 };
 
-
-// Main clustering function
 void Clustering_multiPlane(double threshold, int runNumber, std::string saveName = "default");

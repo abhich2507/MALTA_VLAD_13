@@ -34,7 +34,6 @@ struct PlaneState
     int numClusters = 0;
     std::unordered_set<Pixel, PixelHash> pixels;
 };
-
 struct CaloHits
 {
     int planeID;
@@ -43,7 +42,6 @@ struct CaloHits
     float time;
     int nHit;
 };
-
 struct PositionHits
 {
     int planeID;
@@ -51,7 +49,6 @@ struct PositionHits
     int stripY;
     float time;
 };
-
 struct FullCalorimetryInfo
 {
     double meanX;
@@ -64,7 +61,6 @@ struct FullCalorimetryInfo
     int numCl;
 
 };
-
 struct RawCalorimetryPerMap
 {
     std::unordered_map<int, std::vector<int>> secPerPlane;
@@ -74,7 +70,6 @@ struct RawCalorimetryPerMap
     std::unordered_map<int, std::vector<int>> xPosPerPlane;
     std::unordered_map<int, std::vector<int>> yPosPerPlane;
 };
-
 struct FitCalorimetryInfo
 {
     double tmax;
@@ -84,7 +79,6 @@ struct FitCalorimetryInfo
     double p1;
     double p2;
 };
-
 template<typename Map, typename Proj>
 auto minMaxByProjection(const Map& m, Proj proj)
 {
@@ -95,7 +89,6 @@ auto minMaxByProjection(const Map& m, Proj proj)
     auto maxIt = std::max_element(m.begin(), m.end(), cmp);
     return std::make_pair(minIt, maxIt);
 }
-
 template<typename Vec, typename Proj>
 std::pair<float, float> fieldRange(const Vec& v, Proj proj, float guardSigma = 3.0f)
 {
@@ -118,7 +111,6 @@ std::pair<float, float> fieldRange(const Vec& v, Proj proj, float guardSigma = 3
     }
     return {lo, hi};
 }
-
 auto computeStats = [](const std::vector<float>& v, float& mean, float& sigma)
 {
     

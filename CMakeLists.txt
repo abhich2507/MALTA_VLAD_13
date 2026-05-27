@@ -48,8 +48,13 @@ add_custom_target(Tutorial DEPENDS sim)
 # These are helpers with no top-level entry point
 set(lib_sources
     analysis_multiPlane/src/ConfigAnalysis.cc
-    analysis_multiPlane/src/CaloPreProcessing.cc
     analysis_multiPlane/src/Utils.cc
+    analysis_multiPlane/src/RootIO.cc
+    analysis_multiPlane/src/DigitalUtils.cc
+    analysis_multiPlane/src/TrackingUtils.cc
+    analysis_multiPlane/src/ClusteringUtils.cc
+    analysis_multiPlane/src/AnalysisUtils.cc
+    analysis_multiPlane/src/CalorimetryUtils.cc
 )
 
 add_library(analysis_lib STATIC ${lib_sources})

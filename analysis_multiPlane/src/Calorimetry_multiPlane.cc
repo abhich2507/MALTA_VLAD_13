@@ -1,30 +1,10 @@
-#include "DigitalProcessing_multiPlane.hh"
-#include "Tracking_multiPlane.hh"
 #include "Calorimetry_multiPlane.hh"
-#include <Utils.hh>
-#include<stack>
-#include "TRandom3.h"
+#include "CalorimetryUtils.hh"
+#include "DigitalProcessing_multiPlane.hh"
 #include "Utils.hh"
-#include <TTree.h>
-#include "Utils.hh"
-#include "TStyle.h"
-#include "TROOT.h"
-#include <TROOT.h>
-#include <TStyle.h>
-#include <TH1.h>
-#include <TH2.h>
-#include <TCanvas.h>
-#include <vector>
-#include <utility>
-#include <cstdint>
-#include <iostream>
-#include <ROOT/RNTuple.hxx>
-#include <TH3D.h>
-#include <TFile.h>
-#include <sys/stat.h>
-#include <sys/types.h>
+#include "RootIO.hh"
 #include <chrono>
-#include <random>
+#include <iostream>
 
 
 void Calorimetry_multiPlane(float threshold, int runNumber, std::string saveName)
@@ -35,7 +15,6 @@ void Calorimetry_multiPlane(float threshold, int runNumber, std::string saveName
     auto config = GetDigitalConfig(); 
     std::cout << "GetDigitalConfig done!" << std::endl;
     std::string inputPath = config.inputPath+Form("_%04d/", runNumber);
-
     auto calorimetryHits = GetCalorimetryHits(config, runNumber, saveName, threshold);
     std::cout << "GetCalorimetryHits done!" << std::endl;
     auto positionHits = GetPositionHits(config, runNumber, saveName, threshold);
