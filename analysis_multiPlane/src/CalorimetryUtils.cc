@@ -278,30 +278,26 @@ std::vector<FitCalorimetryInfo> GetCalorimetryMultiLayerFitInformation(RawCalori
     return output;
 }
 
-std::vector<TTree*> CaloPreProcessing(double inputThreshold, int runNumber, std::string saveName)
+std::vector<TTree*> CaloPreProcessing(double inputThreshold, int runNumber, std::string saveName, AnaFlags cfg)
 {
-    // Set all the analysis flags for the digital processing
-    auto analysisFlags = new AnaFlags{};
-    const char* configPath = std::getenv("ANALYSIS_CONFIG");
-    LoadAnalysisFlagsFromFile(configPath, *analysisFlags);
-    std::string localPath = analysisFlags->localPath;
-    std::string inputPath = analysisFlags->inputPath+Form("_%04d/", runNumber);
+    std::string localPath = cfg.localPath;
+    std::string inputPath = cfg.inputPath+Form("_%04d/", runNumber);
     std::string directoryPath = localPath + "Plots/";
     //std::string runPath = Form("local_%04d/", runNumber);
 
     std::cout << "############################# Calo PreProcessing started for:" << std::endl;
     std::cout << inputPath << std::endl;
-    int numThreads = analysisFlags->numThreads; 
+    int numThreads = cfg.numThreads; 
 
-    int nPlanes_100 = analysisFlags->nPlanes_100;
-    int nPlanes_10 = analysisFlags->nPlanes_10;
-    int nPlanes_1 = analysisFlags->nPlanes_1;
+    int nPlanes_100 = cfg.nPlanes_100;
+    int nPlanes_10 = cfg.nPlanes_10;
+    int nPlanes_1 = cfg.nPlanes_1;
     //int nPlanes = nPlanes_100*nPlanes_10*nPlanes_1; // total number of planes
 
     
     // Extract raw data
     TChain *chainPixel = new TChain("RawPixelHits");
-    std::string fileName = analysisFlags->fileName;
+    std::string fileName = cfg.fileName;
     for (int t = 0; t <= numThreads - 1; ++t) 
     {
         chainPixel->Add(Form("%s%s_t%d.root", inputPath.c_str(), fileName.c_str(), t));
@@ -317,7 +313,7 @@ std::vector<TTree*> CaloPreProcessing(double inputThreshold, int runNumber, std:
         }
     }
     std::vector<int> modules{};
-    for (int i = 0; i< analysisFlags->modules; i++)
+    for (int i = 0; i< cfg.modules; i++)
     {
         modules.push_back(i);
     }
@@ -327,7 +323,7 @@ std::vector<TTree*> CaloPreProcessing(double inputThreshold, int runNumber, std:
 
     //std::cout << "modules.size(): " << modules.size() << std::endl;
 
-    if (analysisFlags->simProc == "MALTA2")
+    if (cfg.simProc == "MALTA2")
     {
         for (size_t i = 0; i < modules.size(); i++)
         {

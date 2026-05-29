@@ -14,4 +14,4 @@ std::vector<FullCalorimetryInfo> ProcessLastEventCalorimetry(std::vector<FullCal
 void FillClusterTree(AnaFlags cfg, int runNumber, std::string saveName, double threshold, std::vector<FullCalorimetryInfo> caloHits);
 RawCalorimetryPerMap GetCalorimetryAnalyzedHits( int runNumber, std::string saveName, double threshold);
 std::vector<FitCalorimetryInfo> GetCalorimetryMultiLayerFitInformation(RawCalorimetryPerMap rawCaloMap);
-std::vector<TTree*> CaloPreProcessing(double inputThreshold, int runNumber, std::string saveName);
+std::vector<TTree*> CaloPreProcessing(double inputThreshold, int runNumber, std::string saveName, AnaFlags cfg);

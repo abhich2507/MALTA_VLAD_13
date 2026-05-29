@@ -4,6 +4,7 @@
 #include "Utils.hh"
 #include <TString.h>
 #include <RtypesCore.h>
+#include <iostream>
 
 std::pair<std::vector<FullTrackInfo>, std::vector<Residual>> MatchHits(std::vector<TrackEntry> tracks, std::vector<ProcessedHit> hits, AnaFlags cfg, int runNumber)
 {
@@ -14,8 +15,7 @@ std::pair<std::vector<FullTrackInfo>, std::vector<Residual>> MatchHits(std::vect
     double DUTLocalTime = 0;
     int filePlane = 0;
     std::string inputPath = cfg.inputPath+Form("_%04d/", runNumber);
-    // BIG TODO:
-    DetectorConfig detCfg = LoadConfig(inputPath + "flags.cfg"); // todo: does this need to be generalized? YES
+    DetectorConfig detCfg = LoadConfig(inputPath + "flags.cfg");
     auto geoMaps = LoadGeometry(cfg.geoFile, detCfg);
     // To avoid O(NxN) I will use a sliding window
     Long64_t detIdx = 0; // pointer in detector tree

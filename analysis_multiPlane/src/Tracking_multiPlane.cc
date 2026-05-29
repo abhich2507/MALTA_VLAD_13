@@ -22,7 +22,7 @@ void Tracking_multiPlane(double threshold, int runNumber, std::string saveName)
     {
         auto hits = GetTrackHits(config, threshold, runNumber, saveName, planeZ);
         std::cout << "PlaneZ " << planeZ <<" GetTrackHits done!" << std::endl;
-        auto [fullTrackInfo, residualInfo ] = MatchHits(tracks, hits, config, runNumber);
+        auto [fullTrackInfo, residualInfo] = MatchHits(tracks, hits, config, runNumber);
         std::cout << "PlaneZ " << planeZ <<" MatchHits done!" << std::endl;
         FillTrackedTree(fullTrackInfo, outfile, planeZ);
         std::cout << "PlaneZ " << planeZ <<" FillTrackedTree done!" << std::endl;

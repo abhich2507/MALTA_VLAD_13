@@ -1,0 +1,110 @@
+-- Configuring done (0.2s)
+CMake Warning at CMakeLists.txt:35 (add_executable):
+  Cannot generate a safe runtime search path for target sim because files in
+  some directories may conflict with libraries in implicit directories:
+
+    runtime library [libexpat.so.1] in /usr/lib/x86_64-linux-gnu may be hidden by files in:
+      /home/vlad/anaconda3/lib
+
+  Some of these libraries may not be found correctly.
+
+
+-- Generating done (0.1s)
+-- Build files have been written to: /home/vlad/Documents/Simu/Geant4/DECAL_REPO/build
+[ 29%] Built target sim
+[ 50%] Built target analysis_lib
+[ 56%] Built target run_Analysis
+[ 63%] Built target run_Calorimetry
+[ 70%] Built target run_Clustering
+[ 77%] Built target run_DigitalProcessing
+[ 84%] Built target run_PRIOFIFOHWCProcessing
+[ 90%] Built target run_Tracking
+[ 95%] Built target test_thresholdMap
+[100%] Built target malta2Digitizer
+Directory already exists or failed to create.
+Directory already exists or failed to create.
+Loading flags from file: /home/vlad/Documents/Simu/Geant4/DECAL_REPO//configs/flags_MP_Vlad.cfg
+Loaded flag: comments = ThisistheDEFAULTsimulationflag.Pleasecustomizeasdesired.
+Loaded flag: preDefinedGeometryFlag = MULTIMALTA
+Loaded flag: largeScaleFlag = 
+Loaded flag: geoFile = geo_X1Y1Z1.csv
+Loaded flag: detectorXOffset = 0.
+Loaded flag: detectorYOffset = 0.
+Loaded flag: detectorZOffset = 0.
+Loaded flag: pixelSize = 0.0364
+Loaded flag: detectorSizeX = 1.86368
+Loaded flag: detectorSizeY = 1.86368
+Loaded flag: detectorDepth = 29.1
+Loaded flag: CCModelSigmaX = 4.3
+Loaded flag: CCModelSigmaY = 4.3
+Loaded flag: outsideMaterial = G4_Galactic
+Loaded flag: beamGeometry = rectangle
+Loaded flag: gausSmearing = 0.1
+Loaded flag: beamXOffset = 0.
+Loaded flag: beamYOffset = 0.
+Loaded flag: beamZOffset = -100.
+Loaded flag: sourceRadius = 18.6368
+Loaded flag: sourceRadiusX = 18.6368
+Loaded flag: sourceRadiusY = 18.6368
+Loaded flag: particleCount = 1
+Loaded flag: numEvents = 100
+Loaded flag: intraSpillOffset = 0
+Loaded flag: beamVeto = 1000
+Loaded flag: particleType = proton
+Loaded flag: particleEnergy = 120
+Loaded flag: energyDistribution = none
+Loaded flag: particleMomentumX = 0.
+Loaded flag: particleMomentumY = 0.
+Loaded flag: particleMomentumZ = 1.
+Loaded flag: itkEnable = false
+Loaded flag: pileUpScale = 1
+Loaded flag: itkInput = pixBarrel_occ
+Loaded flag: itkLayer = 0
+Loaded flag: itkZ = 0
+Loaded flag: EMPhysics = true
+Loaded flag: hadronPhysics = true
+Loaded flag: dutTungstenAbsorberFlag = false
+Loaded flag: absorberThickness = 3.2
+Loaded flag: setGEANT4Cuts = true
+Loaded flag: GEANT4CutValue = 1
+Loaded flag: outputPathLocal = Results
+Loaded flag: outputPathNAF = Results
+Loaded flag: macroFileLocal = run.mac
+Loaded flag: macroFileNAF = run.mac
+Loaded flag: numThreadsLocal = 6
+Loaded flag: numThreadsNAF = 12
+Loaded flag: gdmlBool = false
+Loaded flag: gdmlStr = ../LHCfArm2geometry.gdml
+Loaded flag: verbosePL = false
+Loaded flag: verbosePG = false
+Loaded flag: verboseSD = false
+Loaded flag: verboseSA = false
+You are running locally!
+
+**************************************************************
+ Geant4 version Name: geant4-11-03 [MT]   (6-December-2024)
+  << in Multi-threaded mode >> 
+                       Copyright : Geant4 Collaboration
+                      References : NIM A 506 (2003), 250-303
+                                 : IEEE-TNS 53 (2006), 270-278
+                                 : NIM A 835 (2016), 186-225
+                             WWW : http://geant4.org/
+**************************************************************
+
+Checking overlaps for volume plane_000000_module_00_x_00_y_00_z_00:0 (G4Box) ... OK! 
+Creating Directory: /home/vlad/Documents/Simu/Geant4/DECAL_REPO/Results/local_0227
+Copied config file from /home/vlad/Documents/Simu/Geant4/DECAL_REPO//configs/flags_MP_Vlad.cfg to /home/vlad/Documents/Simu/Geant4/DECAL_REPO/Results/local_0227/flags.cfg
+Progress:    1.0% completed. Current event: 1. Out of total events: 100. Elapsed: 0s | ETA: 0sProgress:    2.0% completed. Current event: 2. Out of total events: 100. Elapsed: 0s | ETA: 0sProgress:    3.0% completed. Current event: 3. Out of total events: 100. Elapsed: 0s | ETA: 0sProgress:    4.0% completed. Current event: 4. Out of total events: 100. Elapsed: 0s | ETA: 0sProgress:    5.0% completed. Current event: 5. Out of total events: 100. Elapsed: 0s | ETA: 0sProgress:    6.0% completed. Current event: 6. Out of total events: 100. Elapsed: 0s | ETA: 0sProgress:    7.0% completed. Current event: 7. Out of total events: 100. Elapsed: 0s | ETA: 0sProgress:    8.0% completed. Current event: 8. Out of total events: 100. Elapsed: 0s | ETA: 0sProgress:    9.0% completed. Current event: 9. Out of total events: 100. Elapsed: 0s | ETA: 0sProgress:   10.0% completed. Current event: 10. Out of total events: 100. Elapsed: 0s | ETA: 0sProgress:   11.0% completed. Current event: 11. Out of total events: 100. Elapsed: 0s | ETA: 0sProgress:   12.0% completed. Current event: 12. Out of total events: 100. Elapsed: 0s | ETA: 0sProgress:   13.0% completed. Current event: 13. Out of total events: 100. Elapsed: 0s | ETA: 0sProgress:   14.0% completed. Current event: 14. Out of total events: 100. Elapsed: 0s | ETA: 0sProgress:   15.0% completed. Current event: 15. Out of total events: 100. Elapsed: 0s | ETA: 0sProgress:   16.0% completed. Current event: 16. Out of total events: 100. Elapsed: 0s | ETA: 0sProgress:   17.0% completed. Current event: 17. Out of total events: 100. Elapsed: 0s | ETA: 0sProgress:   18.0% completed. Current event: 18. Out of total events: 100. Elapsed: 0s | ETA: 0sProgress:   19.0% completed. Current event: 19. Out of total events: 100. Elapsed: 0s | ETA: 0sProgress:   20.0% completed. Current event: 20. Out of total events: 100. Elapsed: 0s | ETA: 0sProgress:   21.0% completed. Current event: 21. Out of total events: 100. Elapsed: 0s | ETA: 0sProgress:   22.0% completed. Current event: 22. Out of total events: 100. Elapsed: 0s | ETA: 0sProgress:   23.0% completed. Current event: 23. Out of total events: 100. Elapsed: 0s | ETA: 0sProgress:   24.0% completed. Current event: 24. Out of total events: 100. Elapsed: 0s | ETA: 0sProgress:   25.0% completed. Current event: 25. Out of total events: 100. Elapsed: 0s | ETA: 0sProgress:   26.0% completed. Current event: 26. Out of total events: 100. Elapsed: 0s | ETA: 0sProgress:   27.0% completed. Current event: 27. Out of total events: 100. Elapsed: 0s | ETA: 0sProgress:   28.0% completed. Current event: 28. Out of total events: 100. Elapsed: 0s | ETA: 0sProgress:   29.0% completed. Current event: 29. Out of total events: 100. Elapsed: 0s | ETA: 0sProgress:   30.0% completed. Current event: 30. Out of total events: 100. Elapsed: 0s | ETA: 0sProgress:   31.0% completed. Current event: 31. Out of total events: 100. Elapsed: 0s | ETA: 0sProgress:   32.0% completed. Current event: 32. Out of total events: 100. Elapsed: 0s | ETA: 0sProgress:   33.0% completed. Current event: 33. Out of total events: 100. Elapsed: 0s | ETA: 0sProgress:   34.0% completed. Current event: 34. Out of total events: 100. Elapsed: 0s | ETA: 0sProgress:   35.0% completed. Current event: 35. Out of total events: 100. Elapsed: 0s | ETA: 0sProgress:   36.0% completed. Current event: 36. Out of total events: 100. Elapsed: 0s | ETA: 0sProgress:   37.0% completed. Current event: 37. Out of total events: 100. Elapsed: 0s | ETA: 0sProgress:   38.0% completed. Current event: 38. Out of total events: 100. Elapsed: 0s | ETA: 0sProgress:   39.0% completed. Current event: 39. Out of total events: 100. Elapsed: 0s | ETA: 0sProgress:   40.0% completed. Current event: 40. Out of total events: 100. Elapsed: 0s | ETA: 0sProgress:   41.0% completed. Current event: 41. Out of total events: 100. Elapsed: 0s | ETA: 0sProgress:   42.0% completed. Current event: 42. Out of total events: 100. Elapsed: 0s | ETA: 0sProgress:   43.0% completed. Current event: 43. Out of total events: 100. Elapsed: 0s | ETA: 0sProgress:   44.0% completed. Current event: 44. Out of total events: 100. Elapsed: 0s | ETA: 0sProgress:   45.0% completed. Current event: 45. Out of total events: 100. Elapsed: 0s | ETA: 0sProgress:   46.0% completed. Current event: 46. Out of total events: 100. Elapsed: 0s | ETA: 0sProgress:   47.0% completed. Current event: 47. Out of total events: 100. Elapsed: 0s | ETA: 0sProgress:   48.0% completed. Current event: 48. Out of total events: 100. Elapsed: 0s | ETA: 0sProgress:   49.0% completed. Current event: 49. Out of total events: 100. Elapsed: 0s | ETA: 0sProgress:   50.0% completed. Current event: 50. Out of total events: 100. Elapsed: 0s | ETA: 0sProgress:   51.0% completed. Current event: 51. Out of total events: 100. Elapsed: 0s | ETA: 0sProgress:   52.0% completed. Current event: 52. Out of total events: 100. Elapsed: 0s | ETA: 0sProgress:   53.0% completed. Current event: 53. Out of total events: 100. Elapsed: 0s | ETA: 0sProgress:   54.0% completed. Current event: 54. Out of total events: 100. Elapsed: 0s | ETA: 0sProgress:   55.0% completed. Current event: 55. Out of total events: 100. Elapsed: 0s | ETA: 0sProgress:   56.0% completed. Current event: 56. Out of total events: 100. Elapsed: 0s | ETA: 0sProgress:   57.0% completed. Current event: 57. Out of total events: 100. Elapsed: 0s | ETA: 0sProgress:   58.0% completed. Current event: 58. Out of total events: 100. Elapsed: 0s | ETA: 0sProgress:   59.0% completed. Current event: 59. Out of total events: 100. Elapsed: 0s | ETA: 0sProgress:   60.0% completed. Current event: 60. Out of total events: 100. Elapsed: 0s | ETA: 0sProgress:   61.0% completed. Current event: 61. Out of total events: 100. Elapsed: 0s | ETA: 0sProgress:   62.0% completed. Current event: 62. Out of total events: 100. Elapsed: 0s | ETA: 0sProgress:   63.0% completed. Current event: 63. Out of total events: 100. Elapsed: 0s | ETA: 0sProgress:   64.0% completed. Current event: 64. Out of total events: 100. Elapsed: 0s | ETA: 0sProgress:   65.0% completed. Current event: 65. Out of total events: 100. Elapsed: 0s | ETA: 0sProgress:   66.0% completed. Current event: 66. Out of total events: 100. Elapsed: 0s | ETA: 0sProgress:   67.0% completed. Current event: 67. Out of total events: 100. Elapsed: 0s | ETA: 0sProgress:   68.0% completed. Current event: 68. Out of total events: 100. Elapsed: 0s | ETA: 0sProgress:   69.0% completed. Current event: 69. Out of total events: 100. Elapsed: 0s | ETA: 0sProgress:   70.0% completed. Current event: 70. Out of total events: 100. Elapsed: 0s | ETA: 0sProgress:   71.0% completed. Current event: 71. Out of total events: 100. Elapsed: 0s | ETA: 0sProgress:   72.0% completed. Current event: 72. Out of total events: 100. Elapsed: 0s | ETA: 0sProgress:   73.0% completed. Current event: 73. Out of total events: 100. Elapsed: 0s | ETA: 0sProgress:   74.0% completed. Current event: 74. Out of total events: 100. Elapsed: 0s | ETA: 0sProgress:   75.0% completed. Current event: 75. Out of total events: 100. Elapsed: 0s | ETA: 0sProgress:   76.0% completed. Current event: 76. Out of total events: 100. Elapsed: 0s | ETA: 0sProgress:   77.0% completed. Current event: 77. Out of total events: 100. Elapsed: 0s | ETA: 0sProgress:   78.0% completed. Current event: 78. Out of total events: 100. Elapsed: 0s | ETA: 0sProgress:   79.0% completed. Current event: 79. Out of total events: 100. Elapsed: 0s | ETA: 0sProgress:   80.0% completed. Current event: 80. Out of total events: 100. Elapsed: 0s | ETA: 0sProgress:   81.0% completed. Current event: 81. Out of total events: 100. Elapsed: 0s | ETA: 0sProgress:   82.0% completed. Current event: 82. Out of total events: 100. Elapsed: 0s | ETA: 0sProgress:   83.0% completed. Current event: 83. Out of total events: 100. Elapsed: 0s | ETA: 0sProgress:   84.0% completed. Current event: 84. Out of total events: 100. Elapsed: 0s | ETA: 0sProgress:   85.0% completed. Current event: 85. Out of total events: 100. Elapsed: 0s | ETA: 0sProgress:   86.0% completed. Current event: 86. Out of total events: 100. Elapsed: 0s | ETA: 0sProgress:   87.0% completed. Current event: 87. Out of total events: 100. Elapsed: 0s | ETA: 0sProgress:   88.0% completed. Current event: 88. Out of total events: 100. Elapsed: 0s | ETA: 0sProgress:   89.0% completed. Current event: 89. Out of total events: 100. Elapsed: 0s | ETA: 0sProgress:   90.0% completed. Current event: 90. Out of total events: 100. Elapsed: 0s | ETA: 0sProgress:   91.0% completed. Current event: 91. Out of total events: 100. Elapsed: 0s | ETA: 0sProgress:   92.0% completed. Current event: 92. Out of total events: 100. Elapsed: 0s | ETA: 0sProgress:   93.0% completed. Current event: 93. Out of total events: 100. Elapsed: 0s | ETA: 0sProgress:   94.0% completed. Current event: 94. Out of total events: 100. Elapsed: 0s | ETA: 0sProgress:   95.0% completed. Current event: 95. Out of total events: 100. Elapsed: 0s | ETA: 0sProgress:   96.0% completed. Current event: 96. Out of total events: 100. Elapsed: 0s | ETA: 0sProgress:   97.0% completed. Current event: 97. Out of total events: 100. Elapsed: 0s | ETA: 0sProgress:   98.0% completed. Current event: 98. Out of total events: 100. Elapsed: 0s | ETA: 0sProgress:   99.0% completed. Current event: 99. Out of total events: 100. Elapsed: 0s | ETA: 0sProgress:  100.0% completed. Current event: 100. Out of total events: 100. Elapsed: 0s | ETA: 0s
+G4WT2 > Finishing run 0
+G4WT1 > Finishing run 0
+G4WT0 > Finishing run 0
+G4WT4 > Finishing run 0
+G4WT3 > Finishing run 0
+G4WT5 > Finishing run 0
+Finishing run 0
+
+Simulation completed. Good day!
+WARNING - Attempt to delete the physical volume store while geometry closed !
+WARNING - Attempt to delete the logical volume store while geometry closed !
+WARNING - Attempt to delete the solid store while geometry closed !
+WARNING - Attempt to delete the region store while geometry closed !
