@@ -63,7 +63,7 @@ target_link_libraries(analysis_lib ${ROOT_LIBRARIES})
 
 # ── One executable per pipeline step ────────────────────────────────────────
 # Each main_*.cc just parses argv and calls the corresponding function
-set(steps Analysis Calorimetry Clustering DigitalProcessing PRIOFIFOHWCProcessing Tracking)
+set(steps Analysis Calorimetry Clustering Debug DigitalProcessing PRIOFIFOHWCProcessing Tracking)
 
 foreach(step ${steps})
     add_executable(run_${step}
@@ -75,9 +75,52 @@ endforeach()
 
 # ── Tests ────────────────────────────────────────────────────────────────────
 add_executable(test_thresholdMap
-    analysis_multiPlane/tests/test_thresholdMap.cc
+    analysis_multiPlane/tests/unit/test_thresholdMap.cc
 )
 target_link_libraries(test_thresholdMap analysis_lib)
+
+add_executable(test_fullDigitalProcessing
+    analysis_multiPlane/tests/integration/test_fullDigitalProcessing/test_fullDigitalProcessing.cc
+    analysis_multiPlane/src/DigitalProcessing_multiPlane.cc
+)
+target_link_libraries(
+    test_fullDigitalProcessing
+    analysis_lib
+)
+
+add_executable(test_fullTracking
+    analysis_multiPlane/tests/integration/test_fullDigitalProcessing/test_fullTracking.cc
+    analysis_multiPlane/src/Tracking_multiPlane.cc
+    analysis_multiPlane/src/DigitalProcessing_multiPlane.cc
+)
+target_link_libraries(
+    test_fullTracking
+    analysis_lib
+)
+
+add_executable(test_fullClustering
+    analysis_multiPlane/tests/integration/test_fullDigitalProcessing/test_fullClustering.cc
+    analysis_multiPlane/src/Tracking_multiPlane.cc
+    analysis_multiPlane/src/DigitalProcessing_multiPlane.cc
+    analysis_multiPlane/src/Clustering_multiPlane.cc
+)
+target_link_libraries(
+    test_fullClustering
+    analysis_lib
+)
+
+add_executable(test_fullAnalysis
+    analysis_multiPlane/tests/integration/test_fullDigitalProcessing/test_fullAnalysis.cc
+    analysis_multiPlane/src/Tracking_multiPlane.cc
+    analysis_multiPlane/src/DigitalProcessing_multiPlane.cc
+    analysis_multiPlane/src/Clustering_multiPlane.cc
+    analysis_multiPlane/src/Analysis_multiPlane.cc
+)
+target_link_libraries(
+    test_fullAnalysis
+    analysis_lib
+)
+
 
 # ── Examples ────────────────────────────────────────────────────────────────────
 add_executable(malta2Digitizer
