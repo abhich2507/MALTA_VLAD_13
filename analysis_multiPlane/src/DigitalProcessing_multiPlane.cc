@@ -8,7 +8,7 @@
 #include <random>
 #include <vector>
 
-void DigitalProcessing_multiPlane(double inputThreshold, int runNumber, std::string saveName, bool proteusFlag)
+int DigitalProcessing_multiPlane(double inputThreshold, int runNumber, std::string saveName, bool proteusFlag)
 {
     std::cout << "############################# Digital Processing MultiPlane started!" << std::endl;
     auto start = std::chrono::high_resolution_clock::now();
@@ -16,7 +16,7 @@ void DigitalProcessing_multiPlane(double inputThreshold, int runNumber, std::str
     std::cout << "GetDigitalConfig done!" << std::endl;
     ThresholdMap thresholdMap = generateThrMap(inputThreshold, runNumber, saveName, config, std::random_device{}());
     std::cout << "generateThrMap done!" << std::endl;
-    auto multiPlanes = CaloPreProcessing(inputThreshold, runNumber, saveName); 
+    auto multiPlanes = CaloPreProcessing(inputThreshold, runNumber, saveName, config); 
     std::cout << "CaloPreProcessing done!" << std::endl;
 
     std::vector<int> modules{};
@@ -49,5 +49,7 @@ void DigitalProcessing_multiPlane(double inputThreshold, int runNumber, std::str
     auto end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double, std::milli> elapsed = end - start;
     std::cout << "############################# Digital Processing MultiPlane stopped after " << elapsed.count() << "ms" << std::endl;
+
+    return 0;
 }
 

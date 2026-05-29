@@ -2,6 +2,7 @@
 #include "Utils.hh"
 #include <cmath>
 #include <vector>
+#include <iostream>
 #include "TH1.h"
 #include "TH2.h"
 #include "TRandom3.h"
@@ -88,17 +89,25 @@ TH2D* FillHistograms(std::vector<AnalysisHits> analysisHits, std::vector<TH2D*> 
         histograms2D[kTiming]->Fill(analysisHits[i].x, analysisHits[i].y, analysisHits[i].timing);
 
         double foldedX, foldedY;
+        double period_X = numPixelsX * pixelSizeX;
+        double period_Y = numPixelsY * pixelSizeY;
+
 
         if(cfg.trkUnc == true)
         {
-            foldedX = fmod(analysisHits[i].x + trackOffsetX + rng.Gaus(0., trackunc_X), numPixelsX*pixelSizeX) * 1000;
-            foldedY = fmod(analysisHits[i].y + trackOffsetY + rng.Gaus(0., trackunc_Y), numPixelsY*pixelSizeY) * 1000;
+            foldedX = fmod(fmod(analysisHits[i].x + trackOffsetX + rng.Gaus(0., trackunc_X), period_X) + period_X, period_X) * 1000;
+            foldedY = fmod(fmod(analysisHits[i].y + trackOffsetY + rng.Gaus(0., trackunc_Y), period_Y) + period_Y, period_Y) * 1000;
+            //foldedX = fmod(analysisHits[i].x + trackOffsetX + rng.Gaus(0., trackunc_X), numPixelsX*pixelSizeX) * 1000;
+            //foldedY = fmod(analysisHits[i].y + trackOffsetY + rng.Gaus(0., trackunc_Y), numPixelsY*pixelSizeY) * 1000;
         } 
         else
-        {        
-            foldedX = fmod(analysisHits[i].x + trackOffsetX, numPixelsX*pixelSizeX) * 1000;
-            foldedY = fmod(analysisHits[i].y + trackOffsetY, numPixelsY*pixelSizeY) * 1000;
+        { 
+            foldedX = fmod(fmod(analysisHits[i].x + trackOffsetX, period_X) + period_X, period_X) * 1000;
+            foldedY = fmod(fmod(analysisHits[i].y + trackOffsetY, period_Y) + period_Y, period_Y) * 1000;       
+            //foldedX = fmod(analysisHits[i].x + trackOffsetX, numPixelsX*pixelSizeX) * 1000;
+            //foldedY = fmod(analysisHits[i].y + trackOffsetY, numPixelsY*pixelSizeY) * 1000;
         }
+
 
         histograms2D[kALLInPixel]->Fill(foldedX, foldedY, 1);
         histograms2D[kPASSInPixel]->Fill(foldedX, foldedY, analysisHits[i].clSize > 0 ? 1 : 0);
@@ -123,7 +132,6 @@ AnalyzedHit GetStatistics(std::vector<TH2D*> histograms2D, TH2D* auxiliaryHisto)
     double avgTiming = histograms2D[kTimingInPixel]->Integral() / histograms2D[kPASSInPixel]->Integral();
     double avgClSize = histograms2D[kClSizeInPixel]->Integral() / histograms2D[kPASSInPixel]->Integral();
     double errClSize = getEffErr(histograms2D[kClSizeInPixel]->Integral(), auxiliaryHisto->Integral());
-
     return {avgEff, errEff, avgTiming, avgClSize, errClSize};
 }
 void ScaleHistograms(std::vector<TH2D*> histograms2D, std::vector<TH1D*> histograms1D, TH2D* auxiliaryHisto)

@@ -15,6 +15,21 @@
 #include <utility>
 #include <vector>
 
+
+double ComputeGeometryDelay(int row)
+{
+    return row * 0.0125;
+}
+double ComputeModuleDelay(int module)
+{
+    return (4 - (module %100)%4) * 8;
+}
+double ComputeFrontEndJitter(unsigned int seed, double charge)
+{
+    std::mt19937 gen(seed);
+    std::normal_distribution<double> gauss(0.0, GetFrontEndJitter(charge));
+    return std::abs(gauss(gen));
+}
 std::pair<EnergyMap, TimeMap> BuildEnergyTimeMap(std::vector<RawHit> rawHits)
 {
     EnergyMap enMap;
@@ -30,7 +45,6 @@ std::pair<EnergyMap, TimeMap> BuildEnergyTimeMap(std::vector<RawHit> rawHits)
 }
 SortedTimeVector CorrectAndSortTimeMap(EnergyMap enMap, TimeMap timeMap, ThresholdMap thresholdMap , AnaFlags cfg, unsigned int seed)
 {
-    std::mt19937 gen(seed);
     SortedTimeVector sortedTimings;
     for (const auto& entry : enMap) 
     {
@@ -40,10 +54,11 @@ SortedTimeVector CorrectAndSortTimeMap(EnergyMap enMap, TimeMap timeMap, Thresho
 
         auto it = timeMap.find(key);
         if(it == timeMap.end()) continue;
-        // Row correction also of 7ns/ 512 rows + global GEANT4 timestamp + in-module chip id + front end jitter
-        std::normal_distribution<double> gauss(0.0, GetFrontEndJitter(entry.second));    
-        double timing    = GetTimingOffset(entry.second, itThr->second, cfg.T, cfg.Tdiv, cfg.TrefThr, cfg.x0, cfg.n, cfg.t0);     
-        timing += *std::max_element(it->second.begin(), it->second.end()) + key.y * 0.0125 + (4 - (key.plane %100)%4) * 8 + std::abs(gauss(gen));
+        // Row correction also of 7ns/ 512 rows + global GEANT4 timestamp + in-module chip id + front end jitter   
+        double timing    = GetTimeWalk(entry.second, itThr->second, cfg.T, cfg.Tdiv, cfg.TrefThr, cfg.x0, cfg.n, cfg.t0);     
+        timing += *std::max_element(it->second.begin(), it->second.end()) + ComputeGeometryDelay(key.y) + ComputeModuleDelay(key.plane)
+               + ComputeFrontEndJitter(seed, entry.second);
+        
         sortedTimings.emplace_back(entry.first,timing);
     }
     std::sort(sortedTimings.begin(), sortedTimings.end(), [](auto &a, auto &b){ return a.second < b.second; });
@@ -54,37 +69,57 @@ std::vector<WordBucket> AssignMALTA2WordBuckets(EnergyMap enMap, SortedTimeVecto
 {
     WordBucket merger;
     std::vector<WordBucket> digitizedWords;
-    double t0 = sortedTimings.begin()->second;
-    for (const auto& entry : sortedTimings) 
+
+    bool firstAcceptedHit = true;
+    double t0 = 0.0;
+
+    for (const auto& entry : sortedTimings)
     {
         const HitKey& key = entry.first;
+
         auto itThr = thresholdMap.find({key.x, key.y});
         if (itThr == thresholdMap.end()) continue;
 
         double threshold = itThr->second;
-        double timing = entry.second;
-        auto it = enMap.find(key);
-        double cenergy = it->second;
 
+        auto it = enMap.find(key);
+        if (it == enMap.end()) continue;
+
+        double cenergy = it->second;
         if (cenergy < threshold) continue;
 
-        __uint128_t word = encodeWord(key.x, key.y, cfg.groupSizeX, cfg.groupSizeY, cfg.groupLeng, cfg.parityLeng, cfg.dColLeng, false);
+        double timing = entry.second;
 
-        //Now I digitized all my words. Next step is merging them based on timing
-        if (timing >= t0 && timing < t0 + cfg.wordSpacing)
+        __uint128_t word = encodeWord(
+            key.x, key.y,
+            cfg.groupSizeX, cfg.groupSizeY,
+            cfg.groupLeng, cfg.parityLeng,
+            cfg.dColLeng, false);
+
+        if (firstAcceptedHit)
+        {
+            t0 = timing;
+            merger.push_back({word, timing, key.plane});
+            firstAcceptedHit = false;
+            continue;
+        }
+
+        if (timing < t0 + cfg.wordSpacing)
         {
             merger.push_back({word, timing, key.plane});
         }
         else
         {
-            t0 = timing;
             digitizedWords.push_back(merger);
+
             merger.clear();
+            t0 = timing;
             merger.push_back({word, timing, key.plane});
         }
     }
-    // Also push the very last merged word.
-    if (!merger.empty()) digitizedWords.push_back(merger);
+
+    if (!merger.empty())
+        digitizedWords.push_back(merger);
 
     return digitizedWords;
 }
@@ -456,7 +491,7 @@ std::pair<std::vector<ProcessedHit>, std::vector<ProcessedHit>> DecodeMALTA3HWCH
     }
     return {hitTree, positionTree};
 }
-double GetTimingOffset(double amplitude, double threshold, double T, double Tdiv, double TrefThr, double x0, double n, double t0) 
+double GetTimeWalk(double amplitude, double threshold, double T, double Tdiv, double TrefThr, double x0, double n, double t0) 
 {
     if (amplitude < threshold) // if less than than threshold 
     {

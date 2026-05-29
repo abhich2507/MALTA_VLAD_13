@@ -9,6 +9,9 @@
 #include "DigitalProcessing_multiPlane.hh"
 #include "Tracking_multiPlane.hh"
 
+double ComputeGeometryDelay(int row);
+double ComputeModuleDelay(int module);
+double ComputeFrontEndJitter(unsigned int seed, double charge);
 std::pair<EnergyMap, TimeMap> BuildEnergyTimeMap(std::vector<RawHit> rawHits);
 SortedTimeVector CorrectAndSortTimeMap(EnergyMap enMap, TimeMap timeMap, ThresholdMap thresholdMap , AnaFlags cfg, unsigned int seed);
 std::vector<WordBucket> AssignMALTA2WordBuckets(EnergyMap enMap, SortedTimeVector sortedTimings ,ThresholdMap thresholdMap, AnaFlags cfg);
@@ -28,7 +31,7 @@ std::vector<MALTA3Word> MemorySynchronize(std::vector<MALTA3Word> wordsAfterBus,
 std::vector<MALTA3Word> FIFOPass(std::vector<MALTA3Word> wordsAfterSRAM, AnaFlags cfg);
 std::pair<std::vector<ProcessedHit>, std::vector<ProcessedHit>> DecodeMALTA3HWCHits( std::vector<MALTA3Word> wordsAfterFIFO, int planeID, Offset offset, AnaFlags cfg);
 // Returns timing offset for a given amplitude
-double GetTimingOffset(double amplitude, double threshold, double T, double Tdiv, double TrefThr, double x0, double n, double t0);
+double GetTimeWalk(double amplitude, double threshold, double T, double Tdiv, double TrefThr, double x0, double n, double t0);
 double GetFrontEndJitter(double charge);
 __uint128_t encodeWord(int pixX, int pixY, int groupSizeX, int groupSizeY , int groupLeng, int parityLeng, int dColLeng, bool verbose);
 // Customizable mask for decoding digital subwords in a MALTA word.

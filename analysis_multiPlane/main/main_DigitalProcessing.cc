@@ -13,6 +13,5 @@ int main(int argc, char* argv[])
     std::string save  = argv[3];
     bool   proteus    = (argc > 4) && std::string(argv[4]) == "1";
 
-    DigitalProcessing_multiPlane(threshold, runNumber, save, proteus);
-    return 0;
+    return DigitalProcessing_multiPlane(threshold, runNumber, save, proteus);
 }

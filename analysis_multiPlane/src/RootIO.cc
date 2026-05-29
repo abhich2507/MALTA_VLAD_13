@@ -526,7 +526,7 @@ std::vector<FullTrackInfo> GetMatchedHits(AnaFlags cfg, double threshold, int ru
     trackedTree->SetBranchAddress("DUTLocalTime", &reconstructedTime);
     Long64_t nTrackedEntries = trackedTree->GetEntries();
 
-    for (int i = 0; i <= nTrackedEntries; i++)
+    for (int i = 0; i < nTrackedEntries; i++)
     {
         trackedTree->GetEntry(i);
         output.push_back({planeID, trackID, vertexX, vertexY, globalTrigger, pixX, pixY, nHits, reconstructedTime});

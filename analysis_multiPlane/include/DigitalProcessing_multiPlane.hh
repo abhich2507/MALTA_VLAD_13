@@ -61,7 +61,7 @@ struct ProcessedHit
 };
 
 // Main digital processing function
-void DigitalProcessing_multiPlane(double threshold, int runNumber, std::string saveName, bool proteusFlag);
+int DigitalProcessing_multiPlane(double threshold, int runNumber, std::string saveName, bool proteusFlag);
 ThresholdMap generateThrMap(double inputThreshold, int runNumber, std::string saveName, AnaFlags cfg, unsigned int seed);
 std::vector<RawHit> GetRawHits(TTree* plane);
 std::pair<EnergyMap, TimeMap> BuildEnergyTimeMap(std::vector<RawHit> rawHits);

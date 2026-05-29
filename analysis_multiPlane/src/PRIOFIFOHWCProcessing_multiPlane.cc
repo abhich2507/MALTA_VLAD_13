@@ -24,7 +24,7 @@ void PRIOFIFOHWCProcessing_multiPlane(double inputThreshold, int runNumber, std:
     std::cout << "GetDigitalConfig done!" << std::endl;
     ThresholdMap thresholdMap = generateThrMap(inputThreshold, runNumber, saveName, config, std::random_device{}());
     std::cout << "generateThrMap done!" << std::endl;
-    auto multiPlanes = CaloPreProcessing(inputThreshold, runNumber, saveName);
+    auto multiPlanes = CaloPreProcessing(inputThreshold, runNumber, saveName, config);
     std::cout << "CaloPreProcessing done!" << std::endl;
     std::string inputPath = config.inputPath + Form("_%04d/", runNumber);
     DetectorConfig detConfig = LoadConfig(inputPath + "flags.cfg");
