@@ -26,6 +26,7 @@ PrimaryGenerator::PrimaryGenerator(const SimFlags* flags) : m_flag(flags), m_par
     {
         G4float E0 = std::stod(m_flag->particleEnergy) * GeV;
         G4float particleEnergy = -E0 * std::log(G4UniformRand());
+        m_particleGun->SetParticleEnergy(particleEnergy);
     }
     else
     {
@@ -144,6 +145,26 @@ void PrimaryGenerator::GeneratePrimaries(G4Event *oneEvent)
     }
     for(G4int ev = 0; ev < particleNum; ev++)
     {
+        if(m_flag->largeScaleFlag == "EIC_FMT")
+        {
+            G4String particleType{};
+            G4double energyValue{};
+            if (ev == 0) 
+            {
+                particleType = "pi+";
+                energyValue = 1*GeV;
+            }
+            else
+            {
+                particleType = "e-";
+                energyValue = 10*MeV;
+            }
+
+            G4ParticleTable *particleTable = G4ParticleTable::GetParticleTable();
+            G4ParticleDefinition *particle = particleTable->FindParticle(particleType);
+            m_particleGun->SetParticleDefinition(particle);
+            m_particleGun->SetParticleEnergy(energyValue);
+        }
 
         G4AnalysisManager *analysisManager = G4AnalysisManager::Instance();
         // Particle Direction (momentum)
@@ -204,7 +225,11 @@ void PrimaryGenerator::GeneratePrimaries(G4Event *oneEvent)
         m_particleGun->SetParticlePosition(pos);
 
         G4int evtID = oneEvent->GetEventID();
-        float offSet =  m_flag->intraSpillOffset;
+        
+        float offSet{};
+        if(m_flag->largeScaleFlag == "EIC_FMT") offSet =  G4UniformRand() * 2000.0 * ns;
+        else offSet =  m_flag->intraSpillOffset;
+
         float particleTime = evtID * m_flag->beamVeto *ns + offSet *ns;
         m_particleGun->SetParticleTime(particleTime); // This is the only thread safe way to do this. Multithreading messes up life as always
 
