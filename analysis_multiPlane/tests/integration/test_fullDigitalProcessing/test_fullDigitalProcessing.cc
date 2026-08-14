@@ -70,7 +70,7 @@ void test_mergingWindowCountDependence()
     configPath = "analysis_multiPlane/tests/integration/test_fullDigitalProcessing/config_wS3.cfg";
     auto currentCount_wS3 = getHitCount(0);
 
-    assert (currentCount_wS0 <= currentCount_wS16 <= currentCount_wS3);
+    assert(currentCount_wS0 <= currentCount_wS16 && currentCount_wS16 <= currentCount_wS3);
 }
 void test_idealPixelPositionRetention()
 {

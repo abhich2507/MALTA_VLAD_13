@@ -35,6 +35,8 @@ struct SimFlags
     std::string particleType = "";
     std::string particleEnergy = "";
     std::string energyDistribution = "";
+    std::string bkgparticleType = "";
+    std::string bkgparticleEnergy = "";
     float particleMomentumX = 0.;
     float particleMomentumY = 0.;
     float particleMomentumZ = 0.;
@@ -62,6 +64,7 @@ struct SimFlags
     bool verbosePG = false;
     bool verboseSD = false;
     bool verboseSA = false;
+
     //TODO: When I print thses flags to a file add also the right material/ ion configs
 };
 

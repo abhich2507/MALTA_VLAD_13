@@ -128,6 +128,8 @@ void LoadSimFlagsFromFile(const std::string& filename, SimFlags& flags)
         else if (key == "beamVeto") flags.beamVeto = std::stof(value);
         else if (key == "particleType") flags.particleType = value;
         else if (key == "particleEnergy") flags.particleEnergy = value;
+        else if (key == "bkgparticleType") flags.bkgparticleType = value;
+        else if (key == "bkgparticleEnergy") flags.bkgparticleEnergy = value;
         else if (key == "energyDistribution") flags.energyDistribution = value;
         else if (key == "particleMomentumX") flags.particleMomentumX = std::stof(value);
         else if (key == "particleMomentumY") flags.particleMomentumY = std::stof(value);
