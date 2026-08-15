@@ -147,21 +147,27 @@ void PrimaryGenerator::GeneratePrimaries(G4Event *oneEvent)
     {
         if(m_flag->largeScaleFlag == "EIC_FMT")
         {
+            // Signal (ev == 0) and background particles are taken from the config file.
+            // Energies in the config are given in GeV.
             G4String particleType{};
             G4double energyValue{};
             if (ev == 0) 
             {
-                particleType = "pi+";
-                energyValue = 1*GeV;
+                particleType = m_flag->particleType;
+                energyValue = std::stod(m_flag->particleEnergy) * GeV;
             }
             else
             {
-                particleType = "e-";
-                energyValue = 10*MeV;
+                particleType = m_flag->bkgparticleType;
+                energyValue = std::stod(m_flag->bkgparticleEnergy) * GeV;
             }
 
             G4ParticleTable *particleTable = G4ParticleTable::GetParticleTable();
             G4ParticleDefinition *particle = particleTable->FindParticle(particleType);
+            if (!particle)
+            {
+                throwError("PrimaryGenerator::GeneratePrimaries", "Sampling Failure", "Given particle type does not match any predefined GEANT4 value.");
+            }
             m_particleGun->SetParticleDefinition(particle);
             m_particleGun->SetParticleEnergy(energyValue);
         }
