@@ -5,7 +5,7 @@ import os
 ### Currently the threshold 2000 is used just for the Proteus conversion
 
 parser = argparse.ArgumentParser()
-parser.add_argument("-r", "--run"         , help="Run number"      , type=str           , required =True)
+parser.add_argument("-r", "--run"         , help="Run number(s): single (2), comma list (2,4,6) or range (1-12)", type=str, required=True)
 parser.add_argument("-s", "--save"        , help="Save name"       , type = str         , required = True)
 parser.add_argument("-d", "--digitize"    , help="Digitize the raw data"                , action="store_true")
 parser.add_argument("-dmp", "--digitizemultiplane"    , help="Digitize the raw data of multiple planes", action="store_true")
@@ -20,9 +20,18 @@ parser.add_argument("-thr", "--threshold" , help="Threshold list"  , type= str  
 parser.add_argument("-i", "--input"       , help="Input configuration .cfg", type = str , required = True)
 args=parser.parse_args()
 
-#runNumber  = args.run
-runNumbers = args.run.split(",")
-runNumbers = [int(i) for i in runNumbers]
+# Parse run numbers: support single values, comma-separated lists and start-end ranges
+runNumbers = []
+for token in args.run.split(","):
+    token = token.strip()
+    if "-" in token:
+        start, end = token.split("-", 1)
+        start, end = int(start), int(end)
+        if start > end:
+            start, end = end, start
+        runNumbers.extend(range(start, end + 1))
+    else:
+        runNumbers.append(int(token))
 saveName   = args.save
 
 # Pass the path for the config input as env variable
@@ -72,15 +81,17 @@ if not args.proteus:
                 command = f"root -l -b -q 'analysis/Calorimetry.cc({thr},{runNumber},\"{saveName}\")'"
                 subprocess.run(command, shell=True, check=True)
 else:
-    command = f"root -l -b -q 'analysis/DigitalProcessing.cc(2000,{runNumber},\"{saveName}\", true)'"
-    subprocess.run(command, shell=True, check=True)
+    for runNumber in runNumbers:
+        command = f"root -l -b -q 'analysis/DigitalProcessing.cc(2000,{runNumber},\"{saveName}\", true)'"
+        subprocess.run(command, shell=True, check=True)
 
-    command = f"root -l -b -q 'analysis/SimulationToProteus.cc({runNumber})'"
-    subprocess.run(command, shell=True, check=True)
+        command = f"root -l -b -q 'analysis/SimulationToProteus.cc({runNumber})'"
+        subprocess.run(command, shell=True, check=True)
 
 
 
-savePath = f"Plots/local_{runNumber:04d}/{saveName}"
-command = f"cp configs/{config_name} {savePath}"
-print(f"Copying configuration file to: {savePath}")
-subprocess.run(command, shell = True, check = True)
+for runNumber in runNumbers:
+    savePath = f"Plots/local_{runNumber:04d}/{saveName}"
+    command = f"cp configs/{config_name} {savePath}"
+    print(f"Copying configuration file to: {savePath}")
+    subprocess.run(command, shell = True, check = True)

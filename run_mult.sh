@@ -1,19 +1,26 @@
 #!/bin/bash
 # Wrapper around run_analysis_multiPlane.py
-# Usage: ./run_mult.sh <runNumber>
+# Usage: ./run_mult.sh <startRun> [endRun]   (also accepts a range like 1-12)
 set -e
 
 SAVE="analysis_results_MP"
 CONFIG="analysis_flags_MP.cfg"
 THRESHOLD="100"
 
-RUN="${1:?Usage: $0 <runNumber>}"
+START="${1:?Usage: $0 <startRun> [endRun]}"
+END="${2:-}"
+
+if [ -n "$END" ]; then
+    RUNS="$START-$END"
+else
+    RUNS="$START"
+fi
 
 cd "$(dirname "$0")/"
 
 python run_analysis_multiPlane.py \
     -s "$SAVE" \
-    -r "$RUN" \
+    -r "$RUNS" \
     -i "$CONFIG" \
     -thr "$THRESHOLD" \
     -d -t -c -a
