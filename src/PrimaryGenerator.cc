@@ -206,8 +206,8 @@ void PrimaryGenerator::GeneratePrimaries(G4Event *oneEvent)
             pos = GetRandomPointOnCircle(0.5 *beamWidth, G4ThreeVector(x, y, z));
         }
         else if(m_flag->beamGeometry == "rectangle")
-        {
-            pos = GetRandomPointOnRectangle(beamWidthX, beamWidthY, G4ThreeVector(x, y, z));
+        {  
+           pos = GetRandomPointOnRectangle(beamWidthX, beamWidthY, G4ThreeVector(x, y, z));
         }
         else if (m_flag->beamGeometry == "granularBeam")
         {
