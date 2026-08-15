@@ -39,19 +39,27 @@ void BkgEff()
     }
     in.close();
 
+    // The binomial errors are ~0.02-0.11%, invisible on a ~13% wide axis.
+    // Scale them for display and note the factor on the axis title.
+    const double errScale = 1.;
+
     auto *gr = new TGraphErrors(vCount.size(), vCount.data(), vEff.data(), nullptr, vEffErr.data());
+    for (int i = 0; i < gr->GetN(); ++i)
+        gr->SetPointError(i, 0., vEffErr[i] * errScale);
     gr->SetTitle("");
     gr->SetMarkerStyle(20);
     gr->SetMarkerSize(0.9);
     gr->SetMarkerColor(kBlue + 2);
     gr->SetLineColor(kBlue + 2);
+    gr->SetLineWidth(2);
 
     TCanvas *c = new TCanvas("c", "bkg efficiency", 800, 600);
     c->SetLeftMargin(0.15);
-    c->SetBottomMargin(0.13);
+    c->SetBottomMargin(0.15);
     gr->Draw("AP");
-    gr->GetXaxis()->SetTitle("Background count (count-1)");
-    gr->GetYaxis()->SetTitle("Efficiency [%]");
+    gr->SetTitle("Hit Efficiency vs Background Count");
+    gr->GetXaxis()->SetTitle("Background(e-) count ");
+    gr->GetYaxis()->SetTitle("Efficiency [%] (Signal+BKG)");
     gr->GetYaxis()->SetRangeUser(TMath::MinElement(vEff.size(), vEff.data()) - 1.5,
                                  TMath::MaxElement(vEff.size(), vEff.data()) + 1.5);
 
