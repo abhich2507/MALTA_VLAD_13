@@ -77,8 +77,8 @@ G4ThreeVector PrimaryGenerator::GetRandomPointOnRectangle(G4float height, G4floa
     G4float halfHeight = height / 2.0;
     G4float halfThickness = thickness / 2.0;
 
-    G4float y = center.x() + (2.0 * G4UniformRand() - 1.0) * halfThickness;
-    G4float x = center.y() + (2.0 * G4UniformRand() - 1.0) * halfHeight;
+    G4float x = center.x() + (2.0 * G4UniformRand() - 1.0) * halfThickness;
+    G4float y = center.y() + (2.0 * G4UniformRand() - 1.0) * halfHeight;
     G4float z = center.z();
 
     return G4ThreeVector(x, y, z);
