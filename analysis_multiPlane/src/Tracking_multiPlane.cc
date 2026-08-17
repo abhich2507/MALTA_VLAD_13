@@ -26,12 +26,12 @@ void Tracking_multiPlane(double threshold, int runNumber, std::string saveName)
         std::cout << "PlaneZ " << planeZ <<" MatchHits done!" << std::endl;
         FillTrackedTree(fullTrackInfo, outfile, planeZ);
         std::cout << "PlaneZ " << planeZ <<" FillTrackedTree done!" << std::endl;
-        CloseFile(outfile);
+        //Snip- CloseFile(outfile);
         std::cout << "PlaneZ " << planeZ <<" CloseFile done!" << std::endl;
         SaveResidualHisto(residualInfo, planeZ, threshold, runNumber, saveName, config);
         std::cout << "PlaneZ " << planeZ <<" SaveResidualHisto done!" << std::endl;
     }
-
+    CloseFile(outfile);
     auto end = std::chrono::high_resolution_clock::now(); 
     std::chrono::duration<double, std::milli> elapsed = end - start;   
     std::cout << "############################# Tracking stopped after " << elapsed.count() << " ms" << std::endl;

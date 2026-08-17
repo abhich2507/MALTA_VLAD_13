@@ -1,0 +1,60 @@
+\begin{thebibliography}{10}
+\providecommand{\url}[1]{{#1}}
+\providecommand{\urlprefix}{URL }
+\expandafter\ifx\csname urlstyle\endcsname\relax
+  \providecommand{\doi}[1]{DOI \discretionary{}{}{}#1}\else
+  \providecommand{\doi}{DOI \discretionary{}{}{}\begingroup \urlstyle{rm}\Url}\fi
+
+\bibitem{Abdul_Khalek_2022}
+R.~Abdul~Khalek, et~al., Nuclear Physics A \textbf{1026}, 122447 (2022).
+\newblock \doi{10.1016/j.nuclphysa.2022.122447}
+
+\bibitem{Li:2020sru}
+X.~Li, et~al., EPJ Web Conf. \textbf{235}, 04002 (2020).
+\newblock \doi{10.1051/epjconf/202023504002}
+
+\bibitem{Li:2021xig}
+X.~Li, SciPost Phys. Proc. \textbf{8}, 076 (2022).
+\newblock \doi{10.21468/SciPostPhysProc.8.076}
+
+\bibitem{Li:2025lxr}
+X.~Li, PoS \textbf{QNP2024}, 113 (2025).
+\newblock \doi{10.22323/1.465.0113}
+
+\bibitem{Li:2020zbk}
+H.T. Li, Z.L. Liu, I.~Vitev, Phys. Lett. B \textbf{816}, 136261 (2021).
+\newblock \doi{10.1016/j.physletb.2021.136261}
+
+\bibitem{PhysRevLett.126.252001}
+H.T. Li, I.~Vitev, Phys. Rev. Lett. \textbf{126}, 252001 (2021).
+\newblock \doi{10.1103/PhysRevLett.126.252001}.
+\newblock \urlprefix\url{https://link.aps.org/doi/10.1103/PhysRevLett.126.252001}
+
+\bibitem{PhysRevD.104.114039}
+D.P. Anderle, X.~Dong, F.~Hekhorn, M.~Kelsey, S.~Radhakrishnan, E.~Sichtermann, L.~Xia, H.~Xing, F.~Yuan, Y.~Zhao, Phys. Rev. D \textbf{104}, 114039 (2021).
+\newblock \doi{10.1103/PhysRevD.104.114039}.
+\newblock \urlprefix\url{https://link.aps.org/doi/10.1103/PhysRevD.104.114039}
+
+\bibitem{MALTA2Cz}
+M.~van Rijnbach, et~al., {Eur. Phys. J. C} \textbf{84}(251) (2024).
+\newblock \urlprefix\url{https://doi.org/10.1140/epjc/s10052-024-12601-3}
+
+\bibitem{MALTACz}
+H.~Pernegger, et~al., Journal of Instrumentation \textbf{18}(09), P09018 (2023).
+\newblock \doi{10.1088/1748-0221/18/09/P09018}.
+\newblock \urlprefix\url{https://doi.org/10.1088/1748-0221/18/09/P09018}
+
+\bibitem{MALTATelescope}
+M.~van Rijnbach, et~al., {Eur. Phys. J. C} \textbf{83}(581) (2023).
+\newblock \urlprefix\url{https://doi.org/10.1140/epjc/s10052-023-11760-z}
+
+\bibitem{MALTA2_CCParameterization}
+L.~Fasselt, et~al., JINST \textbf{21}(04), C04001 (2026).
+\newblock \doi{10.1088/1748-0221/21/04/C04001}
+
+\bibitem{MALTAFastSim_Arxiv}
+D.V. Berlea, L.~Fasselt, P.~Behera, et~al.
+\newblock A data-driven fast simulation approach for maps-based detectors and their optimization (2026).
+\newblock \urlprefix\url{https://arxiv.org/abs/2604.05893}
+
+\end{thebibliography}

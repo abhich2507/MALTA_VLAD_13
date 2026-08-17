@@ -1,0 +1,53 @@
+\section{Performance Validation in Simulation - (Lead by Abhishek, Amelia, Lucian, Vlad)}\label{sec:mc}
+
+The charge collection of the MALTA2 pixel has been derived from testbeam data \cite{MALTA2_CCParameterization}.
+A parametric simulation approach is used that has been validated against data \cite{MALTAFastSim_Arxiv}.
+A quad module made of four sensors in series simulated in GEANT4. Each sensor is identical but has time difference because of proximity (ref simulated geometry and schemtic). 
+Characterization of sensors: Each sensor physical properties. 
+fast simulation and Readout implementation(digitization) and tracking with custom configuration. 
+
+\subsection{Telescope geometry and setup in simulation}
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=0.9\linewidth]{Figures/geom.png}
+    \caption{Telescope geometry and setup in simulation.}
+    \label{fig:simgeom}
+\end{figure}
+
+\subsection{Time Resolution (no background)}
+\textcolor{red}{Plot: Time resolution (compare: without background, with 1,2,3 particles per event)}
+Validated with data.
+
+\subsection{Background rate}
+Explain the expected background at the location of the FMT (from Amelia's plots?):
+\begin{itemize}
+    \item Select region of $1\times\SI{2}{\square\centi\meter}$ with highest hit rate.
+    \item Show distribution of hits per $\SI{2}{\micro\second}$ event
+    \item Show PDG code of background particles. Is it primarily photons and electrons/ positrons?
+\end{itemize}
+
+Explain the simplifications/ assumptions that go into the MALTA2 simulation.
+\begin{itemize}
+    \item Identify maximum expected background hit rate per sampled event.
+    \item Spatial distribution is approximately flat within individual MALTA2 sensor.
+\end{itemize}
+
+\subsection{Hit efficiency with background}
+\textcolor{red}{Plot: Hit efficiency of a signal particle versus background rate per event:}
+\begin{itemize}
+    \item Position of background and signal is random in MALTA2 sensor.
+    \item Keep time window of background particles within \SI{10.2}{\nano\second}.
+    \item Increase number of background particles that fall within this. (Expectation from Lucian: Efficiency is still >90\% for 1,2,3 background particles but decreases drastically for >3 particles.
+\end{itemize}
+
+
+
+\subsection{Tracking efficiency, potential spatial/temporal resolution with background}
+This subsection can target the proper tracking efficiency using 2 FMT planes.
+\begin{itemize}
+    \item Obtain hits per plane.
+    \item Reconstruct a track from the two planes.
+    \item Calculate pointing resolution of the track. In the simulation, signal is incident perpendicular onto the sensor. How is the direction reconstructed from the track?
+\end{itemize}
+
+\subsection{Matching capability with background}
