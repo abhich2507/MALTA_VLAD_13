@@ -6,6 +6,7 @@ A quad module made of four sensors in series simulated in GEANT4. Each sensor is
 Characterization of sensors: Each sensor physical properties. 
 fast simulation and Readout implementation(digitization) and tracking with custom configuration. 
 
+
 \subsection{Telescope geometry and setup in simulation}
 \begin{figure}[t]
     \centering
@@ -13,6 +14,31 @@ fast simulation and Readout implementation(digitization) and tracking with custo
     \caption{Telescope geometry and setup in simulation.}
     \label{fig:simgeom}
 \end{figure}
+
+The telescope is modelled in GEANT4 as a quad module of four identical
+MALTA2 sensors placed in series along the beam axis. Each sensor is a
+$1.8\times0.9~cm^2$ monolithic CMOS pixel matrix with a
+pixel pitch of \SI{36.4}{\micro\meter}, giving a $512\times224$ pixel grid.
+The sensors are separated by a fixed spacing, so a particle crosses the
+planes sequentially. Small time offsets between planes, arising from their
+relative position and readout propagation, are applied per sensor.
+
+Primaries are generated per event with a configurable multiplicity. The
+first primary in each event is the signal (a \SI{1}{\GeV} $\pi^{+}$)
+incident perpendicular to the sensor plane; any additional primaries are
+background (\SI{10}{\MeV} $e^{-}$). Each primary is placed at a random
+position within the active area and assigned a global time
+$t = N_\text{evt}\,t_\text{veto} + \delta t$, where $N_\text{evt}$ is the
+event index and $\delta t$ is a random intra-spill offset up to
+\SI{2}{\micro\second}. Signal and background therefore overlap in time and
+are distinguished only by their truth label, not by arrival time.
+
+Energy deposition in each sensor is digitized with the parametric MALTA2
+response (charge collection, threshold, and timing), and the resulting
+pixel hits are reconstructed per plane. Truth provenance
+(event ID and track ID) is propagated through digitization to allow exact
+signal-to-hit association for the efficiency and tracking studies that
+follow.
 
 \subsection{Time Resolution (no background)}
 \textcolor{red}{Plot: Time resolution (compare: without background, with 1,2,3 particles per event)}

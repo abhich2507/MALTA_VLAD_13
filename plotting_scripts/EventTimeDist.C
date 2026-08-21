@@ -55,7 +55,8 @@ void EventTimeDist(int run = 4, const char* dir = "Results_10mev_e_mp")
     hFull->GetXaxis()->SetTitle("trueGlobalTime [ns]");
     hFull->GetYaxis()->SetTitle("Events / bin");
 
-    Long64_t nEntries = chain.GetEntries();
+    //Long64_t nEntries = chain.GetEntries();
+    int nEntries = 1;
     for (Long64_t i = 0; i < nEntries; ++i)
     {
         chain.GetEntry(i);
