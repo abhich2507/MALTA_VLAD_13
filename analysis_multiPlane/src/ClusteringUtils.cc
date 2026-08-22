@@ -62,13 +62,14 @@ ClusteredHit GetValidCluster(const Cluster& cl, ClusterState& state, const std::
     double vertexY = vertex.second;
     int clSize  = cl.clSize;
     int clPlaneID = state.currentPlaneID;
+    int clMCFlag = state.currentMCFlag;
 
     double timing = std::min_element(state.cluster.begin(), state.cluster.end(),
                  [](const Hit& a, const Hit& b){ return a.t < b.t; })->t;
 
     double correctedTiming = timing - state.currentPixY * 0.0125;
 
-    return {clPlaneID, vertexX, vertexY, clSize, timing, correctedTiming};
+    return {clPlaneID, vertexX, vertexY, clSize, timing, correctedTiming, clMCFlag};
 
 }
 void ResetClusterState(ClusterState& state, FullTrackInfo track)
@@ -77,6 +78,7 @@ void ResetClusterState(ClusterState& state, FullTrackInfo track)
     state.cluster.push_back({track.dutX, track.dutY, track.dutTime});
     state.currentPlaneID  = track.planeID;
     state.currentTrackID  = track.trackID;
+    state.currentMCFlag   = track.mcFlag;
     state.currentPixY     = track.dutY;
     state.currentX        = track.vertexX;
     state.currentY        = track.vertexY;
@@ -98,6 +100,7 @@ ClusterState BuildClusterState(const std::vector<FullTrackInfo>& track)
     ClusterState state;
     state.currentPlaneID = track.front().planeID;
     state.currentTrackID = track.front().trackID;
+    state.currentMCFlag  = track.front().mcFlag;
     state.currentPixY    = track.front().dutY;
     state.currentX       = track.front().vertexX;
     state.currentY       = track.front().vertexY;

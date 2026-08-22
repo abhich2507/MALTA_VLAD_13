@@ -11,6 +11,7 @@ struct AnalysisHits
     int clSize;
     double timing;
     double correctedTiming;
+    int mcFlag;
 };
 enum Hist2DIndex 
 {

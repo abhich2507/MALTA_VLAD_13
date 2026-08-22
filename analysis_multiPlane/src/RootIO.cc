@@ -112,7 +112,7 @@ void FillTrackedTree(std::vector<ClusteredHit> allClusters, TFile* outfile, int 
     TTree *analysisTree = new TTree(Form("analyzedHits_planeZ%d",planeZ), Form("analyzedHits_planeZ%d",planeZ));
     // Variables for branches
     double analysisVertexX, analysisVertexY, timing, correctedTiming;
-    int analysisClSize, clPlaneID;
+    int analysisClSize, clPlaneID, clMCFlag;
     // Create branches
     analysisTree->Branch("planeID", &clPlaneID, "planeID/I");
     analysisTree->Branch("analysisVertexX", &analysisVertexX, "analysisVertexX/D");
@@ -120,6 +120,7 @@ void FillTrackedTree(std::vector<ClusteredHit> allClusters, TFile* outfile, int 
     analysisTree->Branch("clSize", &analysisClSize, "clSize/I");
     analysisTree->Branch("timing", &timing, "timing/D");
     analysisTree->Branch("correctedTiming", &correctedTiming, "correctedTiming/D");
+    analysisTree->Branch("mcFlag", &clMCFlag, "mcFlag/I");
 
     for (const auto& el : allClusters)
     {
@@ -129,6 +130,7 @@ void FillTrackedTree(std::vector<ClusteredHit> allClusters, TFile* outfile, int 
         analysisClSize = el.clSize;
         timing = el.timing;
         correctedTiming = el.corrTiming;
+        clMCFlag = el.mcFlag;
         analysisTree->Fill();
     }
     outfile->cd();  
@@ -517,7 +519,7 @@ std::vector<FullTrackInfo> GetMatchedHits(AnaFlags cfg, double threshold, int ru
     std::vector<FullTrackInfo> output;
     double vertexX, vertexY, globalTrigger;
     double reconstructedTime;
-    int trackID, pixX, pixY, nHits, planeID;
+    int trackID, pixX, pixY, nHits, planeID, mcFlag;
     trackedTree->SetBranchAddress("planeID", &planeID);
     trackedTree->SetBranchAddress("trackID", &trackID);
     trackedTree->SetBranchAddress("vertexX", &vertexX);
@@ -528,12 +530,14 @@ std::vector<FullTrackInfo> GetMatchedHits(AnaFlags cfg, double threshold, int ru
     trackedTree->SetBranchAddress("DUTPixY", &pixY);  
     trackedTree->SetBranchAddress("DUTnHits", &nHits);
     trackedTree->SetBranchAddress("DUTLocalTime", &reconstructedTime);
+    trackedTree->SetBranchAddress("mcFlag", &mcFlag);
+    
     Long64_t nTrackedEntries = trackedTree->GetEntries();
 
     for (int i = 0; i < nTrackedEntries; i++)
     {
         trackedTree->GetEntry(i);
-        output.push_back({planeID, trackID, vertexX, vertexY, globalTrigger, pixX, pixY, nHits, reconstructedTime});
+        output.push_back({planeID, trackID, vertexX, vertexY, globalTrigger, pixX, pixY, nHits, reconstructedTime, mcFlag});
     }
 
     return output;
@@ -554,18 +558,19 @@ std::vector<AnalysisHits> GetAnalysisHits(AnaFlags cfg, double threshold, int ru
     TTree *analysisTree = (TTree*) analysisFile->Get(Form("analyzedHits_planeZ%d",planeZ));
 
     double fX, fY, timing, correctedTiming;
-    int clSize, planeID;
+    int clSize, planeID, mcFlag;
     analysisTree->SetBranchAddress("planeID", &planeID);
     analysisTree->SetBranchAddress("analysisVertexX", &fX);
     analysisTree->SetBranchAddress("analysisVertexY", &fY);
     analysisTree->SetBranchAddress("clSize", &clSize);  
     analysisTree->SetBranchAddress("timing", &timing); 
     analysisTree->SetBranchAddress("correctedTiming", &correctedTiming);
+    analysisTree->SetBranchAddress("mcFlag", &mcFlag);
     Long64_t nAnalyzedEntries = analysisTree->GetEntries();
     for (int i =0; i< nAnalyzedEntries; i++)
     {
         analysisTree->GetEntry(i);
-        output.push_back({planeID, fX, fY, clSize, timing, correctedTiming});
+        output.push_back({planeID, fX, fY, clSize, timing, correctedTiming, mcFlag});
     }
 
     return output;
