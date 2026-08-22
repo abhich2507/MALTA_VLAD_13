@@ -25,8 +25,11 @@ std::pair<std::vector<FullTrackInfo>, std::vector<Residual>> MatchHits(std::vect
     {
         auto track = tracks[i];
         Vec3 vertex = {track.x, track.y, track.z};
+
+        double fake_time = cfg.fake_rate ? 1000.0 : 0.0;// displacing original hit to get fake hits efficiency
+         
         // First we set up the sliding window
-        while (detIdx < nHits && hits[detIdx].time < track.t) // take first MALTA hit that is at least the vertexTime
+        while (detIdx < nHits && hits[detIdx].time < track.t+fake_time) // take first MALTA hit that is at least the vertexTime
         {
             detIdx++;
         }
@@ -35,7 +38,8 @@ std::pair<std::vector<FullTrackInfo>, std::vector<Residual>> MatchHits(std::vect
         Long64_t j = detIdx;
         foundHit = false;
         int DUTnHits = 0;
-        while (j < nHits && hits[j].time < track.t + cfg.timeCut) // check whether inside window
+        
+        while (j < nHits && hits[j].time < track.t + fake_time + cfg.timeCut) // check whether inside window
         {
 
             DUTPixX = hits[j].x;

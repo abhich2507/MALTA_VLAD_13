@@ -51,6 +51,7 @@ void LoadAnalysisFlagsFromFile(const std::string& filename, AnaFlags& flags)
         else if (key == "distCut") flags.distCut = std::stod(value);
         else if (key == "timeCut") flags.timeCut = std::stod(value);
         else if (key == "trkUnc") flags.trkUnc   = (value == "true");
+        else if (key == "fake_rate") flags.fake_rate = (value == "true");
         else if (key == "clPos") flags.clPos     = value;
         else if (key == "verboseDigital") flags.verboseDigital = (value == "true");
         else if (key == "verboseTracking") flags.verboseTracking = (value == "true");

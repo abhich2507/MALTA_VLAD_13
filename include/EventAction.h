@@ -19,6 +19,8 @@ struct m_trackEdepTime
   G4int X = -1;
   G4int Y = -1;
   G4int eventNum = -1;
+  G4int trackID = -1;
+  G4int mcFlag = -1;
 };
 
 class EventAction : public G4UserEventAction

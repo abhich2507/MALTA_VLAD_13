@@ -28,6 +28,7 @@ struct AnaFlags
     double distCut = 0.;
     double timeCut = 0.;
     bool trkUnc = false;
+    bool fake_rate = false;
     std::string clPos = "";
     bool verboseDigital = false;
     bool verboseTracking = false;

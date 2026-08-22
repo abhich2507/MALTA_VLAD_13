@@ -21,6 +21,7 @@ PrimaryGenerator::PrimaryGenerator(const SimFlags* flags) : m_flag(flags), m_par
     {
         G4float particleEnergy = std::stod(m_flag->particleEnergy) * GeV;
         m_particleGun->SetParticleEnergy(particleEnergy);  //1.4608 * MeV K-40   0.661 * MeV Cs-137
+
     }
     else if(m_flag->particleEnergy == "log")
     {
@@ -143,25 +144,30 @@ void PrimaryGenerator::GeneratePrimaries(G4Event *oneEvent)
     {
         particleNum = m_flag->particleCount;
     }
+    // Signal particle is a random particle among the total particles, not necessarily the first one
+    G4int signalIndex = static_cast<G4int>(G4UniformRand() * particleNum);
+    G4int trackID = 0;
+    G4int mcFlag = 0;
     for(G4int ev = 0; ev < particleNum; ev++)
     {
         if(m_flag->largeScaleFlag == "EIC_FMT")
         {
-            // Signal (ev == 0) and background particles are taken from the config file.
+            // Signal (ev == signalIndex) and background particles are taken from the config file.
             // Energies in the config are given in GeV.
             G4String particleType{};
             G4double energyValue{};
-            if (ev == 0) 
-            {
+            if (ev == signalIndex) 
+            {   mcFlag = 0;
                 particleType = m_flag->particleType;
                 energyValue = std::stod(m_flag->particleEnergy) * GeV;
             }
             else
-            {
+            {   mcFlag = 1;
+                
                 particleType = m_flag->bkgparticleType;
                 energyValue = std::stod(m_flag->bkgparticleEnergy) * GeV;
             }
-
+            trackID++; 
             G4ParticleTable *particleTable = G4ParticleTable::GetParticleTable();
             G4ParticleDefinition *particle = particleTable->FindParticle(particleType);
             if (!particle)
@@ -245,6 +251,8 @@ void PrimaryGenerator::GeneratePrimaries(G4Event *oneEvent)
         analysisManager->FillNtupleFColumn(1, 2, pos[1]);
         analysisManager->FillNtupleFColumn(1, 3, pos[2]);
         analysisManager->FillNtupleFColumn(1, 4, particleTime);
+        analysisManager->FillNtupleIColumn(1, 5, trackID);
+        analysisManager->FillNtupleIColumn(1, 6, mcFlag);
         //analysisManager->FillNtupleFColumn(1, 5, std::stod(m_flag->particleEnergy));
         analysisManager->AddNtupleRow(1); 
 

@@ -47,6 +47,8 @@ RunAction::RunAction(const SimFlags* flags) : m_flag(flags)
     analysisManager->CreateNtupleFColumn("trueVertexZ");
     // Create Integer Global time column = time that starts when each event begins. Local time = time when the particle is created
     analysisManager->CreateNtupleFColumn("trueGlobalTime");
+    analysisManager->CreateNtupleIColumn("trackID");
+    analysisManager->CreateNtupleIColumn("mcFlag");
     //analysisManager->CreateNtupleFColumn("trueEnergy");
     analysisManager->FinishNtuple(1);
 }
