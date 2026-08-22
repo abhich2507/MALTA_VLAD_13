@@ -55,7 +55,7 @@ void FillTrackedTree(std::vector<FullTrackInfo> trackedHits, TFile* outfile, int
     TTree *trackedTree = new TTree(Form("TrackedHits_planeZ%d",planeZ), Form("Tracked Hits in PlaneZ %d",planeZ));
     // Variables for branches
     double vertexX, vertexY, vertexZ, vertexTime, DUTLocalTime;
-    int DUTPixX, DUTPixY, trackID, DUTnHits, planeData;
+    int DUTPixX, DUTPixY, trackID, DUTnHits, planeData,mcFlag;
 
     // Create branches
     trackedTree->Branch("planeID", &planeData, "planeID/I");
@@ -67,7 +67,7 @@ void FillTrackedTree(std::vector<FullTrackInfo> trackedHits, TFile* outfile, int
     trackedTree->Branch("DUTPixY", &DUTPixY, "DUTPixY/I");
     trackedTree->Branch("DUTnHits", &DUTnHits, "DUTnHits/I");
     trackedTree->Branch("DUTLocalTime", &DUTLocalTime, "DUTLocalTime/D");
-
+    trackedTree->Branch("mcFlag", &mcFlag, "mcFlag/I");
     for (const auto& el : trackedHits)
     {
         planeData = el.planeID;
@@ -79,6 +79,7 @@ void FillTrackedTree(std::vector<FullTrackInfo> trackedHits, TFile* outfile, int
         DUTPixY = el.dutY;
         DUTnHits = el.dutNHits;
         DUTLocalTime = el.dutTime;
+        mcFlag = el.mcFlag;
         trackedTree->Fill();
     }
     outfile->cd();  
@@ -453,11 +454,13 @@ std::vector<TrackEntry> GetVertex(AnaFlags cfg, int runNumber)
     }
 
     float vertexX_float, vertexY_float, vertexZ_float, globalTime_float;
+    int mcFlag=-1;
     // Connect branches
     trackChain->SetBranchAddress("trueVertexX", &vertexX_float);
     trackChain->SetBranchAddress("trueVertexY", &vertexY_float);
     trackChain->SetBranchAddress("trueVertexZ", &vertexZ_float);
     trackChain->SetBranchAddress("trueGlobalTime", &globalTime_float);
+    trackChain->SetBranchAddress("mcFlag", &mcFlag);
     Long64_t nTrackEntries = trackChain->GetEntries();
     // For multiThreading I need to first time order the hits.
     for (Long64_t i = 0; i < nTrackEntries; i++) 
@@ -468,7 +471,8 @@ std::vector<TrackEntry> GetVertex(AnaFlags cfg, int runNumber)
         double vertexY = static_cast<double>(vertexY_float);
         double vertexZ = static_cast<double>(vertexZ_float);
         double globalTime = static_cast<double>(globalTime_float);
-        tracks.push_back({vertexX, vertexY, vertexZ, globalTime});
+        int mcFlagValue = static_cast<int>(mcFlag);
+        tracks.push_back({vertexX, vertexY, vertexZ, globalTime, mcFlagValue});
     }
     // sort by time
     std::sort(tracks.begin(), tracks.end(), [](const TrackEntry &a, const TrackEntry &b){return a.t < b.t;});

@@ -7,6 +7,7 @@ struct TrackEntry
     double y;
     double z;
     double t;
+    int mcFlag;
 };
 struct DetectorConfig 
 {
@@ -44,6 +45,7 @@ struct FullTrackInfo
     int dutY;
     int dutNHits;
     double dutTime;
+    int mcFlag;
 };
 struct Residual
 {

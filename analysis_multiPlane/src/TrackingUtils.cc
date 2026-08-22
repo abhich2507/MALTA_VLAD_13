@@ -57,7 +57,7 @@ std::pair<std::vector<FullTrackInfo>, std::vector<Residual>> MatchHits(std::vect
             if(rx*rx + ry*ry <= (cfg.distCut/1000)*(cfg.distCut/1000))
             {
                 DUTnHits++;
-                TrackOut.push_back({filePlane, i, vertex.x, vertex.y, track.t, DUTPixX, DUTPixY, DUTnHits, DUTLocalTime});
+                TrackOut.push_back({filePlane, i, vertex.x, vertex.y, track.t, DUTPixX, DUTPixY, DUTnHits, DUTLocalTime,track.mcFlag});
                 foundHit = true;
             }
             j++;
@@ -68,7 +68,7 @@ std::pair<std::vector<FullTrackInfo>, std::vector<Residual>> MatchHits(std::vect
             DUTPixX = -1;
             DUTPixY = -1;
             DUTLocalTime = -1;
-            TrackOut.push_back({filePlane, i, vertex.x, vertex.y, track.t, DUTPixX, DUTPixY, DUTnHits, DUTLocalTime});
+            TrackOut.push_back({filePlane, i, vertex.x, vertex.y, track.t, DUTPixX, DUTPixY, DUTnHits, DUTLocalTime, track.mcFlag});
         }
     }
     return {TrackOut, ResOut};

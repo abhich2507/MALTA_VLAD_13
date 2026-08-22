@@ -4,7 +4,7 @@
 set -e
 
 SAVE="analysis_results_MP"
-CONFIG="analysis_flags_MP.cfg"
+CONFIG="analysis_flags_MP_EIC_Vlad.cfg"
 THRESHOLD="100"
 
 START="${1:?Usage: $0 <startRun> [endRun]}"
