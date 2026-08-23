@@ -34,7 +34,7 @@ void Analysis_multiPlane(double threshold, int runNumber, std::string saveName)
         std::cout << "PlaneZ " << planeZ <<" SetHistogramStyle done!" << std::endl;
         SaveHistograms(histograms2D, histograms1D, h2PASSInPixelAux, config, threshold, runNumber, saveName);
         std::cout << "PlaneZ " << planeZ <<" SaveHistograms done!" << std::endl;
-        SaveSummaryRoot(config, runNumber, saveName, threshold, statistics);
+        SaveSummaryRoot(config, runNumber, saveName, threshold, planeZ, statistics);
         std::cout << "PlaneZ " << planeZ <<" SaveSummaryRoot done!" << std::endl;
     }
     

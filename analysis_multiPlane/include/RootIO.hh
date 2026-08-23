@@ -20,7 +20,7 @@ void CloseFile(TFile* outfile);
 void SaveResidualHisto(std::vector<Residual> residuals, int planeZ, double threshold, int runNumber, std::string saveName, AnaFlags cfg);
 void FillTrackedTree(std::vector<ClusteredHit> allClusters, TFile* outfile, int planeZ);
 void SaveHistograms(std::vector<TH2D*> histograms2D, std::vector<TH1D*> histograms1D, TH2D* auxiliaryHisto, AnaFlags cfg, double threshold, int runNumber, std::string saveName);
-void SaveSummaryRoot(AnaFlags cfg, int runNumber, std::string saveName, double threshold, AnalyzedHit statistics);
+void SaveSummaryRoot(AnaFlags cfg, int runNumber, std::string saveName, double threshold, int planeZ, AnalyzedHit statistics);
 void SaveCalorimetryHistograms(RawCalorimetryPerMap rawCaloMap, std::vector<FitCalorimetryInfo> fitCaloMap, int runNumber, std::string saveName, double threshold);
 void FillMALTA3HWCTree(std::pair<std::vector<ProcessedHit>, std::vector<ProcessedHit>> malta3Hits, AnaFlags cfg, double threshold, int runNumber, std::string saveName);
 void savePlot (std::string directoryPath, std::string runPath, double threshold, std::string saveName, TH1* hist, std::string histName);

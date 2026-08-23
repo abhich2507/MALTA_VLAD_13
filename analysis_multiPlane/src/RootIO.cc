@@ -157,7 +157,7 @@ void SaveHistograms(std::vector<TH2D*> histograms2D, std::vector<TH1D*> histogra
     savePlot(directoryPath, runPath, threshold, saveName, histograms1D[kPASSInPixelXProj], histograms1D[kPASSInPixelXProj]->GetName());
     savePlot(directoryPath, runPath, threshold, saveName, histograms1D[kPASSInPixelYProj], histograms1D[kPASSInPixelYProj]->GetName());
 }
-void SaveSummaryRoot(AnaFlags cfg, int runNumber, std::string saveName, double threshold, AnalyzedHit statistics)
+void SaveSummaryRoot(AnaFlags cfg, int runNumber, std::string saveName, double threshold, int planeZ, AnalyzedHit statistics)
 {
     std::string directoryPath = cfg.localPath +"/Plots/";
     std::string runPath = Form("local_%04d/", runNumber);
@@ -166,6 +166,7 @@ void SaveSummaryRoot(AnaFlags cfg, int runNumber, std::string saveName, double t
     // Try opening the file in UPDATE mode (read + write)
     std::string summaryPath = (directoryPath + runPath + saveName + "/summary.root").c_str();
     double summaryThreshold, summaryEff, summaryEffErr, summaryClSize, summaryClSizeErr, summaryTiming;
+    int summaryPlaneID = -1;
 
     TFile *f = TFile::Open(summaryPath.c_str(), "UPDATE");
     if (!f || f->IsZombie()) {
@@ -174,11 +175,21 @@ void SaveSummaryRoot(AnaFlags cfg, int runNumber, std::string saveName, double t
     }
     // Check if the tree exists
     TTree *summaryTree = (TTree*) f->Get("summaryTree");
+    // Old schema has no planeID branch: recreate so both planes can be stored separately
+    if (summaryTree && !summaryTree->GetBranch("planeID"))
+    {
+        std::cout << "Old summary tree without planeID branch found - recreating." << std::endl;
+        f->Close();
+        delete f;
+        f = new TFile(summaryPath.c_str(), "RECREATE");
+        summaryTree = nullptr;
+    }
     if (!summaryTree) 
     {
         std::cout << "Creating new summary tree" << std::endl;
         summaryTree = new TTree("summaryTree", "summary Tree");
         summaryTree->Branch("threshold", &summaryThreshold, "threshold/D");
+        summaryTree->Branch("planeID", &summaryPlaneID, "planeID/I");
         summaryTree->Branch("efficiency", &summaryEff, "efficiency/D");
         summaryTree->Branch("effError", &summaryEffErr, "effError/D");
         summaryTree->Branch("clSize", &summaryClSize, "clSize/D");
@@ -191,6 +202,7 @@ void SaveSummaryRoot(AnaFlags cfg, int runNumber, std::string saveName, double t
     }
 
     summaryTree->SetBranchAddress("threshold", &summaryThreshold);
+    summaryTree->SetBranchAddress("planeID", &summaryPlaneID);
     summaryTree->SetBranchAddress("efficiency",  &summaryEff);
     summaryTree->SetBranchAddress("effError",  &summaryEffErr);
     summaryTree->SetBranchAddress("clSize", &summaryClSize);
@@ -198,6 +210,7 @@ void SaveSummaryRoot(AnaFlags cfg, int runNumber, std::string saveName, double t
     summaryTree->SetBranchAddress("timing", &summaryTiming);
 
     summaryThreshold = threshold;
+    summaryPlaneID = planeZ;
     summaryEff = statistics.avgEff;
     summaryEffErr = statistics.errEff;
     summaryClSize = statistics.avgClSize;
@@ -205,7 +218,7 @@ void SaveSummaryRoot(AnaFlags cfg, int runNumber, std::string saveName, double t
     summaryTiming = statistics.avgTiming;
     summaryTree->Fill();
 
-    std::cout << "Saving values: " << "Threshold: " << threshold << "; avgEff: " << summaryEff << "; summaryEffErr: " 
+    std::cout << "Saving values: " << "planeZ: " << planeZ << "; Threshold: " << threshold << "; avgEff: " << summaryEff << "; summaryEffErr: " 
               << summaryEffErr << "; avgClSize: " << summaryClSize << ";avgTiming: " << summaryTiming << std::endl;
 
     f->cd();
