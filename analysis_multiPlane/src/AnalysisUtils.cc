@@ -79,8 +79,8 @@ TH2D* FillHistograms(std::vector<AnalysisHits> analysisHits, std::vector<TH2D*> 
     TRandom3 rng(0);
     for (int i =0; i< analysisHits.size(); i++)
     {
-         if (analysisHits[i].mcFlag != 0) continue;
-         
+         if (analysisHits[i].mcFlag != 0) continue; // looking for only signal hits
+
         //analysisHits[i];
         double trackOffsetX = cfg.trackOffsetX + geoMaps[analysisHits[i].planeID].x *10;
         double trackOffsetY = cfg.trackOffsetY + geoMaps[analysisHits[i].planeID].y *10;

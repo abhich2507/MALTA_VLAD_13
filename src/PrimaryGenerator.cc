@@ -17,17 +17,28 @@ PrimaryGenerator::PrimaryGenerator(const SimFlags* flags) : m_flag(flags), m_par
 {
     m_particleGun = new G4ParticleGun(1); // 1 particle per event
     // Set primary particle energy if a constant value is passed. If not, an energy method is used below
-    if(!m_flag->particleEnergy.empty() && m_flag->particleEnergy.find_first_not_of("0123456789") == std::string::npos)
+    if(!m_flag->particleEnergy.empty() && m_flag->particleEnergy != "log")
     {
-        G4float particleEnergy = std::stod(m_flag->particleEnergy) * GeV;
+        // Accept any numeric string: integer, decimal, sign, scientific notation
+        G4float particleEnergy{};
+        try
+        {
+            particleEnergy = std::stod(m_flag->particleEnergy) * GeV;
+        }
+        catch (...)
+        {
+            throwError("PrimaryGenerator::PrimaryGenerator", "Sampling Failure",
+                       "particleEnergy '" + m_flag->particleEnergy + "' is not a valid number and no energy distribution with this name is implemented.");
+        }
         m_particleGun->SetParticleEnergy(particleEnergy);  //1.4608 * MeV K-40   0.661 * MeV Cs-137
 
     }
     else if(m_flag->particleEnergy == "log")
     {
-        G4float E0 = std::stod(m_flag->particleEnergy) * GeV;
-        G4float particleEnergy = -E0 * std::log(G4UniformRand());
-        m_particleGun->SetParticleEnergy(particleEnergy);
+        // A logarithmic energy distribution is not implemented. Previously this
+        // branch crashed on std::stod("log"); fail cleanly instead.
+        throwError("PrimaryGenerator::PrimaryGenerator", "Sampling Failure",
+                   "The 'log' energy distribution is not yet implemented.");
     }
     else
     {
