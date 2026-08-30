@@ -5,8 +5,9 @@
 #include <algorithm>
 #include <string>
 
-void Coincidence()
-{   std::string inputFile = "/Users/snip/Documents/MALTA_VLAD_13/malta_simulation/Results_10mev_e_mp_mc/local_0007/analysis_results_MP/analysisThr100.root"; 
+void Coincidence(int runNumber = 2)
+{   std::string inputFile = Form("Results_10mev_e_mp_mc/local_%04d/analysis_results_MP/analysisThr100.root", runNumber);
+    std::cout << "Input file: " << inputFile << std::endl;
     auto file = TFile::Open(inputFile.c_str());
     if (!file || file->IsZombie())
     {
@@ -142,6 +143,7 @@ void Coincidence()
 
     double eff = 100. * coinCount / nSignalGenerated;
 
+    std::cout << "Signal generated tracks: " << nSignalGenerated << std::endl;
     std::cout << "Total coincidences found: " << coinCount << std::endl;
     std::cout << "Total hits in plane Z0: " << hitsZ0.size() << std::endl;
     std::cout << "Total hits in plane Z1: " << hitsZ1.size() << std::endl;  
