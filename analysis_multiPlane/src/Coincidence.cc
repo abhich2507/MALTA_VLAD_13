@@ -6,7 +6,7 @@
 #include <string>
 
 void Coincidence()
-{   std::string inputFile = "/Users/snip/Documents/MALTA_VLAD_13/malta_simulation/Results_10mev_e_mp_mc/local_0001/analysis_results_MP/analysisThr100.root"; 
+{   std::string inputFile = "/Users/snip/Documents/MALTA_VLAD_13/malta_simulation/Results_10mev_e_mp_mc/local_0007/analysis_results_MP/analysisThr100.root"; 
     auto file = TFile::Open(inputFile.c_str());
     if (!file || file->IsZombie())
     {
@@ -115,8 +115,8 @@ void Coincidence()
 
 
     // check coincidence using sliding window
-    double coincidenceWindow = 2.0; // in ns
-    double spatialWindow = 100; // in micrometers
+    double coincidenceWindow = 8; // in ns 
+    double spatialWindow = 100; // in micrometers // not used here bcz we are mathcing tracks by truth vertex coordinates
     int coinCount = 0;
 
     for (const auto& hitZ0 :hitsZ0)
