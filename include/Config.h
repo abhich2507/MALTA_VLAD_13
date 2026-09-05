@@ -21,7 +21,9 @@ struct SimFlags
     float CCModelSigmaY =0.;
     std::string outsideMaterial = "G4_Galactic";
     std::string beamGeometry = "";
-    float gausSmearing = 0.;
+    float gausSmearingX = 0.;
+    float gausSmearingY = 0.;
+    float gausSmearingZ = 0.;
     float beamXOffset = 0.;
     float beamYOffset = 0.;
     float beamZOffset = 0.;

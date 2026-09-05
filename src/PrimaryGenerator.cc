@@ -211,12 +211,13 @@ void PrimaryGenerator::GeneratePrimaries(G4Event *oneEvent)
         }
         else if (m_flag->beamGeometry == "gaussian")
         {
-            G4float sigma = m_flag->gausSmearing *cm;
-            G4float xGauss = G4RandGauss::shoot(x, sigma);
-            G4float yGauss = G4RandGauss::shoot(y, sigma);
-            //G4float zGauss = G4RandGauss::shoot(z, sigma);
-            pos = G4ThreeVector(xGauss, yGauss, z);
-
+            G4float sigma_X = m_flag->gausSmearingX *cm;
+            G4float sigma_Y = m_flag->gausSmearingY *cm;
+            G4float sigma_Z = m_flag->gausSmearingZ *cm;
+            G4float xGauss = G4RandGauss::shoot(x, sigma_X);
+            G4float yGauss = G4RandGauss::shoot(y, sigma_Y);
+            G4float zGauss = G4RandGauss::shoot(z, sigma_Z); // z used here.
+            pos = G4ThreeVector(xGauss, yGauss, zGauss);
         }
         else if(m_flag->beamGeometry == "circle")
         {

@@ -115,7 +115,9 @@ void LoadSimFlagsFromFile(const std::string& filename, SimFlags& flags)
         else if (key == "CCModelSigmaY") flags.CCModelSigmaY = std::stof(value);
         else if (key == "outsideMaterial") flags.outsideMaterial = value;
         else if (key == "beamGeometry") flags.beamGeometry = value;
-        else if (key == "gausSmearing") flags.gausSmearing = std::stof(value);
+        else if (key == "gausSmearingX") flags.gausSmearingX = std::stof(value);
+        else if (key == "gausSmearingY") flags.gausSmearingY = std::stof(value);
+        else if (key == "gausSmearingZ") flags.gausSmearingZ = std::stof(value);
         else if (key == "beamXOffset") flags.beamXOffset = std::stof(value);
         else if (key == "beamYOffset") flags.beamYOffset = std::stof(value);
         else if (key == "beamZOffset") flags.beamZOffset = std::stof(value);
