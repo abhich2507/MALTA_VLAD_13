@@ -6,7 +6,7 @@
 #include <string>
 
 void Coincidence(int runNumber = 2)
-{   std::string inputFile = Form("Results_10mev_e_mp_mc/local_%04d/analysis_results_MP/analysisThr100.root", runNumber);
+{   std::string inputFile = Form("Results/local_%04d/analysis_results_MP/analysisThr100.root", runNumber);
     std::cout << "Input file: " << inputFile << std::endl;
     auto file = TFile::Open(inputFile.c_str());
     if (!file || file->IsZombie())
@@ -116,7 +116,7 @@ void Coincidence(int runNumber = 2)
 
 
     // check coincidence using sliding window
-    double coincidenceWindow = 8; // in ns 
+    double coincidenceWindow = 8.; // in ns 
     double spatialWindow = 100; // in micrometers // not used here bcz we are mathcing tracks by truth vertex coordinates
     int coinCount = 0;
 
