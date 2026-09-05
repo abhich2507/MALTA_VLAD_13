@@ -1,7 +1,7 @@
 // save_bkg_eff.C
 // Reads configs/bkg_count.csv (run,count) and the per-plane efficiency stored in
 // each run's Plots/local_NNNN/<SAVE>/histos.root (directory Thr<THRESHOLD>),
-// then writes configs/bkg_eff.csv with columns:
+// then writes Results/bkg_eff.csv with columns:
 //   plane, count-1, avgEff, effError
 // Efficiency per plane p:
 //   N_gen  = Integral(h2ALLInPixel_planeZ<p>)        (all signal tracks)
@@ -9,7 +9,9 @@
 //         or reconstructed from the efficiency map:
 //            sum_bins( h2PASSInPixel_planeZ<p>/100 * h2ALLInPixel_planeZ<p> )
 //   eff    = 100 * N_pass / N_gen
-// Usage (from malta_simulation/):  root -l -b -q save_bkg_eff.C
+// Usage (from malta_simulation/):
+//   root -l -b -q 'save_bkg_eff.C("analysis_results_MP", 100)'
+// Usually invoked automatically by run_efficiency.sh (step 4/5).
 
 #include <fstream>
 #include <sstream>
@@ -21,15 +23,17 @@
 #include "TSystem.h"
 #include "TString.h"
 
-void save_bkg_eff()
+void save_bkg_eff(const char* save = "analysis_results_MP", int threshold = 100)
 {
-    const char* SAVE = "analysis_results_MP";   // must match run_mult.sh SAVE
-    const int THRESHOLD = 100;                  // must match run_mult.sh THRESHOLD
+    const char* SAVE = save;        // must match the SAVE name of the analysis step
+    const int THRESHOLD = threshold; // must match the threshold of the analysis step
+
+    gSystem->mkdir("Results", kTRUE);  // outputs live in Results/, not configs/
 
     std::ifstream in("configs/bkg_count.csv");
     if (!in) { std::cerr << "Cannot open configs/bkg_count.csv" << std::endl; return; }
 
-    std::ofstream out("configs/bkg_eff.csv");
+    std::ofstream out("Results/bkg_eff.csv");
     out << "plane,count-1,avgEff,effError" << std::endl;
 
     std::string line;
@@ -109,5 +113,5 @@ void save_bkg_eff()
 
     out.close();
     in.close();
-    std::cout << "Written configs/bkg_eff.csv" << std::endl;
+    std::cout << "Written Results/bkg_eff.csv" << std::endl;
 }

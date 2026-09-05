@@ -1,11 +1,12 @@
 #!/bin/bash
 # Wrapper around run_analysis_multiPlane.py
 # Usage: ./run_mult.sh <startRun> [endRun]   (also accepts a range like 1-12)
+# Override analysis settings via env: SAVE, CONFIG, THRESHOLD
 set -e
 
-SAVE="analysis_results_MP"
-CONFIG="analysis_flags_MP_EIC_Vlad.cfg"
-THRESHOLD="100"
+SAVE="${SAVE:-analysis_results_MP}"
+CONFIG="${CONFIG:-analysis_flags_MP_EIC_Vlad.cfg}"
+THRESHOLD="${THRESHOLD:-100}"
 
 START="${1:?Usage: $0 <startRun> [endRun]}"
 END="${2:-}"

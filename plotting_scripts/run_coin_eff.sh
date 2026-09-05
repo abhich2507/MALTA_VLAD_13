@@ -12,6 +12,8 @@
 #   ./plotting_scripts/run_coin_eff.sh 1 2 3     # specific runs
 #   ./plotting_scripts/run_coin_eff.sh           # all runs in configs/bkg_count.csv
 #
+# Override analysis settings via env: SAVE, THRESHOLD, WINDOW_NS
+#
 # Note: the file Results/coin_eff.csv is rewritten by each invocation.
 
 set -euo pipefail
@@ -22,7 +24,9 @@ cd "$BASE_DIR"
 
 COIN_CC="analysis_multiPlane/src/Coincidence.cc"
 OUT_CSV="Results/coin_eff.csv"
-WINDOW_NS=8          # must match coincidenceWindow in Coincidence.cc
+SAVE="${SAVE:-analysis_results_MP}"   # must match the SAVE name of the analysis step
+THRESHOLD="${THRESHOLD:-100}"         # must match the threshold of the analysis step
+WINDOW_NS="${WINDOW_NS:-8}"           # coincidence time window in ns
 
 runs=("$@")
 if [ "${#runs[@]}" -eq 0 ]; then
@@ -42,7 +46,7 @@ echo "run,window_ns,nGen,coinCount,eff_percent" > "$OUT_CSV"
 
 for run in "${runs[@]}"; do
     echo "== processing run $run =="
-    out="$(root -l -b -q "${COIN_CC}(${run})" 2>&1 || true)"
+    out="$(root -l -b -q "${COIN_CC}(${run}, \"${SAVE}\", ${THRESHOLD}, ${WINDOW_NS})" 2>&1 || true)"
 
     coin="$(printf '%s\n' "$out" | sed -n 's/.*Total coincidences found: *\([0-9]*\).*/\1/p' | tail -1)"
     ngen="$(printf '%s\n' "$out" | sed -n 's/.*Signal generated tracks: *\([0-9]*\).*/\1/p' | tail -1)"

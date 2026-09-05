@@ -1,5 +1,5 @@
 // plotting_scripts/BkgEff.c
-// Plot efficiency vs background count with error bars from configs/bkg_eff.csv
+// Plot efficiency vs background count with error bars from Results/bkg_eff.csv
 // CSV columns: plane, count-1, avgEff, effError  (one graph per plane)
 // Usage (from malta_simulation/):
 //   root -l -b -q plotting_scripts/BkgEff.c           # plane efficiencies only
@@ -19,14 +19,15 @@
 #include "TMath.h"
 #include "TStyle.h"
 #include "TROOT.h"
+#include "TSystem.h"
 
 void BkgEff(int withCoin = 0)
 {
     gStyle->SetOptStat(0);
     gROOT->SetStyle("ATLAS");
 
-    std::ifstream in("configs/bkg_eff.csv");
-    if (!in) { std::cerr << "Cannot open configs/bkg_eff.csv" << std::endl; return; }
+    std::ifstream in("Results/bkg_eff.csv");
+    if (!in) { std::cerr << "Cannot open Results/bkg_eff.csv" << std::endl; return; }
 
     std::map<int, std::vector<double>> mCount, mEff, mEffErr;
     std::string line;
@@ -46,7 +47,7 @@ void BkgEff(int withCoin = 0)
     }
     in.close();
 
-    if (mEff.empty()) { std::cerr << "No data read from configs/bkg_eff.csv" << std::endl; return; }
+    if (mEff.empty()) { std::cerr << "No data read from Results/bkg_eff.csv" << std::endl; return; }
 
     // Global y range across all planes
     double yMin = 70., yMax = 99.;
@@ -167,6 +168,7 @@ void BkgEff(int withCoin = 0)
 
     leg->Draw();
 
+    gSystem->mkdir("Plots", kTRUE);
     c->SaveAs("Plots/bkg_eff.png");
     c->SaveAs("Plots/bkg_eff.pdf");
     std::cout << "Saved Plots/bkg_eff.png and Plots/bkg_eff.pdf" << std::endl;

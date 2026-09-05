@@ -5,8 +5,13 @@
 #include <algorithm>
 #include <string>
 
-void Coincidence(int runNumber = 2)
-{   std::string inputFile = Form("Results/local_%04d/analysis_results_MP/analysisThr100.root", runNumber);
+#include "TFile.h"
+#include "TTree.h"
+#include "TString.h"
+
+void Coincidence(int runNumber = 2, const char* save = "analysis_results_MP", int thr = 100, double coincidenceWindow = 8.)
+{
+    std::string inputFile = Form("Results/local_%04d/%s/analysisThr%d.root", runNumber, save, thr);
     std::cout << "Input file: " << inputFile << std::endl;
     auto file = TFile::Open(inputFile.c_str());
     if (!file || file->IsZombie())
@@ -17,6 +22,12 @@ void Coincidence(int runNumber = 2)
 
     TTree* planeZ0 = dynamic_cast<TTree*>(file->Get("analyzedHits_planeZ0"));
     TTree* planeZ1 = dynamic_cast<TTree*>(file->Get("analyzedHits_planeZ1"));
+
+    if (!planeZ0 || !planeZ1)
+    {
+        std::cerr << "Error: One or both trees not found in the file." << std::endl;
+        return;
+    }
 
     int planeID, clSize,mcFlag;
     double analysisVertexX, analysisVertexY, analysisTiming, correctedTiming;
@@ -34,12 +45,6 @@ void Coincidence(int runNumber = 2)
     planeZ1->SetBranchAddress("clSize", &clSize);
     planeZ1->SetBranchAddress("correctedTiming", &correctedTiming);
     planeZ1->SetBranchAddress("mcFlag", &mcFlag);
-
-    if (!planeZ0 || !planeZ1)
-    {
-        std::cerr << "Error: One or both trees not found in the file." << std::endl;
-        return;
-    }
 
     struct AnalyzedHit
     {
@@ -115,8 +120,7 @@ void Coincidence(int runNumber = 2)
     }
 
 
-    // check coincidence using sliding window
-    double coincidenceWindow = 8.; // in ns 
+    // check coincidence using the sliding time window (coincidenceWindow argument, in ns)
     double spatialWindow = 100; // in micrometers // not used here bcz we are mathcing tracks by truth vertex coordinates
     int coinCount = 0;
 

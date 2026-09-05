@@ -67,6 +67,31 @@ python run_analysis_multiPlane.py -r runNumber -i analysis_flags.cfg -thr thrVal
 All the analysis flags are the same as in the case of the single plane analysis, however the scripts used are in another folder analysis_multiPlane. This analysis can be used for single plane analysis, however this requires the use of a MutiPlane config inherited geometry in the GEANT4 simulation. As a consequence, legacy simulation folders should still be ran with the single plane analysis equivalent. 
 
 
+## Efficiency scan pipeline (simulation -> analysis -> coincidence -> plots)
+
+The full background-scan efficiency extraction is a single ordered pipeline:
+
+```bash
+cd malta_simulation/
+./run_efficiency.sh               # full chain
+./run_efficiency.sh --no-sim      # reuse existing Results/, rerun analysis + extraction
+./run_efficiency.sh --only-extract # only re-derive the CSVs and plots
+```
+
+The run list is taken from `configs/bkg_count.csv` (run, particleCount). The steps run in this exact sequence:
+
+| Step | Script | Output |
+|------|--------|--------|
+| 1. Simulation scan | `bkg_scan.sh` | `Results/local_NNNN/` (raw Geant4) |
+| 2. Analysis per run | `run_mult.sh` | `Results/local_NNNN/<SAVE>/`, `Plots/local_NNNN/<SAVE>/histos.root` |
+| 3. Coincidence | `plotting_scripts/run_coin_eff.sh` | `Results/coin_eff.csv` |
+| 4. Signal efficiency | `save_bkg_eff.C` | `Results/bkg_eff.csv` |
+| 5. Plots | `plotting_scripts/BkgEff.c(1)` | `Plots/bkg_eff.png`, `Plots/bkg_eff.pdf` |
+
+All CSV outputs live in `Results/` (not `configs/`). To change the analysis save
+name, threshold or coincidence window, edit the variables at the top of
+`run_efficiency.sh` (or export `SAVE`, `THRESHOLD`, `WINDOW_NS`).
+
 ## Basic Multiplane config Usage
 
 A large scale detector can be implemented with the help of a .csv file found in /configs/geometry/. The user is instructed to use the example_geo.csv file as an example and build their own geometry. The file defines multiple MALTA2 detectors that can be arranged in different positions and angles relative to the GEANT4 origin.
