@@ -30,6 +30,13 @@ struct SimFlags
     float sourceRadius =  0.;
     float sourceRadiusX =  0.;
     float sourceRadiusY =  0.;
+    //bkg spatial distribution
+    float bkgXMin = -1.;
+    float bkgXMax = -1.;
+    float bkgYMin = -1.;
+    float bkgYMax = -1.;
+    float bkgZMin = -200.;
+    float bkgZMax = -200.;
     int particleCount = 0;
     int numEvents = 0;
     float intraSpillOffset = 0;

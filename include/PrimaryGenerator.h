@@ -18,6 +18,7 @@ public:
 private:
     G4ThreeVector GetRandomPointOnCircle(G4float radius, const G4ThreeVector center);
     G4ThreeVector GetRandomPointOnRectangle(G4float height, G4float thickness, const G4ThreeVector center);
+    G4ThreeVector GetRandomPointInBox(G4float xMin, G4float xMax, G4float yMin, G4float yMax, G4float zMin, G4float zMax);
     G4double ImportITK(G4String filename, int layer, double z);
     G4float GetRandomPointInLine( G4float xMin, G4float xMax);
     const SimFlags* m_flag{};

@@ -96,6 +96,17 @@ G4ThreeVector PrimaryGenerator::GetRandomPointOnRectangle(G4float height, G4floa
     return G4ThreeVector(x, y, z);
 }
 
+G4ThreeVector PrimaryGenerator::GetRandomPointInBox(G4float xMin, G4float xMax, 
+                                                    G4float yMin, G4float yMax, 
+                                                    G4float zMin, G4float zMax)
+{
+    G4float x = xMin + (xMax - xMin) * G4UniformRand();
+    G4float y = yMin + (yMax - yMin) * G4UniformRand();
+    G4float z = zMin + (zMax - zMin) * G4UniformRand();
+
+    return G4ThreeVector(x, y, z);
+}
+
 G4float PrimaryGenerator::GetRandomPointInLine( G4float xMin, G4float xMax)
 {
     return xMin + (xMax - xMin) * G4UniformRand();
@@ -205,7 +216,14 @@ void PrimaryGenerator::GeneratePrimaries(G4Event *oneEvent)
         G4float z = m_flag->beamZOffset *cm;
         G4ThreeVector pos;
         // Particle circular beam simulation
-        if(m_flag->beamGeometry == "pencil")
+        if (m_flag->largeScaleFlag == "EIC_FMT" && mcFlag == 1)
+        {
+            pos = GetRandomPointInBox(m_flag->bkgXMin *cm, m_flag->bkgXMax *cm, 
+                                      m_flag->bkgYMin *cm, m_flag->bkgYMax *cm, 
+                                      m_flag->bkgZMin *cm, m_flag->bkgZMax *cm);
+        }
+        
+        else if(m_flag->beamGeometry == "pencil")
         {
             pos = G4ThreeVector(x, y, z);
         }

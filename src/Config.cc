@@ -124,6 +124,12 @@ void LoadSimFlagsFromFile(const std::string& filename, SimFlags& flags)
         else if (key == "sourceRadius") flags.sourceRadius = std::stof(value);
         else if (key == "sourceRadiusX") flags.sourceRadiusX = std::stof(value);
         else if (key == "sourceRadiusY") flags.sourceRadiusY = std::stof(value);
+        else if (key == "bkgXMin") flags.bkgXMin = std::stof(value);
+        else if (key == "bkgXMax") flags.bkgXMax = std::stof(value);
+        else if (key == "bkgYMin") flags.bkgYMin = std::stof(value);
+        else if (key == "bkgYMax") flags.bkgYMax = std::stof(value);
+        else if (key == "bkgZMin") flags.bkgZMin = std::stof(value);
+        else if (key == "bkgZMax") flags.bkgZMax = std::stof(value);
         else if (key == "particleCount") flags.particleCount = std::stoi(value);
         else if (key == "numEvents") flags.numEvents = std::stoi(value);
         else if (key == "intraSpillOffset") flags.intraSpillOffset = std::stof(value);
