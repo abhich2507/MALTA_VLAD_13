@@ -128,7 +128,7 @@ G4VPhysicalVolume *DetectorConstruction::Construct()
     // Define the world
     const G4double xWorld = 2. *m;
     const G4double yWorld = 2. *m;
-    const G4double zWorld = 2. *m;
+    const G4double zWorld = 6. *m;
     // Solid volume definition. 0.5* because G4Box takes the halflength as input
     G4Box *solidWorld = new G4Box("solidWorld", 0.5 * xWorld, 0.5 * yWorld, 0.5 * zWorld);
     // Logical world definition. Takes over solid volume and applies the worldMat material
