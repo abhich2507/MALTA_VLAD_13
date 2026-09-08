@@ -23,26 +23,26 @@ void verifySensorHits(int runNumber = 0, int numThreads = 6)
     
     // Geometry parameters (must match flags.cfg and DetectorConstructor.cc)
    
-    double detectorXOffset = 5.0;   // cm
-    double detectorYOffset = 5.0;   // cm
-    double detectorZOffset = 5.0;   // cm
+    double detectorXOffset = 0.0;   // cm
+    double detectorYOffset = 0.0;   // cm
+    double detectorZOffset = 0.0;   // cm
     double detectorSizeX   = 1.86368; // cm
-    double detectorSizeY   = 0.81536; // cm
+    double detectorSizeY   = 1.86368; // cm
     double pixelSize       = 0.0364;  // mm
-    double sensorGap       = 0.2;     // cm (2mm)
+    double sensorGap       = 0.0002;     // cm 
     double sensorSpacing   = detectorSizeX + sensorGap; // cm, center-to-center
 
-    // Sensor X centers in cm (matching DetectorConstructor.cc)
-    // Plane 0: planeID 0,1,2,3  |  Plane 1: planeID 100,101,102,103
+    // Sensor X centers in cm (matching configs/geometry/geo_X4Y1Z2.csv)
+    // planeID = z*10000 + y*100 + x :  z=0 -> 0..3,  z=1 -> 10000..10003
     std::map<int, double> sensorXCenter;
-    sensorXCenter[0]   = detectorXOffset - 1.5 * sensorSpacing;
-    sensorXCenter[1]   = detectorXOffset - 0.5 * sensorSpacing;
-    sensorXCenter[2]   = detectorXOffset + 0.5 * sensorSpacing;
-    sensorXCenter[3]   = detectorXOffset + 1.5 * sensorSpacing;
-    sensorXCenter[100] = detectorXOffset - 1.5 * sensorSpacing;
-    sensorXCenter[101] = detectorXOffset - 0.5 * sensorSpacing;
-    sensorXCenter[102] = detectorXOffset + 0.5 * sensorSpacing;
-    sensorXCenter[103] = detectorXOffset + 1.5 * sensorSpacing;
+    sensorXCenter[0]     = detectorXOffset + 0.00000;
+    sensorXCenter[1]     = detectorXOffset + 1.86369;
+    sensorXCenter[2]     = detectorXOffset + 3.72737;
+    sensorXCenter[3]     = detectorXOffset + 5.59105;
+    sensorXCenter[10000] = detectorXOffset + 0.00000;
+    sensorXCenter[10001] = detectorXOffset + 1.86369;
+    sensorXCenter[10002] = detectorXOffset + 3.72737;
+    sensorXCenter[10003] = detectorXOffset + 5.59105;
 
     // Sensor Z positions in cm
     std::map<int, double> sensorZ;
@@ -50,10 +50,10 @@ void verifySensorHits(int runNumber = 0, int numThreads = 6)
     sensorZ[1]   = detectorZOffset;
     sensorZ[2]   = detectorZOffset;
     sensorZ[3]   = detectorZOffset;
-    sensorZ[100] = detectorZOffset + 20.0; // 20 cm offset for plane 1
-    sensorZ[101] = detectorZOffset + 20.0;
-    sensorZ[102] = detectorZOffset + 20.0;
-    sensorZ[103] = detectorZOffset + 20.0;
+    sensorZ[10000] = detectorZOffset + 10.0; // 10 cm offset for plane 1
+    sensorZ[10001] = detectorZOffset + 10.0;
+    sensorZ[10002] = detectorZOffset + 10.0;
+    sensorZ[10003] = detectorZOffset + 10.0;
 
     // Sensor labels
     std::map<int, TString> sensorLabel;
@@ -61,12 +61,12 @@ void verifySensorHits(int runNumber = 0, int numThreads = 6)
     sensorLabel[1]   = "P0_L2 (id=1)";
     sensorLabel[2]   = "P0_R1 (id=2)";
     sensorLabel[3]   = "P0_R2 (id=3)";
-    sensorLabel[100] = "P1_L1 (id=100)";
-    sensorLabel[101] = "P1_L2 (id=101)";
-    sensorLabel[102] = "P1_R1 (id=102)";
-    sensorLabel[103] = "P1_R2 (id=103)";
+    sensorLabel[10000] = "P1_L1 (id=10000)";
+    sensorLabel[10001] = "P1_L2 (id=10001)";
+    sensorLabel[10002] = "P1_R1 (id=10002)";
+    sensorLabel[10003] = "P1_R2 (id=10003)";
 
-    std::vector<int> allIDs = {0, 1, 2, 3, 100, 101, 102, 103};
+    std::vector<int> allIDs = {0, 1, 2, 3, 10000, 10001, 10002, 10003};
 
     // ============================================================
     // Load data
@@ -118,7 +118,7 @@ void verifySensorHits(int runNumber = 0, int numThreads = 6)
     }
 
     // 4) 1D Z-axis histogram (which sensor was hit)
-    TH1D *h1PlaneID = new TH1D("h1PlaneID", "Hit count per sensor ID;Sensor ID (iPlane);Entries", 110, -5, 105);
+    TH1D *h1PlaneID = new TH1D("h1PlaneID", "Hit count per sensor ID;Sensor ID (iPlane);Entries", 10010, -5, 10005);
     h1PlaneID->SetFillColor(kBlue-9);
 
     // 5) 3D histograms: real coordinates for each plane
@@ -133,10 +133,10 @@ void verifySensorHits(int runNumber = 0, int numThreads = 6)
                                 50, yMin, yMax,
                                 10, detectorZOffset - 1, detectorZOffset + 1);
 
-    TH3D *h3Plane1 = new TH3D("h3Plane1", "3D Hits - Plane 1 (id 100-103);X [cm];Y [cm];Z [cm]",
+    TH3D *h3Plane1 = new TH3D("h3Plane1", "3D Hits - Plane 1 (id 10000-10003);X [cm];Y [cm];Z [cm]",
                                 100, xMin, xMax,
                                 50, yMin, yMax,
-                                10, detectorZOffset + 20.0 - 1, detectorZOffset + 20.0 + 1);
+                                10, detectorZOffset + 10.0 - 1, detectorZOffset + 10.0 + 1);
 
     // 6) Energy deposition 2D per sensor (pixel grid, summed hitEnergy in e-)
     std::map<int, TH2D*> h2Edep;
@@ -177,7 +177,7 @@ void verifySensorHits(int runNumber = 0, int numThreads = 6)
         double realZ = sensorZ[iPlane];
 
         // Fill 3D histograms
-        if (iPlane < 100)
+        if (iPlane < 10000)
             h3Plane0->Fill(realX, realY, realZ);
         else
             h3Plane1->Fill(realX, realY, realZ);
