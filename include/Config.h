@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 
+
 struct SimFlags
 {
     bool isBatch = false; // This is not read from the config file, but set in the main function

@@ -9,6 +9,7 @@
 #include "G4IonTable.hh"
 #include "G4RadioactiveDecay.hh"
 #include "Config.h"
+#include "GenUtil.h"
 #include "G4AnalysisManager.hh"
 #include "CLHEP/Random/RandPoisson.h"
 
@@ -62,6 +63,12 @@ PrimaryGenerator::PrimaryGenerator(const SimFlags* flags) : m_flag(flags), m_par
     m_particleGun->SetParticleDefinition(particle);
 
     itkParticlePop = ImportITK(m_flag->itkInput, m_flag->itkLayer, m_flag->itkZ);
+    if (m_flag->largeScaleFlag == "EIC_FMT")
+    {
+        m_modules = LoadModules(m_flag->geoFile);
+        m_planePositions = GenUtil::GetPlanePositions(m_modules);
+    }
+
 
 }
 // Destructor
@@ -201,12 +208,10 @@ void PrimaryGenerator::GeneratePrimaries(G4Event *oneEvent)
         }
 
         G4AnalysisManager *analysisManager = G4AnalysisManager::Instance();
-        // Particle Direction (momentum)
-        G4float px = m_flag->particleMomentumX;
-        G4float py = m_flag->particleMomentumY;
-        G4float pz = m_flag->particleMomentumZ;
-        G4ThreeVector mom(px,py,pz);
-        m_particleGun->SetParticleMomentumDirection(mom);
+        // Particle Direction (momentum) — configured direction (used for the signal)
+        G4ThreeVector mom(m_flag->particleMomentumX,
+                          m_flag->particleMomentumY,
+                          m_flag->particleMomentumZ);
 
         float beamWidth = m_flag->sourceRadius *mm;
         float beamWidthX = m_flag->sourceRadiusX *mm;
@@ -266,6 +271,18 @@ void PrimaryGenerator::GeneratePrimaries(G4Event *oneEvent)
 
         m_particleGun->SetParticlePosition(pos);
 
+        // Background (mcFlag == 1): aim so the particle lands on a sensor plane.
+        // Region 1 -> plane-0, region 3 -> plane-1, region 2 -> 50/50.
+        G4ThreeVector finalDir = mom;
+        if (m_flag->largeScaleFlag == "EIC_FMT" && mcFlag == 1)
+        {
+            finalDir = GenUtil::BackgroundDirection(
+                G4ThreeVector(pos.x() / cm, pos.y() / cm, pos.z() / cm),
+                m_modules, m_planePositions,
+                m_flag->detectorSizeX, m_flag->detectorSizeY);
+        }
+        m_particleGun->SetParticleMomentumDirection(finalDir);
+
         G4int evtID = oneEvent->GetEventID();
         
         float offSet{};
@@ -290,11 +307,11 @@ void PrimaryGenerator::GeneratePrimaries(G4Event *oneEvent)
         G4double mass = m_particleGun->GetParticleDefinition()->GetPDGMass(); // MeV
         G4double eTot = ekin + mass;
         G4double pMag = std::sqrt(eTot * eTot - mass * mass);               // MeV/c
-        G4double momNorm = std::sqrt(px * px + py * py + pz * pz);
+        G4double momNorm = finalDir.mag();
         if (momNorm <= 0.0) momNorm = 1.0;
-        analysisManager->FillNtupleFColumn(1, 7,  pMag * px / momNorm / GeV);
-        analysisManager->FillNtupleFColumn(1, 8,  pMag * py / momNorm / GeV);
-        analysisManager->FillNtupleFColumn(1, 9,  pMag * pz / momNorm / GeV);
+        analysisManager->FillNtupleFColumn(1, 7,  pMag * finalDir.x() / momNorm / GeV);
+        analysisManager->FillNtupleFColumn(1, 8,  pMag * finalDir.y() / momNorm / GeV);
+        analysisManager->FillNtupleFColumn(1, 9,  pMag * finalDir.z() / momNorm / GeV);
         analysisManager->FillNtupleFColumn(1, 10, pMag / GeV);
         analysisManager->FillNtupleFColumn(1, 11, ekin / GeV);
         analysisManager->AddNtupleRow(1); 
@@ -304,7 +321,7 @@ void PrimaryGenerator::GeneratePrimaries(G4Event *oneEvent)
         m_eventCounter++;
 
         if(m_flag->verbosePG) std::cout << " - " <<"Type: " << m_flag->particleType << "; X: " << pos[0] << "; Y: " << pos[1] << "; Z: " << pos[2] 
-                              << "; pX: " << px << "; pY: " << py << "; pZ: " << pz << "; Energy: " << m_flag->particleEnergy;
+                              << "; pX: " << finalDir.x() << "; pY: " << finalDir.y() << "; pZ: " << finalDir.z() << "; Energy: " << m_flag->particleEnergy;
                               
     }
 

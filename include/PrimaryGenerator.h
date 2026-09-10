@@ -3,6 +3,9 @@
 
 #include "G4VUserPrimaryGeneratorAction.hh"
 #include "G4ThreeVector.hh"
+#include "Config.h"
+#include "GenUtil.h"
+#include <vector>
 
 class SimFlags;
 class G4Event;
@@ -25,5 +28,7 @@ private:
     G4ParticleGun* m_particleGun{};
     G4int m_eventCounter{0};
     G4double itkParticlePop{};
+    std::vector<Module> m_modules{};
+    GenUtil::PlanePositions m_planePositions{};
 };
 #endif
