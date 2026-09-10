@@ -8,6 +8,9 @@
 #include "TH1D.h"
 #include "TH2D.h"
 #include "TH3D.h"
+#include "TFile.h"
+#include "TPolyMarker3D.h"
+#include "TPolyLine3D.h"
 #include "TStyle.h"
 #include "TLegend.h"
 #include "TLatex.h"
@@ -71,7 +74,7 @@ void verifySensorHits(int runNumber = 0, int numThreads = 6)
     // ============================================================
     // Load data
     // ============================================================
-    TString inputPath = Form("./Results/local_%04d/", runNumber);
+    TString inputPath = Form("./Results_10mev_e_mp_mc_coin_proton120GeV_custom_gen/local_%04d/", runNumber);
     std::cout << "Loading data from: " << inputPath << std::endl;
     TChain *chain = new TChain("RawPixelHits");
     for (int t = 0; t < numThreads; t++)
@@ -303,6 +306,151 @@ void verifySensorHits(int runNumber = 0, int numThreads = 6)
         h2Edep[id]->Draw("COLZ");
     }
     c8->SaveAs(Form("%s/verify_Edep_per_sensor.root", inputPath.Data()));
+
+    // ============================================================
+    // GENERATOR (TRUTH VERTEX) PLOTS
+    // TruthVertex stores positions in mm (Geant4 internal units).
+    // Merged from gen_plot.C: 2D Gaussian (XY) + 1D Z of generated vertices.
+    // ============================================================
+    TChain *genChain = new TChain("TruthVertex");
+    for (int t = 0; t < numThreads; t++)
+    {
+        genChain->Add(Form("%soutput0_t%d.root", inputPath.Data(), t));
+    }
+    std::cout << "Total entries in TruthVertex: " << genChain->GetEntries() << std::endl;
+
+    float vertexX = 0, vertexY = 0, vertexZ = 0;
+    genChain->SetBranchAddress("trueVertexX", &vertexX);
+    genChain->SetBranchAddress("trueVertexY", &vertexY);
+    genChain->SetBranchAddress("trueVertexZ", &vertexZ);
+    int mcFlag = -1;
+    genChain->SetBranchAddress("mcFlag", &mcFlag);
+
+    // 2D Gaussian (XY) of generated vertices, in mm
+    TH2D *h2GenXY = new TH2D("h2GenXY", "2D Gaussian - Truth Vertex XY;x [mm];y [mm]",
+                             100, 24., 32., 100, -4., 4.);
+    // 1D Z distribution of generated vertices, in mm
+    TH1D *h1GenZ = new TH1D("h1GenZ", "Truth Vertex Z;z [mm];Entries",
+                            100, -1400., -600.);
+
+    Long64_t nGen = genChain->GetEntries();
+    for (Long64_t i = 0; i < nGen; i++)
+    {
+        genChain->GetEntry(i);
+        h2GenXY->Fill(vertexX, vertexY);
+        h1GenZ->Fill(vertexZ);
+    }
+
+    std::cout << "Truth vertices: " << nGen
+              << "  meanX = " << h2GenXY->GetMean(1) << " mm"
+              << "  meanY = " << h2GenXY->GetMean(2) << " mm"
+              << "  meanZ = " << h1GenZ->GetMean() << " mm" << std::endl;
+
+    // ============================================================
+    // BACKGROUND (mcFlag = 1) truth-vertex plots
+    // ============================================================
+    TH2D *h2BkgXY = new TH2D("h2BkgXY", "Background (mcFlag=1) Vertex XY;x [mm];y [mm]",
+                             100, 15., 40., 100, -12., 12.);
+    TH1D *h1BkgZ  = new TH1D("h1BkgZ", "Background (mcFlag=1) Vertex Z;z [mm];Entries",
+                             100, -1100., 1100.);
+
+    std::vector<double> bkgX, bkgY, bkgZ;
+    for (Long64_t i = 0; i < nGen; i++)
+    {
+        genChain->GetEntry(i);
+        if (mcFlag != 1) continue;
+        h2BkgXY->Fill(vertexX, vertexY);
+        h1BkgZ->Fill(vertexZ);
+        bkgX.push_back(vertexX);
+        bkgY.push_back(vertexY);
+        bkgZ.push_back(vertexZ);
+    }
+    std::cout << "Background vertices (mcFlag=1): " << bkgX.size()
+              << "  meanX = " << h2BkgXY->GetMean(1) << " mm"
+              << "  meanZ = " << h1BkgZ->GetMean() << " mm" << std::endl;
+
+    // CANVAS 9: Generator truth vertex (2D Gaussian XY + 1D Z)
+    TCanvas *c9 = new TCanvas("c9", "Generator Truth Vertex", 1200, 600);
+    c9->Divide(2, 1);
+    c9->cd(1);
+    h2GenXY->Draw("COLZ");
+    c9->cd(2);
+    h1GenZ->Draw();
+    c9->SaveAs(Form("%s/verify_gen_vertex.root", inputPath.Data()));
+
+    // Write the generator histograms into the same root file
+    TFile *fGen = TFile::Open(Form("%s/verify_gen_vertex.root", inputPath.Data()), "UPDATE");
+    if (fGen && !fGen->IsZombie())
+    {
+        h2GenXY->Write();
+        h1GenZ->Write();
+        fGen->Close();
+    }
+
+    // ============================================================
+    // CANVAS 10: Background vertex XY + Z
+    // ============================================================
+    TCanvas *c10 = new TCanvas("c10", "Background Truth Vertex", 1200, 600);
+    c10->Divide(2, 1);
+    c10->cd(1);
+    h2BkgXY->Draw("COLZ");
+    c10->cd(2);
+    h1BkgZ->Draw();
+    c10->SaveAs(Form("%s/verify_bkg_vertex.root", inputPath.Data()));
+
+    TFile *fBkg = TFile::Open(Form("%s/verify_bkg_vertex.root", inputPath.Data()), "UPDATE");
+    if (fBkg && !fBkg->IsZombie())
+    {
+        h2BkgXY->Write();
+        h1BkgZ->Write();
+        fBkg->Close();
+    }
+
+    // ============================================================
+    // CANVAS 11: 3D momentum-direction vectors (background only)
+    // All particles are generated with a fixed momentum direction
+    // (particleMomentumX,Y,Z = 0,0,1), so arrows point along +z.
+    // ============================================================
+    TCanvas *c11 = new TCanvas("c11", "Background Momentum Vectors", 1000, 800);
+
+    TH3D *h3Frame = new TH3D("h3Frame", "Background Vertices + Momentum Direction;x [mm];y [mm];z [mm]",
+                             10, 15., 40., 10, -12., 12., 10, -1100., 1100.);
+    h3Frame->SetStats(0);
+    h3Frame->Draw();
+
+    TPolyMarker3D *pm3d = new TPolyMarker3D();
+    pm3d->SetMarkerStyle(20);
+    pm3d->SetMarkerSize(0.4);
+    pm3d->SetMarkerColor(kRed);
+
+    const double arrowLen = 80.;   // mm, arrow length along +z
+    const double arrowTip = 20.;   // mm, arrowhead half-width
+    int nDraw = (int)bkgX.size();
+    int step = 1;
+    if (nDraw > 400) step = nDraw / 400;   // cap for readability
+
+    for (int i = 0; i < nDraw; i += step)
+    {
+        double x = bkgX[i], y = bkgY[i], z = bkgZ[i];
+        pm3d->SetNextPoint(x, y, z);
+
+        TPolyLine3D *shaft = new TPolyLine3D(2);
+        shaft->SetPoint(0, x, y, z);
+        shaft->SetPoint(1, x, y, z + arrowLen);
+        shaft->SetLineColor(kBlue);
+        shaft->SetLineWidth(1);
+        shaft->Draw("SAME");
+
+        TPolyLine3D *head = new TPolyLine3D(3);
+        head->SetPoint(0, x - arrowTip, y, z + arrowLen - arrowTip);
+        head->SetPoint(1, x, y, z + arrowLen);
+        head->SetPoint(2, x + arrowTip, y, z + arrowLen - arrowTip);
+        head->SetLineColor(kBlue);
+        head->SetLineWidth(1);
+        head->Draw("SAME");
+    }
+    pm3d->Draw("SAME");
+    c11->SaveAs(Form("%s/verify_bkg_momentum3D.root", inputPath.Data()));
 
     std::cout << "All verification plots saved to: " << inputPath << std::endl;
 }

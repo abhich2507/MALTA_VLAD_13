@@ -14,7 +14,7 @@ void gen_plot(int run = 1)
 {
     // Chain all thread output files of the run
     TChain* chain = new TChain("TruthVertex");
-    chain->Add(Form("Results/local_%04d/output0_t*.root", run));
+    chain->Add(Form("./Results_10mev_e_mp_mc_coin_proton120GeV_custom_gen/local_%04d/output0_t*.root", run));
     if (!chain || chain->GetEntries() == 0)
     {
         std::cerr << "No TruthVertex entries found for run " << run << std::endl;
@@ -58,5 +58,5 @@ void gen_plot(int run = 1)
 
     gSystem->mkdir("Plots", kTRUE);
     c1->SaveAs("Plots/gen_plot_vertexXYZ.png");
-    c1->SaveAs(Form("Results/local_%04d/vertex_distributions.root", run));
+    c1->SaveAs(Form("Results_10mev_e_mp_mc_coin_proton120GeV_custom_gen/local_%04d/vertex_distributions.root", run));
 }
