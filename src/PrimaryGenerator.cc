@@ -283,7 +283,20 @@ void PrimaryGenerator::GeneratePrimaries(G4Event *oneEvent)
         analysisManager->FillNtupleFColumn(1, 4, particleTime);
         analysisManager->FillNtupleIColumn(1, 5, trackID);
         analysisManager->FillNtupleIColumn(1, 6, mcFlag);
-        //analysisManager->FillNtupleFColumn(1, 5, std::stod(m_flag->particleEnergy));
+
+        // Momentum truth information: full momentum vector (GeV) from the
+        // configured direction (px,py,pz) and the gun's kinetic energy.
+        G4double ekin = m_particleGun->GetParticleEnergy();                 // MeV
+        G4double mass = m_particleGun->GetParticleDefinition()->GetPDGMass(); // MeV
+        G4double eTot = ekin + mass;
+        G4double pMag = std::sqrt(eTot * eTot - mass * mass);               // MeV/c
+        G4double momNorm = std::sqrt(px * px + py * py + pz * pz);
+        if (momNorm <= 0.0) momNorm = 1.0;
+        analysisManager->FillNtupleFColumn(1, 7,  pMag * px / momNorm / GeV);
+        analysisManager->FillNtupleFColumn(1, 8,  pMag * py / momNorm / GeV);
+        analysisManager->FillNtupleFColumn(1, 9,  pMag * pz / momNorm / GeV);
+        analysisManager->FillNtupleFColumn(1, 10, pMag / GeV);
+        analysisManager->FillNtupleFColumn(1, 11, ekin / GeV);
         analysisManager->AddNtupleRow(1); 
 
         // Create Vertex

@@ -49,7 +49,11 @@ RunAction::RunAction(const SimFlags* flags) : m_flag(flags)
     analysisManager->CreateNtupleFColumn("trueGlobalTime");
     analysisManager->CreateNtupleIColumn("trackID");
     analysisManager->CreateNtupleIColumn("mcFlag");
-    //analysisManager->CreateNtupleFColumn("trueEnergy");
+    analysisManager->CreateNtupleFColumn("trueMomX");
+    analysisManager->CreateNtupleFColumn("trueMomY");
+    analysisManager->CreateNtupleFColumn("trueMomZ");
+    analysisManager->CreateNtupleFColumn("trueMomentum");
+    analysisManager->CreateNtupleFColumn("trueEnergy");
     analysisManager->FinishNtuple(1);
 }
 
