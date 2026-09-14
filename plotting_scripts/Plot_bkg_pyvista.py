@@ -3,8 +3,8 @@ import numpy as np
 import pyvista as pv
 
 # --- Minimal Config ---
-run = 17
-base_dir = "./Results_10mev_e_mp_mc_coin_proton120GeV_custom_gen"
+run = 5
+base_dir = "./Results"
 n_points = 200          
 
 # INCREASED LENGTH: Change this to make arrows even longer
@@ -16,7 +16,7 @@ path = f"{base_dir}/local_{run:04d}/output0_t0.root:TruthVertex"
 cols = ["trueVertexX", "trueVertexY", "trueVertexZ", "trueMomX", "trueMomY", "trueMomZ"]
 
 raw = uproot.concatenate([path], filter_name=cols + ["mcFlag"], library="np")
-mask = raw["mcFlag"] == 1
+mask = raw["mcFlag"] == 0
 
 x = raw["trueVertexX"][mask][:n_points]
 y = raw["trueVertexY"][mask][:n_points]
@@ -56,8 +56,32 @@ thin_arrow = pv.Arrow(
 arrows = cloud.glyph(geom=thin_arrow, orient='momentum', scale='momentum', factor=1.0)
 plotter.add_mesh(arrows, color='cyan')
 
-# Stretch X and Y by 40x and leave Z at 1x to fix the aspect ratio
-plotter.set_scale(xscale=100.0, yscale=100.0, zscale=10.0)
+# Stretch X and Y less aggressively so arrows keep a more uniform on-screen length
+plotter.set_scale(xscale=30.0, yscale=30.0, zscale=10.0)
+
+# ==========================================
+# Draw the two sensor planes (module ladder)
+# ==========================================
+# MALTA2 module: 1.86368 x 1.86368 cm; 4 modules in x, planes at z = 0 and 10 cm.
+module_x = 1.86368    # cm
+module_y = 1.86368    # cm
+x_centers = [0.0, 1.86369, 3.72737, 5.59105]   # cm (module x-centres)
+plane_z = [0.0, 10.0]                          # cm (plane z positions)
+
+ladder_x_min = x_centers[0]  - module_x / 2.0
+ladder_x_max = x_centers[-1] + module_x / 2.0
+ladder_cx = (ladder_x_min + ladder_x_max) / 2.0
+ladder_w  = ladder_x_max - ladder_x_min
+
+for zc in plane_z:
+    plane = pv.Plane(
+        center=(ladder_cx * 10.0, 0.0, zc * 10.0),   # mm
+        direction=(0.0, 0.0, 1.0),
+        i_size=ladder_w * 10.0,                      # mm (x)
+        j_size=module_y * 10.0,                      # mm (y)
+    )
+    plotter.add_mesh(plane, color="blue", opacity=0.25, show_edges=True,
+                     name=f"plane_{zc:.0f}cm")
 
 plotter.show_grid()
 plotter.show()

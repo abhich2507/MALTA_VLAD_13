@@ -74,7 +74,7 @@ void verifySensorHits(int runNumber = 0, int numThreads = 6)
     // ============================================================
     // Load data
     // ============================================================
-    TString inputPath = Form("./Results_10mev_e_mp_mc_coin_proton120GeV_custom_gen/local_%04d/", runNumber);
+    TString inputPath = Form("./Results/local_%04d/", runNumber);
     std::cout << "Loading data from: " << inputPath << std::endl;
     TChain *chain = new TChain("RawPixelHits");
     for (int t = 0; t < numThreads; t++)
