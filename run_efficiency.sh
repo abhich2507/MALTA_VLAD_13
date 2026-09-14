@@ -33,6 +33,7 @@ CSV="$SCRIPT_DIR/configs/bkg_count.csv"
 
 DO_SIM=true
 DO_ANALYSIS=true
+SEL_RUNS=()
 
 for arg in "$@"; do
     case "$arg" in
@@ -41,8 +42,13 @@ for arg in "$@"; do
         -h|--help)
             sed -n '2,18p' "$0"; exit 0 ;;
         *)
-            echo "Unknown option: $arg (use --no-sim, --only-extract or -h)" >&2
-            exit 1 ;;
+            if [[ "$arg" =~ ^[0-9]+$ ]]; then
+                SEL_RUNS+=("$arg")
+            else
+                echo "Unknown option: $arg (use --no-sim, --only-extract, -h, or a run number)" >&2
+                exit 1
+            fi
+            ;;
     esac
 done
 
@@ -54,6 +60,11 @@ while IFS=',' read -r run rest; do
 done < "$CSV"
 [ "${#runs[@]}" -gt 0 ] || { echo "ERROR: no runs found in $CSV" >&2; exit 1; }
 
+# Restrict to the selected runs, if any were given
+if [ "${#SEL_RUNS[@]}" -gt 0 ]; then
+    runs=("${SEL_RUNS[@]}")
+fi
+
 echo "============================================================================="
 echo " Efficiency scan: ${#runs[@]} run(s) | SAVE=$SAVE | thr=$THRESHOLD e- |"
 echo "                  window=$WINDOW_NS ns"
@@ -63,7 +74,11 @@ echo "==========================================================================
 if $DO_SIM; then
     echo
     echo "== [1/5] SIMULATION (bkg_scan.sh, cfg=$SIM_FLAGS_CFG) =="
-    ./bkg_scan.sh
+    if [ "${#SEL_RUNS[@]}" -gt 0 ]; then
+        ./bkg_scan.sh "${SEL_RUNS[@]}"
+    else
+        ./bkg_scan.sh
+    fi
 else
     echo
     echo "== [1/5] SIMULATION skipped (--no-sim) =="
