@@ -36,7 +36,7 @@ add_executable(sim sim.cc ${sources})
 # Links the sim executable to the libraries listed in the varible Geant4_LIBRARIES
 # added customizable functionality to the cmake. For vlad's machine it needs to be ran as 
 #cmake -DEXTRA_LIBS=uuid ..
-target_link_libraries(sim ${Geant4_LIBRARIES} ${EXTRA_LIBS})
+target_link_libraries(sim ${Geant4_LIBRARIES} ${ROOT_LIBRARIES} ${EXTRA_LIBS})
 
 # Needs explicit link to libuuid library
 # Define target called Tutorial that depends on sim. Running make Tutorial builds sim

@@ -6,7 +6,7 @@
 #include "Config.h"
 #include "GenUtil.h"
 #include <vector>
-
+#include <utility>
 class SimFlags;
 class G4Event;
 class G4ParticleGun;
@@ -30,5 +30,11 @@ private:
     G4double itkParticlePop{};
     std::vector<Module> m_modules{};
     GenUtil::PlanePositions m_planePositions{};
+    using CDF = std::vector<std::pair<double, double>>;
+    CDF m_momCDF[3]{};
+    bool m_hasBkgMomentum=false;
+
+    CDF LoadCDF(const std::string& csvPath) const;
+    double SampleCDF(const CDF& cdf) const;
 };
 #endif

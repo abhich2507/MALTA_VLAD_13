@@ -12,6 +12,10 @@
 #include "GenUtil.h"
 #include "G4AnalysisManager.hh"
 #include "CLHEP/Random/RandPoisson.h"
+#include <algorithm>
+#include <cmath>
+#include <fstream>
+#include <sstream>
 
 //Constructor
 PrimaryGenerator::PrimaryGenerator(const SimFlags* flags) : m_flag(flags), m_particleGun(new G4ParticleGun(1)), m_eventCounter(0)
@@ -69,6 +73,24 @@ PrimaryGenerator::PrimaryGenerator(const SimFlags* flags) : m_flag(flags), m_par
         m_planePositions = GenUtil::GetPlanePositions(m_modules);
     }
 
+    // Background energy mode switch:
+    //   bkgenergyDistribution = none -> fixed bkgparticleEnergy (default, all legacy cfgs)
+    //   bkgenergyDistribution = EIC  -> realistic sampling from EIC momentum histograms
+    if (m_flag->bkgenergyDistribution == "EIC")
+    {
+        if (m_flag->bkgMomentumCSV.empty())
+        {
+            throwError("PrimaryGenerator::PrimaryGenerator", "Sampling Failure",
+                       "bkgenergyDistribution = EIC requires bkgMomentumCSV.");
+        }
+        std::string dir = m_flag->bkgMomentumCSV;
+        if (dir.back() != '/') dir += '/';
+        m_momCDF[0] = LoadCDF(dir + "momentumx.csv");
+        m_momCDF[1] = LoadCDF(dir + "momentumy.csv");
+        m_momCDF[2] = LoadCDF(dir + "momentumz.csv");
+        m_hasBkgMomentum = (!m_momCDF[0].empty() && !m_momCDF[1].empty() && !m_momCDF[2].empty());
+    }
+
 
 }
 // Destructor
@@ -76,6 +98,55 @@ PrimaryGenerator::~PrimaryGenerator()
 {
     delete m_particleGun;
 }
+
+PrimaryGenerator::CDF PrimaryGenerator::LoadCDF(const std::string& csvPath) const
+{
+    CDF cdf;
+    std::ifstream file(csvPath);
+    if (!file)
+    {
+        throwError("PrimaryGenerator::LoadCDF", "Sampling Failure",
+                   "Cannot open background momentum CSV: " + csvPath);
+    }
+
+    std::vector<std::pair<double,double>> bins;
+    double total = 0.0;
+    std::string line;
+    while (std::getline(file, line))
+    {
+        if (line.empty()) continue;
+        std::stringstream ss(line);
+        double x = 0.0, w = 0.0;
+        if (!(ss >> x >> w)) continue;   // skip malformed/blank lines
+        bins.emplace_back(x, w);
+        total += w;
+    }
+
+    if (bins.empty() || total <= 0.0)
+    {
+        throwError("PrimaryGenerator::LoadCDF", "Sampling Failure",
+                   "CSV has no usable content or zero total: " + csvPath);
+    }
+
+    double cum = 0.0;
+    cdf.reserve(bins.size());
+    for (const auto& [x, w] : bins)
+    {
+        cum += w / total;
+        cdf.emplace_back(x, cum);
+    }
+    return cdf;
+}
+
+double PrimaryGenerator::SampleCDF(const CDF& cdf) const
+{
+    double u = G4UniformRand();                       // thread-local CLHEP engine
+    auto it = std::lower_bound(cdf.begin(), cdf.end(), u,
+        [](const std::pair<double,double>& e, double v){ return e.second < v; });
+    return (it != cdf.end()) ? it->first : cdf.back().first;
+}
+
+
 // circular beam modeling
 G4ThreeVector PrimaryGenerator::GetRandomPointOnCircle(G4float radius, const G4ThreeVector center)
 {
@@ -169,6 +240,13 @@ void PrimaryGenerator::GeneratePrimaries(G4Event *oneEvent)
         particleNum = CLHEP::RandPoisson::shoot(itkParticlePop * m_flag->pileUpScale * m_flag->detectorSizeX * m_flag->detectorSizeY * 100);
         //std::cout << "itkPop: " << itkParticlePop <<  "; Mean: " << itkParticlePop * m_flag->detectorSizeX * m_flag->detectorSizeY * 100 << "; Poisson sample: " << particleNum << std::endl;
     }
+    else if (m_flag->largeScaleFlag == "EIC_FMT" && m_flag->bkgRateMean >= 0.0)
+    {
+        // Realistic EIC hit rate: 1 signal + Poisson-distributed background.
+        // bkgRateMean is the TOTAL background mean per event, set in the cfg.
+        G4int nBkg = CLHEP::RandPoisson::shoot(m_flag->bkgRateMean);
+        particleNum = 1 + nBkg;
+    }
     else
     {
         particleNum = m_flag->particleCount;
@@ -204,6 +282,16 @@ void PrimaryGenerator::GeneratePrimaries(G4Event *oneEvent)
                 throwError("PrimaryGenerator::GeneratePrimaries", "Sampling Failure", "Given particle type does not match any predefined GEANT4 value.");
             }
             m_particleGun->SetParticleDefinition(particle);
+
+            if (mcFlag == 1 && m_hasBkgMomentum)
+            {
+                double px   = SampleCDF(m_momCDF[0]);                  // GeV/c
+                double py   = SampleCDF(m_momCDF[1]);                  // GeV/c
+                double pz   = SampleCDF(m_momCDF[2]);                  // GeV/c
+                double p    = std::sqrt(px*px + py*py + pz*pz);        // |p|, GeV/c
+                double mass = particle->GetPDGMass() / GeV;            // 0.000511 for e-
+                energyValue = (std::sqrt(p*p + mass*mass) - mass) * GeV; // kinetic E (MeV)
+            }
             m_particleGun->SetParticleEnergy(energyValue);
         }
 

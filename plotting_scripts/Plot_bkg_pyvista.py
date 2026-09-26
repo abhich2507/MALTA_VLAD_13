@@ -3,7 +3,7 @@ import numpy as np
 import pyvista as pv
 
 # --- Minimal Config ---
-run = 5
+run = 1
 base_dir = "./Results"
 n_points = 200          
 
@@ -16,7 +16,7 @@ path = f"{base_dir}/local_{run:04d}/output0_t0.root:TruthVertex"
 cols = ["trueVertexX", "trueVertexY", "trueVertexZ", "trueMomX", "trueMomY", "trueMomZ"]
 
 raw = uproot.concatenate([path], filter_name=cols + ["mcFlag"], library="np")
-mask = raw["mcFlag"] == 0
+mask = raw["mcFlag"] == 1
 
 x = raw["trueVertexX"][mask][:n_points]
 y = raw["trueVertexY"][mask][:n_points]
