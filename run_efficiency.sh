@@ -27,7 +27,7 @@ SIM_FLAGS_CFG="flags_MP_EIC.cfg"              # passed to bkg_scan.sh
 ANALYSIS_CFG="analysis_flags_MP_EIC_Vlad.cfg" # passed to run_mult.sh
 SAVE="analysis_results_MP"                    # analysis save name (all steps)
 THRESHOLD=100                                 # analysis threshold in e-
-WINDOW_NS=8                                   # coincidence time window in ns
+WINDOW_NS=36                                # coincidence time window in ns
 CSV="$SCRIPT_DIR/configs/bkg_rate.csv"
 # ------------------------------------------------------------------------------
 
