@@ -1,10 +1,10 @@
 #!/bin/bash
-# Scan particleCount in flags_MP_EIC.cfg over selected (run, count) values in configs/bkg_count.csv.
+# Scan bkgRateMean in flags_MP_EIC.cfg over selected (run, rate) values in configs/bkg_rate.csv.
 # Each scan point launches the local Geant4 simulation via run_script_local.sh,
 # and Results/local_NNNN directories increment automatically per run.
 #
 # Usage:
-#   ./bkg_scan.sh              # all runs in configs/bkg_count.csv
+#   ./bkg_scan.sh              # all runs in configs/bkg_rate.csv
 #   ./bkg_scan.sh 2            # only run 2
 #   ./bkg_scan.sh 2 4 6        # runs 2, 4 and 6
 #   ./bkg_scan.sh 2-5          # runs 2 through 5
@@ -12,7 +12,7 @@
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-CSV="$SCRIPT_DIR/configs/bkg_count.csv"
+CSV="$SCRIPT_DIR/configs/bkg_rate.csv"
 FLAGS="$SCRIPT_DIR/configs/flags_MP_EIC.cfg"
 BUILD_DIR="$SCRIPT_DIR/build"
 
@@ -60,7 +60,7 @@ trap 'mv "$FLAGS.bak" "$FLAGS"; echo "Restored $FLAGS"' EXIT
 cd "$BUILD_DIR"
 
 # Skip the header line; process substitution keeps the loop in this shell
-while IFS=',' read -r run count; do
+while IFS=',' read -r run rate; do
     [ -z "$run" ] && continue
 
     # Skip runs that were not selected (only when a selection was provided)
@@ -70,10 +70,10 @@ while IFS=',' read -r run count; do
     fi
 
     echo "=================================================="
-    echo "Scan point: run=$run  particleCount=$count"
+    echo "Scan point: run=$run  bkgRateMean=$rate"
 
-    sed -i '' "s/^particleCount = .*/particleCount = $count/" "$FLAGS"
-    grep -q "^particleCount = $count$" "$FLAGS" || { echo "Failed to set particleCount=$count in $FLAGS"; exit 1; }
+    sed -i '' "s/^bkgRateMean = .*/bkgRateMean = $rate/" "$FLAGS"
+    grep -q "^bkgRateMean = $rate$" "$FLAGS" || { echo "Failed to set bkgRateMean=$rate in $FLAGS"; exit 1; }
 
     source run_script_local.sh flags_MP_EIC.cfg
 done < <(tail -n +2 "$CSV")

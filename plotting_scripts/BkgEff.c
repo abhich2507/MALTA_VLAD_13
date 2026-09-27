@@ -1,11 +1,11 @@
 // plotting_scripts/BkgEff.c
-// Plot efficiency vs background count with error bars from Results/bkg_eff.csv
-// CSV columns: plane, count-1, avgEff, effError  (one graph per plane)
+// Plot efficiency vs background rate with error bars from Results/bkg_eff.csv
+// CSV columns: plane, bkgRateMean, avgEff, effError  (one graph per plane)
 // Usage (from malta_simulation/):
 //   root -l -b -q plotting_scripts/BkgEff.c           # plane efficiencies only
 //   root -l -b -q 'plotting_scripts/BkgEff.c(1)'      # also overlay coincidence efficiency
 // Coincidence data: Results/coin_eff.csv (run, window_ns, nGen, coinCount, eff_percent)
-// mapped to background counts via configs/bkg_count.csv.
+// mapped to background rates via configs/bkg_rate.csv.
 
 #include <fstream>
 #include <sstream>
@@ -16,6 +16,7 @@
 #include "TCanvas.h"
 #include "TLegend.h"
 #include "TAxis.h"
+#include "TGaxis.h"
 #include "TMath.h"
 #include "TStyle.h"
 #include "TROOT.h"
@@ -50,7 +51,7 @@ void BkgEff(int withCoin = 0)
     if (mEff.empty()) { std::cerr << "No data read from Results/bkg_eff.csv" << std::endl; return; }
 
     // Global y range across all planes
-    double yMin = 70., yMax = 99.;
+    double yMin = 90., yMax = 99.;
     // for (std::map<int, std::vector<double>>::iterator it = mEff.begin(); it != mEff.end(); ++it)
     // {
     //     for (size_t i = 0; i < it->second.size(); ++i)
@@ -65,9 +66,9 @@ void BkgEff(int withCoin = 0)
     double coinWindowNs = 0.0;
     if (withCoin)
     {
-        // run -> particleCount from configs/bkg_count.csv
-        std::map<int,int> runCount;
-        std::ifstream rc("configs/bkg_count.csv");
+        // run -> bkgRateMean from configs/bkg_rate.csv
+        std::map<int,double> runRate;
+        std::ifstream rc("configs/bkg_rate.csv");
         if (rc)
         {
             std::string rl;
@@ -76,9 +77,9 @@ void BkgEff(int withCoin = 0)
             {
                 if (rl.empty()) continue;
                 std::stringstream ss(rl);
-                int run, count; char comma;
-                ss >> run >> comma >> count;
-                runCount[run] = count;
+                int run; double rate; char comma;
+                ss >> run >> comma >> rate;
+                runRate[run] = rate;
             }
         }
 
@@ -99,12 +100,12 @@ void BkgEff(int withCoin = 0)
                 coinWindowNs = std::stod(cols[1]);
                 double nGen = std::stod(cols[2]);
                 double eff  = std::stod(cols[4]);
-                if (!runCount.count(run))
+                if (!runRate.count(run))
                 {
-                    std::cerr << "BkgEff: run " << run << " not in configs/bkg_count.csv, skipping" << std::endl;
+                    std::cerr << "BkgEff: run " << run << " not in configs/bkg_rate.csv, skipping" << std::endl;
                     continue;
                 }
-                double x   = runCount[run] - 1.0;  // background count, consistent with plane graphs
+                double x   = runRate[run];  // background rate, consistent with plane graphs
                 double err = (nGen > 0) ? 100.0 * std::sqrt((eff/100.0)*(1.0-eff/100.0)/nGen) : 0.0;
                 coinX.push_back(x);
                 coinY.push_back(eff);
@@ -123,8 +124,9 @@ void BkgEff(int withCoin = 0)
     TCanvas *c = new TCanvas("c", "bkg efficiency", 800, 600);
     c->SetLeftMargin(0.15);
     c->SetBottomMargin(0.15);
+    c->SetTopMargin(0.13);
 
-    TLegend *leg = new TLegend(0.55, 0.75, 0.88, 0.88);
+    TLegend *leg = new TLegend(0.15, 0.15, 0.48, 0.28);
     int colors[6] = {kBlue+2, kRed+2, kGreen+2, kMagenta+2, kOrange+7, kCyan+2};
     int colIdx = 0;
     bool first = true;
@@ -134,7 +136,7 @@ void BkgEff(int withCoin = 0)
         int plane = it->first;
         std::vector<double>& eff = it->second;
         TGraphErrors *gr = new TGraphErrors(eff.size(), mCount[plane].data(), eff.data(), nullptr, mEffErr[plane].data());
-        gr->SetTitle("Hit Efficiency vs Background Count;Background(e-) count;Signal-only efficiency [%]");
+        gr->SetTitle("Hit Efficiency vs Background Rate;Background rate #lambda [particles/event];Signal-only efficiency [%]");
         gr->SetMarkerStyle(20 + (colIdx % 4));
         gr->SetMarkerSize(0.9);
         gr->SetMarkerColor(colors[colIdx % 6]);
@@ -166,9 +168,30 @@ void BkgEff(int withCoin = 0)
         leg->AddEntry(grCoin, Form("coincidence (%.0f ns window)", coinWindowNs), "p");
     }
 
+    // Paint the pad first so gPad->GetUxmin()/GetUymax() return user coordinates.
+    c->Modified();
+    c->Update();
+
+    // Second (top) horizontal axis: background rate as % of the realistic
+    // hottest-spot rate (0.198 hits/sensor/event -> 1.584 total lambda).
+    const double hottestSpotTotal = 0.198 * 8;
+    TGaxis *topAxis = new TGaxis(gPad->GetUxmin(), gPad->GetUymax(),
+                                 gPad->GetUxmax(), gPad->GetUymax(),
+                                 gPad->GetUxmin() / hottestSpotTotal * 100.,
+                                 gPad->GetUxmax() / hottestSpotTotal * 100.,
+                                 510, "-");
+    topAxis->SetTitle("% of hottest spot");
+    topAxis->SetTitleOffset(1.0);
+    topAxis->SetLabelSize(0.04);
+    topAxis->SetTitleSize(0.04);
+    topAxis->SetLineColor(kBlack);
+    topAxis->Draw();
+
     leg->Draw();
 
     gSystem->mkdir("Plots", kTRUE);
+    c->Modified();
+    c->Update();
     c->SaveAs("Plots/bkg_eff.png");
     c->SaveAs("Plots/bkg_eff.pdf");
     std::cout << "Saved Plots/bkg_eff.png and Plots/bkg_eff.pdf" << std::endl;

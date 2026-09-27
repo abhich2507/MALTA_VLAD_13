@@ -10,7 +10,7 @@
 #
 # Usage (run from malta_simulation/ or anywhere):
 #   ./plotting_scripts/run_coin_eff.sh 1 2 3     # specific runs
-#   ./plotting_scripts/run_coin_eff.sh           # all runs in configs/bkg_count.csv
+#   ./plotting_scripts/run_coin_eff.sh           # all runs in configs/bkg_rate.csv
 #
 # Override analysis settings via env: SAVE, THRESHOLD, WINDOW_NS
 #
@@ -30,14 +30,14 @@ WINDOW_NS="${WINDOW_NS:-8}"           # coincidence time window in ns
 
 runs=("$@")
 if [ "${#runs[@]}" -eq 0 ]; then
-    # fallback: take the run column of configs/bkg_count.csv
+    # fallback: take the run column of configs/bkg_rate.csv
     while IFS=',' read -r run rest; do
         case "$run" in ''|'run') continue ;; esac
         if [[ "$run" =~ ^[0-9]+$ ]]; then runs+=("$run"); fi
-    done < configs/bkg_count.csv
+    done < configs/bkg_rate.csv
 fi
 if [ "${#runs[@]}" -eq 0 ]; then
-    echo "ERROR: no run numbers given and configs/bkg_count.csv has none" >&2
+    echo "ERROR: no run numbers given and configs/bkg_rate.csv has none" >&2
     exit 1
 fi
 

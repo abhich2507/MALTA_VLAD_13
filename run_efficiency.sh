@@ -15,7 +15,7 @@
 #   ./run_efficiency.sh --no-sim      skip the Geant4 scan (Results/local_NNNN exist)
 #   ./run_efficiency.sh --only-extract  only re-run steps 3-5 (CSVs + plots)
 #
-# The run list always comes from configs/bkg_count.csv (run,count columns).
+# The run list always comes from configs/bkg_rate.csv (run,bkgRateMean columns).
 # =============================================================================
 set -euo pipefail
 
@@ -28,7 +28,7 @@ ANALYSIS_CFG="analysis_flags_MP_EIC_Vlad.cfg" # passed to run_mult.sh
 SAVE="analysis_results_MP"                    # analysis save name (all steps)
 THRESHOLD=100                                 # analysis threshold in e-
 WINDOW_NS=8                                   # coincidence time window in ns
-CSV="$SCRIPT_DIR/configs/bkg_count.csv"
+CSV="$SCRIPT_DIR/configs/bkg_rate.csv"
 # ------------------------------------------------------------------------------
 
 DO_SIM=true
@@ -52,7 +52,7 @@ for arg in "$@"; do
     esac
 done
 
-# Read the run list from configs/bkg_count.csv (column 1)
+# Read the run list from configs/bkg_rate.csv (column 1)
 runs=()
 while IFS=',' read -r run rest; do
     case "$run" in ''|run) continue ;; esac

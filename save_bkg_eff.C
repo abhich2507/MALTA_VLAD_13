@@ -1,8 +1,8 @@
 // save_bkg_eff.C
-// Reads configs/bkg_count.csv (run,count) and the per-plane efficiency stored in
+// Reads configs/bkg_rate.csv (run,bkgRateMean) and the per-plane efficiency stored in
 // each run's Plots/local_NNNN/<SAVE>/histos.root (directory Thr<THRESHOLD>),
 // then writes Results/bkg_eff.csv with columns:
-//   plane, count-1, avgEff, effError
+//   plane, bkgRateMean, avgEff, effError
 // Efficiency per plane p:
 //   N_gen  = Integral(h2ALLInPixel_planeZ<p>)        (all signal tracks)
 //   N_pass = Integral(h2PASSInPixelAux_planeZ<p>)   (unscaled pass counts, preferred)
@@ -30,11 +30,11 @@ void save_bkg_eff(const char* save = "analysis_results_MP", int threshold = 100)
 
     gSystem->mkdir("Results", kTRUE);  // outputs live in Results/, not configs/
 
-    std::ifstream in("configs/bkg_count.csv");
-    if (!in) { std::cerr << "Cannot open configs/bkg_count.csv" << std::endl; return; }
+    std::ifstream in("configs/bkg_rate.csv");
+    if (!in) { std::cerr << "Cannot open configs/bkg_rate.csv" << std::endl; return; }
 
     std::ofstream out("Results/bkg_eff.csv");
-    out << "plane,count-1,avgEff,effError" << std::endl;
+    out << "plane,bkgRateMean,avgEff,effError" << std::endl;
 
     std::string line;
     std::getline(in, line);  // skip header
@@ -42,9 +42,10 @@ void save_bkg_eff(const char* save = "analysis_results_MP", int threshold = 100)
     {
         if (line.empty()) continue;
         std::stringstream ss(line);
-        int run, count;
+        int run;
+        double rate;
         char comma;
-        ss >> run >> comma >> count;
+        ss >> run >> comma >> rate;
 
         TString path = TString::Format("Plots/local_%04d/%s/histos.root", run, SAVE);
         if (gSystem->AccessPathName(path.Data()))
@@ -103,8 +104,8 @@ void save_bkg_eff(const char* save = "analysis_results_MP", int threshold = 100)
             double eff = (nGen > 0) ? 100.0 * nPass / nGen : 0.0;
             double err = (nGen > 0) ? 100.0 * std::sqrt((nPass / nGen) * (1.0 - nPass / nGen) / nGen) : 0.0;
 
-            out << plane << "," << (count - 1) << "," << eff << "," << err << std::endl;
-            std::cout << "run " << run << " planeZ" << plane << ": count-1=" << (count - 1)
+            out << plane << "," << rate << "," << eff << "," << err << std::endl;
+            std::cout << "run " << run << " planeZ" << plane << ": bkgRateMean=" << rate
                       << " N_gen=" << (long long)nGen << " N_pass=" << (long long)nPass
                       << " avgEff=" << eff << " +- " << err << std::endl;
         }

@@ -148,7 +148,7 @@ void verifySensorHits(int runNumber = 0, int numThreads = 6)
         int id = allIDs[idx];
         h2Edep[id] = new TH2D(Form("h2Edep_%d", id),
                               Form("Energy deposition - %s;Pixel X;Pixel Y;E_{dep} [e^{-}]", sensorLabel[id].Data()),
-                              512, 0, 512, 224, 0, 224);
+                              512, 0, 512, 512, 0, 512);
     }
 
     // 7) Combined 3D: both planes together
