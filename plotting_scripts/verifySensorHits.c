@@ -452,5 +452,65 @@ void verifySensorHits(int runNumber = 0, int numThreads = 6)
     pm3d->Draw("SAME");
     c11->SaveAs(Form("%s/verify_bkg_momentum3D.root", inputPath.Data()));
 
+    // ============================================================
+    // CANVAS 12: Background momentum & energy (mcFlag = 1)
+    // Final generated values from the TruthVertex ntuple (GeV/c, GeV):
+    //   trueMomX/Y/Z  -> momentum components (after the generator forces
+    //                    the direction onto the sensor, so p_x,p_y ~ 0)
+    //   trueMomentum  -> |p|, carries the EIC-sampled magnitude
+    //   trueEnergy    -> kinetic energy
+    // ============================================================
+    float momX = 0, momY = 0, momZ = 0, momentum = 0, energy = 0;
+    int truthEvent = 0;
+    genChain->SetBranchAddress("iEvent",      &truthEvent);
+    genChain->SetBranchAddress("trueMomX",     &momX);
+    genChain->SetBranchAddress("trueMomY",     &momY);
+    genChain->SetBranchAddress("trueMomZ",     &momZ);
+    genChain->SetBranchAddress("trueMomentum", &momentum);
+    genChain->SetBranchAddress("trueEnergy",   &energy);
+
+    TH1D *h1BkgMomX = new TH1D("h1BkgMomX", "Bkg p_{x} (mcFlag=1);p_{x} [GeV/c];Entries", 200, -5., 5.);
+    TH1D *h1BkgMomY = new TH1D("h1BkgMomY", "Bkg p_{y} (mcFlag=1);p_{y} [GeV/c];Entries", 200, -5., 5.);
+    TH1D *h1BkgMomZ = new TH1D("h1BkgMomZ", "Bkg p_{z} (mcFlag=1);p_{z} [GeV/c];Entries", 300, -15., 15.);
+    TH1D *h1BkgMom  = new TH1D("h1BkgMom",  "Bkg |p| (mcFlag=1);|p| [GeV/c];Entries",     300,  0., 15.);
+    TH1D *h1BkgEne  = new TH1D("h1BkgEne",  "Bkg kinetic energy (mcFlag=1);E_{kin} [GeV];Entries", 300, 0., 15.);
+    TH1D *h1BkgMult = new TH1D("h1BkgMult", "Bkg particles / event (mcFlag=1);N_{bkg};Events", 20, 0, 20);
+
+    std::map<int,int> bkgPerEvent;
+    for (Long64_t i = 0; i < nGen; i++)
+    {
+        genChain->GetEntry(i);
+        if (mcFlag != 1) continue;
+        h1BkgMomX->Fill(momX);
+        h1BkgMomY->Fill(momY);
+        h1BkgMomZ->Fill(momZ);
+        h1BkgMom->Fill(momentum);
+        h1BkgEne->Fill(energy);
+        bkgPerEvent[truthEvent]++;
+    }
+    for (auto &kv : bkgPerEvent) h1BkgMult->Fill(kv.second);
+
+    TCanvas *c12 = new TCanvas("c12", "Background Momentum and Energy", 1500, 800);
+    c12->Divide(3, 2);
+    c12->cd(1); h1BkgMomX->Draw();
+    c12->cd(2); h1BkgMomY->Draw();
+    c12->cd(3); h1BkgMomZ->Draw();
+    c12->cd(4); h1BkgMom->Draw();
+    c12->cd(5); h1BkgEne->Draw();
+    c12->cd(6); h1BkgMult->Draw();
+    c12->SaveAs(Form("%s/verify_bkg_momentum.root", inputPath.Data()));
+
+    TFile *fMom = TFile::Open(Form("%s/verify_bkg_momentum.root", inputPath.Data()), "UPDATE");
+    if (fMom && !fMom->IsZombie())
+    {
+        h1BkgMomX->Write();
+        h1BkgMomY->Write();
+        h1BkgMomZ->Write();
+        h1BkgMom->Write();
+        h1BkgEne->Write();
+        h1BkgMult->Write();
+        fMom->Close();
+    }
+
     std::cout << "All verification plots saved to: " << inputPath << std::endl;
 }

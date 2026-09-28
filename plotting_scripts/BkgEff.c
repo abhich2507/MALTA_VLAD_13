@@ -16,7 +16,8 @@
 #include "TCanvas.h"
 #include "TLegend.h"
 #include "TAxis.h"
-#include "TGaxis.h"
+#include "TLine.h"
+#include "TLatex.h"
 #include "TMath.h"
 #include "TStyle.h"
 #include "TROOT.h"
@@ -51,7 +52,7 @@ void BkgEff(int withCoin = 0)
     if (mEff.empty()) { std::cerr << "No data read from Results/bkg_eff.csv" << std::endl; return; }
 
     // Global y range across all planes
-    double yMin = 90., yMax = 99.;
+    double yMin = 40., yMax = 70.;
     // for (std::map<int, std::vector<double>>::iterator it = mEff.begin(); it != mEff.end(); ++it)
     // {
     //     for (size_t i = 0; i < it->second.size(); ++i)
@@ -172,20 +173,19 @@ void BkgEff(int withCoin = 0)
     c->Modified();
     c->Update();
 
-    // Second (top) horizontal axis: background rate as % of the realistic
-    // hottest-spot rate (0.198 hits/sensor/event -> 1.584 total lambda).
-    const double hottestSpotTotal = 0.198 * 8;
-    TGaxis *topAxis = new TGaxis(gPad->GetUxmin(), gPad->GetUymax(),
-                                 gPad->GetUxmax(), gPad->GetUymax(),
-                                 gPad->GetUxmin() / hottestSpotTotal * 100.,
-                                 gPad->GetUxmax() / hottestSpotTotal * 100.,
-                                 510, "-");
-    topAxis->SetTitle("% of hottest spot");
-    topAxis->SetTitleOffset(1.0);
-    topAxis->SetLabelSize(0.04);
-    topAxis->SetTitleSize(0.04);
-    topAxis->SetLineColor(kBlack);
-    topAxis->Draw();
+    // Vertical line marking the original EIC background rate
+    // (0.198 hits/sensor/event x 8 sensors = 1.584 particles/event).
+    const double eicRate = 1.584;
+    TLine *eicLine = new TLine(eicRate, yMin - 1.5, eicRate, yMax + 1.5);
+    eicLine->SetLineColor(kRed);
+    eicLine->SetLineStyle(kDashed);
+    eicLine->SetLineWidth(2);
+    eicLine->Draw();
+
+    TLatex *eicLab = new TLatex(eicRate + 0.15, yMax - 2.0, "Original EIC bkg rate");
+    eicLab->SetTextColor(kRed);
+    eicLab->SetTextSize(0.035);
+    eicLab->Draw();
 
     leg->Draw();
 

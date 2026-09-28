@@ -1,0 +1,127 @@
+-- Could NOT find WrapVulkanHeaders (missing: Vulkan_INCLUDE_DIR) 
+-- Could NOT find WrapVulkanHeaders (missing: Vulkan_INCLUDE_DIR) 
+-- Configuring done (0.5s)
+-- Generating done (0.1s)
+-- Build files have been written to: /Users/snip/Documents/MALTA_VLAD_13/malta_simulation/build
+[ 21%] Built target sim
+[ 34%] Built target analysis_lib
+[ 39%] Built target run_Analysis
+[ 43%] Built target run_Calorimetry
+[ 48%] Built target run_Clustering
+[ 53%] Built target run_Debug
+[ 57%] Built target run_DigitalProcessing
+[ 62%] Built target run_PRIOFIFOHWCProcessing
+[ 66%] Built target run_Tracking
+[ 69%] Built target test_thresholdMap
+[ 74%] Built target test_fullDigitalProcessing
+[ 80%] Built target test_fullTracking
+[ 87%] Built target test_fullClustering
+[ 96%] Built target test_fullAnalysis
+[100%] Built target malta2Digitizer
+Directory already exists or failed to create.
+Directory already exists or failed to create.
+Loading flags from file: /Users/snip/Documents/MALTA_VLAD_13/malta_simulation//configs/flags_MP_EIC.cfg
+Loaded flag: comments = ThisistheDEFAULTsimulationflag.Pleasecustomizeasdesired.
+Loaded flag: preDefinedGeometryFlag = MULTIMALTA
+Loaded flag: largeScaleFlag = EIC_FMT
+Loaded flag: geoFile = geo_X4Y1Z2.csv
+Loaded flag: detectorXOffset = 0.
+Loaded flag: detectorYOffset = 0.
+Loaded flag: detectorZOffset = 0.
+Loaded flag: pixelSize = 0.0364
+Loaded flag: detectorSizeX = 1.86368
+Loaded flag: detectorSizeY = 1.86368
+Loaded flag: detectorDepth = 29.1
+Loaded flag: CCModelSigmaX = 4.3
+Loaded flag: CCModelSigmaY = 4.3
+Loaded flag: outsideMaterial = G4_Galactic
+Loaded flag: beamGeometry = gaussian
+Loaded flag: gausSmearingX = 0.05
+Loaded flag: gausSmearingY = 0.05
+Loaded flag: gausSmearingZ = 10
+Loaded flag: beamXOffset = 1.86369
+Loaded flag: beamYOffset = 0.
+Loaded flag: beamZOffset = -100.
+Loaded flag: sourceRadius = 18
+Loaded flag: sourceRadiusX = 74.4744
+Loaded flag: sourceRadiusY = 18.564
+Loaded flag: particleCount = 11
+Loaded flag: numEvents = 200000
+Loaded flag: intraSpillOffset = 0
+Loaded flag: beamVeto = 2000
+Loaded flag: particleType = pi+
+Loaded flag: particleEnergy = 1
+Loaded flag: energyDistribution = none
+Loaded flag: bkgparticleType = e-
+Loaded flag: bkgparticleEnergy = 0.01
+Loaded flag: bkgenergyDistribution = EIC
+Loaded flag: bkgXMin = 1.79552
+Loaded flag: bkgXMax = 3.79552
+Loaded flag: bkgYMin = -1.0
+Loaded flag: bkgYMax = 1.0
+Loaded flag: bkgZMin = -100.0
+Loaded flag: bkgZMax = 110.0#equalreachupstream(z<0)anddownstream(z>10)->symmetricbkgonbothplanes
+Loaded flag: bkgMomentumCSV = ../Data/momentumCSV
+Loaded flag: bkgRateMean = 0.5
+Loaded flag: particleMomentumX = 0.
+Loaded flag: particleMomentumY = 0.
+Loaded flag: particleMomentumZ = 1.
+Loaded flag: itkEnable = false
+Loaded flag: pileUpScale = 1
+Loaded flag: itkInput = pixBarrel_occ
+Loaded flag: itkLayer = 0
+Loaded flag: itkZ = 0
+Loaded flag: EMPhysics = true
+Loaded flag: hadronPhysics = true
+Loaded flag: dutTungstenAbsorberFlag = false
+Loaded flag: absorberThickness = 3.2
+Loaded flag: setGEANT4Cuts = true
+Loaded flag: GEANT4CutValue = 1
+Loaded flag: outputPathLocal = Results
+Loaded flag: outputPathNAF = Results
+Loaded flag: macroFileLocal = run.mac
+Loaded flag: macroFileNAF = run.mac
+Loaded flag: numThreadsLocal = 6
+Loaded flag: numThreadsNAF = 12
+Loaded flag: gdmlBool = false
+Loaded flag: gdmlStr = ../LHCfArm2geometry.gdml
+Loaded flag: verbosePL = false
+Loaded flag: verbosePG = false
+Loaded flag: verboseSD = false
+Loaded flag: verboseSA = false
+You are running locally!
+
+**************************************************************
+ Geant4 version Name: geant4-11-04-beta-01 [MT]   (26-June-2025)
+  << in Multi-threaded mode >> 
+                       Copyright : Geant4 Collaboration
+                      References : NIM A 506 (2003), 250-303
+                                 : IEEE-TNS 53 (2006), 270-278
+                                 : NIM A 835 (2016), 186-225
+                             WWW : http://geant4.org/
+**************************************************************
+
+Checking overlaps for volume plane_000000_module_00_x_00_y_00_z_00:0 (G4Box) ... OK! 
+Checking overlaps for volume plane_000001_module_00_x_1.86369_y_00_z_00:0 (G4Box) ... OK! 
+Checking overlaps for volume plane_000002_module_00_x_3.72737_y_00_z_00:0 (G4Box) ... OK! 
+Checking overlaps for volume plane_000003_module_00_x_5.59105_y_00_z_00:0 (G4Box) ... OK! 
+Checking overlaps for volume plane_010000_module_01_x_00_y_00_z_10:0 (G4Box) ... OK! 
+Checking overlaps for volume plane_010001_module_01_x_1.86369_y_00_z_10:0 (G4Box) ... OK! 
+Checking overlaps for volume plane_010002_module_01_x_3.72738_y_00_z_10:0 (G4Box) ... OK! 
+Checking overlaps for volume plane_010003_module_01_x_5.59107_y_00_z_10:0 (G4Box) ... OK! 
+Creating Directory: /Users/snip/Documents/MALTA_VLAD_13/malta_simulation/Results/local_0002
+Copied config file from /Users/snip/Documents/MALTA_VLAD_13/malta_simulation//configs/flags_MP_EIC.cfg to /Users/snip/Documents/MALTA_VLAD_13/malta_simulation/Results/local_0002/flags.cfg
+Progress:    1.0% completed. Current event: 2000. Out of total events: 200000. Elapsed: 0s | ETA: 0sProgress:    2.0% completed. Current event: 4000. Out of total events: 200000. Elapsed: 0s | ETA: 0sProgress:    3.0% completed. Current event: 6000. Out of total events: 200000. Elapsed: 0s | ETA: 0sProgress:    4.0% completed. Current event: 8000. Out of total events: 200000. Elapsed: 0s | ETA: 0sProgress:    5.0% completed. Current event: 10000. Out of total events: 200000. Elapsed: 0s | ETA: 0sProgress:    6.0% completed. Current event: 12000. Out of total events: 200000. Elapsed: 0s | ETA: 0sProgress:    7.0% completed. Current event: 14000. Out of total events: 200000. Elapsed: 0s | ETA: 0sProgress:    8.0% completed. Current event: 16000. Out of total events: 200000. Elapsed: 0s | ETA: 0sProgress:    9.0% completed. Current event: 18000. Out of total events: 200000. Elapsed: 0s | ETA: 0sProgress:   10.0% completed. Current event: 20000. Out of total events: 200000. Elapsed: 0s | ETA: 0sProgress:   11.0% completed. Current event: 22000. Out of total events: 200000. Elapsed: 0s | ETA: 0sProgress:   12.0% completed. Current event: 24000. Out of total events: 200000. Elapsed: 0s | ETA: 0sProgress:   13.0% completed. Current event: 26000. Out of total events: 200000. Elapsed: 0s | ETA: 0sProgress:   14.0% completed. Current event: 28000. Out of total events: 200000. Elapsed: 0s | ETA: 0sProgress:   15.0% completed. Current event: 30000. Out of total events: 200000. Elapsed: 0s | ETA: 0sProgress:   16.0% completed. Current event: 32000. Out of total events: 200000. Elapsed: 0s | ETA: 0sProgress:   17.0% completed. Current event: 34000. Out of total events: 200000. Elapsed: 0s | ETA: 0sProgress:   18.0% completed. Current event: 36000. Out of total events: 200000. Elapsed: 0s | ETA: 0sProgress:   19.0% completed. Current event: 38000. Out of total events: 200000. Elapsed: 0s | ETA: 0sProgress:   20.0% completed. Current event: 40000. Out of total events: 200000. Elapsed: 0s | ETA: 0sProgress:   21.0% completed. Current event: 42000. Out of total events: 200000. Elapsed: 0s | ETA: 0sProgress:   22.0% completed. Current event: 44000. Out of total events: 200000. Elapsed: 0s | ETA: 0sProgress:   23.0% completed. Current event: 46000. Out of total events: 200000. Elapsed: 0s | ETA: 0sProgress:   24.0% completed. Current event: 48000. Out of total events: 200000. Elapsed: 0s | ETA: 0sProgress:   25.0% completed. Current event: 50000. Out of total events: 200000. Elapsed: 0s | ETA: 0sProgress:   26.0% completed. Current event: 52000. Out of total events: 200000. Elapsed: 0s | ETA: 0sProgress:   27.0% completed. Current event: 54000. Out of total events: 200000. Elapsed: 0s | ETA: 0sProgress:   28.0% completed. Current event: 56000. Out of total events: 200000. Elapsed: 0s | ETA: 0sProgress:   29.0% completed. Current event: 58000. Out of total events: 200000. Elapsed: 0s | ETA: 0sProgress:   30.0% completed. Current event: 60000. Out of total events: 200000. Elapsed: 0s | ETA: 0sProgress:   31.0% completed. Current event: 62000. Out of total events: 200000. Elapsed: 0s | ETA: 0sProgress:   32.0% completed. Current event: 64000. Out of total events: 200000. Elapsed: 0s | ETA: 0sProgress:   33.0% completed. Current event: 66000. Out of total events: 200000. Elapsed: 0s | ETA: 0sProgress:   34.0% completed. Current event: 68000. Out of total events: 200000. Elapsed: 0s | ETA: 0sProgress:   35.0% completed. Current event: 70000. Out of total events: 200000. Elapsed: 0s | ETA: 0sProgress:   36.0% completed. Current event: 72000. Out of total events: 200000. Elapsed: 0s | ETA: 0sProgress:   37.0% completed. Current event: 74000. Out of total events: 200000. Elapsed: 0s | ETA: 0sProgress:   38.0% completed. Current event: 76000. Out of total events: 200000. Elapsed: 0s | ETA: 0sProgress:   39.0% completed. Current event: 78000. Out of total events: 200000. Elapsed: 0s | ETA: 0sProgress:   40.0% completed. Current event: 80000. Out of total events: 200000. Elapsed: 0s | ETA: 0sProgress:   41.0% completed. Current event: 82000. Out of total events: 200000. Elapsed: 0s | ETA: 0sProgress:   42.0% completed. Current event: 84000. Out of total events: 200000. Elapsed: 0s | ETA: 0sProgress:   43.0% completed. Current event: 86000. Out of total events: 200000. Elapsed: 0s | ETA: 0sProgress:   44.0% completed. Current event: 88000. Out of total events: 200000. Elapsed: 0s | ETA: 0sProgress:   45.0% completed. Current event: 90000. Out of total events: 200000. Elapsed: 0s | ETA: 0sProgress:   46.0% completed. Current event: 92000. Out of total events: 200000. Elapsed: 0s | ETA: 0sProgress:   47.0% completed. Current event: 94000. Out of total events: 200000. Elapsed: 0s | ETA: 0sProgress:   48.0% completed. Current event: 96000. Out of total events: 200000. Elapsed: 0s | ETA: 0sProgress:   49.0% completed. Current event: 98000. Out of total events: 200000. Elapsed: 0s | ETA: 0sProgress:   50.0% completed. Current event: 100000. Out of total events: 200000. Elapsed: 0s | ETA: 0sProgress:   51.0% completed. Current event: 102000. Out of total events: 200000. Elapsed: 0s | ETA: 0sProgress:   52.0% completed. Current event: 104000. Out of total events: 200000. Elapsed: 0s | ETA: 0sProgress:   53.0% completed. Current event: 106000. Out of total events: 200000. Elapsed: 0s | ETA: 0sProgress:   54.0% completed. Current event: 108000. Out of total events: 200000. Elapsed: 0s | ETA: 0sProgress:   55.0% completed. Current event: 110000. Out of total events: 200000. Elapsed: 0s | ETA: 0sProgress:   56.0% completed. Current event: 112000. Out of total events: 200000. Elapsed: 0s | ETA: 0sProgress:   57.0% completed. Current event: 114000. Out of total events: 200000. Elapsed: 0s | ETA: 0sProgress:   58.0% completed. Current event: 116000. Out of total events: 200000. Elapsed: 0s | ETA: 0sProgress:   59.0% completed. Current event: 118000. Out of total events: 200000. Elapsed: 0s | ETA: 0sProgress:   60.0% completed. Current event: 120000. Out of total events: 200000. Elapsed: 0s | ETA: 0sProgress:   61.0% completed. Current event: 122000. Out of total events: 200000. Elapsed: 0s | ETA: 0sProgress:   62.0% completed. Current event: 124000. Out of total events: 200000. Elapsed: 0s | ETA: 0sProgress:   63.0% completed. Current event: 126000. Out of total events: 200000. Elapsed: 0s | ETA: 0sProgress:   64.0% completed. Current event: 128000. Out of total events: 200000. Elapsed: 0s | ETA: 0sProgress:   65.0% completed. Current event: 130000. Out of total events: 200000. Elapsed: 0s | ETA: 0sProgress:   66.0% completed. Current event: 132000. Out of total events: 200000. Elapsed: 0s | ETA: 0sProgress:   67.0% completed. Current event: 134000. Out of total events: 200000. Elapsed: 0s | ETA: 0sProgress:   68.0% completed. Current event: 136000. Out of total events: 200000. Elapsed: 0s | ETA: 0sProgress:   69.0% completed. Current event: 138000. Out of total events: 200000. Elapsed: 0s | ETA: 0sProgress:   70.0% completed. Current event: 140000. Out of total events: 200000. Elapsed: 0s | ETA: 0sProgress:   71.0% completed. Current event: 142000. Out of total events: 200000. Elapsed: 0s | ETA: 0sProgress:   72.0% completed. Current event: 144000. Out of total events: 200000. Elapsed: 0s | ETA: 0sProgress:   73.0% completed. Current event: 146000. Out of total events: 200000. Elapsed: 0s | ETA: 0sProgress:   74.0% completed. Current event: 148000. Out of total events: 200000. Elapsed: 0s | ETA: 0sProgress:   75.0% completed. Current event: 150000. Out of total events: 200000. Elapsed: 0s | ETA: 0sProgress:   76.0% completed. Current event: 152000. Out of total events: 200000. Elapsed: 0s | ETA: 0sProgress:   77.0% completed. Current event: 154000. Out of total events: 200000. Elapsed: 0s | ETA: 0sProgress:   78.0% completed. Current event: 156000. Out of total events: 200000. Elapsed: 0s | ETA: 0sProgress:   79.0% completed. Current event: 158000. Out of total events: 200000. Elapsed: 0s | ETA: 0sProgress:   80.0% completed. Current event: 160000. Out of total events: 200000. Elapsed: 0s | ETA: 0sProgress:   81.0% completed. Current event: 162000. Out of total events: 200000. Elapsed: 1s | ETA: 1sProgress:   82.0% completed. Current event: 164000. Out of total events: 200000. Elapsed: 1s | ETA: 1sProgress:   83.0% completed. Current event: 166000. Out of total events: 200000. Elapsed: 1s | ETA: 1sProgress:   84.0% completed. Current event: 168000. Out of total events: 200000. Elapsed: 1s | ETA: 1sProgress:   85.0% completed. Current event: 170000. Out of total events: 200000. Elapsed: 1s | ETA: 1sProgress:   86.0% completed. Current event: 172000. Out of total events: 200000. Elapsed: 1s | ETA: 1sProgress:   87.0% completed. Current event: 174000. Out of total events: 200000. Elapsed: 1s | ETA: 1sProgress:   88.0% completed. Current event: 176000. Out of total events: 200000. Elapsed: 1s | ETA: 1sProgress:   89.0% completed. Current event: 178000. Out of total events: 200000. Elapsed: 1s | ETA: 1sProgress:   90.0% completed. Current event: 180000. Out of total events: 200000. Elapsed: 1s | ETA: 1sProgress:   91.0% completed. Current event: 182000. Out of total events: 200000. Elapsed: 1s | ETA: 1sProgress:   92.0% completed. Current event: 184000. Out of total events: 200000. Elapsed: 1s | ETA: 1sProgress:   93.0% completed. Current event: 186000. Out of total events: 200000. Elapsed: 1s | ETA: 1sProgress:   94.0% completed. Current event: 188000. Out of total events: 200000. Elapsed: 1s | ETA: 1sProgress:   95.0% completed. Current event: 190000. Out of total events: 200000. Elapsed: 1s | ETA: 1sProgress:   96.0% completed. Current event: 192000. Out of total events: 200000. Elapsed: 1s | ETA: 1sProgress:   97.0% completed. Current event: 194000. Out of total events: 200000. Elapsed: 1s | ETA: 1sProgress:   98.0% completed. Current event: 196000. Out of total events: 200000. Elapsed: 1s | ETA: 1sProgress:   99.0% completed. Current event: 198000. Out of total events: 200000. Elapsed: 1s | ETA: 1sG4WT2 > Finishing run 0
+G4WT0 > Finishing run 0
+Progress:  100.0% completed. Current event: 200000. Out of total events: 200000. Elapsed: 1s | ETA: 1s
+G4WT1 > Finishing run 0
+G4WT4 > Finishing run 0
+G4WT5 > Finishing run 0
+G4WT3 > Finishing run 0
+Finishing run 0
+
+Simulation completed. Good day!
+WARNING - Attempt to delete the physical volume store while geometry closed !
+WARNING - Attempt to delete the logical volume store while geometry closed !
+WARNING - Attempt to delete the solid store while geometry closed !
+WARNING - Attempt to delete the region store while geometry closed !
