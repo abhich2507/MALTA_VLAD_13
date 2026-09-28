@@ -4,7 +4,9 @@
 // Usage (from malta_simulation/):
 //   root -l -b -q plotting_scripts/BkgEff.c           # plane efficiencies only
 //   root -l -b -q 'plotting_scripts/BkgEff.c(1)'      # also overlay coincidence efficiency
-// Coincidence data: Results/coin_eff.csv (run, window_ns, nGen, coinCount, eff_percent)
+// Replot a renamed results directory (e.g. Results_p120GeV_eEIC_mp_coin):
+//   root -l -b -q 'plotting_scripts/BkgEff.c(1, "Results_p120GeV_eEIC_mp_coin", "Plots_p120GeV_eEIC_mp_coin")'
+// Coincidence data: <resDir>/coin_eff.csv (run, window_ns, nGen, coinCount, eff_percent)
 // mapped to background rates via configs/bkg_rate.csv.
 
 #include <fstream>
@@ -17,19 +19,20 @@
 #include "TLegend.h"
 #include "TAxis.h"
 #include "TLine.h"
-#include "TLatex.h"
 #include "TMath.h"
 #include "TStyle.h"
+#include "TString.h"
 #include "TROOT.h"
 #include "TSystem.h"
 
-void BkgEff(int withCoin = 0)
+void BkgEff(int withCoin = 0, const char* resDir = "Results", const char* outDir = "Plots")
 {
     gStyle->SetOptStat(0);
     gROOT->SetStyle("ATLAS");
 
-    std::ifstream in("Results/bkg_eff.csv");
-    if (!in) { std::cerr << "Cannot open Results/bkg_eff.csv" << std::endl; return; }
+    std::string bkgCsv = TString::Format("%s/bkg_eff.csv", resDir).Data();
+    std::ifstream in(bkgCsv.c_str());
+    if (!in) { std::cerr << "Cannot open " << bkgCsv << std::endl; return; }
 
     std::map<int, std::vector<double>> mCount, mEff, mEffErr;
     std::string line;
@@ -49,10 +52,10 @@ void BkgEff(int withCoin = 0)
     }
     in.close();
 
-    if (mEff.empty()) { std::cerr << "No data read from Results/bkg_eff.csv" << std::endl; return; }
+    if (mEff.empty()) { std::cerr << "No data read from " << bkgCsv << std::endl; return; }
 
     // Global y range across all planes
-    double yMin = 40., yMax = 70.;
+    double yMin = 70., yMax = 99.;
     // for (std::map<int, std::vector<double>>::iterator it = mEff.begin(); it != mEff.end(); ++it)
     // {
     //     for (size_t i = 0; i < it->second.size(); ++i)
@@ -84,7 +87,8 @@ void BkgEff(int withCoin = 0)
             }
         }
 
-        std::ifstream coin("Results/coin_eff.csv");
+        std::string coinCsv = TString::Format("%s/coin_eff.csv", resDir).Data();
+        std::ifstream coin(coinCsv.c_str());
         if (coin)
         {
             std::string cl;
@@ -118,7 +122,7 @@ void BkgEff(int withCoin = 0)
         }
         else
         {
-            std::cerr << "Cannot open Results/coin_eff.csv" << std::endl;
+            std::cerr << "Cannot open " << coinCsv << std::endl;
         }
     }
 
@@ -127,7 +131,8 @@ void BkgEff(int withCoin = 0)
     c->SetBottomMargin(0.15);
     c->SetTopMargin(0.13);
 
-    TLegend *leg = new TLegend(0.15, 0.15, 0.48, 0.28);
+    TLegend *leg = new TLegend(0.15, 0.16, 0.92, 0.42);
+    leg->SetTextSize(0.035);
     int colors[6] = {kBlue+2, kRed+2, kGreen+2, kMagenta+2, kOrange+7, kCyan+2};
     int colIdx = 0;
     bool first = true;
@@ -182,17 +187,16 @@ void BkgEff(int withCoin = 0)
     eicLine->SetLineWidth(2);
     eicLine->Draw();
 
-    TLatex *eicLab = new TLatex(eicRate + 0.15, yMax - 2.0, "Original EIC bkg rate");
-    eicLab->SetTextColor(kRed);
-    eicLab->SetTextSize(0.035);
-    eicLab->Draw();
+    leg->AddEntry(eicLine, "Original EIC bkg rate (#lambda = 0.198#times8 = 1.584)", "l");
 
     leg->Draw();
 
-    gSystem->mkdir("Plots", kTRUE);
+    gSystem->mkdir(outDir, kTRUE);
+    std::string outPng = TString::Format("%s/bkg_eff.png", outDir).Data();
+    std::string outPdf = TString::Format("%s/bkg_eff.pdf", outDir).Data();
     c->Modified();
     c->Update();
-    c->SaveAs("Plots/bkg_eff.png");
-    c->SaveAs("Plots/bkg_eff.pdf");
-    std::cout << "Saved Plots/bkg_eff.png and Plots/bkg_eff.pdf" << std::endl;
+    c->SaveAs(outPng.c_str());
+    c->SaveAs(outPdf.c_str());
+    std::cout << "Saved " << outPng << " and " << outPdf << std::endl;
 }

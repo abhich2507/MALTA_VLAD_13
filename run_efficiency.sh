@@ -29,6 +29,8 @@ SAVE="analysis_results_MP"                    # analysis save name (all steps)
 THRESHOLD=100                                 # analysis threshold in e-
 WINDOW_NS=36                                # coincidence time window in ns
 CSV="$SCRIPT_DIR/configs/bkg_rate.csv"
+RES_DIR="Results_pi1GeV_eEIC_mp_coin"                             # where bkg_eff.csv / coin_eff.csv live (step 5)
+OUT_DIR="Plots_pi1GeV_eEIC_mp_coin"                               # where bkg_eff.png / .pdf are written (step 5)
 # ------------------------------------------------------------------------------
 
 DO_SIM=true
@@ -110,13 +112,13 @@ root -l -b -q "save_bkg_eff.C(\"$SAVE\", $THRESHOLD)"
 
 # 5. Plots ---------------------------------------------------------------------
 echo
-echo "== [5/5] PLOTS -> Plots/bkg_eff.png / bkg_eff.pdf =="
-root -l -b -q 'plotting_scripts/BkgEff.c(1)'
+echo "== [5/5] PLOTS -> $OUT_DIR/bkg_eff.png / bkg_eff.pdf =="
+root -l -b -q "plotting_scripts/BkgEff.c(1, \"$RES_DIR\", \"$OUT_DIR\")"
 
 echo
 echo "============================================================================="
 echo " Done."
 echo "   per-plane efficiency : Results/bkg_eff.csv"
 echo "   coincidence efficiency: Results/coin_eff.csv"
-echo "   plots                : Plots/bkg_eff.png / Plots/bkg_eff.pdf"
+echo "   plots                : $OUT_DIR/bkg_eff.png / $OUT_DIR/bkg_eff.pdf"
 echo "============================================================================="
