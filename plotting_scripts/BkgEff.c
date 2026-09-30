@@ -55,7 +55,7 @@ void BkgEff(int withCoin = 0, const char* resDir = "Results", const char* outDir
     if (mEff.empty()) { std::cerr << "No data read from " << bkgCsv << std::endl; return; }
 
     // Global y range across all planes
-    double yMin = 70., yMax = 99.;
+    double yMin = 80., yMax = 99.;
     // for (std::map<int, std::vector<double>>::iterator it = mEff.begin(); it != mEff.end(); ++it)
     // {
     //     for (size_t i = 0; i < it->second.size(); ++i)
@@ -131,7 +131,7 @@ void BkgEff(int withCoin = 0, const char* resDir = "Results", const char* outDir
     c->SetBottomMargin(0.15);
     c->SetTopMargin(0.13);
 
-    TLegend *leg = new TLegend(0.15, 0.16, 0.92, 0.42);
+    TLegend *leg = new TLegend(0.15, 0.16, 0.82, 0.32);
     leg->SetTextSize(0.035);
     int colors[6] = {kBlue+2, kRed+2, kGreen+2, kMagenta+2, kOrange+7, kCyan+2};
     int colIdx = 0;
