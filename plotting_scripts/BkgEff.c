@@ -131,8 +131,9 @@ void BkgEff(int withCoin = 0, const char* resDir = "Results", const char* outDir
     c->SetBottomMargin(0.15);
     c->SetTopMargin(0.13);
 
-    TLegend *leg = new TLegend(0.15, 0.16, 0.82, 0.32);
+    TLegend *leg = new TLegend(0.25, 0.16, 0.92, 0.32);
     leg->SetTextSize(0.035);
+    leg->SetBorderSize(0);
     int colors[6] = {kBlue+2, kRed+2, kGreen+2, kMagenta+2, kOrange+7, kCyan+2};
     int colIdx = 0;
     bool first = true;
