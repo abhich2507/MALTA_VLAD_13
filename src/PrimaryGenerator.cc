@@ -75,20 +75,25 @@ PrimaryGenerator::PrimaryGenerator(const SimFlags* flags) : m_flag(flags), m_par
 
     // Background energy mode switch:
     //   bkgenergyDistribution = none -> fixed bkgparticleEnergy (default, all legacy cfgs)
-    //   bkgenergyDistribution = EIC  -> realistic sampling from EIC momentum histograms
-    if (m_flag->bkgenergyDistribution == "EIC")
+    //   bkgenergyDistribution = CB   -> sample |p| from the Crystal Ball fit
+    if (m_flag->bkgenergyDistribution == "CB")
     {
-        if (m_flag->bkgMomentumCSV.empty())
+        if (m_flag->bkgMomentumCB.empty())
         {
             throwError("PrimaryGenerator::PrimaryGenerator", "Sampling Failure",
-                       "bkgenergyDistribution = EIC requires bkgMomentumCSV.");
+                       "bkgenergyDistribution = CB requires bkgMomentumCB = \"alpha,n,mean,sigma\".");
         }
-        std::string dir = m_flag->bkgMomentumCSV;
-        if (dir.back() != '/') dir += '/';
-        m_momCDF[0] = LoadCDF(dir + "momentumx.csv");
-        m_momCDF[1] = LoadCDF(dir + "momentumy.csv");
-        m_momCDF[2] = LoadCDF(dir + "momentumz.csv");
-        m_hasBkgMomentum = (!m_momCDF[0].empty() && !m_momCDF[1].empty() && !m_momCDF[2].empty());
+        double alpha = 0.0, n = 0.0, mean = 0.0, sigma = 0.0;
+        char c1 = 0, c2 = 0, c3 = 0;
+        std::stringstream ss(m_flag->bkgMomentumCB);
+        bool ok = static_cast<bool>(ss >> alpha >> c1 >> n >> c2 >> mean >> c3 >> sigma);
+        if (!ok || c1 != ',' || c2 != ',' || c3 != ',' || alpha <= 0.0 || n <= 1.0 || sigma <= 0.0)
+        {
+            throwError("PrimaryGenerator::PrimaryGenerator", "Sampling Failure",
+                       "bkgMomentumCB must be \"alpha,n,mean,sigma\" with alpha>0, n>1, sigma>0: got '" + m_flag->bkgMomentumCB + "'.");
+        }
+        m_cbCDF = BuildCBCDF(alpha, n, mean, sigma);
+        m_hasBkgMomentum = !m_cbCDF.empty();
     }
 
 
@@ -99,51 +104,55 @@ PrimaryGenerator::~PrimaryGenerator()
     delete m_particleGun;
 }
 
-PrimaryGenerator::CDF PrimaryGenerator::LoadCDF(const std::string& csvPath) const
+PrimaryGenerator::CDF PrimaryGenerator::BuildCBCDF(double alpha, double n, double mean, double sigma) const
 {
+    const int npts = 20000;
+    const double pmin = std::max(0.0, mean - 10.0 * sigma);
+    const double pmax = mean + 200.0 * sigma;
+
+    const double A = std::pow(n / alpha, n) * std::exp(-0.5 * alpha * alpha);
+    const double B = n / alpha - alpha;
+
+    auto density = [&](double x) {
+        double t = (x - mean) / sigma;
+        return (t <= alpha) ? std::exp(-0.5 * t * t) : A * std::pow(B + t, -n);
+    };
+
     CDF cdf;
-    std::ifstream file(csvPath);
-    if (!file)
-    {
-        throwError("PrimaryGenerator::LoadCDF", "Sampling Failure",
-                   "Cannot open background momentum CSV: " + csvPath);
-    }
-
-    std::vector<std::pair<double,double>> bins;
-    double total = 0.0;
-    std::string line;
-    while (std::getline(file, line))
-    {
-        if (line.empty()) continue;
-        std::stringstream ss(line);
-        double x = 0.0, w = 0.0;
-        if (!(ss >> x >> w)) continue;   // skip malformed/blank lines
-        bins.emplace_back(x, w);
-        total += w;
-    }
-
-    if (bins.empty() || total <= 0.0)
-    {
-        throwError("PrimaryGenerator::LoadCDF", "Sampling Failure",
-                   "CSV has no usable content or zero total: " + csvPath);
-    }
-
+    cdf.reserve(npts);
+    const double dx = (pmax - pmin) / (npts - 1);
     double cum = 0.0;
-    cdf.reserve(bins.size());
-    for (const auto& [x, w] : bins)
+    double fPrev = density(pmin);
+    cdf.emplace_back(pmin, 0.0);
+    for (int i = 1; i < npts; ++i)
     {
-        cum += w / total;
+        double x = pmin + i * dx;
+        double f = density(x);
+        cum += 0.5 * (fPrev + f) * dx;
         cdf.emplace_back(x, cum);
+        fPrev = f;
     }
+    if (cum <= 0.0)
+    {
+        throwError("PrimaryGenerator::BuildCBCDF", "Sampling Failure",
+                   "Crystal Ball CDF integrates to zero.");
+    }
+    for (auto& [x, c] : cdf) c /= cum;
     return cdf;
 }
 
-double PrimaryGenerator::SampleCDF(const CDF& cdf) const
+double PrimaryGenerator::SampleCB(const CDF& cdf) const
 {
     double u = G4UniformRand();                       // thread-local CLHEP engine
     auto it = std::lower_bound(cdf.begin(), cdf.end(), u,
         [](const std::pair<double,double>& e, double v){ return e.second < v; });
-    return (it != cdf.end()) ? it->first : cdf.back().first;
+    if (it == cdf.begin()) return cdf.front().first;
+    if (it == cdf.end())   return cdf.back().first;
+    auto prev = it - 1;
+    double x0 = prev->first, c0 = prev->second;
+    double x1 = it->first,  c1 = it->second;
+    double frac = (c1 > c0) ? (u - c0) / (c1 - c0) : 0.0;
+    return x0 + frac * (x1 - x0);
 }
 
 
@@ -285,12 +294,10 @@ void PrimaryGenerator::GeneratePrimaries(G4Event *oneEvent)
 
             if (mcFlag == 1 && m_hasBkgMomentum)
             {
-                double px   = SampleCDF(m_momCDF[0]);                  // GeV/c
-                double py   = SampleCDF(m_momCDF[1]);                  // GeV/c
-                double pz   = SampleCDF(m_momCDF[2]);                  // GeV/c
-                double p    = std::sqrt(px*px + py*py + pz*pz);        // |p|, GeV/c
+                double p = SampleCB(m_cbCDF);                          // |p| in GeV/c
                 double mass = particle->GetPDGMass() / GeV;            // 0.000511 for e-
                 energyValue = (std::sqrt(p*p + mass*mass) - mass) * GeV; // kinetic E (MeV)
+                G4AnalysisManager::Instance()->FillH1(0, p);           // verify sampled |p| (GeV/c)
             }
             m_particleGun->SetParticleEnergy(energyValue);
         }

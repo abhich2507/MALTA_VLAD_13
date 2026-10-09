@@ -139,7 +139,7 @@ void LoadSimFlagsFromFile(const std::string& filename, SimFlags& flags)
         else if (key == "bkgparticleType") flags.bkgparticleType = value;
         else if (key == "bkgparticleEnergy") flags.bkgparticleEnergy = value;
         else if (key == "bkgenergyDistribution") flags.bkgenergyDistribution = value;
-        else if (key == "bkgMomentumCSV") flags.bkgMomentumCSV = value;
+        else if (key == "bkgMomentumCB") flags.bkgMomentumCB = value;
         else if (key == "bkgRateMean") flags.bkgRateMean = std::stod(value);
         else if (key == "energyDistribution") flags.energyDistribution = value;
         else if (key == "particleMomentumX") flags.particleMomentumX = std::stof(value);

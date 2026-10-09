@@ -47,8 +47,8 @@ struct SimFlags
     std::string energyDistribution = "";
     std::string bkgparticleType = "";
     std::string bkgparticleEnergy = "";
-    std::string bkgenergyDistribution = "none"; // none = fixed bkgparticleEnergy; EIC = sample EIC momentum histograms
-    std::string bkgMomentumCSV = ""; // dir with momentumx/y/z.csv (EIC mode)
+    std::string bkgenergyDistribution = "none"; // none = fixed bkgparticleEnergy; CB = Crystal Ball |p|
+    std::string bkgMomentumCB = ""; // "alpha,n,mean,sigma" Crystal Ball for |p| in GeV/c (CB mode)
     double bkgRateMean = -1.; // Poisson mean of total bkg particles/event; -1 = use particleCount
     float particleMomentumX = 0.;
     float particleMomentumY = 0.;

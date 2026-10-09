@@ -55,6 +55,12 @@ RunAction::RunAction(const SimFlags* flags) : m_flag(flags)
     analysisManager->CreateNtupleFColumn("trueMomentum");
     analysisManager->CreateNtupleFColumn("trueEnergy");
     analysisManager->FinishNtuple(1);
+
+    // Verification: histogram of the sampled background |p| (GeV/c)
+    if (m_flag->bkgenergyDistribution == "CB")
+    {
+        analysisManager->CreateH1("BkgMomentumMag", "Background |p| (sampled, GeV/c)", 200, 0.0, 0.5);
+    }
 }
 
 void RunAction::BeginOfRunAction(const G4Run *run)

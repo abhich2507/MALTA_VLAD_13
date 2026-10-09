@@ -31,10 +31,10 @@ private:
     std::vector<Module> m_modules{};
     GenUtil::PlanePositions m_planePositions{};
     using CDF = std::vector<std::pair<double, double>>;
-    CDF m_momCDF[3]{};
+    CDF m_cbCDF{};
     bool m_hasBkgMomentum=false;
 
-    CDF LoadCDF(const std::string& csvPath) const;
-    double SampleCDF(const CDF& cdf) const;
+    CDF BuildCBCDF(double alpha, double n, double mean, double sigma) const;
+    double SampleCB(const CDF& cdf) const;
 };
 #endif

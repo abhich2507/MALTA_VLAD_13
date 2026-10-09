@@ -23,7 +23,8 @@ BASE_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 cd "$BASE_DIR"
 
 COIN_CC="analysis_multiPlane/src/Coincidence.cc"
-OUT_CSV="Results/coin_eff.csv"
+RES_DIR="${RES_DIR:-Results}"
+OUT_CSV="$RES_DIR/coin_eff.csv"
 SAVE="${SAVE:-analysis_results_MP}"   # must match the SAVE name of the analysis step
 THRESHOLD="${THRESHOLD:-100}"         # must match the threshold of the analysis step
 WINDOW_NS="${WINDOW_NS:-8}"           # coincidence time window in ns
@@ -41,7 +42,7 @@ if [ "${#runs[@]}" -eq 0 ]; then
     exit 1
 fi
 
-mkdir -p Results
+mkdir -p "$RES_DIR"
 echo "run,window_ns,nGen,coinCount,eff_percent" > "$OUT_CSV"
 
 for run in "${runs[@]}"; do

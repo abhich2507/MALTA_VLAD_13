@@ -23,17 +23,18 @@
 #include "TSystem.h"
 #include "TString.h"
 
-void save_bkg_eff(const char* save = "analysis_results_MP", int threshold = 100)
+void save_bkg_eff(const char* save = "analysis_results_MP", int threshold = 100, const char* outdir = "Results")
 {
     const char* SAVE = save;        // must match the SAVE name of the analysis step
     const int THRESHOLD = threshold; // must match the threshold of the analysis step
 
-    gSystem->mkdir("Results", kTRUE);  // outputs live in Results/, not configs/
+    gSystem->mkdir(outdir, kTRUE);  // outputs live in the given results dir
 
     std::ifstream in("configs/bkg_rate.csv");
     if (!in) { std::cerr << "Cannot open configs/bkg_rate.csv" << std::endl; return; }
 
-    std::ofstream out("Results/bkg_eff.csv");
+    std::string outPath = std::string(outdir) + "/bkg_eff.csv";
+    std::ofstream out(outPath.c_str());
     out << "plane,bkgRateMean,avgEff,effError" << std::endl;
 
     std::string line;
@@ -114,5 +115,5 @@ void save_bkg_eff(const char* save = "analysis_results_MP", int threshold = 100)
 
     out.close();
     in.close();
-    std::cout << "Written Results/bkg_eff.csv" << std::endl;
+    std::cout << "Written " << outdir << "/bkg_eff.csv" << std::endl;
 }
