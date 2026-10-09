@@ -90,7 +90,6 @@ dump_settings() {
 # ---------------------------------------------------------------------------
 particleType="$(get_cfg particleType)"
 particleEnergy="$(get_cfg particleEnergy)"
-energyDistribution="$(get_cfg energyDistribution)"
 bkgparticleType="$(get_cfg bkgparticleType)"
 bkgparticleEnergy="$(get_cfg bkgparticleEnergy)"
 bkgenergyDistribution="$(get_cfg bkgenergyDistribution)"
@@ -108,13 +107,8 @@ THRESHOLD="${THRESHOLD:-100}"
 # ---------------------------------------------------------------------------
 # Build the tag
 # ---------------------------------------------------------------------------
-# Energy label: use the fixed value only when the distribution mode is 'none';
-# otherwise the energy is sampled from a distribution (e.g. EIC), so name it after that.
-if [ "$energyDistribution" = "none" ] || [ -z "$energyDistribution" ]; then
-    SIG="$(short_particle "$particleType")$(fmt_num "$particleEnergy")GeV"
-else
-    SIG="$(short_particle "$particleType")${energyDistribution}"
-fi
+# Signal energy is always fixed (energy distributions are no longer supported).
+SIG="$(short_particle "$particleType")$(fmt_num "$particleEnergy")GeV"
 
 if [ "$bkgenergyDistribution" = "none" ] || [ -z "$bkgenergyDistribution" ]; then
     BKG="$(short_particle "$bkgparticleType")$(fmt_num "$(awk -v e="$bkgparticleEnergy" 'BEGIN { print e*1000 }')")MeV"
@@ -131,7 +125,7 @@ TAG="${SIG}_${BKG}_${GEOSUF}_coin"
 
 echo "============================================================================="
 echo " Scan tag:  $TAG"
-echo "   signal  : $particleType @ $(fmt_num "$particleEnergy") GeV   (dist: ${energyDistribution:-none}, beam: $beamGeometry)"
+echo "   signal  : $particleType @ $(fmt_num "$particleEnergy") GeV   (beam: $beamGeometry)"
 echo "   bkg     : $bkgparticleType @ $(fmt_num "$bkgparticleEnergy") GeV   (dist: ${bkgenergyDistribution:-none})"
 echo "   window  : ${WINDOW_NS:-?} ns | SAVE=$SAVE | THRESHOLD=$THRESHOLD"
 echo "============================================================================="

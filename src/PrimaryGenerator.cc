@@ -381,7 +381,7 @@ void PrimaryGenerator::GeneratePrimaries(G4Event *oneEvent)
         G4int evtID = oneEvent->GetEventID();
         
         float offSet{};
-        if(m_flag->largeScaleFlag == "EIC_FMT") offSet =  G4UniformRand() * 2000.0;
+        if(m_flag->largeScaleFlag == "EIC_FMT") offSet =  G4UniformRand() * 2000.0*ns;
         else offSet =  m_flag->intraSpillOffset;
 
         G4double particleTime = evtID * m_flag->beamVeto *ns + offSet *ns;

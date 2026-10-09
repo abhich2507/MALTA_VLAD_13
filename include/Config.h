@@ -44,7 +44,6 @@ struct SimFlags
     float beamVeto = 0;
     std::string particleType = "";
     std::string particleEnergy = "";
-    std::string energyDistribution = "";
     std::string bkgparticleType = "";
     std::string bkgparticleEnergy = "";
     std::string bkgenergyDistribution = "none"; // none = fixed bkgparticleEnergy; CB = Crystal Ball |p|

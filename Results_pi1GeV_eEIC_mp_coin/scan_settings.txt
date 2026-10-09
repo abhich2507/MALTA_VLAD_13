@@ -1,0 +1,6 @@
+# Scan finalized on 2026-10-09 14:49:46
+SAVE=analysis_results_MP
+THRESHOLD=100
+WINDOW_NS=36
+SIM_FLAGS_CFG=flags_MP_EIC.cfg
+ANALYSIS_CFG=analysis_flags_MP_EIC_Vlad.cfg
