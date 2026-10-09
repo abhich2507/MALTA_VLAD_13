@@ -381,10 +381,10 @@ void PrimaryGenerator::GeneratePrimaries(G4Event *oneEvent)
         G4int evtID = oneEvent->GetEventID();
         
         float offSet{};
-        if(m_flag->largeScaleFlag == "EIC_FMT") offSet =  G4UniformRand() * 2000.0 * ns;
+        if(m_flag->largeScaleFlag == "EIC_FMT") offSet =  G4UniformRand() * 2000.0;
         else offSet =  m_flag->intraSpillOffset;
 
-        float particleTime = evtID * m_flag->beamVeto *ns + offSet *ns;
+        G4double particleTime = evtID * m_flag->beamVeto *ns + offSet *ns;
         m_particleGun->SetParticleTime(particleTime); // This is the only thread safe way to do this. Multithreading messes up life as always
 
         // Save Vertex Info
