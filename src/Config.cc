@@ -11,6 +11,22 @@
 #include "G4UnitsTable.hh"
 #include "G4SystemOfUnits.hh"
 
+namespace
+{
+// Split a delimited string into non-empty parts.
+std::vector<std::string> SplitCsv(const std::string& value, char delim)
+{
+    std::vector<std::string> parts;
+    std::stringstream ss(value);
+    std::string item;
+    while (std::getline(ss, item, delim))
+    {
+        if (!item.empty()) parts.push_back(item);
+    }
+    return parts;
+}
+}
+
 void DumpConfigToFile(const std::string& filename) 
 {
     // Copy the config file used as input (from SIMU_CONFIG) to 'filename'
@@ -140,6 +156,12 @@ void LoadSimFlagsFromFile(const std::string& filename, SimFlags& flags)
         else if (key == "bkgparticleEnergy") flags.bkgparticleEnergy = value;
         else if (key == "bkgenergyDistribution") flags.bkgenergyDistribution = value;
         else if (key == "bkgMomentumCB") flags.bkgMomentumCB = value;
+        else if (key == "bkgMixTypes") flags.bkgMixTypes = SplitCsv(value, ',');
+        else if (key == "bkgMixWeights")
+        {
+            for (const std::string& w : SplitCsv(value, ',')) flags.bkgMixWeights.push_back(std::stod(w));
+        }
+        else if (key == "bkgMixCB") flags.bkgMixCB = SplitCsv(value, ';');
         else if (key == "bkgRateMean") flags.bkgRateMean = std::stod(value);
         else if (key == "particleMomentumX") flags.particleMomentumX = std::stof(value);
         else if (key == "particleMomentumY") flags.particleMomentumY = std::stof(value);

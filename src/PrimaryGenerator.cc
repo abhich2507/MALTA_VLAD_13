@@ -76,7 +76,69 @@ PrimaryGenerator::PrimaryGenerator(const SimFlags* flags) : m_flag(flags), m_par
     // Background energy mode switch:
     //   bkgenergyDistribution = none -> fixed bkgparticleEnergy (default, all legacy cfgs)
     //   bkgenergyDistribution = CB   -> sample |p| from the Crystal Ball fit
-    if (m_flag->bkgenergyDistribution == "CB")
+    // When bkgMixTypes is non-empty, background particles are drawn from a
+    // hit-weighted mix of those types (one Crystal Ball per type in CB mode).
+    if (!m_flag->bkgMixTypes.empty())
+    {
+        const size_t nTypes = m_flag->bkgMixTypes.size();
+        if (m_flag->bkgMixWeights.size() != nTypes)
+        {
+            throwError("PrimaryGenerator::PrimaryGenerator", "Sampling Failure",
+                       "bkgMixWeights must have exactly one entry per bkgMixTypes entry.");
+        }
+        if (m_flag->bkgenergyDistribution == "CB" && m_flag->bkgMixCB.size() != nTypes)
+        {
+            throwError("PrimaryGenerator::PrimaryGenerator", "Sampling Failure",
+                       "bkgMixCB must have exactly one \"alpha,n,mean,sigma\" entry per bkgMixTypes entry.");
+        }
+        double wSum = 0.0;
+        for (double w : m_flag->bkgMixWeights)
+        {
+            if (w < 0.0)
+            {
+                throwError("PrimaryGenerator::PrimaryGenerator", "Sampling Failure",
+                           "bkgMixWeights must be non-negative.");
+            }
+            wSum += w;
+        }
+        if (wSum <= 0.0)
+        {
+            throwError("PrimaryGenerator::PrimaryGenerator", "Sampling Failure",
+                       "bkgMixWeights must have a positive sum.");
+        }
+        double cum = 0.0;
+        for (size_t i = 0; i < nTypes; ++i)
+        {
+            G4ParticleDefinition *mixParticle = particleTable->FindParticle(m_flag->bkgMixTypes[i]);
+            if (!mixParticle)
+            {
+                throwError("PrimaryGenerator::PrimaryGenerator", "Sampling Failure",
+                           "Unknown background mix particle type '" + m_flag->bkgMixTypes[i] + "'.");
+            }
+            m_bkgMixParticles.push_back(mixParticle);
+            cum += m_flag->bkgMixWeights[i];
+            m_bkgMixCumulative.push_back(cum / wSum);
+        }
+        if (m_flag->bkgenergyDistribution == "CB")
+        {
+            for (size_t i = 0; i < nTypes; ++i)
+            {
+                double alpha = 0.0, n = 0.0, mean = 0.0, sigma = 0.0;
+                char c1 = 0, c2 = 0, c3 = 0;
+                std::stringstream ss(m_flag->bkgMixCB[i]);
+                bool ok = static_cast<bool>(ss >> alpha >> c1 >> n >> c2 >> mean >> c3 >> sigma);
+                if (!ok || c1 != ',' || c2 != ',' || c3 != ',' || alpha <= 0.0 || n <= 1.0 || sigma <= 0.0)
+                {
+                    throwError("PrimaryGenerator::PrimaryGenerator", "Sampling Failure",
+                               "bkgMixCB entry for '" + m_flag->bkgMixTypes[i] +
+                               "' must be \"alpha,n,mean,sigma\" with alpha>0, n>1, sigma>0.");
+                }
+                m_bkgMixCDFs.push_back(BuildCBCDF(alpha, n, mean, sigma));
+            }
+            m_hasBkgMomentum = true;
+        }
+    }
+    else if (m_flag->bkgenergyDistribution == "CB")
     {
         if (m_flag->bkgMomentumCB.empty())
         {
@@ -153,6 +215,16 @@ double PrimaryGenerator::SampleCB(const CDF& cdf) const
     double x1 = it->first,  c1 = it->second;
     double frac = (c1 > c0) ? (u - c0) / (c1 - c0) : 0.0;
     return x0 + frac * (x1 - x0);
+}
+
+int PrimaryGenerator::SampleMixIndex() const
+{
+    const double u = G4UniformRand();
+    for (size_t i = 0; i < m_bkgMixCumulative.size(); ++i)
+    {
+        if (u < m_bkgMixCumulative[i]) return static_cast<int>(i);
+    }
+    return static_cast<int>(m_bkgMixCumulative.size()) - 1;
 }
 
 
@@ -272,6 +344,7 @@ void PrimaryGenerator::GeneratePrimaries(G4Event *oneEvent)
             // Energies in the config are given in GeV.
             G4String particleType{};
             G4double energyValue{};
+            G4int mixIdx = -1;
             if (ev == signalIndex) 
             {   mcFlag = 0;
                 particleType = m_flag->particleType;
@@ -279,8 +352,15 @@ void PrimaryGenerator::GeneratePrimaries(G4Event *oneEvent)
             }
             else
             {   mcFlag = 1;
-                
-                particleType = m_flag->bkgparticleType;
+                if (!m_bkgMixParticles.empty())
+                {
+                    mixIdx = SampleMixIndex();
+                    particleType = m_bkgMixParticles[mixIdx]->GetParticleName();
+                }
+                else
+                {
+                    particleType = m_flag->bkgparticleType;
+                }
                 energyValue = std::stod(m_flag->bkgparticleEnergy) * GeV;
             }
             trackID++; 
@@ -294,7 +374,7 @@ void PrimaryGenerator::GeneratePrimaries(G4Event *oneEvent)
 
             if (mcFlag == 1 && m_hasBkgMomentum)
             {
-                double p = SampleCB(m_cbCDF);                          // |p| in GeV/c
+                double p = (mixIdx >= 0) ? SampleCB(m_bkgMixCDFs[mixIdx]) : SampleCB(m_cbCDF); // |p| in GeV/c
                 double mass = particle->GetPDGMass() / GeV;            // 0.000511 for e-
                 energyValue = (std::sqrt(p*p + mass*mass) - mass) * GeV; // kinetic E (MeV)
                 G4AnalysisManager::Instance()->FillH1(0, p);           // verify sampled |p| (GeV/c)

@@ -10,6 +10,7 @@
 class SimFlags;
 class G4Event;
 class G4ParticleGun;
+class G4ParticleDefinition;
 
 class PrimaryGenerator : public G4VUserPrimaryGeneratorAction
 {
@@ -33,8 +34,12 @@ private:
     using CDF = std::vector<std::pair<double, double>>;
     CDF m_cbCDF{};
     bool m_hasBkgMomentum=false;
+    std::vector<G4ParticleDefinition*> m_bkgMixParticles{}; // mix particle definitions
+    std::vector<double> m_bkgMixCumulative{};               // cumulative mix weights (normalized to 1)
+    std::vector<CDF> m_bkgMixCDFs{};                        // per-mix-particle momentum CDFs
 
     CDF BuildCBCDF(double alpha, double n, double mean, double sigma) const;
     double SampleCB(const CDF& cdf) const;
+    int SampleMixIndex() const;
 };
 #endif

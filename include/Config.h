@@ -47,7 +47,10 @@ struct SimFlags
     std::string bkgparticleType = "";
     std::string bkgparticleEnergy = "";
     std::string bkgenergyDistribution = "none"; // none = fixed bkgparticleEnergy; CB = Crystal Ball |p|
-    std::string bkgMomentumCB = ""; // "alpha,n,mean,sigma" Crystal Ball for |p| in GeV/c (CB mode)
+    std::string bkgMomentumCB = ""; // "alpha,n,mean,sigma" Crystal Ball for |p| in GeV/c (CB mode, single type)
+    std::vector<std::string> bkgMixTypes;  // hit-weighted bkg mix particle names (GEANT4), e.g. e-,e+,pi-,pi+
+    std::vector<double> bkgMixWeights;     // relative weights of the mix (e.g. sensor hit counts)
+    std::vector<std::string> bkgMixCB;     // "alpha,n,mean,sigma" per mix particle, same order as bkgMixTypes
     double bkgRateMean = -1.; // Poisson mean of total bkg particles/event; -1 = use particleCount
     float particleMomentumX = 0.;
     float particleMomentumY = 0.;
