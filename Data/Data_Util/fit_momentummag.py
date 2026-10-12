@@ -3,7 +3,7 @@ import ROOT, math, os
 ROOT.gROOT.SetBatch(True)
 ROOT.gStyle.SetOptFit(1111)
 
-PATH = "/Users/snip/Documents/MALTA_VLAD_13/malta_simulation/Data/pdgsensor_af_electron_allfiles.root"
+PATH = "/Users/snip/Documents/MALTA_VLAD_13/malta_simulation/Data/pdgsensor_af_positron_allfiles.root"
 HIST = "ForwardMPGDEndcapHits/1415.0/ForwardMPGDEndcapHits.1415.0.maxsensor.momentummag"
 OUTDIR = "/Users/snip/Documents/MALTA_VLAD_13/malta_simulation/Data/New_Data"
 os.makedirs(OUTDIR, exist_ok=True)
@@ -56,10 +56,10 @@ h.Draw("E1")
 cb.SetLineColor(ROOT.kRed)
 cb.Draw("same")
 c1.SetLogy()
-c1.SaveAs(OUTDIR + "/momentummag_fit.png")
-c1.SaveAs(OUTDIR + "/momentummag_fit.root")
+c1.SaveAs(OUTDIR + "/momentummag_fit_posi.png")
+c1.SaveAs(OUTDIR + "/momentummag_fit_posi.root")
 
-with open(OUTDIR + "/momentummag_fit_params.txt", "w") as fp:
+with open(OUTDIR + "/momentummag_fit_params_posi.txt", "w") as fp:
     fp.write(" ".join(f"{cb.GetParameter(i):.9g}" for i in range(cb.GetNpar())) + "\n")
 
 print("params =", " ".join(f"{cb.GetParameter(i):.6g}" for i in range(cb.GetNpar())))
