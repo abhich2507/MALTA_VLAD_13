@@ -35,23 +35,25 @@ xmax = 18.
 # Use ROOT's built-in C++ crystal ball function
 cb = ROOT.TF1("cb", "crystalball", xmin, xmax)
 
-# Parameter order: [0]=Constant, [1]=Mean, [2]=Sigma, [3]=Alpha, [4]=n
-cb.SetParameters(
-    h.GetMaximum(),                      # [0] Constant
-    h.GetBinCenter(h.GetMaximumBin()),   # [1] Mean
-    max(h.GetRMS(), 1e-3),               # [2] Sigma
-    -1.0,                                # [3] Alpha (NEGATIVE for a right-side tail)
-    3.0                                  # [4] n 
-)
-
+# --- Relaxed Limits ---
 cb.SetParLimits(0, 0, 1e12)      # Constant
-cb.SetParLimits(1, xmin, xmax)   # Mean
-cb.SetParLimits(2, 1e-4, 1e3)    # Sigma
-cb.SetParLimits(3, -50, -0.01)   # Alpha (Forced negative to keep the tail on the right)
+cb.SetParLimits(1, 0.0, xmax)    # Mean (Allowed to go to 0)
+cb.SetParLimits(2, 1e-6, 1e3)    # Sigma (Relaxed from 1e-4 down to 1e-6)
+cb.SetParLimits(3, -50, -0.0001) # Alpha (Relaxed from -0.01 down to -0.0001)
 cb.SetParLimits(4, 0.1, 50)      # n
 
+# --- New Initial Guesses (Based on Status 4 results) ---
+# Parameter order: [0]=Constant, [1]=Mean, [2]=Sigma, [3]=Alpha, [4]=n
+cb.SetParameters(
+    3278.0,   # Constant
+    0.0017,   # Mean
+    0.0005,   # Sigma
+    -0.062,   # Alpha 
+    1.96      # n 
+)
+
 # R = Use range of TF1, Q = Quiet mode, S = return TFitResultPtr
-r = h.Fit(cb, "RQS")
+r = h.Fit(cb, "RS")
 
 chi2 = cb.GetChisquare()
 ndf = cb.GetNDF()

@@ -15,6 +15,7 @@ else
     source ../configs/config.sh
 fi
 FLAG=$1
+RUN_NUM="${2:-}"
 
 export SIMU_CONFIG=$LOCAL_PATH/configs/$FLAG
 
@@ -27,5 +28,9 @@ fi
 
 make 2>&1 | tee -a sim.log
 $LOCAL_PATH/build/sim 2>&1 | tee -a sim.log
-latest_dir=$(ls -d ../Results/local_* | sort -V | tail -n 1)
+if [ -n "$RUN_NUM" ]; then
+    latest_dir=$(printf "../Results/local_%04d" "$RUN_NUM")
+else
+    latest_dir=$(ls -d ../Results/local_* | sort -V | tail -n 1)
+fi
 mv sim.log "$latest_dir/"

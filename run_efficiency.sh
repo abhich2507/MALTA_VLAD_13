@@ -27,11 +27,11 @@ cd "$SCRIPT_DIR"
 SIM_FLAGS_CFG="flags_MP_EIC.cfg"              # passed to bkg_scan.sh
 ANALYSIS_CFG="analysis_flags_MP_EIC_Vlad.cfg" # passed to run_mult.sh
 SAVE="analysis_results_MP"                    # analysis save name (all steps)
-THRESHOLD=100                                 # analysis threshold in e-
+THRESHOLD=100                            # analysis threshold in e-
 WINDOW_NS=36                                # coincidence time window in ns
 CSV="$SCRIPT_DIR/configs/bkg_rate.csv"
-RES_DIR="Results_pi1GeV_eEIC_mp_coin_test"                             # final results dir: CSVs + per-run trees/raw
-OUT_DIR="Plots_pi1GeV_eEIC_mp_coin_test"                               # final plots dir: bkg_eff.png/pdf + per-run histos
+RES_DIR="Results_p120GeV_eEIC_mp_coin_test"                             # final results dir: CSVs + per-run trees/raw
+OUT_DIR="Plots_p120GeV_eEIC_mp_coin_test"                               # final plots dir: bkg_eff.png/pdf + per-run histos
 # ------------------------------------------------------------------------------
 
 DO_SIM=true

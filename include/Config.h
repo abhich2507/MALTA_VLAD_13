@@ -68,6 +68,7 @@ struct SimFlags
     float GEANT4CutValue = 0.01;
     std::string outputPathLocal = "";
     std::string outputPathNAF = "";
+    int runDirNumber = -1; // forced output run dir number (local_NNNN); -1 = auto-increment
     std::string macroFileLocal = "";
     std::string macroFileNAF = "";
     int numThreadsLocal = 1;

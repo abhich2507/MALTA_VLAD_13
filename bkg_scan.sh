@@ -75,7 +75,16 @@ while IFS=',' read -r run rate; do
     sed -i '' "s/^bkgRateMean = .*/bkgRateMean = $rate/" "$FLAGS"
     grep -q "^bkgRateMean = $rate$" "$FLAGS" || { echo "Failed to set bkgRateMean=$rate in $FLAGS"; exit 1; }
 
-    source run_script_local.sh flags_MP_EIC.cfg
+    # Force the sim to write into Results/local_%04d matching this run number
+    if grep -q "^runDirNumber = " "$FLAGS"; then
+        sed -i '' "s/^runDirNumber = .*/runDirNumber = $run/" "$FLAGS"
+    else
+        sed -i '' "/^outputPathNAF = /a\\
+runDirNumber = $run" "$FLAGS"
+    fi
+    grep -q "^runDirNumber = $run$" "$FLAGS" || { echo "Failed to set runDirNumber=$run in $FLAGS"; exit 1; }
+
+    source run_script_local.sh flags_MP_EIC.cfg "$run"
 done < <(tail -n +2 "$CSV")
 
 echo "=================================================="

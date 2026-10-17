@@ -55,7 +55,7 @@ void BkgEff(int withCoin = 0, const char* resDir = "Results", const char* outDir
     if (mEff.empty()) { std::cerr << "No data read from " << bkgCsv << std::endl; return; }
 
     // Global y range across all planes
-    double yMin = 80., yMax = 99.;
+    double yMin = 90., yMax = 99.;
     // for (std::map<int, std::vector<double>>::iterator it = mEff.begin(); it != mEff.end(); ++it)
     // {
     //     for (size_t i = 0; i < it->second.size(); ++i)

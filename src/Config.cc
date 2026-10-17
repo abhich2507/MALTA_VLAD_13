@@ -69,35 +69,41 @@ std::string CreateNextRunDirectory(bool flag, const SimFlags* fFlags)
         path = fFlags->outputPathNAF;
         saveFile = "/naf_";
     }
-    int maxRun = 0;
 
-    for (const auto& entry : fs::directory_iterator(path)) 
+    int runNum = fFlags->runDirNumber;
+    if (runNum < 0)
     {
-        std::string name = entry.path().filename().string();
-        try
+        // Auto mode: next number after the highest existing local_NNNN / naf_NNNN
+        int maxRun = 0;
+        if (fs::exists(path))
         {
-            int digits = std::stoi(name.substr(name.size() - 4));
-            if (maxRun < digits)
+            for (const auto& entry : fs::directory_iterator(path)) 
             {
-                maxRun = digits;
+                std::string name = entry.path().filename().string();
+                try
+                {
+                    int digits = std::stoi(name.substr(name.size() - 4));
+                    if (maxRun < digits)
+                    {
+                        maxRun = digits;
+                    }
+                }
+                catch(const std::exception& e)
+                {
+                    continue;
+                }
             }
         }
-        catch(const std::exception& e)
-        {
-            continue;
-        }
+        runNum = maxRun + (flag ? 1 : 0);
     }
+
+    newRunDir << path << saveFile << std::setw(4) << std::setfill('0') << runNum;
 
     if (flag)
     {   
         // Do this only in the Master thread
-        newRunDir << path << saveFile << std::setw(4) << std::setfill('0') << maxRun + 1;
         std::cout <<"Creating Directory: " << newRunDir.str() << std::endl;
         fs::create_directories(newRunDir.str());
-    }
-    else
-    {
-        newRunDir << path << saveFile << std::setw(4) << std::setfill('0') << maxRun;
     }
 
     return newRunDir.str();
@@ -179,6 +185,7 @@ void LoadSimFlagsFromFile(const std::string& filename, SimFlags& flags)
         else if (key == "GEANT4CutValue") flags.GEANT4CutValue = std::stof(value);
         else if (key == "outputPathLocal") flags.outputPathLocal = value;
         else if (key == "outputPathNAF") flags.outputPathNAF = value;
+        else if (key == "runDirNumber") flags.runDirNumber = std::stoi(value);
         else if (key == "macroFileLocal") flags.macroFileLocal = value;
         else if (key == "macroFileNAF") flags.macroFileNAF = value;
         else if (key == "numThreadsLocal") flags.numThreadsLocal = std::stoi(value);

@@ -83,6 +83,7 @@ if not args.proteus:
                 subprocess.run(command, check=True, env=env)
 
 savePath = f"Plots/local_{runNumber:04d}/{saveName}"
+os.makedirs(savePath, exist_ok=True)
 command = f"cp configs/{config_name} {savePath}"
 print(f"Copying configuration file to: {savePath}")
 subprocess.run(command, shell = True, check = True)
