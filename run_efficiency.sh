@@ -30,8 +30,8 @@ SAVE="analysis_results_MP"                    # analysis save name (all steps)
 THRESHOLD=100                            # analysis threshold in e-
 WINDOW_NS=36                                # coincidence time window in ns
 CSV="$SCRIPT_DIR/configs/bkg_rate.csv"
-RES_DIR="Results_p120GeV_eEIC_mp_coin_test"                             # final results dir: CSVs + per-run trees/raw
-OUT_DIR="Plots_p120GeV_eEIC_mp_coin_test"                               # final plots dir: bkg_eff.png/pdf + per-run histos
+RES_DIR="Results_pi0.1GeV_eEIC_mp_coin_test2"                             # final results dir: CSVs + per-run trees/raw
+OUT_DIR="Plots_pi0.1GeV_eEIC_mp_coin_test2"                               # final plots dir: bkg_eff.png/pdf + per-run histos
 # ------------------------------------------------------------------------------
 
 DO_SIM=true
@@ -109,7 +109,7 @@ SAVE="$SAVE" THRESHOLD="$THRESHOLD" WINDOW_NS="$WINDOW_NS" RES_DIR="$RES_DIR" \
 # 4. Per-plane signal efficiency vs background --------------------------------
 echo
 echo "== [4/6] SIGNAL EFFICIENCY -> $RES_DIR/bkg_eff.csv =="
-root -l -b -q "save_bkg_eff.C(\"$SAVE\", $THRESHOLD, \"$RES_DIR\")"
+root -l -b -q "save_bkg_eff.C(\"$SAVE\", $THRESHOLD, \"$RES_DIR\", \"$OUT_DIR\")"
 
 # 5. Plots ---------------------------------------------------------------------
 echo

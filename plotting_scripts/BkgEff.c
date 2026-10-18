@@ -12,6 +12,7 @@
 #include <fstream>
 #include <sstream>
 #include <iostream>
+#include <string>
 #include <vector>
 #include <map>
 #include "TGraphErrors.h"
@@ -24,6 +25,88 @@
 #include "TString.h"
 #include "TROOT.h"
 #include "TSystem.h"
+#include "TLatex.h"
+
+static std::string Trim(const std::string& s)
+{
+    size_t b = s.find_first_not_of(" \t\r\n");
+    if (b == std::string::npos) return "";
+    size_t e = s.find_last_not_of(" \t\r\n");
+    return s.substr(b, e - b + 1);
+}
+
+// Read particleType and particleEnergy from <resDir>/local_0001/flags.cfg and return
+// a ROOT display string for the canvas title, e.g. "#pi^{+} 1 GeV".
+static std::string GetSignalTitle(const char* resDir)
+{
+    std::string particle, energy;
+    std::ifstream in(TString::Format("%s/local_0001/flags.cfg", resDir).Data());
+    std::string line;
+    while (std::getline(in, line))
+    {
+        if (particle.empty() && line.compare(0, 12, "particleType") == 0)
+        {
+            size_t eq = line.find('=');
+            if (eq != std::string::npos) particle = Trim(line.substr(eq + 1));
+        }
+        else if (energy.empty() && line.compare(0, 14, "particleEnergy") == 0)
+        {
+            size_t eq = line.find('=');
+            if (eq != std::string::npos) energy = Trim(line.substr(eq + 1));
+        }
+        if (!particle.empty() && !energy.empty()) break;
+    }
+
+    std::string name;
+    if (particle == "pi+") name = "#pi^{+}";
+    else if (particle == "pi-") name = "#pi^{-}";
+    else if (particle == "proton") name = "p";
+    else name = particle.empty() ? "signal" : particle;
+
+    std::string out = name;
+    if (!energy.empty()) out += " " + energy + " GeV";
+    return out;
+}
+
+// Map planeZ index -> z position [cm] from the geometry file referenced in the run flags.
+static std::map<int, double> GetPlaneZPositions(const char* resDir)
+{
+    std::map<int, double> pos;
+
+    std::string geoFile;
+    std::ifstream flags(TString::Format("%s/local_0001/flags.cfg", resDir).Data());
+    std::string line;
+    while (std::getline(flags, line))
+    {
+        if (line.compare(0, 7, "geoFile") == 0)
+        {
+            size_t eq = line.find('=');
+            if (eq != std::string::npos) geoFile = Trim(line.substr(eq + 1));
+            break;
+        }
+    }
+    if (geoFile.empty()) return pos;
+
+    std::ifstream geo(TString::Format("configs/geometry/%s", geoFile.c_str()).Data());
+    if (!geo) return pos;
+
+    std::getline(geo, line);  // skip header
+    while (std::getline(geo, line))
+    {
+        if (line.empty()) continue;
+        std::stringstream ss(line);
+        std::string cell;
+        std::vector<std::string> cols;
+        while (std::getline(ss, cell, ',')) cols.push_back(Trim(cell));
+        if (cols.size() < 6) continue;
+        int x = std::stoi(cols[0]);
+        int y = std::stoi(cols[1]);
+        int z = std::stoi(cols[2]);
+        double zoff = std::stod(cols[5]);
+        if (x == 0 && y == 0) pos[z] = zoff;
+    }
+    return pos;
+}
 
 void BkgEff(int withCoin = 0, const char* resDir = "Results", const char* outDir = "Plots")
 {
@@ -129,14 +212,17 @@ void BkgEff(int withCoin = 0, const char* resDir = "Results", const char* outDir
     TCanvas *c = new TCanvas("c", "bkg efficiency", 800, 600);
     c->SetLeftMargin(0.15);
     c->SetBottomMargin(0.15);
-    c->SetTopMargin(0.13);
+    c->SetTopMargin(0.17);
 
-    TLegend *leg = new TLegend(0.25, 0.16, 0.92, 0.32);
+    TLegend *leg = new TLegend(0.25, 0.20, 0.92, 0.36);
     leg->SetTextSize(0.035);
     leg->SetBorderSize(0);
     int colors[6] = {kBlue+2, kRed+2, kGreen+2, kMagenta+2, kOrange+7, kCyan+2};
     int colIdx = 0;
     bool first = true;
+
+    std::string signalTitle = GetSignalTitle(resDir);
+    std::map<int, double> planeZcm = GetPlaneZPositions(resDir);
 
     for (std::map<int, std::vector<double>>::iterator it = mEff.begin(); it != mEff.end(); ++it)
     {
@@ -159,7 +245,8 @@ void BkgEff(int withCoin = 0, const char* resDir = "Results", const char* outDir
         {
             gr->Draw("P SAME");
         }
-        leg->AddEntry(gr, Form("planeZ%d", plane), "p");
+        leg->AddEntry(gr, planeZcm.count(plane) ? Form("planeZ%d (z = %.0f cm)", plane, planeZcm[plane])
+                                               : Form("planeZ%d", plane), "p");
         ++colIdx;
     }
 
@@ -188,9 +275,17 @@ void BkgEff(int withCoin = 0, const char* resDir = "Results", const char* outDir
     eicLine->SetLineWidth(2);
     eicLine->Draw();
 
-    leg->AddEntry(eicLine, "Original EIC bkg rate (#lambda = 0.198#times8 = 1.584)", "l");
+    leg->AddEntry(eicLine, "Original EIC bkg rate (#lambda= 1.584)", "l");
 
     leg->Draw();
+
+    // Signal particle + energy as an explicit label on top of the canvas.
+    TLatex *titleLatex = new TLatex();
+    titleLatex->SetNDC();
+    titleLatex->SetTextFont(42);
+    titleLatex->SetTextSize(0.05);
+    titleLatex->SetTextAlign(22);
+    titleLatex->DrawLatex(0.5, 0.90, Form("#bf{Signal: %s}", signalTitle.c_str()));
 
     gSystem->mkdir(outDir, kTRUE);
     std::string outPng = TString::Format("%s/bkg_eff.png", outDir).Data();

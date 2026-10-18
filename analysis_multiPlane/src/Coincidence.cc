@@ -8,10 +8,22 @@
 #include "TFile.h"
 #include "TTree.h"
 #include "TString.h"
+#include "TSystem.h"
 
-void Coincidence(int runNumber = 2, const char* save = "analysis_results_MP", int thr = 100, double coincidenceWindow = 8.)
+void Coincidence(int runNumber = 2, const char* save = "analysis_results_MP", int thr = 100, double coincidenceWindow = 8., const char* resDir = "Results")
 {
-    std::string inputFile = Form("Results/local_%04d/%s/analysisThr%d.root", runNumber, save, thr);
+    // Prefer the live "Results/local_NNNN" location (fresh runs, before archiving);
+    // otherwise fall back to the archive results directory passed from
+    // run_efficiency.sh (re-runs with --only-extract).
+    std::string liveFile = Form("Results/local_%04d/%s/analysisThr%d.root", runNumber, save, thr);
+    std::string archiveFile = Form("%s/local_%04d/%s/analysisThr%d.root", resDir, runNumber, save, thr);
+
+    std::string inputFile;
+    if (!gSystem->AccessPathName(liveFile.c_str()))
+        inputFile = liveFile;
+    else
+        inputFile = archiveFile;
+
     std::cout << "Input file: " << inputFile << std::endl;
     auto file = TFile::Open(inputFile.c_str());
     if (!file || file->IsZombie())

@@ -13,6 +13,8 @@
 #   ./plotting_scripts/run_coin_eff.sh           # all runs in configs/bkg_rate.csv
 #
 # Override analysis settings via env: SAVE, THRESHOLD, WINDOW_NS
+# RES_DIR is also passed to Coincidence.cc so that an --only-extract re-run can
+# read the archived per-run analysisThr*.root files (RES_DIR/local_NNNN/<SAVE>/).
 #
 # Note: the file Results/coin_eff.csv is rewritten by each invocation.
 
@@ -47,7 +49,7 @@ echo "run,window_ns,nGen,coinCount,eff_percent" > "$OUT_CSV"
 
 for run in "${runs[@]}"; do
     echo "== processing run $run =="
-    out="$(root -l -b -q "${COIN_CC}(${run}, \"${SAVE}\", ${THRESHOLD}, ${WINDOW_NS})" 2>&1 || true)"
+    out="$(root -l -b -q "${COIN_CC}(${run}, \"${SAVE}\", ${THRESHOLD}, ${WINDOW_NS}, \"${RES_DIR}\")" 2>&1 || true)"
 
     coin="$(printf '%s\n' "$out" | sed -n 's/.*Total coincidences found: *\([0-9]*\).*/\1/p' | tail -1)"
     ngen="$(printf '%s\n' "$out" | sed -n 's/.*Signal generated tracks: *\([0-9]*\).*/\1/p' | tail -1)"

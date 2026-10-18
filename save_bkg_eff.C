@@ -11,7 +11,9 @@
 //   eff    = 100 * N_pass / N_gen
 // Usage (from malta_simulation/):
 //   root -l -b -q 'save_bkg_eff.C("analysis_results_MP", 100)'
-// Usually invoked automatically by run_efficiency.sh (step 4/5).
+//   root -l -b -q 'save_bkg_eff.C("analysis_results_MP", 100, "Results", "Plots")'
+// Usually invoked automatically by run_efficiency.sh (step 4/5), which passes
+// the results and plots directory names as the last two arguments.
 
 #include <fstream>
 #include <sstream>
@@ -23,7 +25,20 @@
 #include "TSystem.h"
 #include "TString.h"
 
-void save_bkg_eff(const char* save = "analysis_results_MP", int threshold = 100, const char* outdir = "Results")
+// Resolve where the per-run histos.root lives. Prefer the live "Plots/local_NNNN"
+// location (fresh runs, before archiving); otherwise fall back to the archive
+// plot directory passed from run_efficiency.sh (re-runs with --only-extract).
+static TString ResolveHistosPath(int run, const char* save, const char* plotdir)
+{
+    TString live = TString::Format("Plots/local_%04d/%s/histos.root", run, save);
+    if (!gSystem->AccessPathName(live.Data())) return live;
+
+    TString archive = TString::Format("%s/local_%04d/%s/histos.root", plotdir, run, save);
+    return archive;
+}
+
+void save_bkg_eff(const char* save = "analysis_results_MP", int threshold = 100,
+                  const char* outdir = "Results", const char* plotdir = "Plots")
 {
     const char* SAVE = save;        // must match the SAVE name of the analysis step
     const int THRESHOLD = threshold; // must match the threshold of the analysis step
@@ -48,7 +63,7 @@ void save_bkg_eff(const char* save = "analysis_results_MP", int threshold = 100,
         char comma;
         ss >> run >> comma >> rate;
 
-        TString path = TString::Format("Plots/local_%04d/%s/histos.root", run, SAVE);
+        TString path = ResolveHistosPath(run, SAVE, plotdir);
         if (gSystem->AccessPathName(path.Data()))
         {
             std::cout << "skip run " << run << ": " << path << " missing" << std::endl;
