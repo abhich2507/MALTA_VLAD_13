@@ -1,0 +1,77 @@
+\documentclass[aspectratio=169]{beamer}
+
+% Clean, modern theme setup
+\usetheme{Boadilla}
+\usecolortheme{seahorse} % Soft, clean color palette
+\usefonttheme{professionalfonts} % Cleaner math rendering
+
+\usepackage{amsmath}
+
+\title{Pion Decay Rates in a 100 cm Tracking Volume}
+\subtitle{Kinetic Energy Impact on Tracking Efficiency}
+\author{}
+\date{}
+
+\begin{document}
+
+\begin{frame}
+    \titlepage
+\end{frame}
+
+\begin{frame}{1. The Decay Formula}
+    In the lab frame, the mean decay length $\lambda$ is dilated by relativity:
+    \[ \lambda = \beta\gamma c\tau \]
+    Where:
+    \begin{itemize}
+        \item $c\tau \approx 7.80 \text{ m}$ (the proper decay length of a pion, using its rest lifetime $\tau \approx 26.03 \text{ ns}$)
+        \item The probability of the pion decaying before reaching distance $L$ is:
+        \[ P_{\text{decay}} = 1 - e^{-L/\lambda} = 1 - e^{-L/(\beta\gamma c\tau)} \]
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{2. Decay Chances Over 100 cm ($L = 1.0 \text{ m}$)}
+    Using the two kinetic energy values:
+    \vspace{0.5em}
+    
+    \textbf{1 GeV Kinetic Energy ($\beta\gamma \approx 8.16$)}
+    \begin{itemize}
+        \item Mean decay length: 
+        \[ \lambda = 8.16 \times 7.80 \text{ m} \approx 63.6 \text{ m} \]
+        \item Decay probability over 100 cm: 
+        \[ P_{\text{decay}} = 1 - e^{-1.0/63.6} = 1 - e^{-0.0157} \approx 1.56\% \]
+        \item \textit{(\textasciitilde 98.4\% survival chance)}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{2. Decay Chances Over 100 cm (Continued)}
+    \textbf{0.1 GeV Kinetic Energy ($\beta\gamma \approx 1.40$)}
+    \begin{itemize}
+        \item Mean decay length: 
+        \[ \lambda = 1.40 \times 7.80 \text{ m} \approx 10.9 \text{ m} \]
+        \item Decay probability over 100 cm: 
+        \[ P_{\text{decay}} = 1 - e^{-1.0/10.9} = 1 - e^{-0.0917} \approx 8.76\% \]
+        \item \textit{(\textasciitilde 91.2\% survival chance)}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{3. Decay Chances Over 1 cm ($L = 0.01 \text{ m}$)}
+    \textbf{1 GeV Kinetic Energy ($\beta\gamma \approx 8.16$)}
+    \begin{itemize}
+        \item Decay probability over 1 cm:
+        \[ P_{\text{decay}} = 1 - e^{-0.01/63.6} = 1 - e^{-1.57\times10^{-4}} \approx 0.0157\% \]
+        \item \textit{(\textasciitilde 99.984\% survival chance)}
+    \end{itemize}
+    \vspace{0.6em}
+    \textbf{0.1 GeV Kinetic Energy ($\beta\gamma \approx 1.40$)}
+    \begin{itemize}
+        \item Decay probability over 1 cm:
+        \[ P_{\text{decay}} = 1 - e^{-0.01/10.9} = 1 - e^{-9.17\times10^{-4}} \approx 0.0917\% \]
+        \item \textit{(\textasciitilde 99.908\% survival chance)}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Impact on Tracking Efficiency}
+    In a 100 cm tracking volume, approximately \textbf{8.8\%} of 0.1 GeV pions will decay into a muon and a neutrino ($\pi^+ \to \mu^+\nu_\mu$) before traversing the entire detector, causing a kinked or broken track, compared to only \textbf{1.6\%} of 1 GeV pions.
+\end{frame}
+
+\end{document}

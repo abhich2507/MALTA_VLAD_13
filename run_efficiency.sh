@@ -30,8 +30,8 @@ SAVE="analysis_results_MP"                    # analysis save name (all steps)
 THRESHOLD=100                            # analysis threshold in e-
 WINDOW_NS=36                                # coincidence time window in ns
 CSV="$SCRIPT_DIR/configs/bkg_rate.csv"
-RES_DIR="Results_pi0.1GeV_eEIC_mp_coin_test2"                             # final results dir: CSVs + per-run trees/raw
-OUT_DIR="Plots_pi0.1GeV_eEIC_mp_coin_test2"                               # final plots dir: bkg_eff.png/pdf + per-run histos
+RES_DIR="Results_pi5GeV_eEIC_gauss_10_Z_100cm"                             # final results dir: CSVs + per-run trees/raw
+OUT_DIR="Plots_pi5GeV_eEIC_gauss_10_Z_100cm"                               # final plots dir: bkg_eff.png/pdf + per-run histos
 # ------------------------------------------------------------------------------
 
 DO_SIM=true

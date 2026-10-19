@@ -17,9 +17,9 @@
 #include <map>
 #include "TGraphErrors.h"
 #include "TCanvas.h"
-#include "TLegend.h"
 #include "TAxis.h"
 #include "TLine.h"
+#include "TMarker.h"
 #include "TMath.h"
 #include "TStyle.h"
 #include "TString.h"
@@ -106,6 +106,55 @@ static std::map<int, double> GetPlaneZPositions(const char* resDir)
         if (x == 0 && y == 0) pos[z] = zoff;
     }
     return pos;
+}
+
+struct LegendEntry
+{
+    bool isLine;
+    int markerStyle;
+    int markerColor;
+    double markerSize;
+    int lineStyle;
+    int lineColor;
+    int lineWidth;
+    std::string label;
+};
+
+// Draw a borderless legend using TMarker/TLine symbols + TLatex text.
+static void DrawLatexLegend(const std::vector<LegendEntry>& entries,
+                            double x0, double y0, double yStep, double textSize)
+{
+    for (size_t i = 0; i < entries.size(); ++i)
+    {
+        const LegendEntry& e = entries[i];
+        double y = y0 - i * yStep;
+
+        if (e.isLine)
+        {
+            TLine *ln = new TLine(x0, y, x0 + 0.05, y);
+            ln->SetLineColor(e.lineColor);
+            ln->SetLineStyle(e.lineStyle);
+            ln->SetLineWidth(e.lineWidth);
+            ln->SetNDC(true);
+            ln->Draw();
+        }
+        else
+        {
+            TMarker *mk = new TMarker(x0 + 0.025, y, 1);
+            mk->SetNDC(true);
+            mk->SetMarkerStyle(e.markerStyle);
+            mk->SetMarkerColor(e.markerColor);
+            mk->SetMarkerSize(e.markerSize);
+            mk->Draw();
+        }
+
+        TLatex *txt = new TLatex(x0 + 0.06, y, e.label.c_str());
+        txt->SetNDC();
+        txt->SetTextFont(42);
+        txt->SetTextSize(textSize);
+        txt->SetTextAlign(12);  // left, vertically centered
+        txt->Draw();
+    }
 }
 
 void BkgEff(int withCoin = 0, const char* resDir = "Results", const char* outDir = "Plots")
@@ -214,10 +263,9 @@ void BkgEff(int withCoin = 0, const char* resDir = "Results", const char* outDir
     c->SetBottomMargin(0.15);
     c->SetTopMargin(0.17);
 
-    TLegend *leg = new TLegend(0.25, 0.20, 0.92, 0.36);
-    leg->SetTextSize(0.035);
-    leg->SetBorderSize(0);
-    int colors[6] = {kBlue+2, kRed+2, kGreen+2, kMagenta+2, kOrange+7, kCyan+2};
+    std::vector<LegendEntry> legendEntries;
+    int colors[6] = {kBlue-4, kRed-4, kGreen-4, kMagenta-4, kOrange-4, kCyan-4};
+    int styles[6] = {45, 25, 26, 27, 24, 30};  // hollow markers: circle, square, triangle, diamond, cross, star
     int colIdx = 0;
     bool first = true;
 
@@ -230,36 +278,39 @@ void BkgEff(int withCoin = 0, const char* resDir = "Results", const char* outDir
         std::vector<double>& eff = it->second;
         TGraphErrors *gr = new TGraphErrors(eff.size(), mCount[plane].data(), eff.data(), nullptr, mEffErr[plane].data());
         gr->SetTitle("Hit Efficiency vs Background Rate;Background rate #lambda [particles/event];Signal-only efficiency [%]");
-        gr->SetMarkerStyle(20 + (colIdx % 4));
-        gr->SetMarkerSize(0.9);
+        gr->SetMarkerStyle(styles[colIdx % 6]);
+        gr->SetMarkerSize(1.6);
         gr->SetMarkerColor(colors[colIdx % 6]);
         gr->SetLineColor(colors[colIdx % 6]);
-        gr->SetLineWidth(2);
+        gr->SetLineWidth(10);
         if (first)
         {
             gr->Draw("AP");
             gr->GetYaxis()->SetRangeUser(yMin - 1.5, yMax + 1.5);
+            gr->GetYaxis()->SetTitleOffset(1.0);  // smaller = y-axis title closer to the axis
+            gr->GetXaxis()->SetTitleOffset(1.0);
             first = false;
         }
         else
         {
             gr->Draw("P SAME");
         }
-        leg->AddEntry(gr, planeZcm.count(plane) ? Form("planeZ%d (z = %.0f cm)", plane, planeZcm[plane])
-                                               : Form("planeZ%d", plane), "p");
+        std::string label = planeZcm.count(plane) ? Form("planeZ%d (z = %.0f cm)", plane, planeZcm[plane])
+                                                  : Form("planeZ%d", plane);
+        legendEntries.push_back({false, styles[colIdx % 6], colors[colIdx % 6], 1.5, 1, colors[colIdx % 6], 2, label});
         ++colIdx;
     }
 
     if (withCoin && !coinX.empty())
     {
         TGraphErrors *grCoin = new TGraphErrors(coinX.size(), coinX.data(), coinY.data(), nullptr, coinYErr.data());
-        grCoin->SetMarkerStyle(23);
-        grCoin->SetMarkerSize(1.1);
+        grCoin->SetMarkerStyle(30);
+        grCoin->SetMarkerSize(1.7);
         grCoin->SetMarkerColor(kBlack);
         grCoin->SetLineColor(kBlack);
-        grCoin->SetLineWidth(2);
+        grCoin->SetLineWidth(10);
         grCoin->Draw("P SAME");
-        leg->AddEntry(grCoin, Form("coincidence (%.0f ns window)", coinWindowNs), "p");
+        legendEntries.push_back({false, 30, kBlack, 1.6, 1, kBlack, 2, Form("coincidence (%.0f ns window)", coinWindowNs)});
     }
 
     // Paint the pad first so gPad->GetUxmin()/GetUymax() return user coordinates.
@@ -275,9 +326,9 @@ void BkgEff(int withCoin = 0, const char* resDir = "Results", const char* outDir
     eicLine->SetLineWidth(2);
     eicLine->Draw();
 
-    leg->AddEntry(eicLine, "Original EIC bkg rate (#lambda= 1.584)", "l");
+    legendEntries.push_back({true, 1, kRed, 0, kDashed, kRed, 2, "Original EIC bkg rate (#lambda= 1.584)"});
 
-    leg->Draw();
+    DrawLatexLegend(legendEntries, 0.37, 0.34, 0.035, 0.03);
 
     // Signal particle + energy as an explicit label on top of the canvas.
     TLatex *titleLatex = new TLatex();
