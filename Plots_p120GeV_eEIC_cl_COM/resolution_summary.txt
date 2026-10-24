@@ -1,0 +1,18 @@
+# Position resolution, run 1, Results_p120GeV_eEIC_cl_COM
+# residual = clusterX/Y - trackX/Y  [values in um; 1 um = 0.001 mm]
+# selection: mcFlag==0 && clSize>0 (signal clusters)
+# plane    axis     N        mean[um]      RMS[um]   coreSig[um]    coreMean[um]    hw68[um]
+     0     X    198883       +1.74      22.14     23.96+/-0.10       +1.07      21.59
+     0     Y    198883       +0.54      20.69     23.36+/-0.12       +1.16      20.58
+# planeZ0  <clSize> = 1.599   X core sigma vs clSize:
+#   clSize=1  N=  101998   coreSig=  6.19+/-0.02 um   RMS= 22.11 um
+#   clSize=2  N=   81912   coreSig= 14.75+/-0.06 um   RMS= 21.21 um
+#   clSize=3  N=    8150   coreSig=  6.85+/-0.09 um   RMS= 22.81 um
+#   clSize=4  N=    6537   coreSig=  2.03+/-0.02 um   RMS= 27.05 um
+     1     X    198907       +1.75      22.13     23.87+/-0.10       +1.05      21.58
+     1     Y    198907       +0.58      20.75     23.31+/-0.12       +1.12      20.56
+# planeZ1  <clSize> = 1.599   X core sigma vs clSize:
+#   clSize=1  N=  101989   coreSig=  6.42+/-0.02 um   RMS= 22.08 um
+#   clSize=2  N=   81864   coreSig= 15.17+/-0.06 um   RMS= 21.22 um
+#   clSize=3  N=    8284   coreSig=  6.71+/-0.08 um   RMS= 22.55 um
+#   clSize=4  N=    6484   coreSig=  2.04+/-0.02 um   RMS= 27.41 um
