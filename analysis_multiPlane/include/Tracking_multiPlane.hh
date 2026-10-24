@@ -46,6 +46,8 @@ struct FullTrackInfo
     int dutNHits;
     double dutTime;
     int mcFlag;
+    double trackX;
+    double trackY;
    
 };
 struct Residual

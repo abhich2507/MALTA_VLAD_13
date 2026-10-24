@@ -51,8 +51,10 @@ Cluster ValidateCluster(std::vector<Hit>& cluster, const DetectorConfig& cfg)
 }
 std::pair<double,double> GetClusterPosition(const Cluster& cl, ClusterState& state, const std::string&   clPosMode)
 {
-    if (clPosMode == "COM" && cl.x > 0 && cl.y > 0)
-        return { cl.x / cl.clSize, cl.y / cl.clSize};
+    // if (clPosMode == "COM" && cl.x > 0 && cl.y > 0)
+    //     return { cl.x / cl.clSize, cl.y / cl.clSize}; Orginal code
+    if (clPosMode == "COM" && cl.clSize > 0)
+        return { cl.x / cl.clSize, cl.y / cl.clSize}; //snip
 
     return { state.currentX, state.currentY }; // fallback: MC truth
 }
@@ -64,12 +66,18 @@ ClusteredHit GetValidCluster(const Cluster& cl, ClusterState& state, const std::
     int clPlaneID = state.currentPlaneID;
     int clMCFlag = state.currentMCFlag;
 
+    double comX = (clSize > 0) ? cl.x / clSize : -999.;   // snip ADD
+    double comY = (clSize > 0) ? cl.y / clSize : -999.;   // ADD
+    double trkX = state.currentTrackX;                     // ADD
+    double trkY = state.currentTrackY;                     // ADD
+
     double timing = std::min_element(state.cluster.begin(), state.cluster.end(),
                  [](const Hit& a, const Hit& b){ return a.t < b.t; })->t;
 
     double correctedTiming = timing - state.currentPixY * 0.0125;
 
-    return {clPlaneID, vertexX, vertexY, clSize, timing, correctedTiming, clMCFlag};
+    return {clPlaneID, vertexX, vertexY, clSize, timing, correctedTiming, clMCFlag,
+            comX, comY, trkX, trkY}; 
 
 }
 void ResetClusterState(ClusterState& state, FullTrackInfo track)
@@ -82,6 +90,8 @@ void ResetClusterState(ClusterState& state, FullTrackInfo track)
     state.currentPixY     = track.dutY;
     state.currentX        = track.vertexX;
     state.currentY        = track.vertexY;
+    state.currentTrackX   = track.trackX; //snip
+    state.currentTrackY   = track.trackY;
 }
 std::vector<std::vector<FullTrackInfo>> GroupHitsByTrack(const std::vector<FullTrackInfo>& hits)
 {
@@ -104,6 +114,8 @@ ClusterState BuildClusterState(const std::vector<FullTrackInfo>& track)
     state.currentPixY    = track.front().dutY;
     state.currentX       = track.front().vertexX;
     state.currentY       = track.front().vertexY;
+    state.currentTrackX   = track.front().trackX; //snip
+    state.currentTrackY   = track.front().trackY;
     for (const auto& hit : track)
         state.cluster.push_back({hit.dutX, hit.dutY, hit.dutTime});
     return state;

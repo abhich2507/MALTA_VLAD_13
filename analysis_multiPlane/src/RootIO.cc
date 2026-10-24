@@ -54,7 +54,7 @@ void FillTrackedTree(std::vector<FullTrackInfo> trackedHits, TFile* outfile, int
     // Create a TTree for each planeZ
     TTree *trackedTree = new TTree(Form("TrackedHits_planeZ%d",planeZ), Form("Tracked Hits in PlaneZ %d",planeZ));
     // Variables for branches
-    double vertexX, vertexY, vertexZ, vertexTime, DUTLocalTime;
+    double vertexX, vertexY, vertexZ, vertexTime, DUTLocalTime, trackX, trackY;
     int DUTPixX, DUTPixY, trackID, DUTnHits, planeData,mcFlag;
 
     // Create branches
@@ -68,6 +68,8 @@ void FillTrackedTree(std::vector<FullTrackInfo> trackedHits, TFile* outfile, int
     trackedTree->Branch("DUTnHits", &DUTnHits, "DUTnHits/I");
     trackedTree->Branch("DUTLocalTime", &DUTLocalTime, "DUTLocalTime/D");
     trackedTree->Branch("mcFlag", &mcFlag, "mcFlag/I");
+    trackedTree->Branch("trackX", &trackX, "trackX/D");
+    trackedTree->Branch("trackY", &trackY, "trackY/D");
     for (const auto& el : trackedHits)
     {
         planeData = el.planeID;
@@ -80,6 +82,8 @@ void FillTrackedTree(std::vector<FullTrackInfo> trackedHits, TFile* outfile, int
         DUTnHits = el.dutNHits;
         DUTLocalTime = el.dutTime;
         mcFlag = el.mcFlag;
+        trackX = el.trackX;
+        trackY = el.trackY;
         trackedTree->Fill();
     }
     outfile->cd();  
@@ -111,7 +115,7 @@ void FillTrackedTree(std::vector<ClusteredHit> allClusters, TFile* outfile, int 
     outfile->cd();
     TTree *analysisTree = new TTree(Form("analyzedHits_planeZ%d",planeZ), Form("analyzedHits_planeZ%d",planeZ));
     // Variables for branches
-    double analysisVertexX, analysisVertexY, timing, correctedTiming;
+    double analysisVertexX, analysisVertexY, timing, correctedTiming,clusterX, clusterY, trackX, trackY;
     int analysisClSize, clPlaneID, clMCFlag;
     // Create branches
     analysisTree->Branch("planeID", &clPlaneID, "planeID/I");
@@ -121,6 +125,11 @@ void FillTrackedTree(std::vector<ClusteredHit> allClusters, TFile* outfile, int 
     analysisTree->Branch("timing", &timing, "timing/D");
     analysisTree->Branch("correctedTiming", &correctedTiming, "correctedTiming/D");
     analysisTree->Branch("mcFlag", &clMCFlag, "mcFlag/I");
+    analysisTree->Branch("clusterX", &clusterX, "clusterX/D");
+    analysisTree->Branch("clusterY", &clusterY, "clusterY/D");
+    analysisTree->Branch("trackX", &trackX, "trackX/D");
+    analysisTree->Branch("trackY", &trackY, "trackY/D");
+
 
     for (const auto& el : allClusters)
     {
@@ -131,6 +140,10 @@ void FillTrackedTree(std::vector<ClusteredHit> allClusters, TFile* outfile, int 
         timing = el.timing;
         correctedTiming = el.corrTiming;
         clMCFlag = el.mcFlag;
+        clusterX = el.clusterTrackX;
+        clusterY = el.clusterTrackY;
+        trackX = el.trackX;
+        trackY = el.trackY;
         analysisTree->Fill();
     }
     outfile->cd();  
@@ -530,7 +543,7 @@ std::vector<FullTrackInfo> GetMatchedHits(AnaFlags cfg, double threshold, int ru
     TFile *trackedFile = TFile::Open((inputPath + "LocalTrackedHitsThr" + std::to_string(int(threshold)) + ".root").c_str(), "READ");
     TTree *trackedTree = (TTree*) trackedFile->Get(Form("TrackedHits_planeZ%d",planeZ));
     std::vector<FullTrackInfo> output;
-    double vertexX, vertexY, globalTrigger;
+    double vertexX, vertexY, globalTrigger,trackX, trackY;
     double reconstructedTime;
     int trackID, pixX, pixY, nHits, planeID, mcFlag;
     trackedTree->SetBranchAddress("planeID", &planeID);
@@ -544,13 +557,15 @@ std::vector<FullTrackInfo> GetMatchedHits(AnaFlags cfg, double threshold, int ru
     trackedTree->SetBranchAddress("DUTnHits", &nHits);
     trackedTree->SetBranchAddress("DUTLocalTime", &reconstructedTime);
     trackedTree->SetBranchAddress("mcFlag", &mcFlag);
+     trackedTree->SetBranchAddress("trackX", &trackX);
+    trackedTree->SetBranchAddress("trackY", &trackY);
     
     Long64_t nTrackedEntries = trackedTree->GetEntries();
 
     for (int i = 0; i < nTrackedEntries; i++)
     {
         trackedTree->GetEntry(i);
-        output.push_back({planeID, trackID, vertexX, vertexY, globalTrigger, pixX, pixY, nHits, reconstructedTime, mcFlag});
+        output.push_back({planeID, trackID, vertexX, vertexY, globalTrigger, pixX, pixY, nHits, reconstructedTime, mcFlag, trackX, trackY});
     }
 
     return output;

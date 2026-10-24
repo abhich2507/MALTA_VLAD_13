@@ -25,6 +25,8 @@ struct ClusterState
     int               currentTrackID{-1};
     int               currentPixY{-1};
     int               currentMCFlag{-1};  
+    double            currentTrackX{};
+    double            currentTrackY{};
 };
 struct ClusteredHit
 {
@@ -35,6 +37,11 @@ struct ClusteredHit
     double timing;
     double corrTiming;
     int mcFlag;
+    //snip
+    double clusterTrackX; 
+    double clusterTrackY;
+    double trackX;
+    double trackY;
 };
 
 void Clustering_multiPlane(double threshold, int runNumber, std::string saveName = "default");

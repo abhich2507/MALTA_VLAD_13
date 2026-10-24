@@ -48,6 +48,7 @@ std::pair<std::vector<FullTrackInfo>, std::vector<Residual>> MatchHits(std::vect
             DUTLocalTime = hits[j].time - track.t;
             Vec3 pixelPosition = PixelPositionReconstruction(DUTPixX, DUTPixY, detCfg);
             Vec3 trackPlaneIntercept = IntersectTrackPlane(vertex, detCfg, geoMaps[filePlane]);
+            Vec3 localIntercept = ApplyInverseGeometry3D(trackPlaneIntercept, geoMaps[filePlane]); //snip
             auto rotTransPixelPositions = ApplyGeometry3D(pixelPosition, geoMaps[filePlane]);
             double rx = rotTransPixelPositions.x - trackPlaneIntercept.x;
             double ry = rotTransPixelPositions.y - trackPlaneIntercept.y;
@@ -57,7 +58,7 @@ std::pair<std::vector<FullTrackInfo>, std::vector<Residual>> MatchHits(std::vect
             if(rx*rx + ry*ry <= (cfg.distCut/1000)*(cfg.distCut/1000))
             {
                 DUTnHits++;
-                TrackOut.push_back({filePlane, i, vertex.x, vertex.y, track.t, DUTPixX, DUTPixY, DUTnHits, DUTLocalTime,track.mcFlag});
+                TrackOut.push_back({filePlane, i, vertex.x, vertex.y, track.t, DUTPixX, DUTPixY, DUTnHits, DUTLocalTime,track.mcFlag,localIntercept.x, localIntercept.y});
                 foundHit = true;
             }
             j++;
@@ -68,7 +69,7 @@ std::pair<std::vector<FullTrackInfo>, std::vector<Residual>> MatchHits(std::vect
             DUTPixX = -1;
             DUTPixY = -1;
             DUTLocalTime = -1;
-            TrackOut.push_back({filePlane, i, vertex.x, vertex.y, track.t, DUTPixX, DUTPixY, DUTnHits, DUTLocalTime, track.mcFlag});
+            TrackOut.push_back({filePlane, i, vertex.x, vertex.y, track.t, DUTPixX, DUTPixY, DUTnHits, DUTLocalTime, track.mcFlag, -999.,-999.});
         }
     }
     return {TrackOut, ResOut};
