@@ -2,17 +2,17 @@
 # residual = clusterX/Y - trackX/Y  [values in um; 1 um = 0.001 mm]
 # selection: mcFlag==0 && clSize>0 (signal clusters)
 # plane    axis     N        mean[um]      RMS[um]   coreSig[um]    coreMean[um]    hw68[um]
-     0     X    198883       +1.74      22.14     23.96+/-0.10       +1.07      21.59
-     0     Y    198883       +0.54      20.69     23.36+/-0.12       +1.16      20.58
-# planeZ0  <clSize> = 1.599   X core sigma vs clSize:
-#   clSize=1  N=  101998   coreSig=  6.19+/-0.02 um   RMS= 22.11 um
-#   clSize=2  N=   81912   coreSig= 14.75+/-0.06 um   RMS= 21.21 um
-#   clSize=3  N=    8150   coreSig=  6.85+/-0.09 um   RMS= 22.81 um
-#   clSize=4  N=    6537   coreSig=  2.03+/-0.02 um   RMS= 27.05 um
-     1     X    198907       +1.75      22.13     23.87+/-0.10       +1.05      21.58
-     1     Y    198907       +0.58      20.75     23.31+/-0.12       +1.12      20.56
-# planeZ1  <clSize> = 1.599   X core sigma vs clSize:
-#   clSize=1  N=  101989   coreSig=  6.42+/-0.02 um   RMS= 22.08 um
-#   clSize=2  N=   81864   coreSig= 15.17+/-0.06 um   RMS= 21.22 um
-#   clSize=3  N=    8284   coreSig=  6.71+/-0.08 um   RMS= 22.55 um
-#   clSize=4  N=    6484   coreSig=  2.04+/-0.02 um   RMS= 27.41 um
+     0     X    198908       +1.78      22.10     24.04+/-0.11       +1.14      21.64
+     0     Y    198908       +0.52      20.85     23.33+/-0.12       +1.12      20.61
+# planeZ0  <clSize> = 1.600   X core sigma vs clSize:
+#   clSize=1  N=  101944   coreSig=  6.37+/-0.02 um   RMS= 22.14 um
+#   clSize=2  N=   82006   coreSig= 13.00+/-0.04 um   RMS= 21.06 um
+#   clSize=3  N=    8019   coreSig=  6.58+/-0.08 um   RMS= 22.13 um
+#   clSize=4  N=    6626   coreSig=  2.03+/-0.02 um   RMS= 28.00 um
+     1     X    198928       +1.71      21.98     23.62+/-0.10       +1.02      21.58
+     1     Y    198928       +0.52      20.80     23.39+/-0.13       +1.13      20.61
+# planeZ1  <clSize> = 1.601   X core sigma vs clSize:
+#   clSize=1  N=  101897   coreSig=  6.47+/-0.02 um   RMS= 22.17 um
+#   clSize=2  N=   81972   coreSig= 15.07+/-0.06 um   RMS= 20.91 um
+#   clSize=3  N=    8076   coreSig=  6.70+/-0.08 um   RMS= 21.76 um
+#   clSize=4  N=    6659   coreSig=  4.55+/-0.45 um   RMS= 26.64 um
