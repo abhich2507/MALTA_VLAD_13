@@ -295,8 +295,8 @@ void BkgEff(int withCoin = 0, const char* resDir = "Results", const char* outDir
         {
             gr->Draw("P SAME");
         }
-        std::string label = planeZcm.count(plane) ? Form("planeZ%d (z = %.0f cm)", plane, planeZcm[plane])
-                                                  : Form("planeZ%d", plane);
+        std::string label = planeZcm.count(plane) ? Form("plane %d (z = %.0f cm)", plane, planeZcm[plane])
+                                                  : Form("plane %d", plane);
         legendEntries.push_back({false, styles[colIdx % 6], colors[colIdx % 6], 1.5, 1, colors[colIdx % 6], 2, label});
         ++colIdx;
     }
@@ -326,7 +326,7 @@ void BkgEff(int withCoin = 0, const char* resDir = "Results", const char* outDir
     eicLine->SetLineWidth(2);
     eicLine->Draw();
 
-    legendEntries.push_back({true, 1, kRed, 0, kDashed, kRed, 2, "Original EIC bkg rate (#lambda= 1.584)"});
+    legendEntries.push_back({true, 1, kRed, 0, kDashed, kRed, 2, "EIC bkg rate (#lambda= 1.584)"});
 
     DrawLatexLegend(legendEntries, 0.37, 0.34, 0.035, 0.03);
 

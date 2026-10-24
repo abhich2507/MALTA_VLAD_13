@@ -8,6 +8,7 @@
 #include "G4IonPhysics.hh"
 #include "G4SystemOfUnits.hh"
 #include <cassert>
+#include "G4PionPlus.hh"
 
 // Constructor call
 PhysicsList::PhysicsList(const SimFlags* flags) : m_flag(flags)
@@ -28,7 +29,13 @@ PhysicsList::PhysicsList(const SimFlags* flags) : m_flag(flags)
         RegisterPhysics(new G4StoppingPhysics());             // Stopping
         RegisterPhysics(new G4IonPhysics());                  // Ions
     }
-    
+    // Make the signal pion stable. NOTE: G4ParticleTable::FindParticle("pi+")
+    // returns nullptr here because particles are not yet constructed
+    // (G4DecayPhysics::ConstructParticle runs later, at run initialization), so
+    // instantiate the definition directly. SetPDGStable(true) makes
+    // G4Decay::GetMeanFreePath return DBL_MAX -> the pion never decays.
+    G4ParticleDefinition* pion = G4PionPlus::PionPlusDefinition();
+    if (pion) pion->SetPDGStable(true);
 }
 
 void PhysicsList::SetCuts()
