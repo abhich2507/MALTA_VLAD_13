@@ -23,13 +23,17 @@
 #include <iostream>
 
 void TimingResolution(int run = 1,
-                      const char* resDir = "Results_p120GeV_eEIC_mp_coin_test",
+                      const char* resDir = "Results_p120GeV",
                       const char* outDir = "",
                       int threshold = 100)
 {
-    // Fit range [ns] — edit here
-    const double fitLo = 27.5;
-    const double fitHi = 30.55;
+    // Fit range [ns] — edit here//
+    //run =1
+    // const double fitLo = 30.25;
+    // const double fitHi = 34.55;
+    //run =2
+    const double fitLo = 30.95;
+    const double fitHi = 33.95;
 
     gROOT->SetStyle("ATLAS");
     gStyle->SetOptStat(0);
@@ -61,7 +65,7 @@ void TimingResolution(int run = 1,
     t->SetBranchAddress("DUTLocalTime", &tlocal);
 
     TH1D* h = new TH1D("hT0", "Second sensor (planeID=1, Z=0), signal only;DUTLocalTime [ns];entries",
-                       90, 20, 100);
+                       160, 20, 100);
     h->SetDirectory(0);   // detach so f->Close() does not delete it
 
     for (Long64_t i = 0; i < t->GetEntries(); ++i)
