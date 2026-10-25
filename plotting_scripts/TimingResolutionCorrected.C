@@ -81,8 +81,8 @@ void TimingResolutionCorrected(int run = 1,
     double rms       = h->GetRMS();
 
     // Custom fit range [ns] — edit here
-    const double fitLo = 27.5;
-    const double fitHi = 31.05;
+    const double fitLo = 28.15;
+    const double fitHi = 31.65;
 
     // Single Gaussian fit in the custom range
     double sigma = 0., sigmaErr = 0., amp = 0.;

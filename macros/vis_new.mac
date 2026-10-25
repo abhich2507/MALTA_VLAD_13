@@ -1,0 +1,111 @@
+# ============================================================================
+# vis_new.mac  —  detailed, publication-style view of the MALTA2 FMT geometry
+#
+#   * white background
+#   * world (vacuum) hidden, silicon sensors highlighted in gold
+#   * coordinate axes with origin, emphasising +z (beam) direction
+#   * Plane 0 at z = 0 mm and Plane 1 at z = 100 mm labelled
+#
+# To use:  set  macroFileLocal = vis_new.mac   in the flags config
+#          (remove any inline "#" comment on that line!) and run  build/sim
+# ============================================================================
+
+/control/verbose 0
+/run/verbose 0
+/run/initialize
+
+# ---- viewer ---------------------------------------------------------------
+/vis/open OGLSQt 1000x700-0+0
+
+# white background
+/vis/viewer/set/background white
+
+# thicker lines globally (trajectories AND geometry outlines);
+# drawByParticleID has no per-particle line-width command, only per-particle colour
+/vis/viewer/set/globalLineWidthScale 5
+
+# 3/4 view so the beam axis (+z) runs away from the viewer
+#/vis/viewer/set/viewpointThetaPhi 65 25 deg
+/vis/viewer/set/autoRefresh true
+
+# ---- geometry -------------------------------------------------------------
+/vis/drawVolume
+
+# hide the vacuum world
+/vis/geometry/set/visibility logicWorld 0 false
+
+# silicon sensors: gold, opaque
+/vis/geometry/set/colour logicPlane 0.95 0.78 0.25 1.0
+/vis/geometry/set/visibility logicPlane 0 true
+
+# optional: faint world wireframe for orientation
+# /vis/geometry/set/visibility logicWorld 0 true
+# /vis/geometry/set/representation logicWorld wireframe
+# /vis/geometry/set/colour logicWorld 0.5 0.5 0.5 0.2
+
+# ---- trajectories ---------------------------------------------------------
+/vis/modeling/trajectories/create/drawByParticleID
+/vis/modeling/trajectories/drawByParticleID-0/set gamma green
+/vis/modeling/trajectories/drawByParticleID-0/set e- red
+/vis/modeling/trajectories/drawByParticleID-0/set e+ red
+/vis/modeling/trajectories/drawByParticleID-0/set pi+ blue
+/vis/modeling/trajectories/drawByParticleID-0/set pi- blue
+/vis/scene/add/trajectories smooth
+/vis/scene/endOfEventAction accumulate
+
+# ---- decorations ----------------------------------------------------------
+# scale bar and event number
+/vis/scene/add/scale 10 cm
+/vis/scene/add/eventID
+
+# coordinate axes from (-5, 0, -5) cm (moved -5 cm in x and -5 cm in z),
+# x = red, y = green, z = blue; length 5 cm
+#/vis/scene/add/axes -5 0 -5 5 cm
+
+# ---- sensor outlines (make each sensor area clearly visible) ---------------
+/vis/set/lineWidth 1.5
+/vis/set/colour black
+
+# Plane 0 (z = 0 cm)  —  half-pitch = 0.93184 cm
+/vis/scene/add/line -0.93184 -0.93184 0.0   0.93184 -0.93184 0.0 cm   # S0
+/vis/scene/add/line  0.93184 -0.93184 0.0   0.93184  0.93184 0.0 cm
+/vis/scene/add/line  0.93184  0.93184 0.0  -0.93184  0.93184 0.0 cm
+/vis/scene/add/line -0.93184  0.93184 0.0  -0.93184 -0.93184 0.0 cm
+
+/vis/scene/add/line  0.93185 -0.93184 0.0   2.79553 -0.93184 0.0 cm   # S1
+/vis/scene/add/line  2.79553 -0.93184 0.0   2.79553  0.93184 0.0 cm
+/vis/scene/add/line  2.79553  0.93184 0.0   0.93185  0.93184 0.0 cm
+/vis/scene/add/line  0.93185  0.93184 0.0   0.93185 -0.93184 0.0 cm
+
+/vis/scene/add/line  2.79553 -0.93184 0.0   4.65921 -0.93184 0.0 cm   # S2
+/vis/scene/add/line  4.65921 -0.93184 0.0   4.65921  0.93184 0.0 cm
+/vis/scene/add/line  4.65921  0.93184 0.0   2.79553  0.93184 0.0 cm
+/vis/scene/add/line  2.79553  0.93184 0.0   2.79553 -0.93184 0.0 cm
+
+/vis/scene/add/line  4.65921 -0.93184 0.0   6.52289 -0.93184 0.0 cm   # S3
+/vis/scene/add/line  6.52289 -0.93184 0.0   6.52289  0.93184 0.0 cm
+/vis/scene/add/line  6.52289  0.93184 0.0   4.65921  0.93184 0.0 cm
+/vis/scene/add/line  4.65921  0.93184 0.0   4.65921 -0.93184 0.0 cm
+
+# Plane 1 (z = 10 cm)
+/vis/scene/add/line -0.93184 -0.93184 10.0   0.93184 -0.93184 10.0 cm   # S4
+/vis/scene/add/line  0.93184 -0.93184 10.0   0.93184  0.93184 10.0 cm
+/vis/scene/add/line  0.93184  0.93184 10.0  -0.93184  0.93184 10.0 cm
+/vis/scene/add/line -0.93184  0.93184 10.0  -0.93184 -0.93184 10.0 cm
+
+/vis/scene/add/line  0.93185 -0.93184 10.0   2.79553 -0.93184 10.0 cm   # S5
+/vis/scene/add/line  2.79553 -0.93184 10.0   2.79553  0.93184 10.0 cm
+/vis/scene/add/line  2.79553  0.93184 10.0   0.93185  0.93184 10.0 cm
+/vis/scene/add/line  0.93185  0.93184 10.0   0.93185 -0.93184 10.0 cm
+
+/vis/scene/add/line  2.79553 -0.93184 10.0   4.65921 -0.93184 10.0 cm   # S6
+/vis/scene/add/line  4.65921 -0.93184 10.0   4.65921  0.93184 10.0 cm
+/vis/scene/add/line  4.65921  0.93184 10.0   2.79553  0.93184 10.0 cm
+/vis/scene/add/line  2.79553  0.93184 10.0   2.79553 -0.93184 10.0 cm
+
+/vis/scene/add/line  4.65921 -0.93184 10.0   6.52289 -0.93184 10.0 cm   # S7
+/vis/scene/add/line  6.52289 -0.93184 10.0   6.52289  0.93184 10.0 cm
+/vis/scene/add/line  6.52289  0.93184 10.0   4.65921  0.93184 10.0 cm
+/vis/scene/add/line  4.65921  0.93184 10.0   4.65921 -0.93184 10.0 cm
+
+

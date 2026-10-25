@@ -74,7 +74,7 @@ void verifySensorHits(int runNumber = 0, int numThreads = 6)
     // ============================================================
     // Load data
     // ============================================================
-    TString inputPath = Form("./Results_pi1GeV_eEIC_mp_coin_test/local_%04d/", runNumber);
+    TString inputPath = Form("./Results_p120GeV/local_%04d/", runNumber);
     std::cout << "Loading data from: " << inputPath << std::endl;
     TChain *chain = new TChain("RawPixelHits");
     for (int t = 0; t < numThreads; t++)
@@ -262,19 +262,35 @@ void verifySensorHits(int runNumber = 0, int numThreads = 6)
     // ============================================================
     // CANVAS 7: 2D XY hit map per sensor (bird's eye view)
     // ============================================================
-    TCanvas *c7 = new TCanvas("c7", "2D XY Hit Maps", 1600, 800);
+    TCanvas *c7 = new TCanvas("c7", "2D XY Hit Maps", 2400, 1200);
     c7->Divide(4, 2);
 
     std::map<int, TH2D*> h2XY;
     for (int idx = 0; idx < allIDs.size(); idx++)
     {
         int id = allIDs[idx];
-        double sxMin = sensorXCenter[id] - detectorSizeX/2;
-        double sxMax = sensorXCenter[id] + detectorSizeX/2;
+        double sxMin = -1.0;   // sensor-centred local X; 2 cm window -> 0.4 cm ticks
+        double sxMax =  1.0;
         h2XY[id] = new TH2D(Form("h2XY_%d", id),
-                             Form("XY - %s;X [cm];Y [cm]", sensorLabel[id].Data()),
+                             ";#DeltaX [cm];Y [cm]",   // no title, only axis labels
                              128, sxMin, sxMax,
                              128, yMin, yMax);
+        h2XY[id]->SetStats(0);   // remove the statistics box
+
+        // X-axis ticks every 0.4 cm (5 divisions over the 2 cm window)
+        h2XY[id]->GetXaxis()->SetNdivisions(5, kFALSE);
+
+        // larger, bold axis titles and tick labels
+        h2XY[id]->GetXaxis()->SetTitleSize(0.06);
+        h2XY[id]->GetXaxis()->SetTitleFont(62);
+        h2XY[id]->GetXaxis()->SetTitleOffset(1.2);
+        h2XY[id]->GetXaxis()->SetLabelSize(0.05);
+        h2XY[id]->GetXaxis()->SetLabelFont(62);
+        h2XY[id]->GetYaxis()->SetTitleSize(0.06);
+        h2XY[id]->GetYaxis()->SetTitleFont(62);
+        h2XY[id]->GetYaxis()->SetTitleOffset(1.6);
+        h2XY[id]->GetYaxis()->SetLabelSize(0.05);
+        h2XY[id]->GetYaxis()->SetLabelFont(62);
     }
 
     // Second pass for 2D fill (or reuse data)
@@ -282,17 +298,36 @@ void verifySensorHits(int runNumber = 0, int numThreads = 6)
     {
         chain->GetEntry(i);
         if (sensorXCenter.find(iPlane) == sensorXCenter.end()) continue;
-        double realX = sensorXCenter[iPlane] - detectorSizeX/2 + PixX * pixelSize / 10.0;
-        double realY = detectorYOffset       - detectorSizeY/2 + PixY * pixelSize / 10.0;
+        double realX = -detectorSizeX/2 + PixX * pixelSize / 10.0;   // local, sensor-centred
+        double realY =  detectorYOffset - detectorSizeY/2 + PixY * pixelSize / 10.0;
         h2XY[iPlane]->Fill(realX, realY);
     }
 
     for (int idx = 0; idx < allIDs.size(); idx++)
     {
+        int id = allIDs[idx];
         c7->cd(idx + 1);
-        h2XY[allIDs[idx]]->Draw("COLZ");
+
+        // more margin around each histogram so the enlarged labels don't clip
+        gPad->SetLeftMargin(0.20);
+        gPad->SetRightMargin(0.16);
+        gPad->SetBottomMargin(0.18);
+        gPad->SetTopMargin(0.12);
+
+        h2XY[id]->Draw("COLZ");
+
+        // sensor label in the top region (replaces title + stat box)
+        // plane 0 -> S0..S3, plane 1 -> S100..S103
+        TString sLabel = (id < 10000) ? Form("S%d", id)
+                                      : Form("S%d", 100 + (id % 100));
+        TLatex l;
+        l.SetNDC();
+        l.SetTextSize(0.09);
+        l.SetTextAlign(22);   // centred horizontally and vertically
+        l.DrawLatex(0.5, 0.95, sLabel);
     }
     c7->SaveAs(Form("%s/verify_2D_XY_per_sensor.root", inputPath.Data()));
+    c7->SaveAs(Form("%s/verify_2D_XY_per_sensor.pdf",  inputPath.Data()));
 
     // ============================================================
     // CANVAS 8: Energy deposition 2D per sensor (pixel-level)
