@@ -450,7 +450,8 @@ void savePlot (std::string directoryPath, std::string runPath, double threshold,
 std::vector<RawHit> GetRawHits(TTree* plane)
 {
     int eventID, planeID, pixX, pixY;
-    float time, energy;
+    double time;
+    float energy;
 
     plane->SetBranchAddress("iEvent", &eventID);
     plane->SetBranchAddress("iPlane", &planeID);
@@ -481,7 +482,8 @@ std::vector<TrackEntry> GetVertex(AnaFlags cfg, int runNumber)
         trackChain->Add(Form("%s%s_t%d.root", inputPath.c_str(), fileName.c_str(), t));
     }
 
-    float vertexX_float, vertexY_float, vertexZ_float, globalTime_float;
+    float vertexX_float, vertexY_float, vertexZ_float;
+    double globalTime_float;
     int mcFlag=-1;
     // Connect branches
     trackChain->SetBranchAddress("trueVertexX", &vertexX_float);

@@ -54,7 +54,7 @@ G4bool SensitiveDetector::ProcessHits(G4Step *aStep, G4TouchableHistory *)
     G4StepPoint *preStepPoint = aStep->GetPreStepPoint();
     G4float energy = aStep->GetTotalEnergyDeposit();
     G4int trackID = aStep->GetTrack()->GetTrackID();
-    G4float fglobalTime = preStepPoint->GetGlobalTime();
+    G4double fglobalTime = preStepPoint->GetGlobalTime();
     G4ThreeVector posVertex = aStep->GetTrack()->GetVertexPosition();
     // Position is currently defined as the preStepPoint position. 
     G4ThreeVector posPixel = preStepPoint->GetPosition();

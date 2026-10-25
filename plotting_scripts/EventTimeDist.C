@@ -38,7 +38,7 @@ void EventTimeDist(int run = 4, const char* dir = "Results_10mev_e_mp")
     }
 
     Int_t iEvent = 0;
-    Float_t trueGlobalTime = 0;
+    Double_t trueGlobalTime = 0;
     chain.SetBranchAddress("iEvent", &iEvent);
     chain.SetBranchAddress("trueGlobalTime", &trueGlobalTime);
 

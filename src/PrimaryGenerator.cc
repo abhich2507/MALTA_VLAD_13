@@ -472,7 +472,7 @@ void PrimaryGenerator::GeneratePrimaries(G4Event *oneEvent)
         analysisManager->FillNtupleFColumn(1, 1, pos[0]);
         analysisManager->FillNtupleFColumn(1, 2, pos[1]);
         analysisManager->FillNtupleFColumn(1, 3, pos[2]);
-        analysisManager->FillNtupleFColumn(1, 4, particleTime);
+        analysisManager->FillNtupleDColumn(1, 4, particleTime);
         analysisManager->FillNtupleIColumn(1, 5, trackID);
         analysisManager->FillNtupleIColumn(1, 6, mcFlag);
 

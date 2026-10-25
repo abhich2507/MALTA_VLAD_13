@@ -56,6 +56,7 @@ SortedTimeVector CorrectAndSortTimeMap(EnergyMap enMap, TimeMap timeMap, Thresho
         if(it == timeMap.end()) continue;
         // Row correction also of 7ns/ 512 rows + global GEANT4 timestamp + in-module chip id + front end jitter   
         double timing    = GetTimeWalk(entry.second, itThr->second, cfg.T, cfg.Tdiv, cfg.TrefThr, cfg.x0, cfg.n, cfg.t0);     
+        //double timing = 0.0;
         timing += *std::max_element(it->second.begin(), it->second.end()) + ComputeGeometryDelay(key.y) + ComputeModuleDelay(key.plane)
                + ComputeFrontEndJitter(seed, entry.second);
         

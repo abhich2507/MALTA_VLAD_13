@@ -34,7 +34,7 @@ RunAction::RunAction(const SimFlags* flags) : m_flag(flags)
     analysisManager->CreateNtupleIColumn("iModule");
     analysisManager->CreateNtupleIColumn("PixX");
     analysisManager->CreateNtupleIColumn("PixY");
-    analysisManager->CreateNtupleFColumn("hitTime");
+    analysisManager->CreateNtupleDColumn("hitTime");
     analysisManager->CreateNtupleFColumn("hitEnergy");
     analysisManager->FinishNtuple(0);
 
@@ -46,7 +46,7 @@ RunAction::RunAction(const SimFlags* flags) : m_flag(flags)
     analysisManager->CreateNtupleFColumn("trueVertexY");
     analysisManager->CreateNtupleFColumn("trueVertexZ");
     // Create Integer Global time column = time that starts when each event begins. Local time = time when the particle is created
-    analysisManager->CreateNtupleFColumn("trueGlobalTime");
+    analysisManager->CreateNtupleDColumn("trueGlobalTime");
     analysisManager->CreateNtupleIColumn("trackID");
     analysisManager->CreateNtupleIColumn("mcFlag");
     analysisManager->CreateNtupleFColumn("trueMomX");
