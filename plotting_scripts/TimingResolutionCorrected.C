@@ -66,7 +66,7 @@ void TimingResolutionCorrected(int run = 1,
     t->SetBranchAddress("correctedTiming", &correctedTiming);
 
     TH1D* h = new TH1D("hT0c", "Second sensor (planeID=1, Z=0), signal only, corrected timing;correctedTiming [ns];entries",
-                       200, 0, 100);
+                       200, 20, 80);
 
     for (Long64_t i = 0; i < t->GetEntries(); ++i)
     {
@@ -81,8 +81,8 @@ void TimingResolutionCorrected(int run = 1,
     double rms       = h->GetRMS();
 
     // Custom fit range [ns] — edit here
-    const double fitLo = 28.15;
-    const double fitHi = 31.65;
+    const double fitLo = 28.05;
+    const double fitHi = 30.75;
 
     // Single Gaussian fit in the custom range
     double sigma = 0., sigmaErr = 0., amp = 0.;
@@ -129,7 +129,7 @@ void TimingResolutionCorrected(int run = 1,
     l.DrawLatex(0.60, 0.74, Form("RMS = %.2f ns", rms));
     l.DrawLatex(0.60, 0.66, Form("mean = %.2f ns", mean));
     l.DrawLatex(0.60, 0.58, Form("#chi^{2}/ndf = %.2f / %d", chi2, ndf));
-    l.DrawLatex(0.60, 0.50, Form("fit range = [%.1f, %.1f] ns", fitLo, fitHi));
+    //l.DrawLatex(0.50, 0.50, Form("fit range = [%.1f, %.1f] ns", fitLo, fitHi));
 
     c->SaveAs(Form("%s/timingCorrected_secondSensor_Z0_run%04d.png", runDir.Data(), run));
     c->SaveAs(Form("%s/timingCorrected_secondSensor_Z0_run%04d.pdf", runDir.Data(), run));

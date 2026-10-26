@@ -362,11 +362,14 @@ void verifySensorHits(int runNumber = 0, int numThreads = 6)
     genChain->SetBranchAddress("mcFlag", &mcFlag);
 
     // 2D Gaussian (XY) of generated vertices, in mm
+    // Signal is focused on the second sensor (x ~ 18.6 mm), so the x range
+    // is centred there instead of the default [24,32] mm.
     TH2D *h2GenXY = new TH2D("h2GenXY", "2D Gaussian - Truth Vertex XY;x [mm];y [mm]",
-                             100, 24., 32., 100, -4., 4.);
-    // 1D Z distribution of generated vertices, in mm
+                             100, 16., 21., 100, -3., 3.);
+    h2GenXY->SetOption("colz");   // draw with colour palette by default
+    // 1D Z distribution of generated vertices, in mm (beam origin at z = -1000 mm)
     TH1D *h1GenZ = new TH1D("h1GenZ", "Truth Vertex Z;z [mm];Entries",
-                            100, -1400., -600.);
+                            100, -1300., -700.);
 
     Long64_t nGen = genChain->GetEntries();
     for (Long64_t i = 0; i < nGen; i++)
@@ -408,10 +411,25 @@ void verifySensorHits(int runNumber = 0, int numThreads = 6)
     TCanvas *c9 = new TCanvas("c9", "Generator Truth Vertex", 1200, 600);
     c9->Divide(2, 1);
     c9->cd(1);
+    gPad->SetRightMargin(0.30);   // room for the colour palette + its z-axis labels
     h2GenXY->Draw("COLZ");
+    gPad->Update();
+    TPaveStats *st = (TPaveStats*)h2GenXY->GetListOfFunctions()->FindObject("stats");
+    if (st)
+    {
+        st->SetOptStat(1110);                        // remove the name (title) line
+        st->SetBorderSize(0);                        // remove the border
+        st->SetLineWidth(0);                         // no border line
+        st->SetFillStyle(0);                         // transparent background
+        st->SetX1NDC(st->GetX1NDC() + 0.02);         // shift slightly right
+        st->SetX2NDC(st->GetX2NDC() + 0.02);
+    }
     c9->cd(2);
+    gPad->SetLeftMargin(0.20);    // gap between pad-1 palette and this axis
+    h1GenZ->SetLineWidth(3);      // thicker histogram line
     h1GenZ->Draw();
     c9->SaveAs(Form("%s/verify_gen_vertex.root", inputPath.Data()));
+    c9->SaveAs(Form("%s/verify_gen_vertex.pdf",  inputPath.Data()));
 
     // Write the generator histograms into the same root file
     TFile *fGen = TFile::Open(Form("%s/verify_gen_vertex.root", inputPath.Data()), "UPDATE");
