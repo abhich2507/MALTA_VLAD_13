@@ -60,7 +60,7 @@ trap 'mv "$FLAGS.bak" "$FLAGS"; echo "Restored $FLAGS"' EXIT
 cd "$BUILD_DIR"
 
 # Skip the header line; process substitution keeps the loop in this shell
-while IFS=',' read -r run rate; do
+while IFS=',' read -r run rate || [ -n "$run" ]; do
     [ -z "$run" ] && continue
 
     # Skip runs that were not selected (only when a selection was provided)

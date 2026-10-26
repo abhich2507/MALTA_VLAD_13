@@ -30,8 +30,8 @@ SAVE="analysis_results_MP"                    # analysis save name (all steps)
 THRESHOLD=100                            # analysis threshold in e-
 WINDOW_NS=36                                # coincidence time window in ns
 CSV="$SCRIPT_DIR/configs/bkg_rate.csv"
-RES_DIR="Results_pion5GeV"                             # final results dir: CSVs + per-run trees/raw
-OUT_DIR="Plots_pion5GeV"                               # final plots dir: bkg_eff.png/pdf + per-run histos
+RES_DIR="Results_pion1GeV"                             # final results dir: CSVs + per-run trees/raw
+OUT_DIR="Plots_pion1GeV"                               # final plots dir: bkg_eff.png/pdf + per-run histos
 # ------------------------------------------------------------------------------
 
 DO_SIM=true
@@ -57,7 +57,7 @@ done
 
 # Read the run list from configs/bkg_rate.csv (column 1)
 runs=()
-while IFS=',' read -r run rest; do
+while IFS=',' read -r run rest || [ -n "$run" ]; do
     case "$run" in ''|run) continue ;; esac
     [[ "$run" =~ ^[0-9]+$ ]] && runs+=("$run")
 done < "$CSV"

@@ -34,7 +34,7 @@ WINDOW_NS="${WINDOW_NS:-8}"           # coincidence time window in ns
 runs=("$@")
 if [ "${#runs[@]}" -eq 0 ]; then
     # fallback: take the run column of configs/bkg_rate.csv
-    while IFS=',' read -r run rest; do
+    while IFS=',' read -r run rest || [ -n "$run" ]; do
         case "$run" in ''|'run') continue ;; esac
         if [[ "$run" =~ ^[0-9]+$ ]]; then runs+=("$run"); fi
     done < configs/bkg_rate.csv
@@ -45,6 +45,10 @@ if [ "${#runs[@]}" -eq 0 ]; then
 fi
 
 mkdir -p "$RES_DIR"
+
+# Keep the previous CSV before rewriting so a re-run never loses prior results
+[ -f "$OUT_CSV" ] && cp "$OUT_CSV" "${OUT_CSV%.csv}.bak.csv"
+
 echo "run,window_ns,nGen,coinCount,eff_percent" > "$OUT_CSV"
 
 for run in "${runs[@]}"; do
