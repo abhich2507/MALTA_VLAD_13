@@ -67,11 +67,11 @@ G4bool SensitiveDetector::ProcessHits(G4Step *aStep, G4TouchableHistory *)
     const std::array<std::array<std::array<int, 2>, 4>, 4> deltaTable = 
     {{
         // flag = 0b00
-        {{{-1, -1}, {0, -1}, {-1, 0}, {0, 0}}},
+        {{{-1, -1}, {-1, 0}, {0, -1}, {0, 0}}},
         // flag = 0b01
-        {{{ 0, -1}, {1, -1}, { 0, 0}, {1, 0}}},
+        {{{ 0, -1}, {0, 0}, { 1, -1}, {1, 0}}},
         // flag = 0b10
-        {{{-1,  0}, {0,  0}, {-1, 1}, {0, 1}}},
+        {{{-1,  0}, {-1, 1}, {0,  0}, {0, 1}}},
         // flag = 0b11
         {{{ 0,  0}, {0,  1}, { 1, 0}, {1, 1}}}  // 0, -1 -> 1, 0 
     }};
@@ -152,13 +152,13 @@ G4bool SensitiveDetector::ProcessHits(G4Step *aStep, G4TouchableHistory *)
         //effAn[1]+=effAn[0];
         effAn[0] = 0;
         //effAn[3]+=effAn[2];
-        effAn[2] = 0;
+        effAn[1] = 0;
     }
 
     if(pixX == 511 && (quadrantFlag & 0x1) )
     {
         //effAn[0]+=effAn[1];
-        effAn[1] = 0;
+        effAn[2] = 0;
         //effAn[2]+=effAn[3];
         effAn[3] = 0;
     }
@@ -168,13 +168,13 @@ G4bool SensitiveDetector::ProcessHits(G4Step *aStep, G4TouchableHistory *)
         //effAn[2]+=effAn[0];
         effAn[0] = 0;
         //effAn[3]+=effAn[1];
-        effAn[1] = 0;
+        effAn[2] = 0;
     }
 
     if(pixY == 511 && (quadrantFlag & (1 << 1)) )
     {
         //effAn[0]+=effAn[2];
-        effAn[2] = 0;
+        effAn[1] = 0;
         //effAn[1]+=effAn[3];
         effAn[3] = 0;
     }
