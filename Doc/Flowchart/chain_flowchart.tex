@@ -27,6 +27,7 @@
   box4/.style={box, minimum width=2.50cm, text width=2.30cm},
   box3/.style={box, minimum width=3.50cm, text width=3.30cm},
   box2/.style={box, minimum width=5.50cm, text width=5.30cm},
+  box1/.style={box, minimum width=2.00cm, inner xsep=4pt},
   % Left-hand stage badge (matches stage container height: 1.05cm + 10pt)
   lane/.style={
     rectangle, rounded corners=2pt, align=center,
@@ -51,19 +52,16 @@
 \begin{document}
 \begin{tikzpicture}[node distance=0.50cm and 0.50cm]
 
-  % ================= LANE A : GEANT4 (4 boxes) =============================
-  \node[box4, fill=geantC!14] (a1)
+  % ================= LANE A : GEANT4 (3 boxes) =============================
+  \node[box3, fill=geantC!14] (a1)
     {\textbf{Particle generator}\\signal + background};
-  \node[box4, fill=geantC!14, right=of a1] (a2)
+  \node[box3, fill=geantC!14, right=of a1] (a2)
     {\textbf{Geometry}\\QUAD Module};
-  \node[box4, fill=geantC!14, right=of a2] (a3)
-    {\textbf{Physics}\\EM + hadronic Physics lists};
-  \node[box4, fill=geantC!14, right=of a3] (a4)
+  \node[box3, fill=geantC!14, right=of a2] (a4)
     {\textbf{Charge sharing}\\deposit $\to$ 4 pixels};
 
   \draw[steparr] (a1) -- (a2);
-  \draw[steparr] (a2) -- (a3);
-  \draw[steparr] (a3) -- (a4);
+  \draw[steparr] (a2) -- (a4);
 
   % ================= LANE B : DIGITIZATION (3 boxes) =======================
   \node[box3, fill=digiC!14, below=1.65cm of a1.south west, anchor=north west] (b1)
@@ -78,24 +76,28 @@
 
   % ================= LANE C : RECONSTRUCTION (2 boxes) =====================
   \node[box2, fill=recoC!14, below=1.65cm of b1.south west, anchor=north west] (c1)
-    {\textbf{Track matching}};
+    {\textbf{Hit matching}};
   \node[box2, fill=recoC!14, right=of c1] (c2)
     {\textbf{Clustering}};
 
   \draw[steparr] (c1) -- (c2);
 
-  % ================= LANE D : ANALYSIS (2 parallel boxes) ==================
-  \node[box2, fill=anaC!14, below=1.65cm of c1.south west, anchor=north west] (d1)
-    {\textbf{Efficiency, cluster size, timing}};
-  \node[box2, fill=anaC!14, right=of d1] (d2)
-    {\textbf{Per-sensor + in-pixel maps}};
+  % ================= LANE D : RESULTS (1 box) ==============================
+ % Centre the single box under the RECONSTRUCTION row.
+ \node[box1, fill=anaC!14, anchor=north] (d1)
+   at ($(c1.south west)!0.5!(c2.south east) - (0,1.65cm)$)
+   {\textbf{Signal hit efficiency}};
+  % Full-width reference points so the RESULTS stage keeps the same 11.5 cm
+  % width as the rows above; this keeps the vertical data spine straight.
+  \coordinate (d1west) at (c1.west |- d1.north);
+  \coordinate (d1east) at (c2.east |- d1.north);
 
   % ================= STAGE CONTAINERS (BACKGROUND LAYER) ===================
   \begin{pgfonlayer}{background}
     \node[stagebox, fill=geantC!5, draw=geantC!50, fit=(a1) (a4)] (stageA) {};
     \node[stagebox, fill=digiC!5,  draw=digiC!50,  fit=(b1) (b3)] (stageB) {};
     \node[stagebox, fill=recoC!5,  draw=recoC!50,  fit=(c1) (c2)] (stageC) {};
-    \node[stagebox, fill=anaC!5,   draw=anaC!50,   fit=(d1) (d2)] (stageD) {};
+ \node[stagebox, fill=anaC!5,   draw=anaC!50,   fit=(d1)(d1west)(d1east)] (stageD) {};
   \end{pgfonlayer}
 
   % ================= LEFT STAGE HEADERS ====================================
@@ -106,21 +108,18 @@
   \node[lane, minimum width=3.8cm, text width=3.6cm, fill=recoC!22,  draw=recoC!75!black,  text=recoC!45!black,
         left=0.35cm of stageC.west] (Lc) {RECONSTRUCTION};
   \node[lane, fill=anaC!22,   draw=anaC!75!black,   text=anaC!45!black,
-        left=0.35cm of stageD.west] (Ld) {ANALYSIS};
+        left=0.35cm of stageD.west] (Ld) {RESULTS};
 
   % ================= CENTRAL VERTICAL DATA SPINE ===========================
-  \node[fnode] (fA) at ($(stageA.south)!0.5!(stageB.north)$) { Generated Truth +Raw Hits};
+  \node[fnode] (fA) at ($(stageA.south)!0.5!(stageB.north)$) {Generated Truth, Raw hits};
   \node[fnode] (fB) at ($(stageB.south)!0.5!(stageC.north)$) {Reconstructed hits};
-  \node[fnode] (fC) at ($(stageC.south)!0.5!(stageD.north)$) {Tracked hits $\to$ Clusters};
-  \node[fnode, below=0.45cm of stageD.south, font=\small\bfseries, fill=gray!18] (fD) {Results};
-
+  \node[fnode] (fC) at ($(stageC.south)!0.5!(stageD.north)$) {Clusters};
   \draw[dataarr] (stageA.south) -- (fA.north);
   \draw[dataarr] (fA.south)     -- (stageB.north);
   \draw[dataarr] (stageB.south) -- (fB.north);
   \draw[dataarr] (fB.south)     -- (stageC.north);
   \draw[dataarr] (stageC.south) -- (fC.north);
   \draw[dataarr] (fC.south)     -- (stageD.north);
-  \draw[dataarr] (stageD.south) -- (fD.north);
 
   % ================= OPTIONAL TITLE ========================================
   % Comment out the two lines below if using a standard LaTeX \caption{} in your paper
