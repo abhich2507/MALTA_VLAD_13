@@ -328,7 +328,7 @@ void BkgEff(int withCoin = 0, const char* resDir = "Results", const char* outDir
 
     legendEntries.push_back({true, 1, kRed, 0, kDashed, kRed, 2, "EIC bkg rate (#lambda= 1.584)"});
 
-    DrawLatexLegend(legendEntries, 0.37, 0.34, 0.035, 0.03);
+    DrawLatexLegend(legendEntries, 0.37, 0.34, 0.035, 0.04);
 
     // Signal particle + energy as an explicit label on top of the canvas.
     TLatex *titleLatex = new TLatex();

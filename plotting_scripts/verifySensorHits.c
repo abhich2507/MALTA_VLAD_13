@@ -24,6 +24,9 @@ void verifySensorHits(int runNumber = 0, int numThreads = 6)
 {
     gStyle->SetOptStat(1111);
     gStyle->SetPalette(kRainBow);
+    gStyle->SetLabelFont(42, "XYZ");   // Helvetica
+    gStyle->SetTitleFont(42, "XYZ");   // Helvetica (non-bold)
+    gStyle->SetTextFont(42);
 
     
     // Geometry parameters (must match flags.cfg and DetectorConstructor.cc)
@@ -264,24 +267,24 @@ void verifySensorHits(int runNumber = 0, int numThreads = 6)
     // ============================================================
     // CANVAS 7: 2D XY hit map per sensor (bird's eye view)
     // ============================================================
-    TCanvas *c7 = new TCanvas("c7", "2D XY Hit Maps", 2400, 1200);
+    TCanvas *c7 = new TCanvas("c7", "2D XY Hit Maps", 1760, 880);   // 17.6 x 8.8 cm (EPJC double column)
     c7->Divide(4, 2);
 
     std::map<int, TH2D*> h2XY;
-    // Tick spacing in cm — change this one value to use any interval.
-    const double tickInterval = 0.5;
-    // Exact global window, rounded to 2 decimal places (no floor/ceil snapping).
-    double syMin = std::round((detectorYOffset - detectorSizeY/2) * 100.0) / 100.0;
-    double syMax = std::round((detectorYOffset + detectorSizeY/2) * 100.0) / 100.0;
+    // Tick spacing in mm — change this one value to use any interval.
+    const double tickInterval = 5.0;
+    // Exact global window in mm, rounded to 2 decimal places (no floor/ceil).
+    double syMin = std::round((detectorYOffset - detectorSizeY/2) * 1000.0) / 100.0;
+    double syMax = std::round((detectorYOffset + detectorSizeY/2) * 1000.0) / 100.0;
     for (int idx = 0; idx < allIDs.size(); idx++)
     {
         int id = allIDs[idx];
-        // global X window = true sensor edges, rounded to 2 decimals
+        // global X window in mm = true sensor edges, rounded to 2 decimals
         double cx    = sensorXCenter[id];
-        double sxMin = std::round((cx - detectorSizeX/2) * 100.0) / 100.0;
-        double sxMax = std::round((cx + detectorSizeX/2) * 100.0) / 100.0;
+        double sxMin = std::round((cx - detectorSizeX/2) * 1000.0) / 100.0;
+        double sxMax = std::round((cx + detectorSizeX/2) * 1000.0) / 100.0;
         h2XY[id] = new TH2D(Form("h2XY_%d", id),
-                             ";X [cm];Y [cm]",   // global coordinates
+                             ";X [mm];Y [mm]",   // global coordinates
                              128, sxMin, sxMax,
                              128, syMin, syMax);
         h2XY[id]->SetStats(0);   // remove the statistics box
@@ -294,19 +297,19 @@ void verifySensorHits(int runNumber = 0, int numThreads = 6)
         h2XY[id]->GetXaxis()->SetDecimals(kTRUE);
         h2XY[id]->GetYaxis()->SetDecimals(kTRUE);
 
-        // axis titles and tick labels (non-bold, Helvetica 42)
-        h2XY[id]->GetXaxis()->SetTitleSize(0.06);
+        // EPJC: Helvetica; tick labels ~8 pt (0.065), titles ~9.3 pt (0.075)
+        h2XY[id]->GetXaxis()->SetTitleSize(0.075);
         h2XY[id]->GetXaxis()->SetTitleFont(42);
-        h2XY[id]->GetXaxis()->SetTitleOffset(1.2);
-        h2XY[id]->GetXaxis()->SetLabelSize(0.05);
+        h2XY[id]->GetXaxis()->SetTitleOffset(1.1);
+        h2XY[id]->GetXaxis()->SetLabelSize(0.065);
         h2XY[id]->GetXaxis()->SetLabelFont(42);
-        h2XY[id]->GetYaxis()->SetTitleSize(0.06);
+        h2XY[id]->GetYaxis()->SetTitleSize(0.075);
         h2XY[id]->GetYaxis()->SetTitleFont(42);
-        h2XY[id]->GetYaxis()->SetTitleOffset(1.4);   // reduced from 1.6
-        h2XY[id]->GetYaxis()->SetLabelSize(0.042);
+        h2XY[id]->GetYaxis()->SetTitleOffset(1.45);
+        h2XY[id]->GetYaxis()->SetLabelSize(0.065);
         h2XY[id]->GetYaxis()->SetLabelFont(42);
-        h2XY[id]->GetYaxis()->SetLabelOffset(0.02);  // a little extra offset
-        h2XY[id]->GetZaxis()->SetLabelSize(0.045);    // bigger colour-palette labels
+        h2XY[id]->GetYaxis()->SetLabelOffset(0.015);
+        h2XY[id]->GetZaxis()->SetLabelSize(0.065);    // palette labels, same 8 pt
     }
 
     // Second pass for 2D fill (or reuse data)
@@ -314,8 +317,8 @@ void verifySensorHits(int runNumber = 0, int numThreads = 6)
     {
         chain->GetEntry(i);
         if (sensorXCenter.find(iPlane) == sensorXCenter.end()) continue;
-        double realX = sensorXCenter[iPlane] - detectorSizeX/2 + PixX * pixelSize / 10.0;   // global X
-        double realY = detectorYOffset       - detectorSizeY/2 + PixY * pixelSize / 10.0;   // global Y
+        double realX = (sensorXCenter[iPlane] - detectorSizeX/2) * 10.0 + PixX * pixelSize;   // global X [mm]
+        double realY = (detectorYOffset       - detectorSizeY/2) * 10.0 + PixY * pixelSize;   // global Y [mm]
         h2XY[iPlane]->Fill(realX, realY);
     }
 
@@ -327,11 +330,11 @@ void verifySensorHits(int runNumber = 0, int numThreads = 6)
         int id = allIDs[idx];
         c7->cd(idx + 1);
 
-        // tight margins so the sensor pads sit close together (X direction only)
-        gPad->SetLeftMargin(0.16);
-        gPad->SetRightMargin(0.13);
-        gPad->SetBottomMargin(0.15);
-        gPad->SetTopMargin(0.10);
+        // EPJC margins: enough room for 8 pt labels
+        gPad->SetLeftMargin(0.20);
+        gPad->SetRightMargin(0.18);
+        gPad->SetBottomMargin(0.16);
+        gPad->SetTopMargin(0.12);
 
         h2XY[id]->Draw("COLZ");
 
@@ -341,12 +344,15 @@ void verifySensorHits(int runNumber = 0, int numThreads = 6)
                                       : Form("S%d", 100 + (id % 100));
         TLatex l;
         l.SetNDC();
-        l.SetTextSize(0.09);
+        l.SetTextFont(62);    // bold Helvetica
+        l.SetTextSize(0.08);  // ~10 pt
         l.SetTextAlign(22);   // centred horizontally and vertically
         l.DrawLatex(0.5, 0.95, sLabel);
     }
+    gStyle->SetPaperSize(17.6, 8.8);   // exact EPJC double-column PDF size (cm)
     c7->SaveAs(Form("%s/verify_2D_XY_per_sensor.root", inputPath.Data()));
     c7->SaveAs(Form("%s/verify_2D_XY_per_sensor.pdf",  inputPath.Data()));
+    gStyle->SetPaperSize(20.0, 26.0);  // restore ROOT default
     TGaxis::SetMaxDigits(5);   // restore the default digit threshold
 
     // ============================================================
@@ -384,12 +390,32 @@ void verifySensorHits(int runNumber = 0, int numThreads = 6)
     // 2D Gaussian (XY) of generated vertices, in mm
     // Signal is focused on the second sensor (x ~ 18.6 mm), so the x range
     // is centred there instead of the default [24,32] mm.
-    TH2D *h2GenXY = new TH2D("h2GenXY", "2D Gaussian - Truth Vertex XY;x [mm];y [mm]",
+    TH2D *h2GenXY = new TH2D("h2GenXY", ";x [mm];y [mm]",   // no title
                              100, 16., 21., 100, -3., 3.);
     h2GenXY->SetOption("colz");   // draw with colour palette by default
+    h2GenXY->SetStats(0);         // no statistics box
+    h2GenXY->GetXaxis()->SetNdivisions(5, kFALSE);   // 1 mm ticks
     // 1D Z distribution of generated vertices, in mm (beam origin at z = -1000 mm)
-    TH1D *h1GenZ = new TH1D("h1GenZ", "Truth Vertex Z;z [mm];Entries",
+    TH1D *h1GenZ = new TH1D("h1GenZ", ";z [mm];Entries",   // no title
                             100, -1300., -700.);
+    h1GenZ->SetStats(0);         // no statistics box
+    h1GenZ->GetXaxis()->SetNdivisions(3, kFALSE);   // 200 mm ticks
+
+    // EPJC: Helvetica, ~8 pt labels / ~9.5 pt titles at 17.6 x 8.8 cm
+    h2GenXY->GetXaxis()->SetTitleFont(42); h2GenXY->GetXaxis()->SetLabelFont(42);
+    h2GenXY->GetXaxis()->SetTitleSize(0.038); h2GenXY->GetXaxis()->SetLabelSize(0.032);
+    h2GenXY->GetXaxis()->SetTitleOffset(1.1);
+    h2GenXY->GetYaxis()->SetTitleFont(42); h2GenXY->GetYaxis()->SetLabelFont(42);
+    h2GenXY->GetYaxis()->SetTitleSize(0.038); h2GenXY->GetYaxis()->SetLabelSize(0.032);
+    h2GenXY->GetYaxis()->SetTitleOffset(1.2);
+    h2GenXY->GetZaxis()->SetLabelFont(42); h2GenXY->GetZaxis()->SetLabelSize(0.032);
+
+    h1GenZ->GetXaxis()->SetTitleFont(42); h1GenZ->GetXaxis()->SetLabelFont(42);
+    h1GenZ->GetXaxis()->SetTitleSize(0.038); h1GenZ->GetXaxis()->SetLabelSize(0.032);
+    h1GenZ->GetXaxis()->SetTitleOffset(1.1);
+    h1GenZ->GetYaxis()->SetTitleFont(42); h1GenZ->GetYaxis()->SetLabelFont(42);
+    h1GenZ->GetYaxis()->SetTitleSize(0.038); h1GenZ->GetYaxis()->SetLabelSize(0.032);
+    h1GenZ->GetYaxis()->SetTitleOffset(1.2);
 
     Long64_t nGen = genChain->GetEntries();
     for (Long64_t i = 0; i < nGen; i++)
@@ -428,28 +454,57 @@ void verifySensorHits(int runNumber = 0, int numThreads = 6)
               << "  meanZ = " << h1BkgZ->GetMean() << " mm" << std::endl;
 
     // CANVAS 9: Generator truth vertex (2D Gaussian XY + 1D Z)
-    TCanvas *c9 = new TCanvas("c9", "Generator Truth Vertex", 1200, 600);
+    TCanvas *c9 = new TCanvas("c9", "Generator Truth Vertex", 1760, 880);   // 17.6 x 8.8 cm
     c9->Divide(2, 1);
     c9->cd(1);
-    gPad->SetRightMargin(0.30);   // room for the colour palette + its z-axis labels
+    gPad->SetLeftMargin(0.12);
+    gPad->SetRightMargin(0.16);    // colour palette + its labels
+    gPad->SetBottomMargin(0.16);
+    gPad->SetTopMargin(0.10);
+    h2GenXY->GetXaxis()->SetLabelSize(0.045);
+    h2GenXY->GetXaxis()->SetTitleSize(0.045);
+    h2GenXY->GetYaxis()->SetLabelSize(0.045);
+    h2GenXY->GetYaxis()->SetTitleSize(0.045);
+    h2GenXY->GetZaxis()->SetLabelSize(0.045);
     h2GenXY->Draw("COLZ");
-    gPad->Update();
-    TPaveStats *st = (TPaveStats*)h2GenXY->GetListOfFunctions()->FindObject("stats");
-    if (st)
-    {
-        st->SetOptStat(1110);                        // remove the name (title) line
-        st->SetBorderSize(0);                        // remove the border
-        st->SetLineWidth(0);                         // no border line
-        st->SetFillStyle(0);                         // transparent background
-        st->SetX1NDC(st->GetX1NDC() + 0.02);         // shift slightly right
-        st->SetX2NDC(st->GetX2NDC() + 0.02);
-    }
+    TLatex lGen2D;
+    lGen2D.SetNDC();
+    lGen2D.SetTextFont(42);
+    lGen2D.SetTextSize(0.045);
+    //lGen2D.DrawLatex(0.15, 0.85, Form("Truth vertices: %lld", nGen));
+    //lGen2D.DrawLatex(0.15, 0.78, Form("meanX = %.3f mm", h2GenXY->GetMean(1)));
+    //lGen2D.DrawLatex(0.15, 0.71, Form("meanY = %.3f mm", h2GenXY->GetMean(2)));
+    //lGen2D.DrawLatex(0.15, 0.64, Form("meanZ = %.3f mm", h1GenZ->GetMean()));
+    lGen2D.DrawLatex(0.15, 0.85, Form("#sigma_{X} = %.3f mm", h2GenXY->GetRMS(1)));
+    lGen2D.DrawLatex(0.15, 0.78, Form("#sigma_{Y} = %.3f mm", h2GenXY->GetRMS(2)));
     c9->cd(2);
-    gPad->SetLeftMargin(0.20);    // gap between pad-1 palette and this axis
-    h1GenZ->SetLineWidth(3);      // thicker histogram line
+    gPad->SetLeftMargin(0.14);     // gap from pad-1 palette
+    gPad->SetRightMargin(0.090);
+    gPad->SetBottomMargin(0.16);
+    gPad->SetTopMargin(0.10);
+    h1GenZ->SetLineWidth(2);
+    h1GenZ->GetYaxis()->SetTitleOffset(1.60);
+    h1GenZ->GetXaxis()->SetLabelSize(0.045);
+    h1GenZ->GetXaxis()->SetTitleSize(0.045);
+    h1GenZ->GetYaxis()->SetLabelSize(0.045);   
+    h1GenZ->GetYaxis()->SetTitleSize(0.045);
     h1GenZ->Draw();
+   
+    TLatex lGen1D;
+    TGaxis::SetMaxDigits(2);   // compact x10^3 notation for the palette
+   
+    lGen1D.SetNDC();
+    lGen1D.SetTextFont(42);
+    lGen1D.SetTextSize(0.045);
+    //lGen1D.DrawLatex(0.15, 0.85, Form("meanZ = %.3f mm", h1GenZ->GetMean()));
+    lGen1D.DrawLatex(0.40, 0.34, Form("#sigma_{Z} = %.3f mm", h1GenZ->GetRMS()));
+    
+
+    
+    gStyle->SetPaperSize(17.6, 8.8);
     c9->SaveAs(Form("%s/verify_gen_vertex.root", inputPath.Data()));
     c9->SaveAs(Form("%s/verify_gen_vertex.pdf",  inputPath.Data()));
+    gStyle->SetPaperSize(20.0, 26.0);
 
     // Write the generator histograms into the same root file
     TFile *fGen = TFile::Open(Form("%s/verify_gen_vertex.root", inputPath.Data()), "UPDATE");
