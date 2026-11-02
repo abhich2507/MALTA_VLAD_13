@@ -1,0 +1,46 @@
+This is BibTeX, Version 0.99d (TeX Live 2025)
+Capacity: max_strings=200000, hash_size=200000, hash_prime=170003
+The top-level auxiliary file: FMT_sum.aux
+The style file: spphys.bst
+Database file #1: Fmtref.bib
+You've used 11 entries,
+            2812 wiz_defined-function locations,
+            691 strings with 6569 characters,
+and the built_in function-call counts, 3826 in all, are:
+= -- 258
+> -- 104
+< -- 0
++ -- 42
+- -- 31
+* -- 243
+:= -- 471
+add.period$ -- 14
+call.type$ -- 11
+change.case$ -- 0
+chr.to.int$ -- 0
+cite$ -- 11
+duplicate$ -- 409
+empty$ -- 389
+format.name$ -- 40
+if$ -- 863
+int.to.chr$ -- 0
+int.to.str$ -- 11
+missing$ -- 105
+newline$ -- 55
+num.names$ -- 11
+pop$ -- 128
+preamble$ -- 1
+purify$ -- 0
+quote$ -- 0
+skip$ -- 94
+stack$ -- 0
+substring$ -- 131
+swap$ -- 249
+text.length$ -- 0
+text.prefix$ -- 0
+top$ -- 0
+type$ -- 0
+warning$ -- 0
+while$ -- 19
+width$ -- 13
+write$ -- 123

@@ -326,7 +326,7 @@ void BkgEff(int withCoin = 0, const char* resDir = "Results", const char* outDir
     eicLine->SetLineWidth(2);
     eicLine->Draw();
 
-    legendEntries.push_back({true, 1, kRed, 0, kDashed, kRed, 2, "EIC bkg rate (#lambda= 1.584)"});
+    legendEntries.push_back({true, 1, kRed, 0, kDashed, kRed, 2, "EIC background rate (#lambda= 1.584)"});
 
     DrawLatexLegend(legendEntries, 0.37, 0.34, 0.035, 0.04);
 
