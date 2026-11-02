@@ -35,7 +35,9 @@ PrimaryGenerator::PrimaryGenerator(const SimFlags* flags) : m_flag(flags), m_par
             throwError("PrimaryGenerator::PrimaryGenerator", "Sampling Failure",
                        "particleEnergy '" + m_flag->particleEnergy + "' is not a valid number and no energy distribution with this name is implemented.");
         }
-        m_particleGun->SetParticleEnergy(particleEnergy);  //1.4608 * MeV K-40   0.661 * MeV Cs-137
+        m_particleGun->SetParticleEnergy(particleEnergy);  
+        //m_particleGun->SetParticleMomentum(particleEnergy * GeV); // Difference in eff is 0.2% if momentum is set instead of energy.
+         
 
     }
     else if(m_flag->particleEnergy == "log")

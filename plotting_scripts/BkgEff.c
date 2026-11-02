@@ -64,11 +64,11 @@ static std::string GetSignalTitle(const char* resDir)
     else name = particle.empty() ? "signal" : particle;
 
     std::string out = name;
-    if (!energy.empty()) out += " " + energy + " GeV";
+    if (!energy.empty()) out += " " + energy + " GeV/c";
     return out;
 }
 
-// Map planeZ index -> z position [cm] from the geometry file referenced in the run flags.
+// Map planeZ index -> z position [mm] from the geometry file referenced in the run flags.
 static std::map<int, double> GetPlaneZPositions(const char* resDir)
 {
     std::map<int, double> pos;
@@ -270,14 +270,14 @@ void BkgEff(int withCoin = 0, const char* resDir = "Results", const char* outDir
     bool first = true;
 
     std::string signalTitle = GetSignalTitle(resDir);
-    std::map<int, double> planeZcm = GetPlaneZPositions(resDir);
+    std::map<int, double> planeZmm = GetPlaneZPositions(resDir);
 
     for (std::map<int, std::vector<double>>::iterator it = mEff.begin(); it != mEff.end(); ++it)
     {
         int plane = it->first;
         std::vector<double>& eff = it->second;
         TGraphErrors *gr = new TGraphErrors(eff.size(), mCount[plane].data(), eff.data(), nullptr, mEffErr[plane].data());
-        gr->SetTitle("Hit Efficiency vs Background Rate;Background rate #lambda [particles/event];Signal-only efficiency [%]");
+        gr->SetTitle("Hit Efficiency vs Background Rate;Background rate #lambda [particles/event];Signal efficiency [%]");
         gr->SetMarkerStyle(styles[colIdx % 6]);
         gr->SetMarkerSize(1.6);
         gr->SetMarkerColor(colors[colIdx % 6]);
@@ -295,7 +295,7 @@ void BkgEff(int withCoin = 0, const char* resDir = "Results", const char* outDir
         {
             gr->Draw("P SAME");
         }
-        std::string label = planeZcm.count(plane) ? Form("plane %d (z = %.0f cm)", plane, planeZcm[plane])
+        std::string label = planeZmm.count(plane) ? Form("plane %d (z = %.0f mm)", plane, planeZmm[plane]*10.)
                                                   : Form("plane %d", plane);
         legendEntries.push_back({false, styles[colIdx % 6], colors[colIdx % 6], 1.5, 1, colors[colIdx % 6], 2, label});
         ++colIdx;

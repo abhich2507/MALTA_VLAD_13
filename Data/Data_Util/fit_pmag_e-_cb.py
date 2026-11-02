@@ -85,7 +85,7 @@ TLatex = ROOT.TLatex()
 TLatex.SetNDC()
 TLatex.SetTextFont(42)
 TLatex.SetTextSize(0.048)
-TLatex.DrawLatex(0.55, 0.90, f"#chi^{2} / ndf = {chi2:.3g}/{ndf} = {chi2/ndf:.3g}")
+TLatex.DrawLatex(0.55, 0.90, f"#chi^{{2}} / ndf = {chi2:.3g}/{ndf} = {chi2/ndf:.3g}")
 TLatex.DrawLatex(0.55, 0.83, f"p-value = {r.Prob():.3g}")
 TLatex.DrawLatex(0.55, 0.76, f"#mu = {cb.GetParameter(1):.3g} #pm {cb.GetParError(1):.3g}")
 

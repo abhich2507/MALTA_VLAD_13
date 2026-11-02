@@ -1,13 +1,13 @@
 # Fdb version 4
-["bibtex FMT_sum"] 1793593891.94241 "FMT_sum.aux" "FMT_sum.bbl" "FMT_sum" 1793593893.6194 0
+["bibtex FMT_sum"] 1793593891.94241 "FMT_sum.aux" "FMT_sum.bbl" "FMT_sum" 1793634877.33033 0
   "./Fmtref.bib" 1793556538.98024 5924 a9cc1b9c80c24dc6190990de9c803dd0 ""
   "./spphys.bst" 1793556538.97593 28600 1a2e9515055a3f496c0942d26adea55d ""
-  "FMT_sum.aux" 1793593893.42181 9582 5d2315952a2a96170dd37e7b368d4725 "pdflatex"
+  "FMT_sum.aux" 1793634877.10517 9582 5d2315952a2a96170dd37e7b368d4725 "pdflatex"
   (generated)
   "FMT_sum.bbl"
   "FMT_sum.blg"
   (rewritten before read)
-["pdflatex"] 1793593892.0228 "/Users/snip/Documents/MALTA_VLAD_13/malta_simulation/Doc/FMT_EPJC/FMT_sum.tex" "FMT_sum.pdf" "FMT_sum" 1793593893.61955 0
+["pdflatex"] 1793634875.28114 "/Users/snip/Documents/MALTA_VLAD_13/malta_simulation/Doc/FMT_EPJC/FMT_sum.tex" "FMT_sum.pdf" "FMT_sum" 1793634877.33049 0
   "/Users/snip/Documents/MALTA_VLAD_13/malta_simulation/Doc/FMT_EPJC/FMT_sum.tex" 1793588996.0264 25371 afdc8efedf55acaa2b7c3e60ff4c6b24 ""
   "/usr/local/texlive/2025/texmf-dist/fonts/enc/dvips/base/8r.enc" 1165713224 4850 80dc9bab7f31fb78a000ccfed0e27cab ""
   "/usr/local/texlive/2025/texmf-dist/fonts/enc/dvips/cm-super/cm-super-t1.enc" 1136849721 2971 def0b6c1f0b107b3b936def894055589 ""
@@ -113,13 +113,13 @@
   "/usr/local/texlive/2025/texmf-var/web2c/pdftex/pdflatex.fmt" 1741450574 3345740 46b66fdb0378f7bf5921b5eabf1762b8 ""
   "/usr/local/texlive/2025/texmf.cnf" 1741450484 577 418a7058ec8e006d8704f60ecd22c938 ""
   "FMT_geom.png" 1793556538.97842 1329262 b978c8270b4e4298402ad451118a00a6 ""
-  "FMT_sum.aux" 1793593893.42181 9582 5d2315952a2a96170dd37e7b368d4725 "pdflatex"
+  "FMT_sum.aux" 1793634877.10517 9582 5d2315952a2a96170dd37e7b368d4725 "pdflatex"
   "FMT_sum.bbl" 1793593892.01927 2185 64b4d0eca04a5840af96bd4bceb285ed "bibtex FMT_sum"
-  "FMT_sum.out" 1793593893.42763 2083 8ae50983e52093160fb7f19fbf7a3160 "pdflatex"
+  "FMT_sum.out" 1793634877.10768 2083 8ae50983e52093160fb7f19fbf7a3160 "pdflatex"
   "FMT_sum.tex" 1793588996.0264 25371 afdc8efedf55acaa2b7c3e60ff4c6b24 ""
   "Figures/bkg_eff.pdf" 1793593312.88311 15768 54d3c2480ebea316663b3dd02866f182 ""
   "Figures/electron_cb_par_pmag.pdf" 1793591930.09795 17151 41236cef2582a05db0ce39741970da30 ""
-  "Figures/geom.pdf" 1793557513.42571 78872 00cb532f6ee5a3eab4586028dc72d36b ""
+  "Figures/geom.pdf" 1793634782.69782 103925 792c0ee74451ef6eff357182d569449c ""
   "Figures/verify_2D_XY_per_sensor.pdf" 1793590430.94679 47383 65c2a6234dfff7877298dcca67aaecd9 ""
   "Figures/verify_gen_vertex.pdf" 1793561265.83952 31478 47ac1d8439040fa0e1d0a6cfaefc596f ""
   "MALTA2_module_electrical.png" 1793556538.98491 3190934 1751b860e0783614fa5df550dd3e0a8c ""
