@@ -265,54 +265,35 @@ void verifySensorHits(int runNumber = 0, int numThreads = 6)
     c6->SaveAs(Form("%s/verify_3D_AllSensors.root", inputPath.Data()));
 
     // ============================================================
-    // CANVAS 7: 2D XY hit map per sensor (bird's eye view)
+    // CANVAS 7: 2D XY hit maps, one canvas per plane (glued pads, shared axes, one palette)
     // ============================================================
-    TCanvas *c7 = new TCanvas("c7", "2D XY Hit Maps", 1760, 880);   // 17.6 x 8.8 cm (EPJC double column)
-    c7->Divide(4, 2);
+    // Shared y window [mm] (identical for all sensors).
+    const double shYmin = -10.0, shYmax = 10.0;
 
     std::map<int, TH2D*> h2XY;
-    // Tick spacing in mm — change this one value to use any interval.
-    const double tickInterval = 5.0;
-    // Exact global window in mm, rounded to 2 decimal places (no floor/ceil).
-    double syMin = std::round((detectorYOffset - detectorSizeY/2) * 1000.0) / 100.0;
-    double syMax = std::round((detectorYOffset + detectorSizeY/2) * 1000.0) / 100.0;
     for (int idx = 0; idx < allIDs.size(); idx++)
     {
         int id = allIDs[idx];
-        // global X window in mm = true sensor edges, rounded to 2 decimals
-        double cx    = sensorXCenter[id];
-        double sxMin = std::round((cx - detectorSizeX/2) * 1000.0) / 100.0;
-        double sxMax = std::round((cx + detectorSizeX/2) * 1000.0) / 100.0;
-        h2XY[id] = new TH2D(Form("h2XY_%d", id),
-                             ";X [mm];Y [mm]",   // global coordinates
-                             128, sxMin, sxMax,
-                             128, syMin, syMax);
-        h2XY[id]->SetStats(0);   // remove the statistics box
-
-        // number of divisions at the requested interval
-        int xNdiv = (int)std::lround((sxMax - sxMin) / tickInterval);
-        int yNdiv = (int)std::lround((syMax - syMin) / tickInterval);
-        h2XY[id]->GetXaxis()->SetNdivisions(xNdiv, kFALSE);
-        h2XY[id]->GetYaxis()->SetNdivisions(yNdiv, kFALSE);
-        h2XY[id]->GetXaxis()->SetDecimals(kTRUE);
-        h2XY[id]->GetYaxis()->SetDecimals(kTRUE);
-
-        // EPJC: Helvetica; tick labels ~8 pt (0.065), titles ~9.3 pt (0.075)
-        h2XY[id]->GetXaxis()->SetTitleSize(0.075);
+        // each sensor keeps its own global x strip -> continuous global x from left to right
+        double sxMin = (sensorXCenter[id] - detectorSizeX/2) * 10.0;   // mm
+        double sxMax = (sensorXCenter[id] + detectorSizeX/2) * 10.0;   // mm
+        h2XY[id] = new TH2D(Form("h2XY_%d", id), ";X [mm];Y [mm]",
+                            128, sxMin, sxMax, 40, shYmin, shYmax);
+        h2XY[id]->SetStats(0);
         h2XY[id]->GetXaxis()->SetTitleFont(42);
-        h2XY[id]->GetXaxis()->SetTitleOffset(1.1);
-        h2XY[id]->GetXaxis()->SetLabelSize(0.065);
         h2XY[id]->GetXaxis()->SetLabelFont(42);
-        h2XY[id]->GetYaxis()->SetTitleSize(0.075);
+        h2XY[id]->GetXaxis()->SetTitleSize(0.08);
+        h2XY[id]->GetXaxis()->SetLabelSize(0.05);
+        h2XY[id]->GetXaxis()->SetTitleOffset(1.1);
         h2XY[id]->GetYaxis()->SetTitleFont(42);
-        h2XY[id]->GetYaxis()->SetTitleOffset(1.45);
-        h2XY[id]->GetYaxis()->SetLabelSize(0.065);
         h2XY[id]->GetYaxis()->SetLabelFont(42);
-        h2XY[id]->GetYaxis()->SetLabelOffset(0.015);
-        h2XY[id]->GetZaxis()->SetLabelSize(0.065);    // palette labels, same 8 pt
+        h2XY[id]->GetYaxis()->SetTitleSize(0.08);
+        h2XY[id]->GetYaxis()->SetLabelSize(0.05);
+        h2XY[id]->GetYaxis()->SetTitleOffset(1.3);
+        h2XY[id]->GetZaxis()->SetLabelSize(0.06);
     }
 
-    // Second pass for 2D fill (or reuse data)
+    // Fill the histograms (global coordinates in mm)
     for (Long64_t i = 0; i < nEntries; i++)
     {
         chain->GetEntry(i);
@@ -322,38 +303,67 @@ void verifySensorHits(int runNumber = 0, int numThreads = 6)
         h2XY[iPlane]->Fill(realX, realY);
     }
 
-    // compact x10^3 notation for the hit-count palette (S1/S2 reach ~8x10^3)
-    TGaxis::SetMaxDigits(3);
-
-    for (int idx = 0; idx < allIDs.size(); idx++)
+    // One canvas per plane; the four pads are glued side by side.
+    int planeBase[2] = {0, 10000};
+    for (int p = 0; p < 2; p++)
     {
-        int id = allIDs[idx];
-        c7->cd(idx + 1);
+        int id0 = planeBase[p];
 
-        // EPJC margins: enough room for 8 pt labels
-        gPad->SetLeftMargin(0.20);
-        gPad->SetRightMargin(0.18);
-        gPad->SetBottomMargin(0.16);
-        gPad->SetTopMargin(0.12);
+        // common colour scale: max over the four sensors of this plane
+        double zmax = 1.0;
+        for (int s = 0; s < 4; s++)
+        {
+            double m = h2XY[id0 + s]->GetMaximum();
+            if (m > zmax) zmax = m;
+        }
 
-        h2XY[id]->Draw("COLZ");
+        TCanvas* c = new TCanvas(Form("c2d_plane%d", p), Form("2D hits, plane %d", p), 1760, 500);
+        c->Divide(4, 1);
 
-        // sensor label in the top region (replaces title + stat box)
-        // plane 0 -> S0..S3, plane 1 -> S100..S103
-        TString sLabel = (id < 10000) ? Form("S%d", id)
-                                      : Form("S%d", 100 + (id % 100));
-        TLatex l;
-        l.SetNDC();
-        l.SetTextFont(62);    // bold Helvetica
-        l.SetTextSize(0.08);  // ~10 pt
-        l.SetTextAlign(22);   // centred horizontally and vertically
-        l.DrawLatex(0.5, 0.95, sLabel);
+        for (int s = 0; s < 4; s++)
+        {
+            TH2D* h = h2XY[id0 + s];
+            c->cd(s + 1);
+            gPad->SetLogz(1);          // log colour scale: few hits to many hits
+
+            // glue the four pads side by side; margins only on the outer edges
+            gPad->SetLeftMargin(s == 0 ? 0.14 : 0.0);
+            gPad->SetRightMargin(s == 3 ? 0.16 : 0.0);
+            gPad->SetBottomMargin(0.18);
+            gPad->SetTopMargin(0.10);
+
+            h->SetMinimum(0.1);        // > 0 required for log z
+            h->SetMaximum(zmax);       // shared colour scale across the plane
+
+            if (s > 0)
+            {
+                // single shared y-axis: no y title / ticks on the other pads
+                h->GetYaxis()->SetTitleSize(0);
+                h->GetYaxis()->SetLabelSize(0);
+                // single x title: keep it only on the left-most pad
+                h->GetXaxis()->SetTitleSize(0);
+            }
+
+            if (s == 3)
+                h->Draw("COLZ");   // single shared palette on the right-most pad
+            else
+                h->Draw("COL");
+
+            // sensor label
+            TString sLabel = (id0 < 10000) ? Form("S%d", s) : Form("S%d", 100 + s);
+            TLatex l;
+            l.SetNDC();
+            l.SetTextFont(62);
+            l.SetTextSize(0.14);
+            l.SetTextAlign(22);
+            l.DrawLatex(0.5, 0.90, sLabel);
+        }
+
+        gStyle->SetPaperSize(17.6, 5.0);   // exact EPJC double-column width
+        c->SaveAs(Form("%s/verify_2D_XY_plane%d.root", inputPath.Data(), p));
+        c->SaveAs(Form("%s/verify_2D_XY_plane%d.pdf",  inputPath.Data(), p));
+        gStyle->SetPaperSize(20.0, 26.0);  // restore ROOT default
     }
-    gStyle->SetPaperSize(17.6, 8.8);   // exact EPJC double-column PDF size (cm)
-    c7->SaveAs(Form("%s/verify_2D_XY_per_sensor.root", inputPath.Data()));
-    c7->SaveAs(Form("%s/verify_2D_XY_per_sensor.pdf",  inputPath.Data()));
-    gStyle->SetPaperSize(20.0, 26.0);  // restore ROOT default
-    TGaxis::SetMaxDigits(5);   // restore the default digit threshold
 
     // ============================================================
     // CANVAS 8: Energy deposition 2D per sensor (pixel-level)

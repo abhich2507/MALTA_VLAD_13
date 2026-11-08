@@ -2,35 +2,51 @@
 
 % The charge collection of the MALTA2 pixel has been derived from testbeam data \cite{MALTA2_CCParameterization}.
 % A parametric simulation approach is used that has been validated against data \cite{FastSim}.
-As discussd in section (ref section 3.1) and shoen in Fig.2 (ref fig2) a quad module made of four MALTA2 sensors in series is simulated in GEANT4.
+As discussed in section (ref section 3.1) and shown in Fig.3 (ref fig2) a quad module made of four MALTA2 sensors in series is simulated in GEANT4.
 Each sensor is identical and placed horizontally adjacent to each other, as shown in Fig.~\ref{fig:geom}.
 Each MALTA2 sensor is implemented in a data-driven fast simulation method. 
 A detailed characterization and implementation of this fast simulation approach is described in Ref.~\cite{FastSim}.
 This study primararily focuses on the abilty of reconstruction of signals (pions) by the MALTA2 sensors in the presence of background particles, 
-mostly electrons and positrons, that are expected to be present near the beam-pipe of EIC. A detailed studey of the background rate and 
-its impact on the performance of the MALTA2 sensors is presented in the following subsections.
+mostly electrons and positrons, that are expected to be present near the beam-pipe of EIC. A detailed study of the background rate and 
+its impact on the reconstruction efficiency of the MALTA2 sensors is presented in the following subsections.
 
 \subsection{Telescope geometry and setup in simulation}\label{sec:geometry}
 Each quad module consists of four MALTA2 sensors placed side by side in the $xy$ plane as shown in Fig.~\ref{fig:geom} with
 negligible gap of $ \approx$1$\mu m$. 
 The sensor positions are listed in Table~\ref{tab:geom}. A 29 $\mu m$ thick silicon layer is used to construct sensor and 
-it is defined as senstive detector volume in GEANT4. Both Elecromagnetism and Hadronic physics list are being used her to used in
-this simulation. We used GEANT4 particle gun to generate signal particles in a longitudinal direction
-and it is centered at (18.64, 0.0, -1000.0) mm.
+it is defined as senstive detector volume in GEANT4. Both Elecromagnetism and Hadronic physics list are being used here in
+this simulation. A particle gun is used to generate signal particles in a longitudinal direction
+and it is centered at (18.64, 0.0, -1000.0) mm. 
 \begin{equation}
     D^{0} \rightarrow K^{-} \pi^{+}, \qquad \bar{D}^{0} \rightarrow K^{+} \pi^{-}.
     \label{eq:d0decay}
 \end{equation}
-Positive charged Pions are used as our signal particles since they are decay-products of $D^{0}$ as shown in Eq.~\ref{eq:d0decay}.
-Signal-beam particles are generated from a three-dimensional Gaussian distribution, with standard deviations of 0.5~mm in $x$ and $y$ and 100~mm in $z$.
-The generated vertex distribution is shown in Fig.~\ref{fig:genXYZ}. This signal beam particle deposits energy in the sensor and 
-the charge collection is simulated using the data-driven fast simulation method described in Ref.~\cite{FastSim}.
-The two-dimensional distribution of raw hits is shown in Fig.~\ref{fig:rawhits2D}. After that this 
-charge is digitized and the hit information is stored in a ROOT file for further analysis. 
-Signal beam has a veto of \SI{2}{\micro\second} (cite Xuan arxiv paper \href{https://arxiv.org/html/2410.00837v1})
-and energy of 1 GeV and this is taken from the fact that EIC has bunch-crossing of 10.2 ns but signal only produces every \SI{2}{\micro\second}.
+Positive charged Pions are used as signal particles since they are decay-products of $D^{0}$ as shown in Eq.~\ref{eq:d0decay} and 
+that is one of benchmark for track reconstruction at EIC. (we need more rigrous justification)
+Pions (signal) are generated from a three-dimensional Gaussian distribution, with standard deviations of 0.5~mm in $x$ and $y$ and 100~mm in $z$.
+The generated vertex distribution is shown in Fig.~\ref{fig:genXYZ}. These particles deposits energy in the sensor. The two-dimensional distribution 
+of raw hits is shown in Fig.~\ref{fig:rawhits2D} and deposited energy will modeled as charge collection and that is simulated using the data-driven fast 
+simulation method described in Ref.~\cite{FastSim}. Along with charge collection, a paramteric model for time-walk is used here to simulate realistic MALTA2 
+sensor timing and it is explained in Ref.~\cite{FastSim}. 
+
+MALTA Readout: An asynchronous readout architecture is used for storing hit information. Sensor is divided into 512 x 512 pixels and those pixels 
+are further grouped into groups and rows. 
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\textwidth]{Figures/Readout.png}
+    \caption{%
+        MALTA sensor: the $512 \times 512$ pixels are grouped into columns and rows.
+        The asynchronous readout architecture is described in \url{https://cds.cern.ch/record/2691881/files/10.1088_1748-0221_14_06_C06019.pdf}.
+    }
+    \label{fig:readout}
+\end{figure}
+
+The collected charge is digitized by enconding hits into 32-Bit words and merging withing 1.6 ns window and 
+later decoded to get digtized infor. The raw hit and digitized information is stored in different ROOT files for 
+further analysis. Signal beam has a veto of \SI{2}{\micro\second} (cite Xuan arxiv paper \href{https://arxiv.org/html/2410.00837v1}) 
+this is taken from the fact that EIC has bunch-crossing of 10.2 ns but signal only produces every \SI{2}{\micro\second}. The energy of signal 
 These signal particles are reconstructed by the sensors in both planes and those hits are matched with generated truth tracks both spatially
-and temporarily window. If a Hit (X,Y) on sensor is with in radius of 100 $\mu$m and within 500 $ns$ time window. It will be matched with
+and temporarily window. If a Hit (X,Y) on sensor is with in radius of 100 $\mu$m and within 500 $ns$ time window with refernce to generated truth. It will be matched with
 generated truth and defined as Hit matching. We define a hit efficiency as the ratio of the number of signal particles that are reconstructed by the sensor to the total number of signal particles
 generated in the simulation. Without any bcakground and signal hit efficiency for 1 GeV Pion is $\approx~96.8\%$. The efficiency here is 
 lost in two component firsr major compnent is pion's short life-time. A 1 GeV Pion has probability of decay $\approx~1.6\%$. Second compoenent
@@ -44,7 +60,7 @@ efficiency is $\approx~99\%$ for the plane 0.
     \caption{%
         MALTA QUAD Module geometry: eight $18.6 \times 18.6$~mm$^{2}$ silicon sensors in two planes separated by 100~mm.
         Red: \SI{1}{GeV} $\pi^{+}$ signal beam generated at $z = -1000$~mm and focused on the second sensor (S1 \& S101) of each plane.
-        Blue dashed: randomly generated background $e^{-}/e^{+}$.
+        Blue dashed: randomly generated background $e^{\pm}$.
     }
     \label{fig:geom}
 \end{figure}
@@ -79,7 +95,7 @@ efficiency is $\approx~99\%$ for the plane 0.
 
 \begin{figure*}[t]
     \centering
-    \includegraphics[width=\textwidth]{Figures/verify_2D_XY_per_sensor.pdf}
+    \includegraphics[width=\textwidth]{Figures/verify_2D_XY_both_planes.pdf}
     \caption{%
         Two-dimensional distribution of raw hits in the eight MALTA2 sensors.
         The top row shows sensors S0--S3 of the first plane (0) and the bottom row sensors S100--S103 of the second plane (1).
