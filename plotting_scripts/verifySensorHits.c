@@ -20,7 +20,7 @@
 #include <map>
 #include <cmath>
 
-void verifySensorHits(int runNumber = 0, int numThreads = 6)
+void verifySensorHits(int runNumber = 0, int numThreads = 6, const char* resDir = "Results_pi1GeV")
 {
     gStyle->SetOptStat(1111);
     gStyle->SetPalette(kRainBow);
@@ -79,7 +79,7 @@ void verifySensorHits(int runNumber = 0, int numThreads = 6)
     // ============================================================
     // Load data
     // ============================================================
-    TString inputPath = Form("./Results_pi1GeV/local_%04d/", runNumber);
+    TString inputPath = Form("./%s/local_%04d/", resDir, runNumber);
     std::cout << "Loading data from: " << inputPath << std::endl;
     TChain *chain = new TChain("RawPixelHits");
     for (int t = 0; t < numThreads; t++)

@@ -155,7 +155,7 @@ G4bool SensitiveDetector::ProcessHits(G4Step *aStep, G4TouchableHistory *)
         effAn[1] = 0;
     }
 
-    if(pixX == 511 && (quadrantFlag & 0x1) )
+    if(pixX == m_flag->nPixX - 1 && (quadrantFlag & 0x1) )
     {
         //effAn[0]+=effAn[1];
         effAn[2] = 0;
@@ -171,7 +171,7 @@ G4bool SensitiveDetector::ProcessHits(G4Step *aStep, G4TouchableHistory *)
         effAn[2] = 0;
     }
 
-    if(pixY == 511 && (quadrantFlag & (1 << 1)) )
+    if(pixY == m_flag->nPixY - 1 && (quadrantFlag & (1 << 1)) )
     {
         //effAn[0]+=effAn[2];
         effAn[1] = 0;
@@ -180,7 +180,7 @@ G4bool SensitiveDetector::ProcessHits(G4Step *aStep, G4TouchableHistory *)
     }
     
     
-    if (pixX < 0 || pixX >= 512 || pixY < 0 || pixY >= 512)
+    if (pixX < 0 || pixX >= m_flag->nPixX || pixY < 0 || pixY >= m_flag->nPixY)
         return false;
 
 

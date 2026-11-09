@@ -17,6 +17,8 @@ struct SimFlags
     float pixelSize = 0.;
     float detectorSizeX =0.;
     float detectorSizeY =0.;
+    int nPixX = 512; // number of pixels along X (columns); 512 for MALTA1, 512 for MALTA2
+    int nPixY = 512; // number of pixels along Y (rows); 512 for MALTA1, 224 for MALTA2
     float detectorDepth =0.;
     float CCModelSigmaX =0.;
     float CCModelSigmaY =0.;

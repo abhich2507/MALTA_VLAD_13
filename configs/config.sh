@@ -1,1 +1,1 @@
-export LOCAL_PATH=/Users/snip/Documents/MALTA_VLAD_13/malta_simulation/
+export LOCAL_PATH="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/"
