@@ -31,15 +31,15 @@ sensor timing and it is explained in Ref.~\cite{FastSim}.
 
 MALTA Readout: An asynchronous readout architecture is used for storing hit information. Sensor is divided into 512 x 512 pixels and those pixels 
 are further grouped into groups and rows. 
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.5\textwidth]{Figures/Readout.png}
-    \caption{%
-        MALTA sensor: the $512 \times 512$ pixels are grouped into columns and rows.
-        The asynchronous readout architecture is described in \url{https://cds.cern.ch/record/2691881/files/10.1088_1748-0221_14_06_C06019.pdf}.
-    }
-    \label{fig:readout}
-\end{figure}
+% \begin{figure}[H]
+%     \centering
+%     \includegraphics[width=0.5\textwidth]{Figures/Readout.png}
+%     \caption{%
+%         MALTA sensor: the $512 \times 512$ pixels are grouped into columns and rows.
+%         The asynchronous readout architecture is described in \url{https://cds.cern.ch/record/2691881/files/10.1088_1748-0221_14_06_C06019.pdf}.
+%     }
+%     \label{fig:readout}
+% \end{figure}
 
 The collected charge is digitized by enconding hits into 32-Bit words and merging withing 1.6 ns window and 
 later decoded to get digtized infor. The raw hit and digitized information is stored in different ROOT files for 
@@ -127,12 +127,12 @@ To determine the peak background rate, the highest hit sensor was chosen out of 
 
 Fig. \ref{fig:pdg_background} displays the PDG codes of the background hits at the Forward MPGD disk at z = 1415 mm. From this plot, it is clear that the primary background particles in this region are electrons (PDG = 11), positrons (PDG = -11), and photons (PDG = 22).
 
-\begin{figure}
+\begin{figure*}
     \centering
     \includegraphics[width=0.75\linewidth]{Figures/EIC_current_background_AprilFULL.png}
     \caption{Expected background distributions for one MALTA2 sensor at 1415 mm from the collision point. Top left: 2D histogram of hits in the x- and y- dimensions; Top right: x-projection of hits; Bottom left: y-projection of hits; Bottom right: momentum magnitude distribution}
     \label{fig:expected_sensor_background}
-\end{figure}
+\end{figure*}
 \begin{figure}
     \centering
     \includegraphics[width=0.5\linewidth]{Figures/MCParticles_1415_PDG_50files.png}
@@ -181,7 +181,7 @@ in hit efficiency.
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=\linewidth]{Figures/eff_vs_energy.pdf}
+    \includegraphics[width=\linewidth]{Figures/momentum_eff.pdf}
     \caption{%
         Hit efficiency as a function of the signal momentum.
         Background rate is fixed at EIC background rate $\lambda = 1.584\mathrm{particles/event}$ 
