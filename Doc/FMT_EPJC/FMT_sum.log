@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.27 (TeX Live 2025) (preloaded format=pdflatex 2025.3.8)  8 NOV 2026 13:25
+This is pdfTeX, Version 3.141592653-2.6-1.40.27 (TeX Live 2025) (preloaded format=pdflatex 2025.3.8)  8 NOV 2026 15:04
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -609,8 +609,8 @@ Underfull \hbox (badness 2035) in paragraph at lines 40--40
  []
 
 
-Underfull \hbox (badness 2617) in paragraph at lines 40--40
-\T1/ptm/m/n/8.5 columns and groups. The asyn-chronous read-out ar-chi-tec-ture is
+Underfull \hbox (badness 5203) in paragraph at lines 40--40
+\T1/ptm/m/n/8.5 columns and rows. The asyn-chronous read-out ar-chi-tec-ture is
  []
 
 
@@ -629,17 +629,17 @@ Underfull \hbox (badness 10000) has occurred while \output is active
  []
 
 [4]
-LaTeX Font Info:    Trying to load font information for TS1+ptm on input line 48.
+LaTeX Font Info:    Trying to load font information for TS1+ptm on input line 46.
  (/usr/local/texlive/2025/texmf-dist/tex/latex/psnfss/ts1ptm.fd
 File: ts1ptm.fd 2001/06/04 font definitions for TS1/ptm.
 )
 <Figures/geom.pdf, id=168, 613.48196pt x 319.6442pt>
 File: Figures/geom.pdf Graphic file (type pdf)
 <use Figures/geom.pdf>
-Package pdftex.def Info: Figures/geom.pdf  used on input line 61.
+Package pdftex.def Info: Figures/geom.pdf  used on input line 59.
 (pdftex.def)             Requested size: 247.5pt x 128.95769pt.
 
-Overfull \hbox (8.53583pt too wide) in paragraph at lines 61--66
+Overfull \hbox (8.53583pt too wide) in paragraph at lines 59--64
  [][] 
  []
 
@@ -651,29 +651,29 @@ Underfull \vbox (badness 10000) has occurred while \output is active []
 <Figures/verify_gen_vertex.pdf, id=169, 500.87125pt x 242.9075pt>
 File: Figures/verify_gen_vertex.pdf Graphic file (type pdf)
 <use Figures/verify_gen_vertex.pdf>
-Package pdftex.def Info: Figures/verify_gen_vertex.pdf  used on input line 90.
+Package pdftex.def Info: Figures/verify_gen_vertex.pdf  used on input line 88.
 (pdftex.def)             Requested size: 238.96417pt x 115.89003pt.
 <Figures/verify_2D_XY_both_planes.pdf, id=170, 447.19069pt x 267.63991pt>
 File: Figures/verify_2D_XY_both_planes.pdf Graphic file (type pdf)
 <use Figures/verify_2D_XY_both_planes.pdf>
-Package pdftex.def Info: Figures/verify_2D_XY_both_planes.pdf  used on input line 100.
+Package pdftex.def Info: Figures/verify_2D_XY_both_planes.pdf  used on input line 98.
 (pdftex.def)             Requested size: 495.0pt x 296.2507pt.
 
 
 [5{/usr/local/texlive/2025/texmf-dist/fonts/enc/dvips/cm-super/cm-super-t1.enc} <./Figures/Readout.png> <./Figures/geom.pdf> <./Figures/verify_gen_vertex.pdf, page is rotated 90 degrees>]
-Overfull \hbox (1.91383pt too wide) in paragraph at lines 122--123
+Overfull \hbox (1.91383pt too wide) in paragraph at lines 120--121
 []\T1/ptm/m/n/10 Identify max-i-mum ex-pected back-ground hit rate per sam-
  []
 
 
-Overfull \hbox (8.10081pt too wide) in paragraph at lines 127--134
+Overfull \hbox (8.10081pt too wide) in paragraph at lines 125--132
 \T1/ptm/m/n/10 ground mo-men-tum in ev-ery $\OT1/ztmcm/m/n/10 2$$[]$ \T1/ptm/m/n/10 win-dow via inverse-transform
  []
 
 <Figures/electron_cb_par_pmag.pdf, id=250, 569.12625pt x 349.305pt>
 File: Figures/electron_cb_par_pmag.pdf Graphic file (type pdf)
 <use Figures/electron_cb_par_pmag.pdf>
-Package pdftex.def Info: Figures/electron_cb_par_pmag.pdf  used on input line 138.
+Package pdftex.def Info: Figures/electron_cb_par_pmag.pdf  used on input line 136.
 (pdftex.def)             Requested size: 238.96417pt x 146.66978pt.
 
 
@@ -688,16 +688,26 @@ Underfull \hbox (badness 10000) has occurred while \output is active
 <Figures/bkg_eff.pdf, id=347, 569.12625pt x 408.52625pt>
 File: Figures/bkg_eff.pdf Graphic file (type pdf)
 <use Figures/bkg_eff.pdf>
-Package pdftex.def Info: Figures/bkg_eff.pdf  used on input line 158.
+Package pdftex.def Info: Figures/bkg_eff.pdf  used on input line 156.
 (pdftex.def)             Requested size: 238.96417pt x 171.53621pt.
+<Figures/eff_vs_energy.pdf, id=348, 569.12625pt x 408.52625pt>
+File: Figures/eff_vs_energy.pdf Graphic file (type pdf)
+<use Figures/eff_vs_energy.pdf>
+Package pdftex.def Info: Figures/eff_vs_energy.pdf  used on input line 166.
+(pdftex.def)             Requested size: 238.96417pt x 171.53621pt.
+
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+
+
 )
-
-
 Overfull \hbox (0.38414pt too wide) in paragraph at lines 218--219
 \T1/ptm/m/n/10 fice of Sci-ence, Of-fice of Work-force De-vel-op-ment for Teach-
  []
 
 (./FMT_sum.bbl
+
+[7 <./Figures/bkg_eff.pdf, page is rotated 90 degrees> <./Figures/eff_vs_energy.pdf, page is rotated 90 degrees>]
 Underfull \hbox (badness 3098) in paragraph at lines 29--32
 []\T1/ptm/m/n/10 H.T. Li, I. Vitev, Phys. Rev. Lett. \T1/ptm/b/n/10 126\T1/ptm/m/n/10 , 252001
  []
@@ -723,8 +733,6 @@ Underfull \hbox (badness 1092) in paragraph at lines 39--41
  []
 
 
-
-[7 <./Figures/bkg_eff.pdf, page is rotated 90 degrees>]
 Underfull \hbox (badness 5245) in paragraph at lines 43--46
 []\T1/ptm/m/n/10 H. Perneg-ger, et al., Jour-nal of In-stru-men-ta-tion
  []
@@ -758,27 +766,39 @@ Underfull \hbox (badness 2735) in paragraph at lines 52--54
 
 
 
-[leftcolumn badness]: 1000000 on 11.7783pt
-[rightcolumn badness]: 1000000 on 11.7783pt
-[leftcolumn badness]: 1000000 on 11.7783pt
-[rightcolumn badness]: 1000000 on 11.7783pt
-[leftcolumn badness]: 1000000 on 11.7783pt
-[rightcolumn badness]: 1000000 on 11.7783pt
-[leftcolumn badness]: 1000000 on 11.7783pt
-[rightcolumn badness]: 1000000 on 11.7783pt
-[leftcolumn badness]: 1000000 on 11.7783pt
-[rightcolumn badness]: 1000000 on 11.7783pt
+[leftcolumn badness]: 1000000 on 25.54323pt
+[rightcolumn badness]: 1000000 on 25.54323pt
+[leftcolumn badness]: 1000000 on 25.54323pt
+[rightcolumn badness]: 1000000 on 25.54323pt
+[leftcolumn badness]: 1000000 on 25.54323pt
+[rightcolumn badness]: 1000000 on 25.54323pt
+[leftcolumn badness]: 1000000 on 25.54323pt
+[rightcolumn badness]: 1000000 on 25.54323pt
+[leftcolumn badness]: 1000000 on 25.54323pt
+[rightcolumn badness]: 1000000 on 25.54323pt
+[leftcolumn badness]: 1000000 on 25.54323pt
+[rightcolumn badness]: 1000000 on 25.54323pt
+[leftcolumn badness]: 1000000 on 25.54323pt
+[rightcolumn badness]: 1000000 on 25.54323pt
+[leftcolumn badness]: 1000000 on 25.54323pt
+[rightcolumn badness]: 1000000 on 25.54323pt
+[leftcolumn badness]: 1000000 on 25.54323pt
+[rightcolumn badness]: 1000000 on 25.54323pt
+[leftcolumn badness]: 1000000 on 25.54323pt
+[rightcolumn badness]: 1000000 on 25.54323pt
+[leftcolumn badness]: 1000000 on 25.54323pt
+[rightcolumn badness]: 1000000 on 25.54323pt
 - LAST -
-Extra skip:12.5pt
-Left:85.0pt/1.49998pt
-Right:72.5pt/1.49998pt
-Split: 85.0pt
-Output:85.0pt
+Extra skip:24.40001pt
+Left:221.23508pt/2.16492pt
+Right:197.5pt/1.49998pt
+Split: 221.61754pt
+Output:221.61754pt
 Pageshrink: 0.0pt
 Pagestretch: 0.0pt
 @colht:665.79448pt
-FLUSHEND [output]: 85.0pt
-FLUSHEND [leftcolumn badness]: 0
+FLUSHEND [output]: 221.61754pt
+FLUSHEND [leftcolumn badness]: 10000
 FUSHEND [rightcolumn badness]: 10000
 
 Underfull \hbox (badness 10000) has occurred while \output is active
@@ -799,13 +819,13 @@ Package rerunfilecheck Info: File `FMT_sum.out' has not changed.
 (rerunfilecheck)             Checksum: 8AE50983E52093160FB7F19FBF7A3160;2083.
  ) 
 Here is how much of TeX's memory you used:
- 14108 strings out of 473190
- 278980 string characters out of 5715801
- 662259 words of memory out of 5000000
- 37101 multiletter control sequences out of 15000+600000
+ 14117 strings out of 473190
+ 279253 string characters out of 5715801
+ 662410 words of memory out of 5000000
+ 37109 multiletter control sequences out of 15000+600000
  608897 words of font info for 116 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 75i,9n,80p,1678b,1155s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 75i,9n,80p,1678b,1131s stack positions out of 10000i,1000n,20000p,200000b,200000s
 
 pdfTeX warning (dest): name{addr5} has been referenced but does not exist, replaced by a fixed one
 
@@ -822,10 +842,10 @@ pdfTeX warning (dest): name{addr2} has been referenced but does not exist, repla
 pdfTeX warning (dest): name{addr1} has been referenced but does not exist, replaced by a fixed one
 
 </usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/cm-super/sftt0800.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/cm-super/sftt1000.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/urw/symbol/usyr.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/urw/times/utmb8a.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/urw/times/utmr8a.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/urw/times/utmri8a.pfb>
-Output written on FMT_sum.pdf (8 pages, 5854169 bytes).
+Output written on FMT_sum.pdf (8 pages, 5867794 bytes).
 PDF statistics:
- 481 PDF objects out of 1000 (max. 8388607)
- 310 compressed objects within 4 object streams
- 73 named destinations out of 1000 (max. 500000)
- 107 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 526 PDF objects out of 1000 (max. 8388607)
+ 329 compressed objects within 4 object streams
+ 74 named destinations out of 1000 (max. 500000)
+ 112 words of extra memory for PDF output out of 10000 (max. 10000000)
 

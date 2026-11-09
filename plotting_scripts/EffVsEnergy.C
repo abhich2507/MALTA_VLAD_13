@@ -235,7 +235,7 @@ void EffVsEnergy(const char* outDir = "./")
 
     if (p0.empty()) { std::cerr << "No plane-0 data" << std::endl; return; }
 
-    g0->SetTitle("Hit Efficiency vs Signal Energy;Signal energy [GeV];Signal-only efficiency [%]");
+    g0->SetTitle("Hit Efficiency vs Signal Energy;Signal Momentum [GeV/c];Signal efficiency [%]");
     g0->SetMarkerStyle(45);
     g0->SetMarkerSize(1.6);
     g0->SetMarkerColor(kBlue-4);
@@ -284,7 +284,7 @@ void EffVsEnergy(const char* outDir = "./")
     titleLatex->SetTextFont(42);
     titleLatex->SetTextSize(0.05);
     titleLatex->SetTextAlign(22);
-    titleLatex->DrawLatex(0.5, 0.90, "#bf{#pi beam, 1-5 GeV} #lambda = 1.584 particles/event");
+    titleLatex->DrawLatex(0.5, 0.90, "#bf{#pi^{+}} beam, 1-5 GeV/c #lambda = 1.584 particles/event");
 
     gSystem->mkdir(outDir, kTRUE);
     std::string outPng = TString::Format("%s/eff_vs_energy.png", outDir).Data();

@@ -321,6 +321,11 @@ INPUT ./Figures/bkg_eff.pdf
 INPUT ./Figures/bkg_eff.pdf
 INPUT ./Figures/bkg_eff.pdf
 INPUT ./Figures/bkg_eff.pdf
+INPUT ./Figures/eff_vs_energy.pdf
+INPUT ./Figures/eff_vs_energy.pdf
+INPUT ./Figures/eff_vs_energy.pdf
+INPUT ./Figures/eff_vs_energy.pdf
+INPUT ./Figures/eff_vs_energy.pdf
 INPUT ./FMT_sum.bbl
 INPUT ./FMT_sum.bbl
 INPUT FMT_sum.bbl
