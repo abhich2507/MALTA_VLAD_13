@@ -311,6 +311,16 @@ INPUT /usr/local/texlive/2025/texmf-dist/fonts/tfm/public/cm/cmr10.tfm
 INPUT /usr/local/texlive/2025/texmf-dist/fonts/vf/adobe/times/zptmcm7y.vf
 INPUT /usr/local/texlive/2025/texmf-dist/fonts/tfm/public/cm/cmsy10.tfm
 INPUT /usr/local/texlive/2025/texmf-dist/fonts/tfm/public/rsfs/rsfs10.tfm
+INPUT ./Figures/EIC_current_background_AprilFULL.png
+INPUT ./Figures/EIC_current_background_AprilFULL.png
+INPUT ./Figures/EIC_current_background_AprilFULL.png
+INPUT ./Figures/EIC_current_background_AprilFULL.png
+INPUT ./Figures/EIC_current_background_AprilFULL.png
+INPUT ./Figures/MCParticles_1415_PDG_50files.png
+INPUT ./Figures/MCParticles_1415_PDG_50files.png
+INPUT ./Figures/MCParticles_1415_PDG_50files.png
+INPUT ./Figures/MCParticles_1415_PDG_50files.png
+INPUT ./Figures/MCParticles_1415_PDG_50files.png
 INPUT ./Figures/electron_cb_par_pmag.pdf
 INPUT ./Figures/electron_cb_par_pmag.pdf
 INPUT ./Figures/electron_cb_par_pmag.pdf

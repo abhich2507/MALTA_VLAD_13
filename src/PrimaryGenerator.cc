@@ -21,8 +21,14 @@
 PrimaryGenerator::PrimaryGenerator(const SimFlags* flags) : m_flag(flags), m_particleGun(new G4ParticleGun(1)), m_eventCounter(0)
 {
     m_particleGun = new G4ParticleGun(1); // 1 particle per event
-    // Set primary particle energy if a constant value is passed. If not, an energy method is used below
-    if(!m_flag->particleEnergy.empty() && m_flag->particleEnergy != "log")
+    // Set the primary particle momentum (mode 1) or kinetic energy (mode 2).
+    if(!m_flag->particleMomentum.empty())
+    {
+        // pure momentum mode: momentum magnitude in GeV/c, along +Z
+        G4double pMag = std::stod(m_flag->particleMomentum) * GeV;
+        m_particleGun->SetParticleMomentum(G4ThreeVector(0., 0., pMag));
+    }
+    else if(!m_flag->particleEnergy.empty() && m_flag->particleEnergy != "log")
     {
         // Accept any numeric string: integer, decimal, sign, scientific notation
         G4float particleEnergy{};
@@ -350,7 +356,8 @@ void PrimaryGenerator::GeneratePrimaries(G4Event *oneEvent)
             if (ev == signalIndex) 
             {   mcFlag = 0;
                 particleType = m_flag->particleType;
-                energyValue = std::stod(m_flag->particleEnergy) * GeV;
+                if (m_flag->particleMomentum.empty())
+                    energyValue = std::stod(m_flag->particleEnergy) * GeV;
             }
             else
             {   mcFlag = 1;
@@ -381,7 +388,16 @@ void PrimaryGenerator::GeneratePrimaries(G4Event *oneEvent)
                 energyValue = (std::sqrt(p*p + mass*mass) - mass) * GeV; // kinetic E (MeV)
                 G4AnalysisManager::Instance()->FillH1(0, p);           // verify sampled |p| (GeV/c)
             }
-            m_particleGun->SetParticleEnergy(energyValue);
+            if (mcFlag == 0 && !m_flag->particleMomentum.empty())
+            {
+                // pure momentum mode: momentum magnitude in GeV/c, along +Z
+                G4double pMag = std::stod(m_flag->particleMomentum) * GeV;
+                m_particleGun->SetParticleMomentum(G4ThreeVector(0., 0., pMag));
+            }
+            else
+            {
+                m_particleGun->SetParticleEnergy(energyValue);
+            }
         }
 
         G4AnalysisManager *analysisManager = G4AnalysisManager::Instance();

@@ -35,11 +35,11 @@ static std::string Trim(const std::string& s)
     return s.substr(b, e - b + 1);
 }
 
-// Read particleType and particleEnergy from <resDir>/local_0001/flags.cfg and return
-// a ROOT display string for the canvas title, e.g. "#pi^{+} 1 GeV".
+// Read particleType and particleMomentum from <resDir>/local_0001/flags.cfg and return
+// a ROOT display string for the canvas title, e.g. "#pi^{+} 1 GeV/c".
 static std::string GetSignalTitle(const char* resDir)
 {
-    std::string particle, energy;
+    std::string particle, momentum;
     std::ifstream in(TString::Format("%s/local_0001/flags.cfg", resDir).Data());
     std::string line;
     while (std::getline(in, line))
@@ -49,12 +49,14 @@ static std::string GetSignalTitle(const char* resDir)
             size_t eq = line.find('=');
             if (eq != std::string::npos) particle = Trim(line.substr(eq + 1));
         }
-        else if (energy.empty() && line.compare(0, 14, "particleEnergy") == 0)
+        else if (momentum.empty()
+                 && line.compare(0, 16, "particleMomentum") == 0
+                 && (line.size() == 16 || line[16] == ' ' || line[16] == '\t' || line[16] == '='))
         {
             size_t eq = line.find('=');
-            if (eq != std::string::npos) energy = Trim(line.substr(eq + 1));
+            if (eq != std::string::npos) momentum = Trim(line.substr(eq + 1));
         }
-        if (!particle.empty() && !energy.empty()) break;
+        if (!particle.empty() && !momentum.empty()) break;
     }
 
     std::string name;
@@ -64,7 +66,7 @@ static std::string GetSignalTitle(const char* resDir)
     else name = particle.empty() ? "signal" : particle;
 
     std::string out = name;
-    if (!energy.empty()) out += " " + energy + " GeV/c";
+    if (!momentum.empty()) out += " " + momentum + " GeV/c";
     return out;
 }
 

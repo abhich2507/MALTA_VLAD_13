@@ -44,6 +44,7 @@ struct SimFlags
     float beamVeto = 0;
     std::string particleType = "";
     std::string particleEnergy = "";
+    std::string particleMomentum = ""; // GeV/c, signal momentum magnitude along +Z (momentum mode)
     std::string bkgparticleType = "";
     std::string bkgparticleEnergy = "";
     std::string bkgenergyDistribution = "none"; // none = fixed bkgparticleEnergy; CB = Crystal Ball |p|

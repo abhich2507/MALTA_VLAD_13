@@ -121,6 +121,24 @@ Explain the simplifications/ assumptions that go into the MALTA2 simulation.
     \item Spatial distribution is approximately flat within individual MALTA2 sensor.
 \end{itemize}
 
+To determine the expected background rate, projected plots were made using the EIC simulation files alongside PyROOT analysis. The EIC Geant4 simulation files used were the April 2026 FULL deep inelastic scattering neutral current background files. Since these were FULL files, each contained the Geant4 simulation ROOT files as well as truth level information. The Forward MPGD disk located at 1415 mm from the point of collision was used as a reference detector for the background environment near the proposed FMT location. By masking to the chosen z-location, it was possible to extract various background distributions at the disk location. In addition to the z-location “disk” mask, a “sensor” mask was applied to the disk as a way to isolate the footprint of one MALTA2 sensor within the disk. This “sensor” mask limited the x- and y- dimensions to that of one MALTA2 sensor with a final footprint of 1 by 2 cm\^2.
+
+To determine the peak background rate, the highest hit sensor was chosen out of several sensors near the beampipe. Because the hit and momentum distributions were of interest, the highest hit background sensor plots can be found in Fig. \ref{fig:expected_sensor_background} . The top left 2D histogram was used to determine the expected rate per event in the default 2 \(\mu s\) window by taking the integral of the plot. This resulted in an expected rate per event of 0.198. Additionally, this plot shows that the spatial distribution in this plot is relatively flat within an individual MALTA2 sensor.
+
+Fig. \ref{fig:pdg_background} displays the PDG codes of the background hits at the Forward MPGD disk at z = 1415 mm. From this plot, it is clear that the primary background particles in this region are electrons (PDG = 11), positrons (PDG = -11), and photons (PDG = 22).
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.75\linewidth]{Figures/EIC_current_background_AprilFULL.png}
+    \caption{Expected background distributions for one MALTA2 sensor at 1415 mm from the collision point. Top left: 2D histogram of hits in the x- and y- dimensions; Top right: x-projection of hits; Bottom left: y-projection of hits; Bottom right: momentum magnitude distribution}
+    \label{fig:expected_sensor_background}
+\end{figure}
+\begin{figure}
+    \centering
+    \includegraphics[width=0.5\linewidth]{Figures/MCParticles_1415_PDG_50files.png}
+    \caption{Particle identification at reference detector Forward MPGD Disk z = 1415 mm. THIS PLOT NEEDS TO BE UPDATED TO FIT THE STYLE}
+    \label{fig:pdg_background}
+\end{figure}
 \subsection{Sampling of EIC background}
 The momentum magnitude distributions of the background electrons and positrons are each modelled by a Crystal Ball function.
 The fitted parameters are used to sample the background momentum in every \SI{2}{\micro\second} window via inverse-transform sampling.
