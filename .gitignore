@@ -3,7 +3,13 @@ build/
 
 # Simulation / analysis outputs
 Results/
+Results*/
 Plots/
+Plots*/
 
 # ROOT binaries
 *.root
+
+# Logs and config backups
+*.log
+*.bak
