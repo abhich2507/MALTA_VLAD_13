@@ -16,9 +16,14 @@
 #include <vector>
 
 
-double ComputeGeometryDelay(int row)
+double ComputeGeometryDelay(int row, int nRows)
 {
-    return row * 0.0125;
+    // Total row-to-row skew across the full matrix was tuned as 6.4 ns over
+    // 512 rows (0.0125 ns/row). Scale by the configured number of rows so the
+    // correction stays proportional to the matrix height for other geometries
+    // (e.g. 224 rows for MALTA2). For nRows=512 this is bit-identical to the
+    // historical 0.0125 ns/row value.
+    return row * (6.4 / nRows);
 }
 double ComputeModuleDelay(int module)
 {
@@ -54,10 +59,11 @@ SortedTimeVector CorrectAndSortTimeMap(EnergyMap enMap, TimeMap timeMap, Thresho
 
         auto it = timeMap.find(key);
         if(it == timeMap.end()) continue;
-        // Row correction also of 7ns/ 512 rows + global GEANT4 timestamp + in-module chip id + front end jitter   
+        // Row correction (skew across the matrix, scaled by cfg.yPix) + global
+        // GEANT4 timestamp + in-module chip id + front end jitter
         double timing    = GetTimeWalk(entry.second, itThr->second, cfg.T, cfg.Tdiv, cfg.TrefThr, cfg.x0, cfg.n, cfg.t0);     
         //double timing = 0.0;
-        timing += *std::max_element(it->second.begin(), it->second.end()) + ComputeGeometryDelay(key.y) + ComputeModuleDelay(key.plane)
+        timing += *std::max_element(it->second.begin(), it->second.end()) + ComputeGeometryDelay(key.y, cfg.yPix) + ComputeModuleDelay(key.plane)
                + ComputeFrontEndJitter(seed, entry.second);
         
         sortedTimings.emplace_back(entry.first,timing);
@@ -644,7 +650,7 @@ ThresholdMap generateThrMap(double inputThreshold, int runNumber, std::string sa
 
     // Save the threshold 
     TH1D *h1DThreshold =  new TH1D("h1DUTThreshold", "h1DThreshold", 100, inputThreshold - inputThreshold / 2,inputThreshold + inputThreshold / 2);
-    TH2D *h2DThreshold    = new TH2D("h2DUTThreshold", "h2DUTThreshold", 512, 0, 512, 512, 0, 512);
+    TH2D *h2DThreshold    = new TH2D("h2DUTThreshold", "h2DUTThreshold", pixXNum, 0, pixXNum, pixYNum, 0, pixYNum);
 
     ThresholdMap result;
 
