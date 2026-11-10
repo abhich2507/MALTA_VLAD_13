@@ -15,8 +15,12 @@
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-CSV="$SCRIPT_DIR/configs/momentum_scan.csv"
-FLAGS="$SCRIPT_DIR/configs/flags_MP_EIC_momentum.cfg"
+CSV="${MOMENTUM_CSV:-$SCRIPT_DIR/configs/momentum_scan.csv}"
+FLAGS="${MOMENTUM_FLAGS:-$SCRIPT_DIR/configs/flags_MP_EIC_momentum.cfg}"
+# Accept relative paths for env overrides (resolved against SCRIPT_DIR)
+[[ "$CSV"   == /* ]] || CSV="$SCRIPT_DIR/$CSV"
+[[ "$FLAGS" == /* ]] || FLAGS="$SCRIPT_DIR/$FLAGS"
+FLAGS_NAME="$(basename "$FLAGS")"   # passed to run_script_local.sh (must live in configs/)
 BUILD_DIR="$SCRIPT_DIR/build"
 EIC_BKG_RATE=1.584   # fixed EIC background rate (0.198 hits/sensor/event x 8 sensors)
 
@@ -89,7 +93,7 @@ runDirNumber = $run" "$FLAGS"
     fi
     grep -q "^runDirNumber = $run$" "$FLAGS" || { echo "Failed to set runDirNumber=$run in $FLAGS"; exit 1; }
 
-    source run_script_local.sh flags_MP_EIC_momentum.cfg "$run"
+    source run_script_local.sh "$FLAGS_NAME" "$run"
 done < <(tail -n +2 "$CSV")
 
 echo "=================================================="

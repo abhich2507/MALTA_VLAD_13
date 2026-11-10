@@ -30,15 +30,15 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR"
 
-# ---- configuration (single place to edit) -----------------------------------
-SIM_FLAGS_CFG="flags_MP_EIC_momentum.cfg"     # dedicated config (fixed EIC bkg rate)
-ANALYSIS_CFG="analysis_flags_MP_EIC_Vlad.cfg" # same analysis config as the bkg scan
-SAVE="analysis_results_momScan"               # analysis save name (separate from bkg scan)
+# ---- configuration (env-overridable, defaults keep the 512x512 workflow) -----
+SIM_FLAGS_CFG="${SIM_FLAGS_CFG:-flags_MP_EIC_momentum.cfg}"       # dedicated config (fixed EIC bkg rate)
+ANALYSIS_CFG="${ANALYSIS_CFG:-analysis_flags_MP_EIC_Vlad.cfg}"    # analysis config
+SAVE="${SAVE:-analysis_results_momScan}"                          # analysis save name
 THRESHOLD=100                                 # analysis threshold in e-
 WINDOW_NS=36                                  # coincidence time window in ns
-CSV="$SCRIPT_DIR/configs/momentum_scan.csv"
-RES_DIR="Results_momScan"                     # final results dir: CSVs + per-run trees/raw
-OUT_DIR="Plots_momScan"                       # final plots dir: momentum_eff.png/pdf + per-run histos
+CSV="${MOMENTUM_CSV:-$SCRIPT_DIR/configs/momentum_scan.csv}"
+RES_DIR="${RES_DIR:-Results_momScan}"         # final results dir: CSVs + per-run trees/raw
+OUT_DIR="${OUT_DIR:-Plots_momScan}"           # final plots dir: momentum_eff.png/pdf + per-run histos
 # ------------------------------------------------------------------------------
 
 DO_SIM=true
@@ -85,9 +85,9 @@ if $DO_SIM; then
     echo
     echo "== [1/6] SIMULATION (momentum_scan.sh, cfg=$SIM_FLAGS_CFG) =="
     if [ "${#SEL_RUNS[@]}" -gt 0 ]; then
-        ./momentum_scan.sh "${SEL_RUNS[@]}"
+        MOMENTUM_FLAGS="configs/$SIM_FLAGS_CFG" MOMENTUM_CSV="$CSV" ./momentum_scan.sh "${SEL_RUNS[@]}"
     else
-        ./momentum_scan.sh
+        MOMENTUM_FLAGS="configs/$SIM_FLAGS_CFG" MOMENTUM_CSV="$CSV" ./momentum_scan.sh
     fi
 else
     echo
