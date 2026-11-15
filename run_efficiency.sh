@@ -78,9 +78,9 @@ if $DO_SIM; then
     echo
     echo "== [1/6] SIMULATION (bkg_scan.sh, cfg=$SIM_FLAGS_CFG) =="
     if [ "${#SEL_RUNS[@]}" -gt 0 ]; then
-        ./bkg_scan.sh "${SEL_RUNS[@]}"
+        BKG_SCAN_FLAGS="configs/$SIM_FLAGS_CFG" BKG_SCAN_CSV="$CSV" ./bkg_scan.sh "${SEL_RUNS[@]}"
     else
-        ./bkg_scan.sh
+        BKG_SCAN_FLAGS="configs/$SIM_FLAGS_CFG" BKG_SCAN_CSV="$CSV" ./bkg_scan.sh
     fi
 else
     echo
