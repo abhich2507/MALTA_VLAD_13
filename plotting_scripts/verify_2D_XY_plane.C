@@ -13,8 +13,11 @@
 #include <iostream>
 #include <vector>
 #include <map>
+#include <fstream>
+#include <sstream>
+#include <string>
 
-void verify_2D_XY_plane(int runNumber = 0, int numThreads = 6)
+void verify_2D_XY_plane(int runNumber = 0, int numThreads = 6, const char* resDir = "Results_pi1GeV")
 {
     gStyle->SetOptStat(0); 
     gStyle->SetPalette(kRainBow);
@@ -25,30 +28,63 @@ void verify_2D_XY_plane(int runNumber = 0, int numThreads = 6)
     gStyle->SetTextFont(43);
 
     // ============================================================
-    // Geometry parameters 
+    // Geometry parameters — read from the run's flags.cfg + geometry file
+    // (so both 512x512 and 224x512 sensors are drawn correctly)
     // ============================================================
     double detectorXOffset = 0.0;
     double detectorYOffset = 0.0;
     double detectorSizeX   = 1.86368; 
     double detectorSizeY   = 1.86368; 
-    double pixelSize       = 0.0364;  
+    double pixelSize       = 0.0364;
+    std::string geoFile    = "geo_X4Y1Z2.csv";
 
+    {
+        std::ifstream fl(Form("%s/local_%04d/flags.cfg", resDir, runNumber));
+        std::string line;
+        while (std::getline(fl, line))
+        {
+            size_t eq = line.find('=');
+            if (eq == std::string::npos) continue;
+            std::string key = line.substr(0, eq);
+            while (!key.empty() && (key.back() == ' ' || key.back() == '\t')) key.pop_back();
+            double val = std::atof(line.substr(eq + 1).c_str());
+            if      (key == "detectorXOffset") detectorXOffset = val;
+            else if (key == "detectorYOffset") detectorYOffset = val;
+            else if (key == "detectorSizeX")   detectorSizeX   = val;
+            else if (key == "detectorSizeY")   detectorSizeY   = val;
+            else if (key == "pixelSize")       pixelSize       = val;
+            else if (key == "geoFile")         geoFile         = line.substr(eq + 1);
+        }
+    }
+
+    // Sensor X centres from configs/geometry/<geoFile> (xoff column, cm)
     std::map<int, double> sensorXCenter;
-    sensorXCenter[0]     = detectorXOffset + 0.00000;
-    sensorXCenter[1]     = detectorXOffset + 1.86369;
-    sensorXCenter[2]     = detectorXOffset + 3.72737;
-    sensorXCenter[3]     = detectorXOffset + 5.59105;
-    sensorXCenter[10000] = detectorXOffset + 0.00000;
-    sensorXCenter[10001] = detectorXOffset + 1.86369;
-    sensorXCenter[10002] = detectorXOffset + 3.72737;
-    sensorXCenter[10003] = detectorXOffset + 5.59105;
+    {
+        std::ifstream geo(Form("configs/geometry/%s", geoFile.c_str()));
+        std::string line;
+        std::getline(geo, line);  // header
+        while (std::getline(geo, line))
+        {
+            if (line.empty()) continue;
+            std::stringstream ss(line);
+            std::string cell;
+            std::vector<std::string> cols;
+            while (std::getline(ss, cell, ',')) cols.push_back(cell);
+            if (cols.size() < 6) continue;
+            int x = std::atoi(cols[0].c_str());
+            int y = std::atoi(cols[1].c_str());
+            int z = std::atoi(cols[2].c_str());
+            double xoff = std::atof(cols[3].c_str());
+            if (y == 0) sensorXCenter[z * 10000 + y * 100 + x] = detectorXOffset + xoff;
+        }
+    }
 
     std::vector<int> allIDs = {0, 1, 2, 3, 10000, 10001, 10002, 10003};
 
     // ============================================================
     // Load data
     // ============================================================
-    TString inputPath = Form("./Results_pi1GeV/local_%04d/", runNumber);
+    TString inputPath = Form("./%s/local_%04d/", resDir, runNumber);
     std::cout << "Loading data from: " << inputPath << std::endl;
     
     TChain *chain = new TChain("RawPixelHits");
@@ -68,7 +104,8 @@ void verify_2D_XY_plane(int runNumber = 0, int numThreads = 6)
     // ============================================================
     // Create 2D Histograms
     // ============================================================
-    const double shYmin = -10.0, shYmax = 10.0; 
+    const double shYhalf = detectorSizeY * 10.0 / 2.0 + 1.0; // sensor half-height [mm] + 1 mm margin
+    const double shYmin = -shYhalf, shYmax = shYhalf;
 
     std::map<int, TH2D*> h2XY;
     for (int idx = 0; idx < allIDs.size(); idx++)
