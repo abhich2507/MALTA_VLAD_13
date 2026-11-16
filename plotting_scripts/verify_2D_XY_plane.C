@@ -17,7 +17,7 @@
 #include <sstream>
 #include <string>
 
-void verify_2D_XY_plane(int runNumber = 0, int numThreads = 6, const char* resDir = "Results_p120GeV")
+void verify_2D_XY_plane(int runNumber = 0, int numThreads = 6, const char* resDir = "Results")
 {
     gStyle->SetOptStat(0); 
     gStyle->SetPalette(kRainBow);
