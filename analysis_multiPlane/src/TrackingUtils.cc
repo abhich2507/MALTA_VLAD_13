@@ -87,9 +87,11 @@ Vec3 PixelPositionReconstruction(int pixelX, int pixelY, const DetectorConfig& c
 }
 Vec3 IntersectTrackPlane(const Vec3& V,  const DetectorConfig& cfg, Offset& g)
 {
-    // plane point
+    // plane point. g.x/g.y/g.z are in cm (geoFile offsets); the truth vertex V is
+    // in mm, so convert the plane point to mm to stay consistent with V and with
+    // ApplyGeometry3D/ApplyInverseGeometry3D (which also use x10).
     BuildRotationMatrix(g);
-    Vec3 P0 = { g.x, g.y, g.z };
+    Vec3 P0 = { g.x * 10, g.y * 10, g.z * 10 };
     Vec3 D =  {cfg.momX, cfg.momY, cfg.momZ};
 
 
