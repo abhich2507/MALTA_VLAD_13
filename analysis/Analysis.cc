@@ -42,6 +42,24 @@ void Analysis(double threshold, int runNumber = 91, std::string saveName = "defa
     int nX = numPixlesX*16, nY = numPixlesY*16, nZ = 100;
     //int nX = 10*16, nY = 10*16, nZ = 100;
     double pixelSizeX = 0.0364 , pixelSizeY = 0.0364; // in mm
+    // Read sensor geometry from the simulation flags (Results/local_NNNN/flags.cfg)
+    // so the full-matrix plots follow the simulated matrix (512x512 or 224x512).
+    double detSizeXmm = 18.6368, detSizeYmm = 18.6368;
+    {
+        std::ifstream fl(Form("Results/local_%04d/flags.cfg", runNumber));
+        std::string line;
+        while (std::getline(fl, line))
+        {
+            size_t eq = line.find('=');
+            if (eq == std::string::npos) continue;
+            std::string key = line.substr(0, eq);
+            while (!key.empty() && (key.back() == ' ' || key.back() == '\t')) key.pop_back();
+            double val = std::stod(line.substr(eq + 1));
+            if      (key == "detectorSizeX") detSizeXmm = val * 10.; // cm -> mm
+            else if (key == "detectorSizeY") detSizeYmm = val * 10.; // cm -> mm
+            else if (key == "pixelSize")     pixelSizeX = pixelSizeY = val;
+        }
+    }
 
     TFile *analysisFile = TFile::Open((inputPath + "analysisThr" + std::to_string(int(threshold)) + ".root").c_str(), "READ");
 
@@ -54,11 +72,11 @@ void Analysis(double threshold, int runNumber = 91, std::string saveName = "defa
     analysisTree->SetBranchAddress("analysisVertexY", &fY);
     analysisTree->SetBranchAddress("clSize", &clSize);  
     analysisTree->SetBranchAddress("timing", &timing); 
-    // Full Matrix histograms
-    TH2D *h2ALL    = new TH2D("h2ALL", "h2ALL", 100, 50 - 18.6/2, 50 + 18.6/2, 100, 50 - 18.6/2, 50 + 18.6/2);
-    TH2D *h2PASS   = new TH2D("h2PASS", "h2PASS", 100, 50 - 18.6/2, 50 + 18.6/2, 100, 50 - 18.6/2, 50 + 18.6/2);
-    TH2D *h2ClSize = new TH2D("h2ClSize", "h2ClSize", 100, 50 - 18.6/2, 50 + 18.6/2, 100, 50 - 18.6/2, 50 + 18.6/2);
-    TH2D *h2Timing = new TH2D("h2Timing", "h2Timing", 100, 50 - 18.6/2, 50 + 18.6/2, 100, 50 - 18.6/2, 50 + 18.6/2);
+    // Full Matrix histograms (sensor-sized; follows detectorSizeX/Y from flags.cfg)
+    TH2D *h2ALL    = new TH2D("h2ALL", "h2ALL", 100, 50 - detSizeXmm/2, 50 + detSizeXmm/2, 100, 50 - detSizeYmm/2, 50 + detSizeYmm/2);
+    TH2D *h2PASS   = new TH2D("h2PASS", "h2PASS", 100, 50 - detSizeXmm/2, 50 + detSizeXmm/2, 100, 50 - detSizeYmm/2, 50 + detSizeYmm/2);
+    TH2D *h2ClSize = new TH2D("h2ClSize", "h2ClSize", 100, 50 - detSizeXmm/2, 50 + detSizeXmm/2, 100, 50 - detSizeYmm/2, 50 + detSizeYmm/2);
+    TH2D *h2Timing = new TH2D("h2Timing", "h2Timing", 100, 50 - detSizeXmm/2, 50 + detSizeXmm/2, 100, 50 - detSizeYmm/2, 50 + detSizeYmm/2);
     // In-pixel histrograms
     TH2D *h2ALLInPixel   = new TH2D("h2ALLInPixel", "h2ALLInPixel", nX, 0, numPixlesX*pixelSizeX*1000, nY, 0, numPixlesY*pixelSizeY *1000);
     TH2D *h2PASSInPixel  = new TH2D("h2PASSInPixel", "h2PASSInPixel", nX, 0, numPixlesX*pixelSizeX*1000, nY, 0, numPixlesY*pixelSizeY *1000);
