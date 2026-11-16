@@ -97,8 +97,8 @@ void SaveResidualHisto(std::vector<Residual> residuals, int planeZ, double thres
 {
     std::string directoryPath = cfg.localPath + "Plots/";
     std::string runPath = Form("local_%04d/", runNumber);
-    TH1D *h1ResidualX = new TH1D(Form("h1ResidualX_planeZ%d",planeZ), Form("h1ResidualX_planeZ%d",planeZ), 100, -2, 2);
-    TH1D *h1ResidualY = new TH1D(Form("h1ResidualY_planeZ%d",planeZ), Form("h1ResidualY_planeZ%d",planeZ), 100, -2, 2);
+    TH1D *h1ResidualX = new TH1D(Form("h1ResidualX_planeZ%d",planeZ), Form("h1ResidualX_planeZ%d",planeZ), 400, -0.5, 0.5);
+    TH1D *h1ResidualY = new TH1D(Form("h1ResidualY_planeZ%d",planeZ), Form("h1ResidualY_planeZ%d",planeZ), 400, -0.5, 0.5);
 
     for (const auto& el : residuals)
     {
