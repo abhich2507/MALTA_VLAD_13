@@ -109,7 +109,7 @@ void verify_2D_XY_plane(int runNumber = 0, int numThreads = 6, const char* resDi
     // ============================================================
     // Create 2D Histograms
     // ============================================================
-    const double shYhalf = detectorSizeY * 10.0 / 2.0 + 1.0; // sensor half-height [mm] + 1 mm margin
+    const double shYhalf = detectorSizeY * 10.0 / 2.0; // exact sensor half-height [mm], no margin
     const double shYmin = -shYhalf, shYmax = shYhalf;
 
     std::map<int, TH2D*> h2XY;
@@ -232,10 +232,16 @@ void verify_2D_XY_plane(int runNumber = 0, int numThreads = 6, const char* resDi
             h->GetYaxis()->SetTitleSize(customTitleSize);
             h->GetZaxis()->SetLabelSize(customLabelSize);
 
-            // Hide Y-axis titles and labels on all but the 1st sensor
+            // Hide Y-axis titles and labels on all but the 1st sensor.
+            // On the 1st sensor we keep the "Y [mm]" title but replace the
+            // automatic numeric labels with exact sensor-edge labels below.
             if (s > 0)
             {
                 h->GetYaxis()->SetTitleSize(0);
+                h->GetYaxis()->SetLabelSize(0);
+            }
+            else
+            {
                 h->GetYaxis()->SetLabelSize(0);
             }
 
@@ -249,6 +255,25 @@ void verify_2D_XY_plane(int runNumber = 0, int numThreads = 6, const char* resDi
                 h->Draw("COLZ");  
             else
                 h->Draw("COL");
+
+            // Exact sensor-edge Y tick labels (-4.08, -2.04, 0.00, 2.04, 4.08 mm)
+            if (s == 0)
+            {
+                double uy0 = gPad->GetBottomMargin();
+                double uy1 = 1.0 - gPad->GetTopMargin();
+                double ux0 = gPad->GetLeftMargin();
+                const double ypos[5] = { shYmin, shYmin / 2.0, 0.0, shYmax / 2.0, shYmax };
+                TLatex ylab;
+                ylab.SetNDC();
+                ylab.SetTextFont(43);
+                ylab.SetTextSize(customLabelSize);
+                ylab.SetTextAlign(32); // right-aligned, vertically centred
+                for (int i = 0; i < 5; i++)
+                {
+                    double ndcy = uy0 + (ypos[i] - shYmin) / (shYmax - shYmin) * (uy1 - uy0);
+                    ylab.DrawLatex(ux0 - 0.01, ndcy, Form("%.2f", ypos[i]));
+                }
+            }
 
             double labelX = 0.5;
             if (s == 0) labelX = 1.0 - (0.5 * f / (l + f));
