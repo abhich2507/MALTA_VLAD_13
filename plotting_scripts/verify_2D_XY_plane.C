@@ -134,8 +134,8 @@ void verify_2D_XY_plane(int runNumber = 0, int numThreads = 6, const char* resDi
         
         // Increased offsets so the larger 34px titles don't crash into the 35px labels
         h2XY[id]->GetXaxis()->SetTitleOffset(1.2);
-        h2XY[id]->GetYaxis()->SetTitleOffset(1.2); 
-        h2XY[id]->GetYaxis()->SetLabelOffset(0.015);
+        h2XY[id]->GetYaxis()->SetTitleOffset(1.7); 
+        h2XY[id]->GetYaxis()->SetLabelOffset(0.085);
         h2XY[id]->GetXaxis()->SetLabelOffset(0.015);
         
         h2XY[id]->GetZaxis()->SetMaxDigits(3);
