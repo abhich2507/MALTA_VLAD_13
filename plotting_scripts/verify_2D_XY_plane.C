@@ -53,7 +53,12 @@ void verify_2D_XY_plane(int runNumber = 0, int numThreads = 6, const char* resDi
             else if (key == "detectorSizeX")   detectorSizeX   = val;
             else if (key == "detectorSizeY")   detectorSizeY   = val;
             else if (key == "pixelSize")       pixelSize       = val;
-            else if (key == "geoFile")         geoFile         = line.substr(eq + 1);
+            else if (key == "geoFile")
+            {
+                geoFile = line.substr(eq + 1);
+                while (!geoFile.empty() && (geoFile.front() == ' ' || geoFile.front() == '\t')) geoFile.erase(geoFile.begin());
+                while (!geoFile.empty() && (geoFile.back() == ' ' || geoFile.back() == '\t' || geoFile.back() == '\r')) geoFile.pop_back();
+            }
         }
     }
 
@@ -111,8 +116,10 @@ void verify_2D_XY_plane(int runNumber = 0, int numThreads = 6, const char* resDi
     for (int idx = 0; idx < allIDs.size(); idx++)
     {
         int id = allIDs[idx];
-        double sxMin = (sensorXCenter[id] - detectorSizeX/2) * 10.0;   
-        double sxMax = (sensorXCenter[id] + detectorSizeX/2) * 10.0;   
+        // exact 18.6368 mm sensor + small margin -> clean 18.7 mm span, fully contained
+        double sxHalf = detectorSizeX * 10.0 / 2.0 + 0.0316;
+        double sxMin = sensorXCenter[id] * 10.0 - sxHalf;
+        double sxMax = sensorXCenter[id] * 10.0 + sxHalf;
         h2XY[id] = new TH2D(Form("h2XY_%d", id), ";X [mm];Y [mm]",
                             128, sxMin, sxMax, 40, shYmin, shYmax);
         h2XY[id]->SetStats(0);
@@ -142,8 +149,8 @@ void verify_2D_XY_plane(int runNumber = 0, int numThreads = 6, const char* resDi
         chain->GetEntry(i);
         if (sensorXCenter.find(iPlane) == sensorXCenter.end()) continue;
         
-        double realX = (sensorXCenter[iPlane] - detectorSizeX/2) * 10.0 + PixX * pixelSize;   
-        double realY = (detectorYOffset       - detectorSizeY/2) * 10.0 + PixY * pixelSize;   
+        double realX = (sensorXCenter[iPlane] - detectorSizeX/2) * 10.0 + (PixX + 0.5) * pixelSize;   
+        double realY = (detectorYOffset       - detectorSizeY/2) * 10.0 + (PixY + 0.5) * pixelSize;   
         
         h2XY[iPlane]->Fill(realX, realY);
     }
