@@ -24,8 +24,8 @@ ANALYSIS_CFG="analysis_flags_MP_EIC_224x512.cfg"
 SAVE="analysis_results_224x512_module"
 THRESHOLD=100
 CSV="$SCRIPT_DIR/configs/module_scan.csv"
-RES_DIR="Results_module"                             # <-- set your results dir here
-OUT_DIR="Plots_module"                               # <-- set your plots dir here
+RES_DIR="Results_module_pencil"                             # <-- set your results dir here
+OUT_DIR="Plots_module_pencil"                               # <-- set your plots dir here
 # ------------------------------------------------------------------------------
 
 DO_SIM=true

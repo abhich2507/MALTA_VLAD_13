@@ -2,12 +2,9 @@
 // Overlay the 4 sensor (quad-module) timing distributions of plane 0 in ONE
 // canvas, each taken from its own perpendicular-beam run (configs/module_scan.csv).
 //   run i (CSV row order) -> sensor i (S0..S3) -> planeID == i in TrackedHits_planeZ0
-// Each histogram is normalized, its peak is located automatically, and a
-// Gaussian is fitted around it so the per-sensor time resolution (sigma) is read
-// off directly.
 //
 // Usage:
-//   root -l -b -q 'plotting_scripts/ModuleTiming_overlay.C'                                  # header defaults
+//   root -l -b -q 'plotting_scripts/ModuleTiming_overlay.C'
 //   root -l -b -q 'plotting_scripts/ModuleTiming_overlay.C("Results_module","analysis_results_224x512_module",100,"Plots_module","configs/module_scan.csv")'
 
 #include <iostream>
@@ -26,6 +23,7 @@
 #include <sstream>
 #include <vector>
 #include <string>
+#include <iomanip>
 
 // ==================== USER CONFIG (edit here) ====================
 const char* RES_DIR   = "Results_module";
@@ -34,10 +32,15 @@ const int   THRESHOLD = 100;
 const char* OUT_DIR   = "Plots_module";
 const char* CSV_PATH  = "configs/module_scan.csv";
 
-const double T_MIN = 0.0,  T_MAX = 60.0;   // timing histogram range [ns]
-const int    NBINS = 120;
-// fit half-width around the located peak [ns]
-const double FIT_HALF = 8.0;
+const double T_MIN = 0.0,  T_MAX = 90.0;   // timing histogram range [ns]
+const int    NBINS = 900;
+
+// Custom Gaussian fit windows per sensor S0..S3: [min, max]
+// Matches the fit ranges defined in QuadModule_time_plane0.C
+// const double FIT_MIN[4] = {15.35, 23.5,  31.50, 39.90};
+// const double FIT_MAX[4] = {18.65, 26.4, 34.50, 42.95};
+const double FIT_MIN[4] = {37.650, 29.50, 21.5,  13.55};
+const double FIT_MAX[4] = {40.35, 32.750, 24.4, 16.35};
 // ================================================================
 
 void ModuleTiming_overlay(const char* resDir = "", const char* save = "",
@@ -94,21 +97,31 @@ void ModuleTiming_overlay(const char* resDir = "", const char* save = "",
         t->SetBranchAddress("DUTLocalTime", &timing);
         t->SetBranchAddress("planeID",      &planeID);
 
-        h[i] = new TH1D(Form("h%s", sensors[i].c_str()), Form("%s;t [ns];a.u.", sensors[i].c_str()), NBINS, T_MIN, T_MAX);
+        h[i] = new TH1D(Form("h%s", sensors[i].c_str()), Form("%s;time[ns];a.u.", sensors[i].c_str()), NBINS, T_MIN, T_MAX);
+        h[i]->SetTitle(0);  // no title, only axis labels]
+        //h[i]->GetXaxis()->SetTitle("Hit time (local) [ns]");
+        h[i]->GetYaxis()->SetTitle("Normalized entries [a.u.]");
+        h[i]->GetYaxis()->SetTitleOffset(1.);
+        h[i]->GetXaxis()->SetTitleSize(0.049);
+        h[i]->GetYaxis()->SetTitleSize(0.049);
+        h[i]->GetXaxis()->SetLabelSize(0.045);
+        h[i]->GetYaxis()->SetLabelSize(0.045);
+        h[i]->GetYaxis()->SetMaxDigits(3);
         Long64_t n = t->GetEntries();
         for (Long64_t e = 0; e < n; e++) {
             t->GetEntry(e);
-            if (planeID == (int)i && timing >= T_MIN && timing <= T_MAX) h[i]->Fill(timing);
+            int expectedPlaneID = (int)i;
+            if (planeID == expectedPlaneID && timing >= T_MIN && timing <= T_MAX) h[i]->Fill(timing);
         }
         f->Close();
-        std::cout << sensors[i] << " (run " << run << "): in-range entries = " << h[i]->GetEntries() << std::endl;
+        std::cout << "\n" << sensors[i] << " (run " << run << "): in-range entries = " << h[i]->GetEntries() << std::endl;
     }
 
     TCanvas *c = new TCanvas("c", "Plane0 module timing (4 sensors)", 1200, 800);
     TLegend *leg = new TLegend(0.58, 0.42, 0.88, 0.88);
     leg->SetBorderSize(0);
     leg->SetFillStyle(0);
-    leg->SetTextSize(0.032);
+    leg->SetTextSize(0.038);
 
     bool first = true;
     for (int i = 0; i < 4; i++) {
@@ -117,35 +130,49 @@ void ModuleTiming_overlay(const char* resDir = "", const char* save = "",
         h[i]->Scale(1.0 / h[i]->Integral());
         h[i]->SetMarkerStyle(markers[i]);
         h[i]->SetMarkerColor(colors[i]);
-        h[i]->SetMarkerSize(1.1);
+        h[i]->SetMarkerSize(.7);
         h[i]->SetLineColor(colors[i]);
-        h[i]->SetLineWidth(3);
+        h[i]->SetLineWidth(3.5);
         h[i]->SetFillStyle(0);
 
         if (first) { h[i]->Draw("P"); first = false; }
         else        h[i]->Draw("P SAME");
 
-        // locate peak = max bin in range, then fit +/- FIT_HALF around it
-        int peakBin = h[i]->GetMaximumBin();
-        double peak  = h[i]->GetBinCenter(peakBin);
-
-        TF1 *g = new TF1(Form("g%d", i), "gaus", peak - FIT_HALF, peak + FIT_HALF);
+        // Fit using custom ranges from QuadModule_time_plane0.C
+        TF1 *g = new TF1(Form("g%d", i), "gaus", FIT_MIN[i], FIT_MAX[i]);
         g->SetLineColor(colors[i]);
         g->SetLineWidth(3);
         h[i]->Fit(g, "QR");
         g->Draw("SAME");
 
-        double mu  = g->GetParameter(1);
-        double sig = g->GetParameter(2);
-        leg->AddEntry(h[i], Form("#bf{%s,  peak = %.1f ns}", sensors[i].c_str(), mu), "pl");
+        double mu      = g->GetParameter(1);
+        double mu_err  = g->GetParError(1);
+        double sig     = g->GetParameter(2);
+        double sig_err = g->GetParError(2);
+        double chi2    = g->GetChisquare();
+        int    ndf     = g->GetNDF();
+
+        // Print custom fit results to terminal
+        std::cout << "--- Sensor " << sensors[i] << " (S" << i << ") Fit Results ---" << std::endl;
+        std::cout << std::fixed << std::setprecision(2);
+        std::cout << "  Chi2 / NDF : " << chi2 << " / " << ndf 
+                  << " = " << (ndf > 0 ? chi2/ndf : 0.0) << std::endl;
+        std::cout << std::setprecision(3);
+        std::cout << "  Mean       : " << mu  << " +/- " << mu_err  << " ns" << std::endl;
+        std::cout << "  Sigma      : " << sig << " +/- " << sig_err << " ns" << std::endl;
+        std::cout << "---------------------------------------\n" << std::endl;
+
+        leg->AddEntry(h[i], Form("#bf{%s,  mean = %.1f ns}", sensors[i].c_str(), mu), "pl");
         leg->AddEntry((TObject*)0, Form("#bf{#sigma = %.2f ns}", sig), "");
+
     }
+
     leg->Draw();
 
     TLatex ttl;
     ttl.SetNDC();
     ttl.SetTextSize(0.045);
-    ttl.DrawLatex(0.26, 0.93, "MALTA2 224#times512  plane-0  quad-module timing");
+    ttl.DrawLatex(0.26, 0.93, "MALTA2 Plane-0  Quad Module Timing");
 
     c->Update();
     gSystem->mkdir(outDir, kTRUE);

@@ -16,14 +16,9 @@
 #include <vector>
 
 
-double ComputeGeometryDelay(int row, int nRows)
+double ComputeGeometryDelay(int row)
 {
-    // Total row-to-row skew across the full matrix was tuned as 6.4 ns over
-    // 512 rows (0.0125 ns/row). Scale by the configured number of rows so the
-    // correction stays proportional to the matrix height for other geometries
-    // (e.g. 224 rows for MALTA2). For nRows=512 this is bit-identical to the
-    // historical 0.0125 ns/row value.
-    return row * (6.4 / nRows);
+    return row * 0.0125;
 }
 double ComputeModuleDelay(int module)
 {
@@ -63,7 +58,7 @@ SortedTimeVector CorrectAndSortTimeMap(EnergyMap enMap, TimeMap timeMap, Thresho
         // GEANT4 timestamp + in-module chip id + front end jitter
         double timing    = GetTimeWalk(entry.second, itThr->second, cfg.T, cfg.Tdiv, cfg.TrefThr, cfg.x0, cfg.n, cfg.t0);     
         //double timing = 0.0;
-        timing += *std::max_element(it->second.begin(), it->second.end()) + ComputeGeometryDelay(key.y, cfg.yPix) + ComputeModuleDelay(key.plane)
+        timing += *std::max_element(it->second.begin(), it->second.end()) + ComputeGeometryDelay(key.y) + ComputeModuleDelay(key.plane)
                + ComputeFrontEndJitter(seed, entry.second);
         
         sortedTimings.emplace_back(entry.first,timing);
