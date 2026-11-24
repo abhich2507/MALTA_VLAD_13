@@ -8,9 +8,9 @@
 void ModuleTiming()
 {
     // Build file path
-    const int runNumber = 194;
-    std::string tag = "NewTime";
-    std::string anaPath = Form("Results/local_%04d/%s/LocalTrackedHitsThr200.root", runNumber, tag.c_str());
+    const int runNumber = 501;
+    std::string tag = "analysis_results_224x512_module";
+    std::string anaPath = Form("Results_module/local_%04d/%s/LocalTrackedHitsThr100.root", runNumber, tag.c_str());
     //std::string anaPath = Form("Results/local_%04d/%s/analysisThr200.root", runNumber, tag.c_str());
     std::cout << "Opening: " << anaPath << std::endl;
 
@@ -151,7 +151,7 @@ void ModuleTiming()
     leg->Draw();
     c1->Update();
 
-    c1->SaveAs("PublicPlots/ModuleTiming.pdf");
-    c1->SaveAs("PublicPlots/ModuleTiming.C");
+    c1->SaveAs("./Plots_module/ModuleTiming.pdf");
+    //c1->SaveAs("PublicPlots/ModuleTiming.C");
 
 }

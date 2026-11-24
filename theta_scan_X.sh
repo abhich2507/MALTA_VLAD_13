@@ -19,7 +19,7 @@ cd "$SCRIPT_DIR"
 # ---- configuration -----------------------------------------------------------
 SIM_FLAGS_CFG="flags_MP_EIC_224x512_thetaX.cfg"
 ANALYSIS_CFG="analysis_flags_MP_EIC_224x512.cfg"
-SAVE="analysis_results_224x512_theta"
+SAVE="${SAVE:-analysis_results_224x512_thetaX}"
 THRESHOLD=100
 CSV="$SCRIPT_DIR/configs/theta_scan_X.csv"
 FLAGS="$SCRIPT_DIR/configs/$SIM_FLAGS_CFG"
