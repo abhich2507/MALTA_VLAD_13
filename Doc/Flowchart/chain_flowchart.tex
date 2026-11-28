@@ -1,51 +1,35 @@
-% ============================================================================
-% chain_flowchart.tex  (publication version)
-% MALTA2 FMT simulation and reconstruction chain
-% Workflow mirrors Doc/FMT_EPJC/Sections/Simulations.tex:
-%   GEANT4 (geometry + generator + charge sharing)  ->  DIGITIZATION
-%   ->  RECONSTRUCTION (matching + clustering)      ->  PERFORMANCE
-% Compile:  pdflatex chain_flowchart.tex
-% ============================================================================
 \documentclass[tikz,border=6pt]{standalone}
 \usepackage[T1]{fontenc}
 \usepackage{lmodern}
 \usetikzlibrary{positioning,arrows.meta,fit,backgrounds,calc}
 
-% ---- palette (colorblind-safe, high-contrast print friendly) --------------
-\definecolor{geantC}{RGB}{ 31,119,180}   % blue   : Monte Carlo
-\definecolor{digiC}{RGB}{ 44,160, 44}    % green  : digitization
-\definecolor{recoC}{RGB}{230, 97,  1}    % orange : reconstruction
-\definecolor{perfC}{RGB}{123, 50,148}    % purple : performance / results
-\definecolor{fileG}{RGB}{ 90, 90, 90}    % slate  : intermediate data
+\definecolor{geantC}{RGB}{ 31,119,180}
+\definecolor{digiC}{RGB}{ 44,160, 44}
+\definecolor{recoC}{RGB}{230, 97,  1}
+\definecolor{perfC}{RGB}{123, 50,148}
+\definecolor{fileG}{RGB}{ 90, 90, 90}
 
-% ---- node & arrow styles --------------------------------------------------
 \tikzset{
-  % Base processing box
   box/.style={
     rectangle, rounded corners=2pt, align=center, font=\large,
-    minimum height=1.55cm, inner xsep=0pt, inner ysep=3pt,
+    minimum height=1.70cm, inner xsep=0pt, inner ysep=4pt,
     draw=black!65, line width=0.55pt
   },
-  % Row-specific widths: 3-column rows and 2-column rows span the same width
   box3/.style={box, minimum width=3.90cm, text width=3.70cm},
   box2/.style={box, minimum width=6.10cm, text width=5.90cm},
-  % Left-hand stage badge
   lane/.style={
     rectangle, rounded corners=2pt, align=center,
-    font=\large\bfseries, minimum width=3.60cm, text width=3.40cm,
-    minimum height=1.55cm+10pt, inner sep=0pt, line width=0.6pt
+    font=\large\bfseries, minimum width=3.80cm, text width=3.60cm,
+    minimum height=1.70cm+10pt, inner sep=0pt, line width=0.6pt
   },
-  % Shaded background container grouping each stage
   stagebox/.style={
     rectangle, rounded corners=3pt, inner sep=5pt, line width=0.6pt
   },
-  % Intermediate data/file pill along the central vertical spine
   fnode/.style={
     rectangle, rounded corners=8pt, align=center, font=\large\itshape,
-    minimum width=6.00cm, minimum height=0.62cm, inner sep=3pt,
+    minimum width=6.80cm, minimum height=0.65cm, inner sep=3pt,
     draw=fileG!80, fill=gray!10, line width=0.55pt
   },
-  % Arrows: steparr for horizontal in-stage flow, dataarr for vertical spine
   steparr/.style={-{Stealth[length=2.0mm, width=1.5mm]}, semithick, draw=black!65},
   dataarr/.style={-{Stealth[length=2.3mm, width=1.8mm]}, thick, draw=black!75},
 }
@@ -53,48 +37,40 @@
 \begin{document}
 \begin{tikzpicture}[node distance=0.50cm and 0.50cm]
 
-  % =============== LANE A : GEANT4 MONTE CARLO (3 boxes) ===================
   \node[box3, fill=geantC!14] (a1)
-    {\textbf{Detector geometry}\\2 planes $\times$ 4 sensors\\512$\times$224 pixels (36.4~$\mu$m pitch)};
+    {\textbf{Detector geometry}\\2 planes $\times$ 4 sensors\\$512\times 224$ pixels ($36.4~\mu$m pitch)};
   \node[box3, fill=geantC!14, right=of a1] (a2)
     {\textbf{Particle generator}\\1~GeV/$c$ $\pi^{+}$ signal\\$+$ EIC $e^{\pm}$ background};
   \node[box3, fill=geantC!14, right=of a2] (a3)
-    {\textbf{Charge sharing}\\seed + 3 neighbours\\$\sigma_{\mathrm{erf}} = 4.3~\mu$m};
+    {\textbf{Charge sharing}\\seed $+$ 3 neighbours\\$\sigma_{\mathrm{erf}} = 4.3~\mu$m};
 
   \draw[steparr] (a1) -- (a2);
   \draw[steparr] (a2) -- (a3);
 
-  % ================= LANE B : DIGITIZATION (3 boxes) =======================
   \node[box3, fill=digiC!14, below=2.05cm of a1.south west, anchor=north west] (b1)
-    {\textbf{Per-pixel threshold}\\charge above threshold};
+    {\textbf{Per-pixel threshold}\\charge $> 200\,\text{e}^{-}$\\($2\times 8$ pixel groups)};
   \node[box3, fill=digiC!14, right=of b1] (b2)
-    {\textbf{Hit timing}\\timewalk $+$ row $+$ module\\$+$ Gaussian jitter};
+    {\textbf{Hit timing model}\\time-walk $+$ row delay\\$+$ module $+$ Gaussian jitter};
   \node[box3, fill=digiC!14, right=of b2] (b3)
-    {\textbf{Word encode/merge}\\encode $\to$ merge (1.6~ns)\\$\to$ decode to $(X,Y)$};
+    {\textbf{Asynchronous readout}\\40-bit encode $\to$ 1.6~ns\\periphery merge $\to$ decode};
 
   \draw[steparr] (b1) -- (b2);
   \draw[steparr] (b2) -- (b3);
 
-  % ================= LANE C : RECONSTRUCTION (2 boxes) =====================
   \node[box2, fill=recoC!14, below=2.05cm of b1.south west, anchor=north west] (c1)
-    {\textbf{Hit matching}\\100~$\mu$m radius, 500~ns window};
+    {\textbf{Space--time hit matching}\\extrapolated truth track within\\$100~\mu$m radius and 500~ns window};
   \node[box2, fill=recoC!14, right=of c1] (c2)
-    {\textbf{Clustering}\\group edge-connected hits\\earliest-hit time $t_{0}$};
+    {\textbf{Clustering \& timing}\\edge-connected pixels (no diagonals)\\earliest hit $t_{0}$ $-$ row delay};
 
   \draw[steparr] (c1) -- (c2);
 
-  % ================= LANE D : PERFORMANCE (3 boxes) ========================
   \node[box3, fill=perfC!14, below=2.05cm of c1.south west, anchor=north west] (d1)
-    {\textbf{Time resolution}\\Gaussian core of $t_{0}$};
+    {\textbf{Time resolution}\\Gaussian fit to core of $t_{0}$\\(time-walk tails excluded)};
   \node[box3, fill=perfC!14, right=of d1] (d2)
-    {\textbf{Hit efficiency}\\per-plane \& coincidence};
+    {\textbf{Hit efficiency}\\matched-to-generated ratio\\(per-plane \& coincidence)};
   \node[box3, fill=perfC!14, right=of d2] (d3)
-    {\textbf{Background study}\\$\lambda$ scan up to $10\times$ EIC background};
+    {\textbf{Background study}\\$\lambda$ scan up to $10\times$\\nominal EIC background};
 
-  \draw[steparr] (d1) -- (d2);
-  \draw[steparr] (d2) -- (d3);
-
-  % ================= STAGE CONTAINERS (BACKGROUND LAYER) ===================
   \begin{pgfonlayer}{background}
     \node[stagebox, fill=geantC!5, draw=geantC!50, fit=(a1) (a3)] (stageA) {};
     \node[stagebox, fill=digiC!5,  draw=digiC!50,  fit=(b1) (b3)] (stageB) {};
@@ -102,21 +78,22 @@
     \node[stagebox, fill=perfC!5,  draw=perfC!50,  fit=(d1) (d3)] (stageD) {};
   \end{pgfonlayer}
 
-  % ================= LEFT STAGE HEADERS ====================================
   \node[lane, fill=geantC!22, draw=geantC!75!black, text=geantC!45!black,
-        left=0.35cm of stageA.west] (La) {\textsc{Geant4}\\Monte Carlo};
+        left=0.35cm of stageA.west] (La) {GEANT4\\Monte Carlo};
   \node[lane, fill=digiC!22,  draw=digiC!75!black,  text=digiC!45!black,
-        left=0.35cm of stageB.west] (Lb) {\textsc{Digitization}};
-  \node[lane, minimum width=4.2cm, text width=4.0cm, fill=recoC!22,
-        draw=recoC!75!black,  text=recoC!45!black,
-        left=0.35cm of stageC.west] (Lc) {\textsc{Tracking \&}\\Clustering};
+        left=0.35cm of stageB.west] (Lb) {Digitization};
+  \node[lane, fill=recoC!22,  draw=recoC!75!black,  text=recoC!45!black,
+        left=0.35cm of stageC.west] (Lc) {Tracking \&\\Clustering};
   \node[lane, fill=perfC!22,  draw=perfC!75!black,  text=perfC!45!black,
-        left=0.35cm of stageD.west] (Ld) {\textsc{Performance}};
+        left=0.35cm of stageD.west] (Ld) {Performance\\Evaluation};
 
-  % ================= CENTRAL VERTICAL DATA SPINE ===========================
-  \node[fnode] (fA) at ($(stageA.south)!0.5!(stageB.north)$) {Raw hits + truth vertices};
-  \node[fnode] (fB) at ($(stageB.south)!0.5!(stageC.north)$) {Digitized hits};
-  \node[fnode] (fC) at ($(stageC.south)!0.5!(stageD.north)$) {Clusters};
+  \node[fnode] (fA) at ($(stageA.south)!0.5!(stageB.north)$)
+    {Raw pixel charges $+$ truth tracks};
+  \node[fnode] (fB) at ($(stageB.south)!0.5!(stageC.north)$)
+    {Digitized hits $(X, Y, t)$};
+  \node[fnode] (fC) at ($(stageC.south)!0.5!(stageD.north)$)
+    {Matched clusters (row-corrected $t_{0}$)};
+
   \draw[dataarr] (stageA.south) -- (fA.north);
   \draw[dataarr] (fA.south)     -- (stageB.north);
   \draw[dataarr] (stageB.south) -- (fB.north);
