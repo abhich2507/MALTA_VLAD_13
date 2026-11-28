@@ -21,7 +21,7 @@ cd "$SCRIPT_DIR"
 SIM_FLAGS_CFG="flags_MP_EIC_224x512_module.cfg"
 ANALYSIS_CFG="analysis_flags_MP_EIC_224x512.cfg"
 SAVE="${SAVE:-analysis_results_224x512_module}"
-THRESHOLD=100
+THRESHOLD="${THRESHOLD:-200}"
 CSV="$SCRIPT_DIR/configs/module_scan.csv"
 FLAGS="$SCRIPT_DIR/configs/$SIM_FLAGS_CFG"
 BUILD_DIR="$SCRIPT_DIR/build"
@@ -88,4 +88,4 @@ for run in "${runs[@]}"; do
     SAVE="$SAVE" CONFIG="$ANALYSIS_CFG" THRESHOLD="$THRESHOLD" ./run_mult.sh "$run"
 done
 
-echo " Done. Timing: root -l -b -q 'plotting_scripts/QuadModule_time_plane0.C(\$run, \"\$RES_DIR\", \"\$SAVE\", 100, \"\$OUT_DIR\")'"
+echo " Done. Timing: root -l -b -q 'plotting_scripts/QuadModule_time_plane0.C(\$run, \"\$RES_DIR\", \"\$SAVE\", $THRESHOLD, \"\$OUT_DIR\")'"

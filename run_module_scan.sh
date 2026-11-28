@@ -3,6 +3,7 @@
 #
 #   1. SIM + ANALYSIS   module_scan.sh           -> Results/local_NNNN, Plots/local_NNNN
 #   2. TIMING           QuadModule_time_plane0.C -> $OUT_DIR/ModuleTiming_plane0_runNNNN.png/pdf
+#                      CorrectedTiming_plane0.C -> $OUT_DIR/CorrectedTiming_plane0_runNNNN.png/pdf
 #   3. OVERLAY          ModuleTiming_overlay.C    -> $OUT_DIR/ModuleTiming_all4.png/pdf
 #   4. ARCHIVE          move per-run outputs     -> $RES_DIR, $OUT_DIR
 #
@@ -22,10 +23,10 @@ cd "$SCRIPT_DIR"
 SCAN_SCRIPT="module_scan.sh"
 ANALYSIS_CFG="analysis_flags_MP_EIC_224x512.cfg"
 SAVE="analysis_results_224x512_module"
-THRESHOLD=100
+THRESHOLD=200
 CSV="$SCRIPT_DIR/configs/module_scan.csv"
-RES_DIR="Results_module_pencil"                             # <-- set your results dir here
-OUT_DIR="Plots_module_pencil"                               # <-- set your plots dir here
+RES_DIR="Results_module_thr200"                             # <-- set your results dir here
+OUT_DIR="Plots_module_thr200"                               # <-- set your plots dir here
 # ------------------------------------------------------------------------------
 
 DO_SIM=true
@@ -59,36 +60,38 @@ echo "==========================================================================
 
 # 1. Simulation + analysis -----------------------------------------------------
 if $DO_SIM; then
-    echo; echo "== [1/4] SIM + ANALYSIS ($SCAN_SCRIPT) =="
+    echo; echo "== [1/5] SIM + ANALYSIS ($SCAN_SCRIPT) =="
     if [ "${#SEL_RUNS[@]}" -gt 0 ]; then
-        SAVE="$SAVE" ./$SCAN_SCRIPT "${SEL_RUNS[@]}"
+        SAVE="$SAVE" THRESHOLD="$THRESHOLD" ./$SCAN_SCRIPT "${SEL_RUNS[@]}"
     else
-        SAVE="$SAVE" ./$SCAN_SCRIPT
+        SAVE="$SAVE" THRESHOLD="$THRESHOLD" ./$SCAN_SCRIPT
     fi
 elif $DO_ANALYSIS; then
-    echo; echo "== [1/4] ANALYSIS only (--no-sim) =="
+    echo; echo "== [1/5] ANALYSIS only (--no-sim) =="
     if [ "${#SEL_RUNS[@]}" -gt 0 ]; then
-        SAVE="$SAVE" ./$SCAN_SCRIPT --no-sim "${SEL_RUNS[@]}"
+        SAVE="$SAVE" THRESHOLD="$THRESHOLD" ./$SCAN_SCRIPT --no-sim "${SEL_RUNS[@]}"
     else
-        SAVE="$SAVE" ./$SCAN_SCRIPT --no-sim
+        SAVE="$SAVE" THRESHOLD="$THRESHOLD" ./$SCAN_SCRIPT --no-sim
     fi
 else
-    echo; echo "== [1/4] SIM + ANALYSIS skipped (--only-extract) =="
+    echo; echo "== [1/5] SIM + ANALYSIS skipped (--only-extract) =="
 fi
 
 # 2. Per-run module timing -----------------------------------------------------
-echo; echo "== [2/4] PER-RUN MODULE TIMING -> $OUT_DIR/ =="
+echo; echo "== [2/5] PER-RUN MODULE TIMING -> $OUT_DIR/ =="
 for run in "${runs[@]}"; do
     echo "----- run $run -----"
     root -l -b -q "plotting_scripts/QuadModule_time_plane0.C($run, \"$RES_DIR\", \"$SAVE\", $THRESHOLD, \"$OUT_DIR\")"
+    root -l -b -q "plotting_scripts/CorrectedTiming_plane0.C($run, \"$RES_DIR\", \"$SAVE\", $THRESHOLD, \"$OUT_DIR\")"
 done
 
 # 3. Combined overlay of all 4 sensors ------------------------------------------
-echo; echo "== [3/4] OVERLAY all 4 sensors -> $OUT_DIR/ModuleTiming_all4.png/pdf =="
+echo; echo "== [3/5] OVERLAY all 4 sensors -> $OUT_DIR/ModuleTiming_all4.png/pdf =="
 root -l -b -q "plotting_scripts/ModuleTiming_overlay.C(\"$RES_DIR\", \"$SAVE\", $THRESHOLD, \"$OUT_DIR\", \"$CSV\")"
+root -l -b -q "plotting_scripts/CorrectedTiming_overlay.C(\"$RES_DIR\", \"$SAVE\", $THRESHOLD, \"$OUT_DIR\", \"$CSV\")"
 
 # 4. Archive -------------------------------------------------------------------
-echo; echo "== [4/4] ARCHIVE -> $RES_DIR / $OUT_DIR =="
+echo; echo "== [4/5] ARCHIVE -> $RES_DIR / $OUT_DIR =="
 mkdir -p "$RES_DIR" "$OUT_DIR"
 {
     echo "# Scan finalized on $(date '+%Y-%m-%d %H:%M:%S')"
